@@ -712,3 +712,6 @@ font[style*="background-color"] { background: none !important; box-shadow: none 
 }
 @media (max-width: 420px) { .more .menu.mega { grid-template-columns: 1fr; } .mt small { display: block; } }
 .draft-note { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; font-size: .9rem; max-width: 640px; }
+.danger-link { color: var(--bad) !important; }
+.pub-sum { margin: 4px 0; font-size: .92rem; }
+a.chip { text-decoration: none; }

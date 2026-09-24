@@ -63,7 +63,7 @@ async function activities(kind) {
     return `<article class="act-card" id="${esc(k)}" data-group="${esc(groupOf(o))}" data-name="${esc(o.name.toLowerCase())}">
       <header><h3>${esc(o.name)}</h3>${kind === 'sport' && o.levels?.length ? o.levels.map((l) => `<span class="tag">${esc(l)}</span>`).join('') : ''}</header>
       ${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
-      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}</span>` : ''}
+      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : ''}</span>` : ''}
         <span class="act-links">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener nofollow">Page ↗</a>` : ''}
         <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>
     </article>`;
@@ -87,7 +87,14 @@ async function activities(kind) {
     draw();
   });
   $('#act-q').addEventListener('input', draw);
-  $('#act-list').addEventListener('click', (e) => {
+  $('#act-list').addEventListener('click', async (e) => {
+    const u = e.target.closest('[data-unpub]');
+    if (u) {
+      const note = prompt('Unpublish this info? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
+      if (note === null) return;
+      if (await guard(() => s.review(Number(u.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) location.reload();
+      return;
+    }
     const b = e.target.closest('.more-btn');
     if (!b) return;
     const open = b.closest('.fact').classList.toggle('open');
@@ -236,9 +243,16 @@ const pages = {
         const stale = staleness(x);
         return `<article><h3>${icon(topic)}${esc(x.payload.title)}</h3>${prose(x.payload.text)}
           ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}</div></article>`;
+          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : ''}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
     </section>`).join('');
+    $('#school-list').addEventListener('click', async (e) => {
+      const u = e.target.closest('[data-unpub]');
+      if (!u) return;
+      const note = prompt('Unpublish this article? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
+      if (note === null) return;
+      if (await guard(() => s.review(Number(u.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) location.reload();
+    });
   },
 
   async account() {

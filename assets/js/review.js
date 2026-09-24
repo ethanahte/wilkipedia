@@ -10,7 +10,8 @@ const s = await initHeader();
 const data = await courses();
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
 const courseName = (slug) => bySlug[slug]?.name || slug || 'School-wide';
-let tab = location.hash.slice(1) || 'submissions';
+let tab = (location.hash.slice(1) || 'submissions').replace('published-off', 'published');
+window.addEventListener('hashchange', () => { tab = location.hash.slice(1).replace('published-off', 'published') || 'submissions'; draw(); });
 
 function payloadHtml(kind, p) {
   return KINDS[kind].fields.filter((f) => p[f.key]).map((f) => {
@@ -39,6 +40,27 @@ const tabs = {
           <button class="btn ghost danger" data-act="rejected">Reject…</button>
         </div>
       </article>`).join('') : '<div class="empty">Nothing waiting. Nice.</div>';
+  },
+  async published() {
+    const showOff = location.hash === '#published-off';
+    const list = await s.byStatus(showOff ? 'rejected' : 'approved');
+    const names = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
+    const summary = (x) => { const p = x.payload || {}; return p.title || p.summary || p.text || p.test_style || p.what || p.name || ''; };
+    return `<div class="list-tools"><input id="pub-q" type="search" placeholder="Filter by class, teacher, author or text" aria-label="Filter">
+        <div class="chips"><a class="chip" href="#published" aria-pressed="${!showOff}">Live on the site (${showOff ? '…' : list.length})</a>
+        <a class="chip" href="#published-off" aria-pressed="${showOff}">Unpublished / rejected</a></div></div>
+      ${list.length ? list.map((x) => `
+      <article class="card review pub-row" data-id="${x.id}" data-hay="${esc(`${placeOf(x, names)[0]} ${x.teacher || ''} ${x.author} ${JSON.stringify(x.payload)}`.toLowerCase())}">
+        <div class="r-head"><span class="tag">${esc(KINDS[x.kind]?.label || x.kind)}</span>
+          ${(([w, h]) => `<a href="${h}" target="_blank">${esc(w)}</a>`)(placeOf(x, names))}
+          ${x.teacher ? ` · ${esc(x.teacher)}` : ''}
+          <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at || x.created_at)}</span></div>
+        <p class="pub-sum">${esc(summary(x).slice(0, 220))}${summary(x).length > 220 ? '…' : ''}</p>
+        ${x.review_note ? `<p class="meta">Note: ${esc(x.review_note)}</p>` : ''}
+        <div class="r-actions">${showOff
+          ? '<button class="btn ghost small" data-act="approved">Republish</button>'
+          : '<button class="btn ghost danger small" data-act="rejected">Unpublish…</button>'}</div>
+      </article>`).join('') : `<div class="empty">${showOff ? 'Nothing unpublished.' : 'Nothing published yet.'}</div>`}`;
   },
   async comments() {
     const list = await s.heldComments();
@@ -122,7 +144,11 @@ async function draw() {
     $('#panel').innerHTML = `<div class="empty">This page is for reviewers. ${me ? 'Your account isn’t a reviewer yet.' : 'Sign in first.'}</div>`;
     return;
   }
-  $('#panel').innerHTML = await guard(() => tabs[tab]()) || '';
+  $('#panel').innerHTML = await guard(() => (tabs[tab] || tabs.submissions)()) || '';
+  $('#pub-q')?.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('.pub-row').forEach((r) => (r.hidden = q && !r.dataset.hay.includes(q)));
+  });
 }
 
 document.addEventListener('click', async (e) => {
@@ -133,11 +159,12 @@ document.addEventListener('click', async (e) => {
   if (t.dataset.act && card) {
     let note = null;
     if (t.dataset.act !== 'approved') {
-      note = prompt(t.dataset.act === 'changes' ? 'What should they fix? (they will see this)' : 'Why is this rejected? (they will see this)');
+      note = prompt(t.dataset.act === 'changes' ? 'What should they fix? (they will see this)'
+        : tab === 'published' ? 'Why is this being unpublished? (the author will see this)' : 'Why is this rejected? (they will see this)');
       if (note === null) return;
     }
     await guard(() => s.review(Number(card.dataset.id), t.dataset.act, note),
-                t.dataset.act === 'approved' ? 'Approved and published.' : 'Sent back with your note.');
+                t.dataset.act === 'approved' ? 'Published.' : tab === 'published' ? 'Unpublished.' : 'Sent back with your note.');
     return draw();
   }
   const cc = t.closest('[data-cid]');

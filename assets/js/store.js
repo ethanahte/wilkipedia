@@ -137,6 +137,10 @@ async function live() {
       return ok(await sb.from('submissions').select(SUB).eq('status', 'pending')
         .order('created_at')).map(withAuthor);
     },
+    async byStatus(status) {
+      return ok(await sb.from('submissions').select(SUB).eq('status', status)
+        .order('reviewed_at', { ascending: false }).limit(500)).map(withAuthor);
+    },
     async review(id, status, review_note = null) {
       ok(await sb.from('submissions').update({ status, review_note }).eq('id', id));
     },
@@ -304,6 +308,7 @@ async function demo() {
         .map((s) => s.course_slug));
     },
     async pending() { reviewer(); return db.submissions.filter((s) => s.status === 'pending').map(sub); },
+    async byStatus(status) { reviewer(); return db.submissions.filter((s) => s.status === status).sort(byReviewed).map(sub); },
     async review(sid, status, review_note = null) {
       const u = reviewer();
       const s = db.submissions.find((x) => x.id === sid);

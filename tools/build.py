@@ -498,7 +498,7 @@ def build_static():
 
     page("review/", "Review", """
 <h1>Review</h1>
-<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button></div>
+<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="published">Published</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button></div>
 <div id="panel"></div>""", script="review.js")
 
     page("leaderboard/", "Leaderboard", """

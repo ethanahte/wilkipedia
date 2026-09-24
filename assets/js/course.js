@@ -13,12 +13,16 @@ const submitUrl = (kind, teacher) =>
 const PROMPTS = ['General', 'What surprised you?', 'How much time did it take each week?',
                  'Advice for next year’s students?', 'Who should (or shouldn’t) take it?'];
 
+// Reviewers get an Unpublish link on everything students wrote
+const isMod = () => REVIEWER_ROLES.includes(s.user()?.role);
+const unpub = (sub) => (isMod() ? ` · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : '');
+
 function meta(sub, target) {
   const stale = staleness(sub);
   return `${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
     <div class="meta">By ${byline(sub.author, sub.verified)} · checked ${fmtDate(sub.reviewed_at)}
       ${sub.payload.school_year ? ` · ${esc(sub.payload.school_year)}` : ''}
-      · <button class="linkish" data-report="${esc(target)}">Report outdated</button></div>`;
+      · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
 }
 
 function fieldList(kind, payload, skip = []) {
@@ -88,14 +92,14 @@ async function draw() {
       ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
       <span class="meta">${r.payload.author
         ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
-        : `Made by ${byline(r.author, r.verified)}`}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
+        : `Made by ${byline(r.author, r.verified)}`}${unpub(r)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
   }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>`
     : empty('No resources yet. Made a study guide or found a great video?', 'resource', null, 'Share one');
 
   // Tips
   const tips = subs.filter((x) => x.kind === 'tip');
   $('#tips').innerHTML = tips.length ? `<div class="tip-list">${tips.map((t) => `<figure class="tip-card">${prose(t.payload.text)}
-      <figcaption class="meta">${byline(t.author, t.verified)}${t.teacher ? ` · ${esc(t.teacher)}’s class` : ''}</figcaption></figure>`).join('')}</div>
+      <figcaption class="meta">${byline(t.author, t.verified)}${t.teacher ? ` · ${esc(t.teacher)}’s class` : ''}${unpub(t)}</figcaption></figure>`).join('')}</div>
       <a class="edit" href="${submitUrl('tip')}">Add a tip</a>`
     : empty('No tips yet. What do you wish you’d known on day one?', 'tip', null, 'Add the first tip');
 
@@ -161,6 +165,13 @@ $('#cancel-reply').addEventListener('click', () => {
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('button');
   if (!t) return;
+  if (t.dataset.unpub) {
+    e.preventDefault();                       // it may sit inside a resource link
+    const note = prompt('Unpublish this? It comes off the page but stays saved (you can republish it from Review → Published).\n\nReason (the author will see this):');
+    if (note === null) return;
+    if (await guard(() => s.review(Number(t.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) draw();
+    return;
+  }
   if (t.dataset.report) {
     if (!(await requireUser(s, 'to report outdated info'))) return;
     const note = prompt('What looks out of date? (optional)') ;
