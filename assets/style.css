@@ -28,8 +28,11 @@
   --warn: #8a5a00;
   --warn-soft: #fbf0d9;
   --bad: #b3261e;
-  --empty: #a9a9a3;
+  --empty: #75756f;        /* 'not written yet' grey: dim but still readable (4.6:1) */
   --tab: #111111;          /* bounty tab: black with gold */
+  --on-bg: #111111;        /* selected chips and toggles */
+  --on-fg: #f5c400;
+  --dot-off: #c4c1b7;
   --tab-ink: #f5c400;
   --serif: 'Newsreader', Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -45,7 +48,8 @@
     --paper: #0d0d0d; --card: #171717; --ink: #f1f1ee; --muted: #a3a39d; --rule: #2d2d2b;
     --gold: #f5c400; --gold-ink: #111111; --accent: #f7cf2e; --accent-ink: #111111; --accent-soft: #2c250b;
     --bar: #000000; --bar-ink: #ffffff; --bar-muted: #a3a39d;
-    --warn: #e5b45a; --warn-soft: #3a2f1a; --bad: #ff8a80; --empty: #6b6b66;
+    --warn: #e5b45a; --warn-soft: #3a2f1a; --bad: #ff8a80; --empty: #8f8f89;
+    --on-bg: #f5c400; --on-fg: #111111; --dot-off: #6e6e68;
     --tab: #f5c400; --tab-ink: #111111;
     color-scheme: dark;
   }
@@ -54,7 +58,8 @@
   --paper: #0d0d0d; --card: #171717; --ink: #f1f1ee; --muted: #a3a39d; --rule: #2d2d2b;
   --gold: #f5c400; --gold-ink: #111111; --accent: #f7cf2e; --accent-ink: #111111; --accent-soft: #2c250b;
   --bar: #000000; --bar-ink: #ffffff; --bar-muted: #a3a39d;
-  --warn: #e5b45a; --warn-soft: #3a2f1a; --bad: #ff8a80; --empty: #6b6b66;
+  --warn: #e5b45a; --warn-soft: #3a2f1a; --bad: #ff8a80; --empty: #8f8f89;
+    --on-bg: #f5c400; --on-fg: #111111; --dot-off: #6e6e68;
   --tab: #f5c400; --tab-ink: #111111;
   color-scheme: dark;
 }
@@ -198,7 +203,7 @@ textarea { resize: vertical; }
   font: 500 .82rem var(--sans); border: 1px solid var(--rule); background: transparent; color: var(--muted);
   padding: 4px 11px; border-radius: 999px; cursor: pointer;
 }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--gold); border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--on-bg); color: var(--on-fg); border-color: var(--on-bg); }
 .tag {
   display: inline-block; font: 600 .66rem/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase;
   padding: 1px 6px; border: 1px solid var(--rule); border-radius: 3px; color: var(--muted); vertical-align: middle;
@@ -339,7 +344,7 @@ details:not(.more)[open] > summary::after { content: ' −'; }
 .b-sub { display: block; font-weight: 400; font-size: .84rem; color: var(--muted); }
 .b-size { font: .82rem var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
 .dots { display: block; color: var(--accent); letter-spacing: 2px; font-size: .7rem; }
-.dots .off { color: var(--rule); }
+.dots .off { color: var(--dot-off); }
 .b-brief { padding: 0 4px 18px 88px; max-width: 760px; }
 .b-actions { display: flex; gap: 8px; }
 @media (max-width: 560px) {
@@ -416,7 +421,7 @@ button.panel { font: inherit; text-align: left; cursor: pointer; width: 100%; }
 .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; flex-wrap: wrap; }
 .seg button { font: 500 .9rem var(--sans); background: none; color: var(--muted); border: 0; padding: 8px 14px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--rule); }
-.seg button[aria-checked="true"] { background: var(--ink); color: var(--paper); }
+.seg button[aria-checked="true"] { background: var(--on-bg); color: var(--on-fg); }
 
 /* ── bounty gate ── */
 .gate { max-width: 560px; }
