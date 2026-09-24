@@ -65,6 +65,15 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
 - **Profile pictures are icons + colours, never uploads** (no moderation load, no
   student photos). Keys are in `AVATARS`/`AVATAR_COLORS` (ui.js) and in the SQL
   check constraints; keep them in sync.
-- **Map** reads `data/map.json`. Only add rooms read off a real campus map.
+- **Map** (`assets/js/map.js`) reads `data/map.json`: 126 room boxes traced off the
+  school's campus map (`assets/map/campus-map.png`, pixel coordinates) plus a
+  public-domain USDA/USGS aerial photo. The camera is the SVG viewBox. A room's
+  contents come from approved teacher sections whose `room` matches its id
+  (normalised: "room b-204" = B204). Only add rooms that are on the real map.
+- **Colours:** Wilcox black/gold/white. `--gold` is the brand fill and always
+  carries black text; `--accent` is gold that reads as text. Never put
+  `--gold` text on white.
+- **Cache-busting:** build.py stamps every CSS/JS/data URL with a content hash
+  and writes an import map for the JS modules. Always rebuild before pushing.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

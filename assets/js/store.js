@@ -191,7 +191,8 @@ async function demo() {
   if (!db.seeded) {
     try {
       const root = document.body.dataset.root || './';
-      const seed = await (await fetch(root + 'data/seed-bounties.json')).json();
+      const v = document.querySelector('meta[name="data-version"]')?.content;
+      const seed = await (await fetch(root + 'data/seed-bounties.json' + (v ? `?v=${v}` : ''))).json();
       db.bounties = seed.map((b) => ({ status: 'open', created_at: now(), ...b }));
       db.seeded = true;
       save();

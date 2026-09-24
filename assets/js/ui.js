@@ -51,9 +51,13 @@ export async function guard(fn, okMsg) {
   catch (e) { console.error(e); toast(e.message || 'Something went wrong.', 'bad'); return undefined; }
 }
 
+// Data files carry the build's content hash so a deploy is never half-cached.
+const DATA_V = document.querySelector('meta[name="data-version"]')?.content;
+export const dataUrl = (path) => root + path + (DATA_V ? `?v=${DATA_V}` : '');
+
 let coursesCache;
 export function courses() {
-  coursesCache ??= fetch(root + 'data/courses.json').then((r) => r.json());
+  coursesCache ??= fetch(dataUrl('data/courses.json')).then((r) => r.json());
   return coursesCache;
 }
 

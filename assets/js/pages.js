@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { initHeader, courses, dataUrl, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
@@ -12,7 +12,7 @@ const s = await initHeader();
 // ── search (home live results + search page) ──
 let index;
 async function search(q) {
-  index ??= await fetch(root + 'data/search.json').then((r) => r.json());
+  index ??= await fetch(dataUrl('data/search.json')).then((r) => r.json());
   const terms = q.toLowerCase().replace(/\bap\b/g, 'ap').split(/\s+/).filter(Boolean);
   if (!terms.length) return [];
   const alias = { chem: 'chemistry', calc: 'calculus', apush: 'ap us history', bio: 'biology', lit: 'literature',
@@ -49,10 +49,6 @@ const pages = {
       const r = await search(q.value);
       $('#home-results').innerHTML = q.value.trim() ? (r.slice(0, 6).map(resultHtml).join('') || '<div class="meta">No matches.</div>') : '';
     });
-    const b = (await s.bounties()).filter((x) => x.status === 'open').slice(0, 5);
-    $('#home-bounties').innerHTML = b.map((x) => `<a href="${root}bounties/#${esc(x.id)}"><span class="b-id">${esc(x.id)}</span> ${esc(x.title)}
-      <span class="meta">${x.size} · ${SIZE_POINTS[x.size]} pts${x.claims.length ? ' · claimed' : ''}</span></a>`).join('')
-      || '<div class="meta">No open bounties right now.</div>';
     const [recent, data] = await Promise.all([s.recent(6), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     $('#home-recent').innerHTML = recent.map((x) => `<a href="${x.course_slug ? courseUrl(x.course_slug) : root + 'school/'}">
@@ -168,50 +164,6 @@ const pages = {
           <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
     </section>`).join('');
-  },
-
-  async map() {
-    const [map, sections, data] = await Promise.all([
-      fetch(root + 'data/map.json').then((r) => r.json()),
-      s.approved({ kind: 'teacher_section' }),
-      courses(),
-    ]);
-    const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
-    // room → [{teacher, course}], from the room numbers in approved teacher sections
-    const rooms = {};
-    for (const x of sections) {
-      const room = (x.payload.room || '').trim().toUpperCase();
-      if (!room || !x.course_slug) continue;
-      const list = rooms[room] ??= [];
-      if (!list.some((y) => y.teacher === x.teacher && y.course === x.course_slug)) list.push({ teacher: x.teacher, course: x.course_slug });
-    }
-    const roomHtml = (id) => {
-      const list = rooms[id.toUpperCase()] || [];
-      const teachers = [...new Set(list.map((y) => y.teacher))];
-      return `<h3>Room ${esc(id)}</h3>${teachers.length ? teachers.map((t) => `<p><b>${esc(t)}</b><br>${list.filter((y) => y.teacher === t)
-        .map((y) => `<a href="${courseUrl(y.course)}">${esc(name[y.course] || y.course)}</a>`).join(' · ')}</p>`).join('')
-        : '<p class="meta">Nobody has added this room yet.</p>'}`;
-    };
-
-    if (map.image) {
-      $('#map-view').innerHTML = `<div class="map-wrap"><div class="map-canvas">
-          <img src="${root}${esc(map.image)}" alt="${esc(map.alt || 'Campus map')}">
-          ${map.rooms.map((r) => `<button class="pin ${rooms[r.id.toUpperCase()] ? 'has' : ''}" style="left:${Number(r.x)}%;top:${Number(r.y)}%"
-            data-room="${esc(r.id)}" aria-label="Room ${esc(r.id)}">${esc(r.label || r.id)}</button>`).join('')}
-        </div><aside class="map-panel" id="map-panel"><p class="meta">Tap a room to see who teaches there.</p></aside></div>`;
-      $('#map-view').addEventListener('click', (e) => {
-        const pin = e.target.closest('.pin');
-        if (!pin) return;
-        $$('.pin').forEach((p) => p.classList.toggle('on', p === pin));
-        $('#map-panel').innerHTML = roomHtml(pin.dataset.room);
-      });
-    } else {
-      $('#map-view').innerHTML = `<div class="card map-soon"><h2>The map is on its way</h2>
-        <p>We’re drawing a campus map you can click on. Until then, the room list below shows who teaches where.</p></div>`;
-    }
-    const ids = Object.keys(rooms).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-    $('#room-list').innerHTML = ids.length ? `<div class="rooms">${ids.map((id) => `<div class="room">${roomHtml(id)}</div>`).join('')}</div>`
-      : '<div class="empty">No rooms yet. Room numbers appear here once teacher sections include them.</div>';
   },
 
   async account() {

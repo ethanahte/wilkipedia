@@ -54,7 +54,7 @@ function paint() {
   if (!state.kind) return;
   $('#course-row').hidden = scope === 'school';
   paintTeacher();
-  form = renderFields($('#fields'), state.kind);
+  form = renderFields($('#fields'), state.kind, q.get('room') ? { room: q.get('room').toUpperCase() } : {});
   const mine = bounties.filter((b) => b.claims.some((c) => c.user_id === s.user()?.id) || b.id === state.bounty);
   $('#bounty').innerHTML = '<option value="">Not part of a bounty</option>'
     + mine.map((b) => `<option value="${esc(b.id)}" ${b.id === state.bounty ? 'selected' : ''}>${esc(b.id)} · ${esc(b.title)}</option>`).join('');

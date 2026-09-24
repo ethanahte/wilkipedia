@@ -19,6 +19,7 @@ Outputs (all generated, safe to delete and rebuild):
 Standard library only, so it runs on any Mac with no installs.
 """
 
+import hashlib
 import html
 import json
 import re
@@ -101,8 +102,44 @@ def load():
 # lives in the "More" menu. The bounty board is not here: it is a side tab that
 # only signed-in members see (see initHeader in assets/js/ui.js).
 NAV = [("map/", "Map"), ("subjects/", "Classes")]
-MORE = [("summer/", "Summer homework"), ("school/", "School info"), ("leaderboard/", "Leaderboard"),
-        ("teachers/", "Teachers"), ("rules/", "Community rules"), ("about/", "About")]
+_I = lambda d: f'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
+ICONS = {
+    "menu": _I('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+    "chev": '<svg class="chev" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',
+    "summer": _I('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+    "school": _I('<path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/>'),
+    "leaderboard": _I('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>'),
+    "teachers": _I('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>'),
+    "rules": _I('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>'),
+    "about": _I('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),
+}
+MORE = [("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
+        ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
+        ("rules/", "Community rules", "rules"), ("about/", "About", "about")]
+
+
+def _version(path):
+    return hashlib.sha1(path.read_bytes()).hexdigest()[:10]
+
+
+def asset_versions():
+    """Content hashes for every CSS/JS/data file the pages load.
+
+    GitHub Pages lets browsers cache files for 10 minutes, so right after a
+    deploy a visitor could get new HTML with OLD CSS/JS: broken menus, missing
+    buttons. Every URL therefore carries ?v=<hash of its contents>, and an import
+    map applies the same to the JS modules' imports of each other."""
+    v = {"style.css": _version(ROOT / "assets" / "style.css")}
+    for f in sorted((ROOT / "assets" / "js").glob("*.js")):
+        v["js/" + f.name] = _version(f)
+    data = hashlib.sha1()
+    for f in sorted(DATA.glob("*.json")):
+        data.update(f.read_bytes())
+    v["data"] = data.hexdigest()[:10]
+    return v
+
+
+VERSIONS = {}
 
 # Applies a saved night-mode choice before first paint, so pages never flash.
 THEME_BOOT = ("<script>try{var t=localStorage.getItem('wilkipedia-theme');"
@@ -121,10 +158,15 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
         canon = f'<link rel="canonical" href="{e(SITE_URL.rstrip("/") + "/" + rel)}">'
     cur = lambda href: " aria-current=page" if active == href else ""
     nav = "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in NAV)
-    more_active = any(active == href for href, _ in MORE)
-    nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""}>More</summary>'
-            f'<div class="menu">' + "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in MORE)
+    more_active = any(active == href for href, _, _ in MORE)
+    nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""} aria-label="More pages">'
+            f'{ICONS["menu"]}<span>More</span>{ICONS["chev"]}</summary><div class="menu">'
+            + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon in MORE)
             + '</div></details>')
+    v = VERSIONS
+    importmap = json.dumps({"imports": {f"{r}assets/{k}": f"{r}assets/{k}?v={h}"
+                                        for k, h in v.items() if k.startswith("js/")}})
+    entry = f"js/{script or 'pages.js'}"
     data_tag = ""
     if data is not None:
         blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
@@ -142,14 +184,16 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 {canon}
 <link rel="icon" href="{r}assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="{r}assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{r}assets/style.css">
+<link rel="stylesheet" href="{r}assets/style.css?v={v["style.css"]}">
+<meta name="data-version" content="{v["data"]}">
 {THEME_BOOT}
+<script type="importmap">{importmap}</script>
 </head>
 <body data-root="{r}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
-    <a class="brand" href="{r}">Wilkipedia</a>
+    <a class="brand" href="{r}"><span class="w">W</span>ilkipedia</a>
     <nav class="main-nav" aria-label="Main">{nav}</nav>
     <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
     <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
@@ -168,7 +212,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
   </div>
 </footer>
 {data_tag}
-<script type="module" src="{r}assets/js/{script or 'pages.js'}"></script>
+<script type="module" src="{r}assets/{entry}?v={v[entry]}"></script>
 </body>
 </html>
 """)
@@ -228,11 +272,8 @@ def build_home(depts):
   <button type="button" class="panel guests-only accent js-signin"><span class="label">Help build it</span><b>Sign in to write pages and earn credit.</b><span class="meta">Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
-<section class="two">
-  <div><h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div></div>
-  <div class="members-only"><h2 class="label-h">Open bounties</h2><div id="home-bounties" class="mini-list"><div class="meta">Loading…</div></div>
-    <a href="bounties/">See the whole board →</a></div>
-  <div class="guests-only"><h2 class="label-h">School info</h2><div class="mini-list"><a href="school/">Bell schedule, counselor appointments, passes and more →</a></div></div>
+<section>
+  <h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
 </section>
 """, desc="Student-written guides to every class at Wilcox High School in Santa Clara: test style, grading, homework, study guides, tips and summer homework.",
          data={"page": "home"})
@@ -479,13 +520,28 @@ def build_static():
 
     page("map/", "Campus map", """
 <h1>Campus map</h1>
-<p class="lede">Find a classroom, see who teaches there and what they teach.</p>
-<div id="map-view"></div>
-<section><h2>Rooms</h2>
-  <p class="meta">Built from the room numbers students add to teacher sections. <a href="../submit/?kind=teacher_section">Add a teacher’s room</a></p>
+<p class="lede">Tap a room to zoom in and see who teaches there, what they teach and when.</p>
+<div class="map-app" id="map-app">
+  <div class="map-toolbar">
+    <div class="seg" id="map-mode" role="radiogroup" aria-label="Map style">
+      <button type="button" role="radio" aria-checked="true" data-mode="plan">Map</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="aerial">Aerial photo</button>
+    </div>
+    <form id="room-find" class="room-find" role="search"><input id="room-q" list="room-ids" placeholder="Find a room, e.g. B204" aria-label="Find a room" autocomplete="off"><datalist id="room-ids"></datalist></form>
+    <div class="zoom"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button><button type="button" id="z-reset">Whole campus</button></div>
+  </div>
+  <div class="map-stage" id="map-stage">
+    <svg id="map-svg" role="group" aria-label="Wilcox High School campus map"><image id="map-img"/><g id="hotspots"></g></svg>
+    <aside class="map-panel" id="map-panel" aria-live="polite" hidden></aside>
+    <div class="map-hint" id="map-hint">Drag to move · scroll or pinch to zoom · tap a room</div>
+  </div>
+  <p class="meta credit" id="map-credit"></p>
+</div>
+<section><h2>Rooms with info</h2>
+  <p class="meta">Built from the room numbers students add to teacher sections. <a href="../submit/?kind=teacher_section">Add a teacher’s room and schedule</a></p>
   <div id="room-list"><div class="meta">Loading…</div></div>
-</section>""", active="map/", data={"page": "map"},
-         desc="Map of Wilcox High School classrooms: find a room and see who teaches there.")
+</section>""", active="map/", script="map.js", data={"page": "map"},
+         desc="Interactive map of Wilcox High School: tap a classroom to see who teaches there, what they teach and when.")
 
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})
@@ -528,12 +584,13 @@ def main():
     for d in GENERATED_DIRS:
         shutil.rmtree(ROOT / d, ignore_errors=True)
     depts, courses, teachers = load()
+    build_data(depts, courses, teachers)       # first, so its output is in the data hash
+    VERSIONS.update(asset_versions())
     build_home(depts)
     build_subjects(depts)
     build_courses(depts, courses)
     build_teachers(teachers, courses)
     build_static()
-    build_data(depts, courses, teachers)
     build_seo(courses, teachers, depts)
     linked = sum(1 for c in courses.values() if c["teachers"])
     print(f"Built {len(courses)} course pages ({linked} with teachers), {len(teachers)} teacher pages, {len(depts)} subjects.")
