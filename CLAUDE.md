@@ -89,7 +89,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Bell schedule** (`assets/js/bell.js`, `data/bell.json` from the school's page):
   strip at the top of home, full tables on School info. Days the school calls
   "adjusted" without times are shown as adjusted, never guessed. Update each August.
-- **Class colours** (html[data-class]): Class of 2027 blue, 2028 green, 2029
+- **Class colours** (html[data-class], a small accent only: `--class` tints your avatar ring and class-year chips; the site stays gold): Class of 2027 blue, 2028 green, 2029
   yellow, 2030 purple, rotating every 4 years (`classColorOf` in ui.js, from the
   Wikipedia article on Wilcox). Picked on the account page; 'auto' follows grad year.
 - **Feedback** goes to the `feedback` table (anyone can insert, reviewers read)

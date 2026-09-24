@@ -131,10 +131,13 @@ export function placeOf(x, courseName = {}) {
 // (Class of 2027 blue, 2028 green, 2029 yellow, 2030 purple, 2031 blue again).
 export const CLASS_COLORS = { blue: 'Blue', green: 'Green', yellow: 'Yellow', purple: 'Purple' };
 const ROTATION = ['blue', 'green', 'yellow', 'purple'];
+// A small chip in that class's colour, e.g. "’27"
+export const classChip = (year, long = false) => (year
+  ? ` <span class="class-chip c-${ROTATION[(((year - 2027) % 4) + 4) % 4]}" title="Class of ${year}">${long ? `Class of ${year}` : `’${String(year).slice(2)}`}</span>` : '');
 export const classColorOf = (year) => (year ? ROTATION[(((year - 2027) % 4) + 4) % 4] : null);
 
-// The colour theme: 'auto' follows your class year, 'gold' is Wilcox gold,
-// or pick any class colour. Stored per browser; THEME_BOOT applies the
+// Your class colour (a small accent only): 'auto' follows your class year,
+// 'gold' is plain Wilcox gold, or pick any class colour. Stored per browser; THEME_BOOT applies the
 // resolved value (wilkipedia-class-applied) before first paint.
 const CLASS_KEY = 'wilkipedia-class';
 export function classPref() { try { return localStorage.getItem(CLASS_KEY) || 'auto'; } catch { return 'auto'; } }

@@ -3,7 +3,7 @@
 
 import { initHeader, courses, dataUrl, placeOf, slugify, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
-         CLASS_COLORS, classColorOf, classPref, applyClassTheme } from './ui.js';
+         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 
@@ -188,7 +188,7 @@ const pages = {
       const sorted = [...rows].sort((a, b) => b[key] - a[key]).filter((r) => r[key] > 0);
       $('#board').innerHTML = sorted.map((r) => `<li><span class="who">${avatarHtml(r)} ${byline(r.display_name, r.school_verified)}
         ${r.role !== 'contributor' ? `<span class="tag">${esc(roleLabel(r.role))}</span>` : ''}
-        ${r.grad_year ? `<span class="meta">’${String(r.grad_year).slice(2)}</span>` : ''}</span>
+        ${classChip(r.grad_year)}</span>
         <span class="meta">${r.approved} approved</span><b>${r[key]}</b></li>`).join('')
         || '<li class="empty">No points yet. <a href="../bounties/">Claim the first bounty</a>.</li>';
     };
@@ -246,11 +246,12 @@ const pages = {
       const themeCard = `<section class="card"><h2>Appearance</h2>
         <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">${[['system', 'Match my device'], ['light', 'Day'], ['dark', 'Night']]
           .map(([v, l]) => `<button type="button" role="radio" aria-checked="${themePref() === v}" data-theme-pref="${v}">${l}</button>`).join('')}</div>
-        <h3>Colour</h3>
+        <h3>Class colour</h3>
         <div class="seg swatch-seg" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class (${CLASS_COLORS[classColorOf(me.grad_year)]})` : 'My class'], ['gold', 'Wilcox gold'],
           ...Object.entries(CLASS_COLORS).map(([k, v]) => [k, v])]
           .map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>
         <p class="meta">${me?.grad_year ? `Class of ${me.grad_year}’s colour is ${CLASS_COLORS[classColorOf(me.grad_year)]}.` : 'Set your class year in your profile and “My class” uses your class colour.'}
+          It shows as a small accent (your picture’s ring and class chip). The site itself stays Wilcox gold.
           Class colours: 2027 Blue · 2028 Green · 2029 Yellow · 2030 Purple.</p>
         <p class="meta">Saved in this browser.</p></section>`;
 
@@ -264,7 +265,7 @@ const pages = {
           <section class="card profile">
             <div class="profile-head">${avatarHtml(me, 'lg')}
               <div><b class="profile-name">${esc(me.name)}</b>${badge(me.school)}
-                <div class="meta">${esc(roleLabel(me.role))}${me.grad_year ? ` · Class of ${me.grad_year}` : ''}</div></div></div>
+                <div class="meta">${esc(roleLabel(me.role))}${classChip(me.grad_year, true)}</div></div></div>
             <p class="meta">${me.school
               ? 'You signed in with your school account, so your work shows the SCUSD ✓ badge.'
               : `You signed in with a personal account.${REVIEWER_ROLES.includes(me.role) ? '' : ' Your comments always go to a reviewer first.'} Sign in with your @scusd.net school account to get the SCUSD ✓ badge.`}</p>

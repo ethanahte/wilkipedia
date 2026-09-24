@@ -59,22 +59,14 @@
   color-scheme: dark;
 }
 
-/* Class colour themes (html[data-class], set from your class year or your
-   choice on the account page). They replace the gold accent; black, white and
-   the layout stay Wilcox. Each needs a light and a dark version of --accent
-   (text) and --accent-soft (tint); --gold is the fill, --gold-ink its text. */
-:root[data-class="blue"]   { --gold: #2f6fe4; --gold-ink: #fff; --accent: #1d4fb8; --accent-soft: #e5edff; --tab-ink: #8fb4ff; }
-:root[data-class="green"]  { --gold: #1f9a55; --gold-ink: #fff; --accent: #146b3a; --accent-soft: #e2f5e9; --tab-ink: #6fdb9d; }
-:root[data-class="purple"] { --gold: #7c45e0; --gold-ink: #fff; --accent: #5b2cb8; --accent-soft: #efe7ff; --tab-ink: #c2a5ff; }
-/* yellow is Wilcox gold: the defaults already are the yellow theme */
-:root[data-theme="dark"][data-class="blue"]   { --accent: #8fb4ff; --accent-soft: #16233d; --tab: #2f6fe4; --tab-ink: #fff; }
-:root[data-theme="dark"][data-class="green"]  { --accent: #6fdb9d; --accent-soft: #13291c; --tab: #1f9a55; --tab-ink: #fff; }
-:root[data-theme="dark"][data-class="purple"] { --accent: #c2a5ff; --accent-soft: #231a38; --tab: #7c45e0; --tab-ink: #fff; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"])[data-class="blue"]   { --accent: #8fb4ff; --accent-soft: #16233d; --tab: #2f6fe4; --tab-ink: #fff; }
-  :root:not([data-theme="light"])[data-class="green"]  { --accent: #6fdb9d; --accent-soft: #13291c; --tab: #1f9a55; --tab-ink: #fff; }
-  :root:not([data-theme="light"])[data-class="purple"] { --accent: #c2a5ff; --accent-soft: #231a38; --tab: #7c45e0; --tab-ink: #fff; }
-}
+/* Class colours (html[data-class], from your class year or your choice on the
+   account page). Deliberately small: the site stays Wilcox gold; --class only
+   tints your own avatar ring and class-year chips. */
+:root { --class: #f5c400; --class-ink: #111; }
+:root[data-class="blue"]   { --class: #2f6fe4; --class-ink: #fff; }
+:root[data-class="green"]  { --class: #1f9a55; --class-ink: #fff; }
+:root[data-class="yellow"] { --class: #f5c400; --class-ink: #111; }
+:root[data-class="purple"] { --class: #7c45e0; --class-ink: #fff; }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -637,3 +629,11 @@ body:has(#submit-form) .contribute-fab { display: none; }
 .swatch-seg button { display: inline-flex; align-items: center; gap: 6px; }
 .sw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.2); }
 .sw-gold, .sw-yellow { background: #f5c400; } .sw-blue { background: #2f6fe4; } .sw-green { background: #1f9a55; } .sw-purple { background: #7c45e0; }
+
+/* class colour touches */
+.auth .who .avatar, .profile-head .avatar { box-shadow: 0 0 0 2px var(--bar, #111), 0 0 0 4px var(--class); }
+.profile-head .avatar { box-shadow: 0 0 0 3px var(--card), 0 0 0 6px var(--class); }
+.class-chip { display: inline-block; font: 700 .66rem/1.5 var(--mono); letter-spacing: .04em; padding: 0 6px; border-radius: 999px;
+  background: var(--chip, var(--class)); color: var(--chip-ink, var(--class-ink)); vertical-align: 1px; }
+.class-chip.c-blue { --chip: #2f6fe4; --chip-ink: #fff; } .class-chip.c-green { --chip: #1f9a55; --chip-ink: #fff; }
+.class-chip.c-yellow { --chip: #f5c400; --chip-ink: #111; } .class-chip.c-purple { --chip: #7c45e0; --chip-ink: #fff; }
