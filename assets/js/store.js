@@ -113,6 +113,7 @@ async function live() {
     },
     async postBounty(b) { ok(await sb.from('bounties').insert(b)); },
     async setBountyStatus(id, status) { ok(await sb.from('bounties').update({ status }).eq('id', id)); },
+    async updateBounty(id, fields) { ok(await sb.from('bounties').update(fields).eq('id', id)); },
 
     async submit(s) { ok(await sb.from('submissions').insert({ ...s, user_id: me.id })); },
     async mySubmissions() {
@@ -231,6 +232,7 @@ async function demo() {
                           avatar: db.users[uid]?.avatar ?? null, color: db.users[uid]?.color ?? 'gray' });
   const need = () => { if (!me()) throw new Error('Sign in first.'); return me(); };
   const reviewer = () => { const u = need(); if (!REVIEWER_ROLES.includes(u.role)) throw new Error('Reviewers only.'); return u; };
+  const admin = () => { const u = need(); if (u.role !== 'admin') throw new Error('Admins only.'); return u; };
 
   if (!db.seeded) {
     try {
@@ -273,13 +275,14 @@ async function demo() {
     async resetDemo() { try { localStorage.removeItem(KEY); } catch { /* ignore */ } },
 
     async bounties() {
+      if (!REVIEWER_ROLES.includes(me()?.role)) return [];      // mirrors RLS: review team only
       return db.bounties
         .map((b) => ({ ...b, claims: db.claims.filter((c) => c.bounty_id === b.id && active(c))
           .map((c) => ({ user_id: c.user_id, name: name(c.user_id), expires_at: c.expires_at })) }))
         .sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
     },
     async claim(bounty_id) {
-      const u = need();
+      const u = reviewer();
       const b = db.bounties.find((x) => x.id === bounty_id);
       if (!b || b.status !== 'open') throw new Error('That bounty is closed.');
       db.claims = db.claims.filter((c) => !(c.bounty_id === bounty_id && c.user_id === u.id));
@@ -293,13 +296,14 @@ async function demo() {
       save();
     },
     async postBounty(b) {
-      reviewer();
+      admin();
       if (db.bounties.some((x) => x.id === b.id)) throw new Error(`Bounty ${b.id} already exists.`);
       db.bounties.push({ status: 'open', created_at: now(), ...b }); save();
     },
     async setBountyStatus(bid, status) {
-      reviewer(); db.bounties.find((b) => b.id === bid).status = status; save();
+      admin(); db.bounties.find((b) => b.id === bid).status = status; save();
     },
+    async updateBounty(bid, fields) { admin(); Object.assign(db.bounties.find((b) => b.id === bid), fields); save(); },
 
     async submit(s) {
       const u = need();

@@ -55,10 +55,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - Schema changes: add a numbered file in `supabase/migrations/` for the live
   database AND fold the change into `schema.sql` for fresh setups.
 - **Navigation:** header = Map + Classes + a "More" panel grouped into columns (`NAV`/`MORE_GROUPS` in build.py).
-  The bounty board is members-only: a fixed side tab (`#bounty-tab`) shown by
-  `initHeader` when signed in, and `.members-only` / `.guests-only` sections
-  toggle on `body.signed-in`. Bounty rows stay publicly readable in the database;
-  the gate is presentation only.
+  The bounty board belongs to the review team: reviewers/admins see and claim
+  bounties, only admins post/edit/close them (RLS since migration 008, plus
+  `is-team` UI gating and the shared `openBountyEditor` in ui.js). Everyone
+  else contributes through the + button. `.members-only` / `.guests-only`
+  sections toggle on `body.signed-in`.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
   `wilkipedia-theme`, restored by `THEME_BOOT` in <head>), falling back to the
   device setting. The dark palette lives in two blocks in style.css; edit both.

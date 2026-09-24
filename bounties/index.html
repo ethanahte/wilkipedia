@@ -10,10 +10,10 @@
 <link rel="canonical" href="https://wilcoxwiki.org/bounties/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/style.css?v=e0c3d06438">
+<link rel="stylesheet" href="../assets/style.css?v=3fca1e5ab7">
 <meta name="data-version" content="3de7007f17">
 <script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c}catch(e){}</script>
-<script type="importmap">{"imports": {"../assets/js/bell.js": "../assets/js/bell.js?v=2db5b8120b", "../assets/js/bounties.js": "../assets/js/bounties.js?v=e373708e29", "../assets/js/config.js": "../assets/js/config.js?v=1b9039fc8e", "../assets/js/course.js": "../assets/js/course.js?v=9fdeae670f", "../assets/js/forms.js": "../assets/js/forms.js?v=895cb8985a", "../assets/js/i18n.js": "../assets/js/i18n.js?v=606d77b7b8", "../assets/js/map.js": "../assets/js/map.js?v=1c6bad5518", "../assets/js/menu.js": "../assets/js/menu.js?v=eb08dcc9b8", "../assets/js/pages.js": "../assets/js/pages.js?v=07dcd5f912", "../assets/js/review.js": "../assets/js/review.js?v=f0c64e7375", "../assets/js/search.js": "../assets/js/search.js?v=fc99882726", "../assets/js/store.js": "../assets/js/store.js?v=80a8ef1ba3", "../assets/js/submit.js": "../assets/js/submit.js?v=614d2ce7d8", "../assets/js/translate.js": "../assets/js/translate.js?v=3353ff261e", "../assets/js/ui.js": "../assets/js/ui.js?v=388d44d999"}}</script>
+<script type="importmap">{"imports": {"../assets/js/bell.js": "../assets/js/bell.js?v=2db5b8120b", "../assets/js/bounties.js": "../assets/js/bounties.js?v=dc8b6d0716", "../assets/js/config.js": "../assets/js/config.js?v=1b9039fc8e", "../assets/js/course.js": "../assets/js/course.js?v=9fdeae670f", "../assets/js/forms.js": "../assets/js/forms.js?v=895cb8985a", "../assets/js/i18n.js": "../assets/js/i18n.js?v=606d77b7b8", "../assets/js/map.js": "../assets/js/map.js?v=1c6bad5518", "../assets/js/menu.js": "../assets/js/menu.js?v=eb08dcc9b8", "../assets/js/pages.js": "../assets/js/pages.js?v=07dcd5f912", "../assets/js/review.js": "../assets/js/review.js?v=829c80d66c", "../assets/js/search.js": "../assets/js/search.js?v=fc99882726", "../assets/js/store.js": "../assets/js/store.js?v=7f84eee25b", "../assets/js/submit.js": "../assets/js/submit.js?v=614d2ce7d8", "../assets/js/translate.js": "../assets/js/translate.js?v=3353ff261e", "../assets/js/ui.js": "../assets/js/ui.js?v=930a36d2cb"}}</script>
 </head>
 <body data-root="../">
 <a class="skip" href="#main">Skip to content</a>
@@ -35,11 +35,12 @@
 
 <h1>Bounty board</h1>
 <div id="gate" class="card gate" hidden>
-  <h2>Sign in to see the bounty board</h2>
-  <p>Bounties are jobs for Wilkipedia members: claim one, write a page, get credit on the leaderboard.</p>
-  <p><button type="button" class="btn js-signin">Sign in</button> <span class="meta">Use your school account to get the SCUSD ✓ badge.</span></p>
+  <h2 id="gate-text">Sign in to see the bounty board.</h2>
+  <p>Bounties are jobs the admins post for the review team. Everyone can still help: add class info, tips or a study guide.</p>
+  <p><a class="btn" href="../submit/">Contribute</a> <button type="button" class="btn ghost js-signin" id="gate-signin">Sign in</button></p>
 </div>
 <div id="members">
+<div id="admin-bar" class="admin-bar" hidden><span class="meta">You’re an admin: you can post, edit and close bounties.</span><button type="button" class="btn" id="post-bounty">+ Post a bounty</button></div>
 <p class="lede">Wilkipedia is written by volunteers. Each bounty is one clear job with a finish line. Claim one, do it, submit it, and a reviewer publishes it with your name on it.</p>
 <div id="stats" class="stats"></div>
 <div class="filters">
@@ -71,6 +72,6 @@
   </div>
 </footer>
 
-<script type="module" src="../assets/js/bounties.js?v=e373708e29"></script>
+<script type="module" src="../assets/js/bounties.js?v=dc8b6d0716"></script>
 </body>
 </html>

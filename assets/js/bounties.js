@@ -2,11 +2,13 @@
 // then one line per bounty that expands in place to its brief
 // ("You get" / "Done means", the BountyBoard app's format).
 
-import { initHeader, requireUser, courses, $, esc, guard, fmtDate, courseUrl, root } from './ui.js';
-import { SIZE_POINTS } from './store.js';
+import { initHeader, requireUser, courses, openBountyEditor, $, esc, guard, fmtDate, courseUrl, root } from './ui.js';
+import { SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 
 const s = await initHeader();
-const courseName = Object.fromEntries((await courses()).courses.map((c) => [c.slug, c.name]));
+const courseList = (await courses()).courses;
+const courseName = Object.fromEntries(courseList.map((c) => [c.slug, c.name]));
+let all = [];
 const SIZE_TIME = { S: '~30 min', M: '~2 hrs', L: '~5+ hrs' };
 const filters = { track: 'All', state: 'all' };
 let open = new Set(location.hash ? [decodeURIComponent(location.hash.slice(1))] : []);
@@ -15,11 +17,16 @@ const dots = (n) => '●'.repeat(n) + '<span class="off">' + '●'.repeat(5 - n)
 
 async function draw() {
   const me = s.user();
-  // The board is for signed-in members only.
-  $('#gate').hidden = !!me;
-  $('#members').hidden = !me;
-  if (!me) return;
-  const all = (await s.bounties()).filter((b) => b.status === 'open');
+  // The board belongs to the review team; admins run it.
+  const team = !!me && REVIEWER_ROLES.includes(me.role);
+  const isAdmin = me?.role === 'admin';
+  $('#gate').hidden = team;
+  $('#gate-text').textContent = me ? 'The bounty board is for the Wilkipedia review team.' : 'Sign in to see the bounty board.';
+  $('#gate-signin').hidden = !!me;
+  $('#members').hidden = !team;
+  $('#admin-bar').hidden = !isAdmin;
+  if (!team) { $('#board').innerHTML = ''; return; }
+  all = (await s.bounties()).filter((b) => b.status === 'open');
   const tracks = ['All', ...new Set(all.map((b) => b.track))];
   $('#stats').innerHTML = `
     <div><b>${all.length}</b><span>open bounties</span></div>
@@ -50,6 +57,7 @@ async function draw() {
         <p class="meta">Worth ${SIZE_POINTS[b.size]} points · posted ${fmtDate(b.created_at)}
           ${mine ? ` · your claim expires ${fmtDate(b.claims.find((c) => c.user_id === me.id).expires_at)}` : ''}</p>
         <div class="b-actions">
+          ${isAdmin ? `<button class="btn ghost" data-edit-bounty="${esc(b.id)}">Edit</button><button class="btn ghost danger" data-close-bounty="${esc(b.id)}">Close</button>` : ''}
           ${mine
             ? `<a class="btn" href="${root}submit/?bounty=${encodeURIComponent(b.id)}">Submit work</a>
                <button class="btn ghost" data-unclaim="${esc(b.id)}">Drop claim</button>`
@@ -73,6 +81,14 @@ document.addEventListener('click', async (e) => {
     filters.state = t.dataset.state;
     document.querySelectorAll('[data-state]').forEach((b) => b.setAttribute('aria-pressed', b === t));
     draw();
+  } else if (t.dataset.editBounty) {
+    openBountyEditor(s, all.find((b) => b.id === t.dataset.editBounty), courseList, draw);
+  } else if (t.dataset.closeBounty) {
+    if (confirm(`Close ${t.dataset.closeBounty}? It leaves the board but stays in Review → Bounties.`)) {
+      if (await guard(() => s.setBountyStatus(t.dataset.closeBounty, 'closed'), 'Bounty closed.')) draw();
+    }
+  } else if (t.id === 'post-bounty') {
+    openBountyEditor(s, null, courseList, draw);
   } else if (t.dataset.claim) {
     if (!(await requireUser(s, 'to claim a bounty'))) return;
     if (await guard(() => s.claim(t.dataset.claim), 'Claimed. You have 14 days to submit.')) draw();

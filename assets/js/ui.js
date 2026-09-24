@@ -215,10 +215,12 @@ export async function initHeader() {
         $('.n', b).textContent = n > 9 ? '9+' : n;
       }).catch(() => {});
     }
-    // The bounty board is for signed-in members: its tab only appears for them.
+    // The bounty board belongs to the review team: its button only appears for them.
+    const team = !!u && REVIEWER_ROLES.includes(u.role);
+    document.body.classList.toggle('is-team', team);
     if (tab) {
-      tab.hidden = !u;
-      if (u) {
+      tab.hidden = !team;
+      if (team) {
         try {
           const open = (await s.bounties()).filter((b) => b.status === 'open' && !b.claims.length).length;
           $('.n', tab).textContent = open || '';
@@ -271,6 +273,60 @@ export function openEditor(store, sub, onSaved) {
     if (ok) { close(); onSaved?.(); }
   });
   $('#ed-note', wrap).focus();
+}
+
+// ── bounty editor (admins) ──
+// One dialog for posting a new bounty (b = null) and editing an existing one.
+export const BOUNTY_TRACKS = ['Course pages', 'Teacher sections', 'Study guides', 'Resources', 'Summer homework', 'School info', 'Clubs & sports', 'Fix outdated'];
+export function openBountyEditor(store, b, courseList, onSaved) {
+  const isNew = !b;
+  b ??= { id: '', title: '', track: 'Course pages', course_slug: null, teacher: '', kind: null, size: 'M', priority: 3, you_get: '', done_means: '' };
+  const courseName = courseList.find((c) => c.slug === b.course_slug)?.name || '';
+  const wrap = document.createElement('div');
+  wrap.className = 'modal';
+  wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="bt-title" id="bounty-form">
+      <div class="lang-top"><h2 id="bt-title">${isNew ? 'Post a bounty' : `Edit ${esc(b.id)}`}</h2>
+        <button type="button" class="icon-btn lang-x" data-close aria-label="Close">✕</button></div>
+      <div class="grid2">
+        <div class="field"><label for="bt-id">ID</label><input id="bt-id" name="id" required placeholder="SCI-04" pattern="[A-Za-z]{2,5}-\\d{1,3}" value="${esc(b.id)}" ${isNew ? '' : 'disabled'}></div>
+        <div class="field"><label for="bt-track">Track</label><select id="bt-track" name="track">${BOUNTY_TRACKS.map((t) => `<option ${t === b.track ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label for="bt-t">Title</label><input id="bt-t" name="title" required value="${esc(b.title)}" placeholder="Complete the AP Chemistry page"></div>
+      <div class="grid2">
+        <div class="field"><label for="bt-c">Class (optional)</label><input id="bt-c" name="course" list="bt-courses" value="${esc(courseName)}" placeholder="Type to search…">
+          <datalist id="bt-courses">${courseList.map((c) => `<option value="${esc(c.name)}">`).join('')}</datalist></div>
+        <div class="field"><label for="bt-te">Teacher (optional)</label><input id="bt-te" name="teacher" value="${esc(b.teacher || '')}"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="bt-k">Suggested kind</label><select id="bt-k" name="kind"><option value="">Any</option>${Object.entries(KINDS).map(([k, d]) => `<option value="${k}" ${k === b.kind ? 'selected' : ''}>${esc(d.label)}</option>`).join('')}</select></div>
+        <div class="field"><label for="bt-s">Size</label><select id="bt-s" name="size">${[['S', '~30 min · 10 pts'], ['M', '~2 hrs · 30 pts'], ['L', '~5+ hrs · 60 pts']].map(([v, l]) => `<option value="${v}" ${v === b.size ? 'selected' : ''}>${v} · ${l}</option>`).join('')}</select></div>
+        <div class="field"><label for="bt-p">Priority</label><select id="bt-p" name="priority">${[5, 4, 3, 2, 1].map((n) => `<option ${n === b.priority ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label for="bt-g">You get</label><textarea id="bt-g" name="you_get" rows="2">${esc(b.you_get || '')}</textarea></div>
+      <div class="field"><label for="bt-d">Done means</label><textarea id="bt-d" name="done_means" rows="2" required>${esc(b.done_means || '')}</textarea></div>
+      <p class="error" id="bt-err" hidden></p>
+      <div class="r-actions"><button class="btn">${isNew ? 'Post bounty' : 'Save changes'}</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
+    </form>`;
+  document.body.append(wrap);
+  const f = $('form', wrap);
+  const close = () => wrap.remove();
+  wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = (m) => { $('#bt-err', wrap).textContent = m; $('#bt-err', wrap).hidden = false; };
+    const name = f.course.value.trim().toLowerCase();
+    const course = courseList.find((c) => c.name.toLowerCase() === name);
+    if (name && !course) return err('Pick the class from the list, or leave it blank.');
+    if (!f.title.value.trim() || !f.done_means.value.trim()) return err('Title and “Done means” are required.');
+    const fields = { title: f.title.value.trim(), track: f.track.value, course_slug: course?.slug || null,
+      teacher: f.teacher.value.trim() || null, kind: f.kind.value || null, size: f.size.value, priority: Number(f.priority.value),
+      you_get: f.you_get.value.trim() || null, done_means: f.done_means.value.trim() };
+    const ok = isNew
+      ? await guard(() => store.postBounty({ id: f.id.value.trim().toUpperCase(), ...fields }), 'Bounty posted.')
+      : await guard(() => store.updateBounty(b.id, fields), 'Bounty saved.');
+    if (ok) { close(); onSaved?.(); }
+  });
+  (isNew ? $('#bt-id', wrap) : $('#bt-t', wrap)).focus();
 }
 
 // ── drafts ──

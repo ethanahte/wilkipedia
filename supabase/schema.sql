@@ -54,6 +54,12 @@ language sql stable security definer set search_path = public as $$
   select coalesce(public.my_role() in ('reviewer', 'admin'), false)
 $$;
 
+-- Only admins run the bounty board
+create function public.is_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce(public.my_role() = 'admin', false)
+$$;
+
 alter table public.profiles enable row level security;
 create policy "profiles are public" on public.profiles for select using (true);
 create policy "edit own profile" on public.profiles for update using (id = auth.uid());
@@ -80,9 +86,11 @@ create table public.bounties (
 );
 
 alter table public.bounties enable row level security;
-create policy "bounties are public" on public.bounties for select using (true);
-create policy "reviewers post bounties" on public.bounties for insert with check (public.is_reviewer());
-create policy "reviewers edit bounties" on public.bounties for update using (public.is_reviewer());
+-- The bounty board belongs to the review team: they see and claim, admins run it
+create policy "review team sees bounties" on public.bounties for select using (public.is_reviewer());
+create policy "admins post bounties" on public.bounties for insert with check (public.is_admin());
+create policy "admins edit bounties" on public.bounties for update using (public.is_admin());
+create policy "admins delete bounties" on public.bounties for delete using (public.is_admin());
 
 -- ───────────────────────── claims ─────────────────────────
 -- A claim lasts 14 days. Expired claims are simply ignored when read.
@@ -95,9 +103,9 @@ create table public.claims (
 );
 
 alter table public.claims enable row level security;
-create policy "claims are public" on public.claims for select using (true);
-create policy "claim for yourself" on public.claims for insert
-  with check (user_id = auth.uid()
+create policy "review team sees claims" on public.claims for select using (public.is_reviewer());
+create policy "review team claims" on public.claims for insert
+  with check (user_id = auth.uid() and public.is_reviewer()
               and exists (select 1 from public.bounties b where b.id = bounty_id and b.status = 'open'));
 create policy "drop your own claim" on public.claims for delete using (user_id = auth.uid());
 

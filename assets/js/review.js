@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, placeOf, openEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
+import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -89,7 +89,7 @@ const tabs = {
           <span class="meta">by ${esc(r.author)} · ${ago(r.created_at)}</span></div>
         ${r.note ? prose(r.note) : '<p class="meta">No note.</p>'}
         <div class="r-actions">
-          ${r.kind === 'outdated' ? `<button class="btn ghost" data-tobounty="${r.id}">Turn into a bounty</button>` : ''}
+          ${r.kind === 'outdated' && s.user()?.role === 'admin' ? `<button class="btn ghost" data-tobounty="${r.id}">Turn into a bounty</button>` : ''}
           <button class="btn" data-resolve="${r.id}">Mark resolved</button>
         </div>
       </article>`).join('') : '<div class="empty">No open reports.</div>';
@@ -111,32 +111,13 @@ const tabs = {
   },
   async bounties() {
     const list = await s.bounties();
-    return `<form id="bounty-form" class="card">
-        <h3>Post a bounty</h3>
-        <div class="grid2">
-          <div class="field"><label>ID</label><input name="id" required placeholder="SCI-04" pattern="[A-Z]{2,5}-\\d{1,3}"></div>
-          <div class="field"><label>Track</label><select name="track">${['Course pages', 'Teacher sections', 'Study guides', 'Resources', 'Summer homework', 'School info', 'Fix outdated'].map((t) => `<option>${t}</option>`).join('')}</select></div>
-        </div>
-        <div class="field"><label>Title</label><input name="title" required placeholder="Complete the AP Chemistry page"></div>
-        <div class="grid2">
-          <div class="field"><label>Course (optional)</label><input name="course" list="course-list" placeholder="Type to search…"></div>
-          <div class="field"><label>Teacher (optional)</label><input name="teacher"></div>
-        </div>
-        <div class="grid3">
-          <div class="field"><label>Suggested kind</label><select name="kind"><option value="">Any</option>${Object.entries(KINDS).map(([k, d]) => `<option value="${k}">${esc(d.label)}</option>`).join('')}</select></div>
-          <div class="field"><label>Size</label><select name="size"><option value="S">S · ~30 min · 10 pts</option><option value="M" selected>M · ~2 hrs · 30 pts</option><option value="L">L · ~5+ hrs · 60 pts</option></select></div>
-          <div class="field"><label>Priority</label><select name="priority">${[5, 4, 3, 2, 1].map((n) => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-        </div>
-        <div class="field"><label>You get</label><textarea name="you_get" rows="2" placeholder="The page template and anything we already know."></textarea></div>
-        <div class="field"><label>Done means</label><textarea name="done_means" rows="2" required placeholder="Overview + a teacher section with a syllabus source + 3 tips."></textarea></div>
-        <button class="btn">Post bounty</button>
-      </form>
-      <datalist id="course-list">${data.courses.map((c) => `<option value="${esc(c.name)}">`).join('')}</datalist>
-      <h3>All bounties</h3>
-      <table class="plain"><tbody>${list.map((b) => `<tr><td><code>${esc(b.id)}</code></td><td>${esc(b.title)}</td>
+    const isAdmin = s.user()?.role === 'admin';
+    return `${isAdmin ? '<p><button class="btn" data-newbounty>+ Post a bounty</button></p>' : '<p class="meta">Only admins can post or edit bounties.</p>'}
+      <table class="plain"><tbody>${list.map((b) => `<tr><td><code>${esc(b.id)}</code></td><td>${esc(b.title)}
+          ${b.status === 'closed' ? ' <span class="tag">closed</span>' : ''}</td>
         <td>${b.claims.map((c) => esc(c.name)).join(', ') || '<span class="meta">unclaimed</span>'}</td>
-        <td><button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Reopen'}</button></td></tr>`).join('')}</tbody></table>`;
-  },
+        <td>${isAdmin ? `<button class="linkish" data-editb="${esc(b.id)}">Edit</button> · <button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Reopen'}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
+  },,
 };
 
 async function draw() {
@@ -182,31 +163,21 @@ document.addEventListener('click', async (e) => {
   if (fc && 'fdel' in t.dataset) { if (!confirm('Delete this feedback?')) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return draw(); }
   if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return draw(); }
   if (t.dataset.tobounty) {
-    tab = 'bounties'; await draw();
+    const r = (await s.reports()).find((x) => String(x.id) === t.dataset.tobounty);
+    // a new bounty, pre-filled from the report (id stays empty for the admin to pick)
+    openBountyEditor(s, null, data.courses, draw);
     const f = $('#bounty-form');
-    f.track.value = 'Fix outdated'; f.size.value = 'S';
-    f.title.value = 'Update outdated info';
-    f.title.focus();
+    f.track.value = 'Fix outdated'; f.size.value = 'S'; f.title.value = 'Update outdated info';
+    if (r?.course_slug) f.course.value = data.courses.find((c) => c.slug === r.course_slug)?.name || '';
+    if (r?.note) f.done_means.value = `Check and update: ${r.note}`;
     return;
   }
+  if ('newbounty' in t.dataset) { openBountyEditor(s, null, data.courses, draw); return; }
+  if (t.dataset.editb) { const b = (await s.bounties()).find((x) => x.id === t.dataset.editb); openBountyEditor(s, b, data.courses, draw); return; }
   if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to)); return draw(); }
 });
 
-document.addEventListener('submit', async (e) => {
-  if (e.target.id !== 'bounty-form') return;
-  e.preventDefault();
-  const f = e.target;
-  const name = f.course.value.trim().toLowerCase();
-  const course = data.courses.find((c) => c.name.toLowerCase() === name);
-  if (name && !course) return alert('Pick the course from the list, or leave it blank.');
-  const ok = await guard(() => s.postBounty({
-    id: f.id.value.trim().toUpperCase(), title: f.title.value.trim(), track: f.track.value,
-    course_slug: course?.slug || null, teacher: f.teacher.value.trim() || null, kind: f.kind.value || null,
-    size: f.size.value, priority: Number(f.priority.value),
-    you_get: f.you_get.value.trim() || null, done_means: f.done_means.value.trim(),
-  }), 'Bounty posted.');
-  if (ok) draw();
-});
+
 
 s.onAuth(draw);
 draw();

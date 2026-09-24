@@ -303,7 +303,7 @@ def build_home(depts):
 <section class="three">
   <a class="panel" href="map/"><span class="label">Campus map</span><b>Find a classroom and who teaches there.</b><span class="meta">Browse by room instead of by class.</span></a>
   <a class="panel" href="summer/"><span class="label">Summer homework</span><b>Every class’s summer work in one place.</b><span class="meta">Collected each May and June.</span></a>
-  <a class="panel members-only accent" href="bounties/"><span class="label">Help build it</span><b>Claim a bounty. Write a page.</b><span class="meta">Get credit on the leaderboard.</span></a>
+  <a class="panel members-only accent" href="submit/"><span class="label">Help build it</span><b>Add class info, a tip or a study guide.</b><span class="meta">Get credit on the leaderboard.</span></a>
   <button type="button" class="panel guests-only accent js-signin"><span class="label">Help build it</span><b>Sign in to write pages and earn credit.</b><span class="meta">Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
@@ -439,11 +439,12 @@ def build_static():
     page("bounties/", "Bounty board", """
 <h1>Bounty board</h1>
 <div id="gate" class="card gate" hidden>
-  <h2>Sign in to see the bounty board</h2>
-  <p>Bounties are jobs for Wilkipedia members: claim one, write a page, get credit on the leaderboard.</p>
-  <p><button type="button" class="btn js-signin">Sign in</button> <span class="meta">Use your school account to get the SCUSD ✓ badge.</span></p>
+  <h2 id="gate-text">Sign in to see the bounty board.</h2>
+  <p>Bounties are jobs the admins post for the review team. Everyone can still help: add class info, tips or a study guide.</p>
+  <p><a class="btn" href="../submit/">Contribute</a> <button type="button" class="btn ghost js-signin" id="gate-signin">Sign in</button></p>
 </div>
 <div id="members">
+<div id="admin-bar" class="admin-bar" hidden><span class="meta">You’re an admin: you can post, edit and close bounties.</span><button type="button" class="btn" id="post-bounty">+ Post a bounty</button></div>
 <p class="lede">Wilkipedia is written by volunteers. Each bounty is one clear job with a finish line. Claim one, do it, submit it, and a reviewer publishes it with your name on it.</p>
 <div id="stats" class="stats"></div>
 <div class="filters">

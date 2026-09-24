@@ -734,3 +734,5 @@ a.chip { text-decoration: none; }
 .teacher-tag { color: var(--accent); border-color: var(--accent); }
 .res-card[hidden] { display: none; }
 .res-filter { margin: 0 0 10px; }
+.admin-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
