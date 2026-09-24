@@ -103,7 +103,8 @@ assets/
   js/forms.js          submission templates: the fields that define "complete"
   js/ui.js             shared helpers: header, escaping, toasts, form renderer
   js/course.js         course page
-  js/bounties.js       bounty board
+  js/bounties.js       bounty board: Board, Agenda, Ledger and Orrery views
+  js/orrery.js         the Orrery: bounties drawn as a solar system on a canvas
   js/submit.js         contribute form
   js/review.js         reviewer desk
   js/pages.js          home, subjects, search, leaderboard, summer, school, account

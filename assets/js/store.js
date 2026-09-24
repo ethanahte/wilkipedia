@@ -9,8 +9,10 @@
 // Every method returns plain objects in the shapes documented below.
 //   User       {id, name, role, school, avatar, color, grad_year, show_on_leaderboard}
 //              school = signed in with an @scusd.net account
-//   Bounty     {id, title, track, course_slug, teacher, size, priority, you_get,
-//               done_means, status, created_at, claims: [{user_id, name, expires_at}]}
+//   Bounty     {id, title, track, course_slug, teacher, size, priority (5 = rank S … 1 = D),
+//               you_get, done_means, due_on, status ('open' | 'done' | 'closed'), closed_at,
+//               created_at, claims: [{user_id, name, expires_at}]}
+//   Work       {bounty_id, user_id, author, reviewed_at}   approved submissions made for a bounty
 //   Submission {id, user_id, author, verified, avatar, color, bounty_id, course_slug, kind, teacher, payload,
 //               status, review_note, reviewed_at, created_at}
 //   Comment    {id, course_slug, user_id, author, verified, avatar, color, parent_id, prompt, body, status,
@@ -114,6 +116,14 @@ async function live() {
     async postBounty(b) { ok(await sb.from('bounties').insert(b)); },
     async setBountyStatus(id, status) { ok(await sb.from('bounties').update({ status }).eq('id', id)); },
     async updateBounty(id, fields) { ok(await sb.from('bounties').update(fields).eq('id', id)); },
+    // Who finished what: approved submissions made for a bounty (the Ledger)
+    async bountyWork() {
+      return ok(await sb.from('submissions')
+        .select('bounty_id, user_id, reviewed_at, profiles!submissions_user_id_fkey(display_name)')
+        .eq('status', 'approved').not('bounty_id', 'is', null))
+        .map((r) => ({ bounty_id: r.bounty_id, user_id: r.user_id, reviewed_at: r.reviewed_at,
+                       author: r.profiles?.display_name ?? FORMER }));
+    },
 
     async submit(s) { ok(await sb.from('submissions').insert({ ...s, user_id: me.id })); },
     async mySubmissions() {
@@ -301,9 +311,16 @@ async function demo() {
       db.bounties.push({ status: 'open', created_at: now(), ...b }); save();
     },
     async setBountyStatus(bid, status) {
-      admin(); db.bounties.find((b) => b.id === bid).status = status; save();
+      admin();
+      const b = db.bounties.find((x) => x.id === bid);
+      if (b.status !== status) b.closed_at = status === 'open' ? null : now();   // mirrors on_bounty_status()
+      b.status = status; save();
     },
     async updateBounty(bid, fields) { admin(); Object.assign(db.bounties.find((b) => b.id === bid), fields); save(); },
+    async bountyWork() {
+      return db.submissions.filter((x) => x.status === 'approved' && x.bounty_id)
+        .map((x) => ({ bounty_id: x.bounty_id, user_id: x.user_id, reviewed_at: x.reviewed_at, author: name(x.user_id) }));
+    },
 
     async submit(s) {
       const u = need();

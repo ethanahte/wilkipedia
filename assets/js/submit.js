@@ -77,7 +77,7 @@ function paint() {
   form = renderFields($('#fields'), state.kind, { ...preset, ...(draft?.values || {}), ...(keep || {}) });
   $('#fields').dataset.kind = state.kind;
   $('#draft-note').hidden = !draft;
-  const mine = bounties.filter((b) => b.claims.some((c) => c.user_id === s.user()?.id) || b.id === state.bounty);
+  const mine = bounties.filter((b) => b.status === 'open' && (b.claims.some((c) => c.user_id === s.user()?.id) || b.id === state.bounty));
   $('#bounty').innerHTML = '<option value="">Not part of a bounty</option>'
     + mine.map((b) => `<option value="${esc(b.id)}" ${b.id === state.bounty ? 'selected' : ''}>${esc(b.id)} · ${esc(b.title)}</option>`).join('');
   $('#bounty-row').hidden = !mine.length;

@@ -444,15 +444,61 @@ def build_static():
   <p><a class="btn" href="../submit/">Contribute</a> <button type="button" class="btn ghost js-signin" id="gate-signin">Sign in</button></p>
 </div>
 <div id="members">
-<div id="admin-bar" class="admin-bar" hidden><span class="meta">You’re an admin: you can post, edit and close bounties.</span><button type="button" class="btn" id="post-bounty">+ Post a bounty</button></div>
-<p class="lede">Wilkipedia is written by volunteers. Each bounty is one clear job with a finish line. Claim one, do it, submit it, and a reviewer publishes it with your name on it.</p>
-<div id="stats" class="stats"></div>
-<div class="filters">
-  <div class="chips" id="track-filter"></div>
-  <div class="chips"><button class="chip" data-state="all" aria-pressed="true">Any status</button><button class="chip" data-state="open">Unclaimed</button><button class="chip" data-state="claimed">Claimed</button></div>
+<div id="admin-bar" class="admin-bar" hidden><span class="meta">You’re an admin: you post, edit, complete and withdraw bounties. In the Orrery you can drag a bounty to another ring to re-rank it.</span><button type="button" class="btn" id="post-bounty">+ Post a bounty</button></div>
+<p class="lede">Every bounty is one job that makes Wilkipedia better, with a clear finish line. Pick one that fits the time you have, claim it, do it, and a reviewer publishes it with your name on it.</p>
+<div class="bb-top">
+  <nav class="bb-views" role="tablist" aria-label="Views">
+    <button type="button" role="tab" data-view="board" aria-selected="true" title="Every bounty as a card (key 1)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.2" width="7" height="15.6" rx="1.6"/><rect x="13.8" y="4.2" width="7" height="9.4" rx="1.6"/></svg><span>Board</span></button>
+    <button type="button" role="tab" data-view="agenda" aria-selected="false" title="What is due, day by day (key 2)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.9V12l3.5 2.1"/></svg><span>Agenda</span></button>
+    <button type="button" role="tab" data-view="ledger" aria-selected="false" title="Everything the team has finished (key 3)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 6.6h9.6M3.6 12h9.6M3.6 17.4h6.4"/><path d="M15.4 15.9l2.3 2.3 4.1-4.4"/></svg><span>Ledger</span></button>
+    <button type="button" role="tab" data-view="orrery" aria-selected="false" title="The board as a solar system (key 4)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><ellipse cx="12" cy="12" rx="10.2" ry="4.3" transform="rotate(-24 12 12)"/></svg><span>Orrery</span></button>
+  </nav>
+  <label class="bb-search"><span class="sr-only">Search bounties</span><input id="bb-q" type="search" placeholder="Search bounties" autocomplete="off"><kbd>/</kbd></label>
 </div>
-<p class="meta" id="count"></p>
-<div id="board" class="board"></div>
+<div class="bb-tools">
+  <div class="chips" id="track-filter"></div>
+  <div class="bb-row">
+    <div class="chips" id="state-filter"><button type="button" class="chip" data-state="all" aria-pressed="true">Any status</button><button type="button" class="chip" data-state="open">Unclaimed</button><button type="button" class="chip" data-state="claimed">Claimed</button><button type="button" class="chip" data-state="mine">Mine</button></div>
+    <label class="bb-fits">Time I have <select id="fits"><option value="any">Any</option><option value="30">30 min</option><option value="120">2 hours</option></select></label>
+  </div>
+  <p class="meta" id="count"></p>
+</div>
+<section id="view-board"></section>
+<section id="view-agenda" hidden></section>
+<section id="view-ledger" hidden></section>
+<section id="view-orrery" hidden>
+  <div class="orr-wrap" translate="no">
+    <canvas class="orr-canvas" aria-label="The open bounties drawn as a solar system. The Board view lists the same bounties as text."></canvas>
+    <div class="orr-bar">
+      <span class="orr-fill"></span>
+      <button type="button" class="orr-toggle" data-orr="out" aria-label="Zoom out">−</button>
+      <button type="button" class="orr-toggle" data-orr="in" aria-label="Zoom in">+</button>
+      <div class="orr-menu-wrap">
+        <button type="button" class="orr-toggle" data-orr="menu" aria-expanded="false">Display ▾</button>
+        <div class="orr-menu" hidden>
+          <div class="om-row" data-t="motion"><span class="om-k hud-l">Motion</span><span class="om-sw"><i></i></span></div>
+          <div class="om-row" data-t="labels"><span class="om-k hud-l">Labels</span><span class="om-sw"><i></i></span></div>
+          <div class="om-row" data-t="belt"><span class="om-k hud-l">Completed belt</span><span class="om-sw"><i></i></span></div>
+          <div class="om-sep"></div>
+          <div class="om-row om-static"><span class="om-k hud-l">Track links</span>
+            <span class="om-seg"><button type="button" data-l="off" title="Draw no lines">Off</button><button type="button" data-l="linked" title="Point at a bounty to see the others in its track">Related</button><button type="button" data-l="all" title="Join every bounty in the same track">All</button></span></div>
+        </div>
+      </div>
+      <button type="button" class="orr-toggle" data-orr="home">⟲ Reset</button>
+    </div>
+    <div class="orr-hint" id="orr-hint"></div>
+    <div class="orr-tip" hidden></div>
+    <aside class="orr-detail" hidden></aside>
+  </div>
+  <dl class="orr-key">
+    <div><dt>Ring</dt><dd>Rank. S is the innermost ring, D the outermost.</dd></div>
+    <div><dt>Size</dt><dd>Effort. Bigger planets take longer.</dd></div>
+    <div><dt>Ring around a planet</dt><dd>Someone has claimed it. Each moon is one person on it; yours is gold.</dd></div>
+    <div><dt>Red trail</dt><dd>Overdue. A pulsing outline means due today.</dd></div>
+    <div><dt>Rocks between B and C</dt><dd>Completed bounties.</dd></div>
+    <div><dt>The sun</dt><dd>How many bounties are open.</dd></div>
+  </dl>
+</section>
 <section class="how">
   <h2>How a bounty runs</h2>
   <ol>
@@ -460,11 +506,12 @@ def build_static():
     <li><b>Build</b> it with the form. Required fields must be filled.</li>
     <li><b>Submit.</b> It goes to the review queue, not straight onto the site.</li>
     <li><b>Review.</b> A reviewer approves it or sends it back with a note saying what to fix.</li>
-    <li><b>Credit.</b> Approved work goes live with your name, and the points go on the leaderboard.</li>
+    <li><b>Credit.</b> Approved work goes live with your name, and the points go on the leaderboard. When the job is fully done, an admin marks the bounty complete and it moves to the Ledger.</li>
   </ol>
-  <p><b>Points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>. If you signed in with your school account, your comments then post instantly.</p>
-  <p><b>Sign in with your school account</b> (@scusd.net) to get the <span class="badge-school">SCUSD ✓</span> badge on everything you write. Personal Google accounts work too, but their comments always go to a reviewer first.</p>
-  <p>Have an idea for a bounty? Suggest it in a comment on the class page, or tell a reviewer.</p>
+  <p><b>Rank</b> is how urgent a bounty is: <b>S</b> critical · <b>A</b> high · <b>B</b> normal · <b>C</b> low · <b>D</b> whenever.</p>
+  <p><b>Effort and points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>. If you signed in with your school account, your comments then post instantly.</p>
+  <p><b>Keys:</b> 1 Board · 2 Agenda · 3 Ledger · 4 Orrery · / search.</p>
+  <p>Have an idea for a bounty? Tell an admin.</p>
 </section>
 </div>""", active="bounties/", script="bounties.js")
 

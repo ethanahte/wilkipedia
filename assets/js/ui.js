@@ -278,9 +278,15 @@ export function openEditor(store, sub, onSaved) {
 // ── bounty editor (admins) ──
 // One dialog for posting a new bounty (b = null) and editing an existing one.
 export const BOUNTY_TRACKS = ['Course pages', 'Teacher sections', 'Study guides', 'Resources', 'Summer homework', 'School info', 'Clubs & sports', 'Fix outdated'];
-export function openBountyEditor(store, b, courseList, onSaved) {
+// Rank is urgency and reads S (critical) to D (whenever), the BountyBoard scale.
+// It is stored as the priority column: 5 = S … 1 = D.
+export const RANKS = { S: { p: 5, label: 'critical' }, A: { p: 4, label: 'high' }, B: { p: 3, label: 'normal' },
+                       C: { p: 2, label: 'low' }, D: { p: 1, label: 'whenever' } };
+export const rankOf = (priority) => ['D', 'C', 'B', 'A', 'S'][Math.min(5, Math.max(1, priority || 3)) - 1];
+
+export function openBountyEditor(store, b, courseList, onSaved, preset = {}) {
   const isNew = !b;
-  b ??= { id: '', title: '', track: 'Course pages', course_slug: null, teacher: '', kind: null, size: 'M', priority: 3, you_get: '', done_means: '' };
+  b ??= { id: '', title: '', track: 'Course pages', course_slug: null, teacher: '', kind: null, size: 'M', priority: 3, you_get: '', done_means: '', due_on: null, ...preset };
   const courseName = courseList.find((c) => c.slug === b.course_slug)?.name || '';
   const wrap = document.createElement('div');
   wrap.className = 'modal';
@@ -300,8 +306,10 @@ export function openBountyEditor(store, b, courseList, onSaved) {
       <div class="grid3">
         <div class="field"><label for="bt-k">Suggested kind</label><select id="bt-k" name="kind"><option value="">Any</option>${Object.entries(KINDS).map(([k, d]) => `<option value="${k}" ${k === b.kind ? 'selected' : ''}>${esc(d.label)}</option>`).join('')}</select></div>
         <div class="field"><label for="bt-s">Size</label><select id="bt-s" name="size">${[['S', '~30 min · 10 pts'], ['M', '~2 hrs · 30 pts'], ['L', '~5+ hrs · 60 pts']].map(([v, l]) => `<option value="${v}" ${v === b.size ? 'selected' : ''}>${v} · ${l}</option>`).join('')}</select></div>
-        <div class="field"><label for="bt-p">Priority</label><select id="bt-p" name="priority">${[5, 4, 3, 2, 1].map((n) => `<option ${n === b.priority ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+        <div class="field"><label for="bt-p">Rank</label><select id="bt-p" name="priority">${Object.entries(RANKS).map(([r, d]) => `<option value="${d.p}" ${d.p === b.priority ? 'selected' : ''}>${r} · ${d.label}</option>`).join('')}</select></div>
       </div>
+      <div class="field"><label for="bt-due">Due (optional)</label><input id="bt-due" name="due_on" type="date" value="${esc(b.due_on || '')}">
+        <p class="meta">Dated bounties show up on the Agenda. Leave it blank for “someday”.</p></div>
       <div class="field"><label for="bt-g">You get</label><textarea id="bt-g" name="you_get" rows="2">${esc(b.you_get || '')}</textarea></div>
       <div class="field"><label for="bt-d">Done means</label><textarea id="bt-d" name="done_means" rows="2" required>${esc(b.done_means || '')}</textarea></div>
       <p class="error" id="bt-err" hidden></p>
@@ -320,7 +328,7 @@ export function openBountyEditor(store, b, courseList, onSaved) {
     if (!f.title.value.trim() || !f.done_means.value.trim()) return err('Title and “Done means” are required.');
     const fields = { title: f.title.value.trim(), track: f.track.value, course_slug: course?.slug || null,
       teacher: f.teacher.value.trim() || null, kind: f.kind.value || null, size: f.size.value, priority: Number(f.priority.value),
-      you_get: f.you_get.value.trim() || null, done_means: f.done_means.value.trim() };
+      you_get: f.you_get.value.trim() || null, done_means: f.done_means.value.trim(), due_on: f.due_on.value || null };
     const ok = isNew
       ? await guard(() => store.postBounty({ id: f.id.value.trim().toUpperCase(), ...fields }), 'Bounty posted.')
       : await guard(() => store.updateBounty(b.id, fields), 'Bounty saved.');

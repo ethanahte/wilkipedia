@@ -114,9 +114,9 @@ const tabs = {
     const isAdmin = s.user()?.role === 'admin';
     return `${isAdmin ? '<p><button class="btn" data-newbounty>+ Post a bounty</button></p>' : '<p class="meta">Only admins can post or edit bounties.</p>'}
       <table class="plain"><tbody>${list.map((b) => `<tr><td><code>${esc(b.id)}</code></td><td>${esc(b.title)}
-          ${b.status === 'closed' ? ' <span class="tag">closed</span>' : ''}</td>
+          ${b.status === 'closed' ? ' <span class="tag">withdrawn</span>' : b.status === 'done' ? ' <span class="tag">completed</span>' : ''}</td>
         <td>${b.claims.map((c) => esc(c.name)).join(', ') || '<span class="meta">unclaimed</span>'}</td>
-        <td>${isAdmin ? `<button class="linkish" data-editb="${esc(b.id)}">Edit</button> · <button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Reopen'}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
+        <td>${isAdmin ? `<button class="linkish" data-editb="${esc(b.id)}">Edit</button> · <button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Repost'}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
   },,
 };
 

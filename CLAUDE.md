@@ -60,6 +60,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   `is-team` UI gating and the shared `openBountyEditor` in ui.js). Everyone
   else contributes through the + button. `.members-only` / `.guests-only`
   sections toggle on `body.signed-in`.
+- **The bounty board copies Ethan's BountyBoard app** (~/BountyBoard) in four
+  views, keys 1–4: Board (Posted/Claimed cards), Agenda (rolling horizon by
+  `due_on` + 35-day density strip), Ledger (stats + completed/withdrawn history),
+  Orrery (`orrery.js`, a canvas star system: ring = rank, size = effort, moons =
+  claimers, belt = completed; admins drag to re-rank). Rank S–D is the existing
+  `priority` column (5 = S … 1 = D, `RANKS`/`rankOf` in ui.js). Status is
+  open / done (completed) / closed (withdrawn); `closed_at` is stamped by the
+  `on_bounty_status` trigger (migration 009). Left out on purpose: comets, the
+  black hole and the photo sky. Unlike the personal app, bounties here pay
+  leaderboard points, so the Ledger reports points paid out.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
   `wilkipedia-theme`, restored by `THEME_BOOT` in <head>), falling back to the
   device setting. The dark palette lives in two blocks in style.css; edit both.

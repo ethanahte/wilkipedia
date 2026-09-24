@@ -81,9 +81,23 @@ create table public.bounties (
   priority    int  not null default 3 check (priority between 1 and 5),
   you_get     text,
   done_means  text,
-  status      text not null default 'open' check (status in ('open', 'closed')),
+  due_on      date,                                   -- optional deadline (the Agenda view)
+  status      text not null default 'open' check (status in ('open', 'done', 'closed')),
+  closed_at   timestamptz,                            -- set when it leaves the board (the Ledger)
   created_at  timestamptz not null default now()
 );
+
+-- done = completed, closed = withdrawn; either stamps closed_at, reposting clears it
+create function public.on_bounty_status() returns trigger
+language plpgsql as $$
+begin
+  if new.status is distinct from old.status then
+    new.closed_at := case when new.status = 'open' then null else now() end;
+  end if;
+  return new;
+end $$;
+create trigger bounties_status before update of status on public.bounties
+  for each row execute function public.on_bounty_status();
 
 alter table public.bounties enable row level security;
 -- The bounty board belongs to the review team: they see and claim, admins run it
