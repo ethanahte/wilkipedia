@@ -16,7 +16,6 @@ const TYPES = {
   page: ['Page', 'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6'],
   post: ['Written by students', 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'],
 };
-const ORDER = ['c', 't', 'room', 'club', 'sport', 'page', 'post'];
 
 // Shortcuts students actually type → what the catalog calls it
 const ALIASES = {
@@ -175,7 +174,10 @@ export const resultHtml = (x, q, active = false) => `<a class="result${active ? 
 export function groupedHtml(results, q) {
   const by = {};
   for (const x of results) (by[x.t] ??= []).push(x);
-  return ORDER.filter((t) => by[t]).map((t) => `<section class="r-group"><h2 class="label-h">${TYPES[t][0]}${t === 'post' ? '' : 's'} <span class="meta">${by[t].length}</span></h2>
+  const plural = { c: 'Classes', t: 'Teachers', club: 'Clubs', sport: 'Sports', room: 'Rooms', page: 'Pages', post: 'Written by students' };
+  // groups in the order their best result ranked, so the top hit's group comes first
+  const order = [...new Set(results.map((x) => x.t))];
+  return order.map((t) => `<section class="r-group"><h2 class="label-h">${plural[t]} <span class="meta">${by[t].length}</span></h2>
     ${by[t].map((x) => resultHtml(x, q)).join('')}</section>`).join('');
 }
 
