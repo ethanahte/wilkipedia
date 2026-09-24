@@ -1,0 +1,3075 @@
+{
+  "source": "SCUSD High School Course Catalog 2025-2026",
+  "pageNumbering": "page = PDF page index (the printed page number is one less)",
+  "departments": [
+    {
+      "name": "English",
+      "slug": "english"
+    },
+    {
+      "name": "Math",
+      "slug": "math"
+    },
+    {
+      "name": "Social Science",
+      "slug": "social-science"
+    },
+    {
+      "name": "Science",
+      "slug": "science"
+    },
+    {
+      "name": "World Language",
+      "slug": "world-language"
+    },
+    {
+      "name": "Physical Education",
+      "slug": "physical-education"
+    },
+    {
+      "name": "Visual / Performing Arts",
+      "slug": "visual-performing-arts"
+    },
+    {
+      "name": "Practical Arts",
+      "slug": "practical-arts"
+    },
+    {
+      "name": "Electives",
+      "slug": "electives"
+    },
+    {
+      "name": "Silicon Valley Career Technical Education (SVCTE)",
+      "slug": "svcte"
+    }
+  ],
+  "courses": [
+    {
+      "slug": "english-9",
+      "name": "English 9",
+      "department": "english",
+      "grades": "9",
+      "courseNumber": "100015",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "English 9 is a challenging and rewarding course. Journals, essays, reflections, creative and timed writings will help students become stronger writers. In this year-long course, students will read a variety of texts with themes including coming of age, hero’s journey, search for identity, and role of community. Students will develop their ability to analyze and interpret texts. Students will also learn the features of paragraphs and essays. Final products include literary analysis, narrative, and expository essays. By practicing and participating, students will grow as writers, readers, and thinkers.",
+      "page": 44
+    },
+    {
+      "slug": "honors-english-9",
+      "name": "Honors English 9",
+      "department": "english",
+      "grades": "9",
+      "courseNumber": "100515",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "There is no prerequisite at SCHS, but a summer reading assignment is required at both schools.",
+      "description": "English 9 Honors is an accelerated one-year program that is the foundation for the sequentially designed Honors/AP English Program. Students will analyze and interpret a variety of texts including novels, short stories, poetry, non-fiction, and drama. Students will focus on writing as a process especially in the area of literary analysis. Students will be asked to work independently and collaboratively on student-centered, creative long-term projects. Students will read texts in addition to what is required for English 9 on themes including coming of age, search for identity, the role of community, and hero’s journey. Note: the grade for this Honors course is not weighted for GPA purposes.",
+      "page": 45
+    },
+    {
+      "slug": "english-10",
+      "name": "English 10",
+      "department": "english",
+      "grades": "10",
+      "courseNumber": "100025",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "In English 10 students will continue to develop skills in composition and literature. Through classic and contemporary literature, students will examine the relationship between the individual and society. Students will refine their ability to analyze and make meaning of novels, short stories, poetry, and nonfiction. Student participation in this course is essential as it will enhance critical thinking skills. Themes may include social justice, the pursuit of justice and human dignity, and the use and abuse of power.",
+      "page": 45
+    },
+    {
+      "slug": "honors-english-10",
+      "name": "Honors English 10",
+      "department": "english",
+      "grades": "10",
+      "courseNumber": "100525",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MECHS"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "There is no prerequisite at SCHS, but a summer reading assignment is required at both schools. There is no prerequisite or prompt submission required at MECHS.",
+      "description": "This is an accelerated, one-year program that aims to refine students’ analysis and interpretation skills using a variety of texts including classic and contemporary novels, short stories, poetry, drama, and non-fiction. Students are expected to share their unique perspectives and talents through creative and analytical writing, answering essential questions, as well as through oral presentations and student-created long-term projects, to create a challenging and dynamic learning environment. This course is the second year of a sequentially designed Honors Program although students may enter the course who were not enrolled in Honors English 9. There is a strong focus on writing as a process, especially in the area of literary analysis. Students will read texts in addition to what is required for English 10 on themes such as social justice, the pursuit of justice and human dignity, and use and abuse of power. Note: the grade for this Honors course is not weighted for GPA purposes.",
+      "page": 45
+    },
+    {
+      "slug": "english-11",
+      "name": "English 11",
+      "department": "english",
+      "grades": "11",
+      "courseNumber": "100035",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "English 11 students use American Literature to define and analyze the “American dream” and the “American Experience”. Emphasis is placed on writing as a process and students will write multi-draft literary analysis and expository essays and a major research paper. In addition to the study of American Literature, English 11 students will refine their research, vocabulary, collaboration, and oral communication skills.",
+      "page": 46
+    },
+    {
+      "slug": "ap-english-language-and-composition",
+      "name": "AP English Language and Composition",
+      "department": "english",
+      "grades": "11",
+      "courseNumber": "103735",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Students with a C or better, or with teacher recommendation.",
+      "description": "This college-level course prepares students to analyze rhetorical contexts with an emphasis on American writers. Through close reading, discussion, collaboration, and independent practice, students will hone their abilities to develop, articulate, and defend interpretations of style and content. Students will write essays in response to literature and a variety of expository essays including an argumentative/persuasive essay, synthesis essay, and a rhetorical essay. The reading and writing demands of the course are rigorous and are designed to prepare students to take the Advanced Placement English Language and Composition test in May.",
+      "page": 46
+    },
+    {
+      "slug": "ap-english-literature-and-composition",
+      "name": "AP English Literature and Composition",
+      "department": "english",
+      "grades": "12",
+      "courseNumber": "100645",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Students with a C or better, or with teacher recommendation.",
+      "description": "This college-level class, equivalent to English 1A and 1B, studies poetry, short story, drama, and novels. Writing assignments include literary analysis, research papers, creative projects, and reflective essays appropriate for college applications. Group work and class discussion form the foundation for understanding. The reading and writing demands of the course are rigorous and are designed to prepare students to take the Advanced Placement English Literature and Composition test in May.",
+      "page": 47
+    },
+    {
+      "slug": "csu-expository-reading-and-writing",
+      "name": "CSU Expository Reading and Writing",
+      "department": "english",
+      "grades": "12",
+      "courseNumber": "105945",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "The ERWC course is designed to show how reading and writing are more than skills or tools; they reflect and even define our social worlds. Texts, written and spoken, create ways for students to make sense of the world. Not only will students learn to negotiate a variety of texts, but they will also become familiar with the discourse of academic English. The course focuses on three parts of reading and writing: contents, process, and purpose. Students will develop fluency with a wide range of reading materials- organized around current topics of interest- characteristic of those they are likely to encounter in post-secondary education and/or the globalizing world of work.\n\nFor students who earned an EAP status of “conditionally ready” in their junior year, passing ERWC with a grade of C or better in both semesters of their senior year allows them to enroll in a CSU without taking the English Placement Test.",
+      "page": 48
+    },
+    {
+      "slug": "honors-british-literature",
+      "name": "Honors British Literature",
+      "department": "english",
+      "grades": "11-12",
+      "courseNumber": "103605",
+      "ucCsu": "B",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Students with a C or better, or with teacher recommendation, are invited to submit a response to a specific prompt. Prompts are available from English teachers. There is no prerequisite or prompt submission required at MECHS.",
+      "description": "This course provides the college-bound student rigorous instruction in the major British literary works of the Anglo-Saxon, Medieval, Renaissance periods, the Age of Reason, the Eighteenth Century, Romantic and Victorian eras, and the Twentieth Century by examining the historical and cultural periods of each era. Students are required to complete a summer reading assignment prior to class. Throughout the year they will complete a research paper in poetry, critical essays, creative projects, and review for the AP English exams. Group work and class discussion form the foundation for understanding.",
+      "page": 48
+    },
+    {
+      "slug": "reading-intervention",
+      "name": "Reading Intervention",
+      "department": "english",
+      "grades": "9-12",
+      "courseNumber": "755415",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Recommendation based on student need",
+      "description": null,
+      "page": 50
+    },
+    {
+      "slug": "el-beginning",
+      "name": "EL Beginning",
+      "department": "english",
+      "grades": "9-12",
+      "courseNumber": "154015",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "corequisite": "EL Beginning 150105",
+      "description": "The instruction in this course will emphasize the development of foundational and advanced skills in vocabulary, grammar, reading comprehension, academic communication, and cultural proficiency. Students will engage with a variety of texts, including short stories, plays, excerpts, and articles spanning multiple content areas, to enrich vocabulary and enhance critical thinking. Writing instruction will progress from constructing clear, simple sentences and paragraphs to crafting more sophisticated and well-organized essays and projects by the second semester. Students will refine their writing through the use of visual organizers, outlines, and structured drafts. Oral communication skills will be developed through school- and academic-related discussions, collaborative projects, and formal presentations. Cultural proficiency and awareness will be integrated throughout the curriculum to foster global citizenship. This course is designed to provide a rigorous foundation in English language skills and is taken in conjunction with Course# 154015, EL Beginning.",
+      "page": 51
+    },
+    {
+      "slug": "el-beginning-grammar-vocabulary-reading",
+      "name": "EL Beginning-Grammar/Vocabulary/Reading",
+      "department": "english",
+      "grades": "9-12",
+      "courseNumber": "150105",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "corequisite": "EL Beginning 154015 (Qualifies for English Credit-A for A-G)",
+      "description": "The instruction in this course will emphasize the development of foundational and advanced skills in vocabulary, grammar, reading comprehension, academic communication, and cultural proficiency. Students will engage with a variety of texts, including short stories, plays, excerpts, and articles spanning multiple content areas, to enrich vocabulary and enhance critical thinking. Writing instruction will progress from constructing clear, simple sentences and paragraphs to crafting more sophisticated and well-organized essays and projects by the second semester. Students will refine their writing through the use of visual organizers, outlines, and structured drafts. Oral communication skills will be developed through school- and academic-related discussions, collaborative projects, and formal presentations. Cultural proficiency and awareness will be integrated throughout the curriculum to foster global citizenship. This course is designed to provide a rigorous foundation in English language skills and is taken in conjunction with Course# 154015, EL Beginning.",
+      "page": 51
+    },
+    {
+      "slug": "el-intermediate",
+      "name": "EL Intermediate",
+      "department": "english",
+      "grades": "9-12",
+      "courseNumber": "154025",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "The instruction in this course will focus on intermediate vocabulary, grammar, communication skills, reading, study skills and American culture. The main resource will be a textbook designed for development in English language skills. Students will read short stories, plays, excerpts and articles that cover multiple content areas and will allow for enrichment in vocabulary. Students will progress from initial sentence creation and paragraphs design, building into more complex and developed pieces of writing by second semester. They will also learn to recognize high frequency words and phrases, and benefit from a variety of using reading strategies to analyze literature. Students will be provided diverse instructional strategies to increase learning in all academic areas. Students will communicate effectively, engage in school and academic related conversations, make oral presentations, and learn to work collaboratively. Cultural proficiency will be an ongoing part of the curriculum in this class.",
+      "page": 52
+    },
+    {
+      "slug": "el-advanced",
+      "name": "EL Advanced",
+      "department": "english",
+      "grades": "9-12",
+      "courseNumber": "154035",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "The instruction in this course will focus on more advanced vocabulary, grammar, communication skills, reading, study skills and American culture. The main resource will be a textbook designed for development in English language skills. Students will continue to develop language skills by interacting with a variety of supplementary books and materials. They will also learn to recognize high frequency words and phrases, and benefit from a variety of using reading strategies to analyze literature. Students will be provided diverse instructional strategies to increase learning in all academic areas. Cultural proficiency will be an ongoing part of the curriculum in this class.",
+      "page": 52
+    },
+    {
+      "slug": "bsc-english-9",
+      "name": "BSC English 9",
+      "department": "english",
+      "grades": "9",
+      "courseNumber": "160015",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Students will work on basic writing and reading skills, one-on-one and in groups. Correct grammar and punctuation will be focused on as well as word analysis and fluency. The students read and analyze English literature, novels, and short stories. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. It follows the California State Standards with modified instruction and meets the English graduation requirements. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 52
+    },
+    {
+      "slug": "bsc-english-10",
+      "name": "BSC English 10",
+      "department": "english",
+      "grades": "10",
+      "courseNumber": "160025",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Students will work on basic writing and reading skills, one-on-one and in groups. Correct grammar and punctuation will be focused on as well as word analysis and fluency. The students read and analyze English literature, novels, and short stories. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. It follows the California State Standards with modified instruction and meets the English graduation requirements. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 53
+    },
+    {
+      "slug": "bsc-english-11",
+      "name": "BSC English 11",
+      "department": "english",
+      "grades": "11",
+      "courseNumber": "160035",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Students will work on basic writing and reading skills, one-on-one and in groups. Correct grammar and punctuation will be focused on as well as word analysis and fluency. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. It follows the California State Standards with modified instruction and meets the English graduation requirements. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 53
+    },
+    {
+      "slug": "bsc-english-12",
+      "name": "BSC English 12",
+      "department": "english",
+      "grades": "12",
+      "courseNumber": "160045",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Students will work on basic writing and reading skills, one-on-one and in groups. Correct grammar and punctuation will be focused on as well as word analysis and fluency. The students read and analyze English literature, novels, and short stories. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. It follows the California State Standards with modified instruction and meets the English graduation requirements. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 53
+    },
+    {
+      "slug": "prt-english-9",
+      "name": "PRT English 9",
+      "department": "english",
+      "grades": "9",
+      "courseNumber": "170015",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Students will work on basic writing and reading skills, one-on-one and in groups. Letter and word recognition, correct grammar, and punctuation will be covered. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. Instruction will include classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 54
+    },
+    {
+      "slug": "prt-english-10",
+      "name": "PRT English 10",
+      "department": "english",
+      "grades": "10",
+      "courseNumber": "170025",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Students will work on basic writing and reading skills, one-on-one and in groups. Letter and word recognition, correct grammar, and punctuation will be covered. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. Instruction will include classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 54
+    },
+    {
+      "slug": "prt-english-11",
+      "name": "PRT English 11",
+      "department": "english",
+      "grades": "11",
+      "courseNumber": "170035",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Students will work on basic writing and reading skills, one-on-one and in groups. Letter and word recognition, correct grammar, and punctuation will be covered. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. Instruction will include classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 54
+    },
+    {
+      "slug": "prt-english-12",
+      "name": "PRT English 12",
+      "department": "english",
+      "grades": "12",
+      "courseNumber": "170045",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Students will work on basic writing and reading skills, one-on-one and in groups. Letter and word recognition, correct grammar, and punctuation will be covered. Vocabulary and comprehension will be improved through spelling, reading assignments, and group discussions. Levels and materials will vary according to each individual’s goals. Instruction will include classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 55
+    },
+    {
+      "slug": "algebra-1",
+      "name": "Algebra 1",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "201105",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "note": "The catalog also prints \"Prerequisite: Concurrent enrollment in Algebra 1\" after the description.",
+      "description": "Algebra is a year-long course that builds on arithmetic skills and algebraic concepts taught in earlier grades. This course emphasizes the following concepts: basic properties of, and operations with, real numbers, solving equations and inequalities, graphing linear equations and inequalities, solving systems of equations, operations with polynomials, products and factoring, irrational numbers, and radicals.",
+      "page": 56
+    },
+    {
+      "slug": "geometry",
+      "name": "Geometry",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "202005",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "MacDonald",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Passing Grade in Algebra 1",
+      "description": "Geometry is a one-year course, which reviews the geometric concepts of previous math courses. In addition, it encourages and guides the student in the discovery of new geometric concepts. Geometry stresses the ability to reason logically and think critically. It will include teaching the student how to present a formal proof. Geometric properties of both two and three dimensions are emphasized as they apply to points, lines, planes, triangles, circles.",
+      "page": 56
+    },
+    {
+      "slug": "algebra-2",
+      "name": "Algebra 2",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "201405",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "MacDonald",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in both Algebra 1 and Geometry",
+      "description": "Algebra 2 is a one-year course, which provides a view and extension of the concepts taught in Algebra 1. Emphasis is placed on the following topics: operations with real numbers, systems of linear equations and inequalities, factoring rational expressions and equations, quadratic functions, exponential functions, logarithms, complex numbers, conic sections, variations, probability, and progressions.",
+      "page": 56
+    },
+    {
+      "slug": "precalculus-and-trigonometry",
+      "name": "PreCalculus and Trigonometry",
+      "department": "math",
+      "grades": "10-12",
+      "courseNumber": "203005",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MECHS",
+        "New Valley",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Algebra 2",
+      "description": "PreCalculus and Trigonometry is a one-year course which provides a review of relevant topics from Algebra 2 and Geometry. Trigonometry emphasizes the study of periodic functions and real variables. Basic content centers on circular functions (using the unit circle) and trigonometric functions of angles. Pre-Calculus is the examination of the number system, and study of elementary functions. Basic content includes algebra of real numbers, factors, complex numbers and polynomials, analytical geometry based on vector algebra; polynomial, exponential, and logarithmic functions; circular functions and trigonometry; and elementary probability functions.",
+      "page": 56
+    },
+    {
+      "slug": "precalculus-and-trigonometry-honors",
+      "name": "PreCalculus and Trigonometry Honors",
+      "department": "math",
+      "grades": "10-12",
+      "courseNumber": "203105",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "B or better in Algebra II Honors or an A in Algebra 2 or Teacher recommendation",
+      "description": "This course is designed for students who want an accelerated pace and have a desire to complete AP Calculus during High School. The course contains a minimal review of Algebra 2 with an emphasis on the study of trigonometric and pre-calculus concepts including but not limited to: periodic functions and real variables, circular functions (using the unit circle), trigonometric functions of angles, vector and parametric equations, polar and complex numbers, conics, logarithms, sequences and series, combinations and probability, and elementary statistics and data analysis.",
+      "page": 57
+    },
+    {
+      "slug": "calculus",
+      "name": "Calculus",
+      "department": "math",
+      "grades": "11-12",
+      "courseNumber": "204605",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Trigonometry or H. Algebra II with PreCalculus/Trig",
+      "description": "This course will prepare the student to enter college a year of calculus background so that the student will be ready for calculus at the college level. Students will study topics in analytic geometry, limit theory, derivatives, and integrals.",
+      "page": 57
+    },
+    {
+      "slug": "honors-algebra-2-with-precalculus-and-trigonometry",
+      "name": "Honors Algebra 2 with PreCalculus and Trigonometry",
+      "department": "math",
+      "grades": "10-11",
+      "courseNumber": "201505",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley SCHS",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Geometry and Algebra 1 with Math 8 B or higher",
+      "description": "Honors Algebra 2 with PreCalculus and Trigonometry is a one-year course, which teaches all of the content taught in Algebra 2 and Precalculus with Trigonometry. Emphasis is placed on the following topics: factoring rational expressions and equations, quadratic functions, exponential functions, logarithms, complex numbers, conic sections, variations, probability, periodic functions and real variables, circular functions (using the unit circle), trigonometric functions of angles, vector and parametric equations. Note: the grade for this Honors course is weighted for GPA purposes.",
+      "page": 57
+    },
+    {
+      "slug": "ap-calculus-ab",
+      "name": "AP Calculus AB",
+      "department": "math",
+      "grades": "11-12",
+      "courseNumber": "204505",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "B or better in H. Algebra 2 with PreCalculus/Trig, PreCalculus and Trig, or teacher recommendation",
+      "description": "This course provides a basis for extending the skills of previous courses and developing the skills for success in calculus a the college level by acquiring competence in the study of coordinate geometry, the study of functions, the calculations of a limit, the determination of continuity at a point the calculations of the derivative of algebraic, trigonometric, exponential and logarithmic functions, the evaluation of the definite integral and antiderivative of these functions, and the solutions of application problems in which the concepts of the derivative and integral apply. Students taking AP Calculus are expected to take the AP Calculus A/B exam in May.",
+      "page": 58
+    },
+    {
+      "slug": "ap-calculus-bc",
+      "name": "AP Calculus BC",
+      "department": "math",
+      "grades": "11-12",
+      "courseNumber": "205205",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "B or higher in AP Calculus AB",
+      "description": "The course will prepare the student to enter college with one year of Calculus background. Topics include limits, differentiation, integrals and sequences, and series. This course prepares the student for the AP Calculus BC exam.",
+      "page": 58
+    },
+    {
+      "slug": "statistics",
+      "name": "Statistics",
+      "department": "math",
+      "grades": "10-12",
+      "courseNumber": "207005",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Algebra 2, C or better in Data Science",
+      "description": "Statistics is a one-year course about data and probability. Medicine, science, business, and consumerism are just a few of the real-life problem settings that we will explore. WE will focus on four major topics: data analysis, producing data, probability, and inference. The goal of this course is to prepare you for taking Statistics in college/university.",
+      "page": 59
+    },
+    {
+      "slug": "ap-statistics",
+      "name": "AP Statistics",
+      "department": "math",
+      "grades": "11-12",
+      "courseNumber": "207105",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "B or better in Algebra 2 or H. Algebra 2 with Precalculus/Trig, or teacher recommendation",
+      "description": "AP Statistics is for students with a wide variety of interests including science, psychology, health, and business. It is a one-year course about data and probability. Students will analyze data with calculators and computers, conduct classroom experiments, carry out projects and perform probability simulations. AP Statistics culminates in the AP Statistics exam. Students who are successful may receive college credit for a one-semester course in statistics. Most college majors now require a statistics course. Students will be able to apply their knowledge of statistics in their chosen fields.",
+      "page": 59
+    },
+    {
+      "slug": "bsc-algebra-1",
+      "name": "BSC Algebra 1",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "772205",
+      "ucCsu": "None",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "BSC Algebra 1 is a year-long course that builds on arithmetic skills and algebraic concepts taught in earlier grades. This course emphasizes the following concepts: basic properties of, and operations with, real numbers, solving equations and inequalities, graphing linear equations and inequalities, solving systems of equations, operations with polynomials, products and factoring, irrational numbers, and radicals. It follows the California State Standards with modified instruction and meets the math graduation requirements. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 59
+    },
+    {
+      "slug": "prt-math",
+      "name": "PRT Math",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "270005",
+      "ucCsu": "None",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Basic skills and fundamental concepts of measurement, algebra, statistics, problem solving, and communication are included in this year-long course tied to functional skills utilized within the community. Subject matter will be determined based on individual goals. Instruction will include classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 60
+    },
+    {
+      "slug": "prt-algebra-1",
+      "name": "PRT Algebra 1",
+      "department": "math",
+      "grades": "9-12",
+      "courseNumber": "270205",
+      "ucCsu": "None",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. The main purpose of Algebra I is to develop students’ fluency with linear, quadratic and exponential functions. The critical areas of instruction involve deepening and extending students’ understanding of linear and exponential relationships by contrasting them with each other and by applying linear models to data that exhibit a linear trend. In addition, students engage in methods for analyzing, solving, and using exponential and quadratic functions. Some of the overarching ideas in the Algebra I course include: the notion of function, solving equations, rates of change and growth patterns, graphs as representations of functions, and modeling.",
+      "page": 60
+    },
+    {
+      "slug": "world-history",
+      "name": "World History",
+      "department": "social-science",
+      "grades": "10",
+      "courseNumber": "301025",
+      "ucCsu": "A",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course analyzes major turning points in modern civilizations and the political, economical, and social roots of current world issues. The students will study the rise of democracy and the role of revolution, the industrial revolution and its effects on society, the role of imperialism in shaping our world, the causes and effects of World War I, the human experience of World War II, the global conflict of the Cold War, and current world conflicts. The student will work collaboratively to develop skills in geography, literacy, and technology.",
+      "page": 61
+    },
+    {
+      "slug": "ap-european-history",
+      "name": "AP European History",
+      "department": "social-science",
+      "grades": "10",
+      "courseNumber": "301725",
+      "ucCsu": "A",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course analyzes the development of Western Civilization focusing on the end of the Middle Ages to the present. Students will demonstrate an understanding of the social, political, and economic factors that helped shape our world today. This course is a rigorous college-prep course. Students who qualify must have excellent writing, reading, and study skills as this course are designed to prepare students for the AP examination given in May.",
+      "page": 62
+    },
+    {
+      "slug": "us-history",
+      "name": "US History",
+      "department": "social-science",
+      "grades": "11",
+      "courseNumber": "302035",
+      "ucCsu": "A",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course delves into the study of ideas, people, forces, and geography that influenced our country and people today. The course will provide an understanding that many social, economic, political, cultural, religious, and military events have helped define American society. With that perspective, students will be able to analyze the historical causes and effects of events in our history. A primary focus will be given to the time period after the Civil War up until the present day. Students will be exposed to multimedia, research methods, and historical writing skills.",
+      "page": 63
+    },
+    {
+      "slug": "ap-us-history",
+      "name": "AP US History",
+      "department": "social-science",
+      "grades": "11",
+      "courseNumber": "302235",
+      "ucCsu": "A",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course is a highly intensive, fast-paced college-level, chronological review of American history. The course will span from the founding of the colonies to the present. In order to cover a vast record of history, the course will include lectures, discussion, group presentation, work with primary source documents, and rigorous testing. A goal of the course is to prepare students for the AP examination given each May, for which they may receive college credit. Students will be challenged throughout the year to improve on skills demanded by the AP Test.",
+      "page": 63
+    },
+    {
+      "slug": "civics",
+      "name": "Civics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "302545",
+      "ucCsu": "A",
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This is a course in American government and politics, which will cover the foundations, philosophy, and events leading to the formation of the American system of government. Special attention will be given to the Constitution and its creation. Moreover, the course will focus on the branches of government, democratic participation, media’s influence, the party system, local state government structures, and comparative governments. Students will be assessed using a variety of tools including projects, presentations, testing, and collaborative work.",
+      "page": 64
+    },
+    {
+      "slug": "ap-us-government-and-politics",
+      "name": "AP US Government & Politics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "302745",
+      "ucCsu": "A",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course provides an in depth study of the US national government. The purpose of this course is to examine and analyze our basic governmental institutions and processes. This course involves the study of general concepts used to interpret US politics as well as the various institutions, groups, beliefs and ideas that constitute US political reality. This is an exceptionally demanding course and requires extensive critical thinking, in depth readings, and writing with intense analysis. Goal of the course is to prepare students for the AP examination given each May.",
+      "page": 64
+    },
+    {
+      "slug": "economics",
+      "name": "Economics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "303005",
+      "ucCsu": "G",
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course examines the characteristics, benefits, and goals of the American economic system. The course will provide an understanding of\n• The major aspects of macroeconomics including the nature of scarcity, the laws of supply and demand, money and banking, the role of government and taxation, the nature of poverty, unemployment, and the importance of world trade.\n• Some aspects of microeconomics deal with pricing, business firms, and the role of the consumer. In addition, the course will provide the student with practical skills and knowledge for use in the workplace and in higher education. We will also highlight the use of technology to enhance the learning process.",
+      "page": 65
+    },
+    {
+      "slug": "ap-macroeconomics",
+      "name": "AP Macroeconomics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "303245",
+      "ucCsu": "G",
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course is designed to give students an in-depth understanding of the principles of economics. There will be a detailed analysis of macroeconomic aggregate variables such as unemployment and inflation, the role of the Federal Reserve, the tools of monetary and fiscal policies, and international economics. This is a rigorous course, which includes a heavy workload. A goal of the course is to prepare students for the AP examination given each May.",
+      "page": 66
+    },
+    {
+      "slug": "ap-psychology",
+      "name": "AP Psychology",
+      "department": "social-science",
+      "grades": "11-12",
+      "courseNumber": "754605",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "The AP Psychology course introduces students to the systematic and scientific study of human behavior and mental processes. While considering the psychologists and studies that have shaped the field, students explore and apply psychological theories, key concepts, and phenomena associated with such topics as the biological bases of behavior, sensation and perceptions, learning and cognition, motivation, developmental psychology, testing, and individual differences, treatment of abnormal behavior, and social psychological research methods, including ethical considerations as they use the scientific method, analyze bias, evaluate claims and evidence, and effectively communicate ideas.",
+      "page": 67
+    },
+    {
+      "slug": "bsc-economics",
+      "name": "BSC Economics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "360305",
+      "ucCsu": null,
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course examines the characteristics, benefits, and goals of the American economic system. The course will provide an understanding of\n• the major aspects of macroeconomics including the nature of scarcity, the laws of supply and demand, money and banking, the role of government and taxation, the nature of poverty, and unemployment and the importance of world trade.\n• Some aspects of microeconomics deal with pricing business firms and the role of the consumer. In addition, the course will provide the student with practical skills and knowledge for use in the workplace and in higher education. We will also highlight the use of technology to enhance the learning process. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 68
+    },
+    {
+      "slug": "bsc-civics",
+      "name": "BSC Civics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "360405",
+      "ucCsu": null,
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This is a course in American government and politics, which will cover the foundations, philosophy, and events leading to the formation of the American system of government. Special attention will be given to the Constitution and its creation. Moreover, the course will focus on the branches of government, democratic participation, media’s influence, the party system, local state government structures, and comparative governments. Students will be assessed using a variety of tools including projects, presentations, testing, and collaborative work. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 68
+    },
+    {
+      "slug": "bsc-world-history",
+      "name": "BSC World History",
+      "department": "social-science",
+      "grades": "10",
+      "courseNumber": "360105",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course analyzes major turning points in modern civilizations and the political, economical, and social roots of current world issues. The students will study the rise of democracy and the role of revolution, the industrial revolution and its effects on society, the role of imperialism in shaping our world, the causes and effects of World War I, the human experience of World War II, the global conflict of the Cold War, and current world conflicts. The students will work collaboratively to develop skills in geography, literacy, and technology. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 69
+    },
+    {
+      "slug": "bsc-us-history",
+      "name": "BSC US History",
+      "department": "social-science",
+      "grades": "11",
+      "courseNumber": "360205",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course delves into the study of ideas, people, forces, and geography that influenced our country and people today. The course will provide an understanding that many social, economic, political, cultural, religious, and military events have helped define American society. With that perspective, students will be able to analyze the historical causes and effects of events in our history. A primary focus will be given to the time period after the Civil War up until present day. Students will be exposed to multimedia, research methods, and historical writing skills. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 69
+    },
+    {
+      "slug": "prt-world-history",
+      "name": "PRT World History",
+      "department": "social-science",
+      "grades": "10",
+      "courseNumber": "370015",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "It is an activity-centered class that emphasizes mastery of social and emotional skills. It focuses on individual responsibilities and human rights; multicultural and pluralistic perspectives and their relationship to history and society, and study critical thinking skills. Levels and materials will vary according to each individual’s goals. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 69
+    },
+    {
+      "slug": "prt-us-history",
+      "name": "PRT US History",
+      "department": "social-science",
+      "grades": "11",
+      "courseNumber": "370025",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "It is an activity-centered class that emphasizes mastery of social and emotional skills. It focuses on individual responsibilities and human rights; multicultural and pluralistic perspectives and their relationship to history and society, and study critical thinking skills. Levels and materials will vary according to each individual’s goals. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 70
+    },
+    {
+      "slug": "prt-social-science",
+      "name": "PRT Social Science",
+      "department": "social-science",
+      "grades": "9-12",
+      "courseNumber": "370005",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Areas to be covered include American Government, World Geography, Economics, US History, World HIstory tied to functional life skills within the community. Instruction includes classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 70
+    },
+    {
+      "slug": "prt-civics",
+      "name": "PRT Civics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "370035",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course serves as an introduction to the U.S. national government. The purpose of this course is to examine and analyze our basic governmental institutions and processes. Levels and materials will vary according to each individual’s goals. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 70
+    },
+    {
+      "slug": "prt-economics",
+      "name": "PRT Economics",
+      "department": "social-science",
+      "grades": "12",
+      "courseNumber": "370045",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed to give students an in-depth understanding of the principles of economics. There will be detailed macroeconomics aggregate variables such as unemployment and inflation, the role of the Federal Reserve, the tools of monetary and fiscal policies, and international economics. Levels and materials will vary according to each individual’s goals. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 71
+    },
+    {
+      "slug": "biology-of-the-living-earth",
+      "name": "Biology of the Living Earth",
+      "department": "science",
+      "grades": "9-12",
+      "courseNumber": "403005",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Biology of the Living Earth is a year-long college preparatory laboratory life science class that prepares students to be scientifically literate lifelong learners. In this course based on the Next Generation Science Standards, students investigate real-world phenomena integrating biology and earth science concepts in 6 major areas of focus: ecosystem interactions and energy; history of earth’s atmosphere: photosynthesis and respiration; evidence of evolution; inheritance of traits; structure, function, and growth (from cells to organisms); and ecosystem stability & the response to climate change. It builds student competency in Science and Engineering Practices and Cross-Cutting Concepts with an eye on Environmental Principles and Concepts. Student-centered laboratory activities will emphasize the process of inquiry and critical thinking.",
+      "page": 71
+    },
+    {
+      "slug": "chemistry-in-the-earth-system",
+      "name": "Chemistry in the Earth System",
+      "department": "science",
+      "grades": "10-12",
+      "courseNumber": "403505",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Algebra 1 or Geometry and completion of Biology or Marine Biology",
+      "description": "Chemistry in the Earth System is a year-long, college preparatory, laboratory-based physical science course. This course explores the foundations of chemistry and the chemical processes that drive the Earth system with a strong emphasis on environmental principles and concepts. Students will develop critical thinking skills and apply chemistry principles to investigate real-world phenomena. In addition to the chemistry and earth science disciplinary core ideas, this course also incorporates the Science and Engineering Practices and Crosscutting Concepts related to the Next Generation Science Standards. Student-centered laboratory activities will emphasize the process of inquiry and critical thinking. This course focuses on career and college readiness as it prepares students to be scientifically literate life-long learners.",
+      "page": 72
+    },
+    {
+      "slug": "honors-chemistry-in-the-earth-system",
+      "name": "Honors Chemistry in the Earth System",
+      "department": "science",
+      "grades": "10-12",
+      "courseNumber": "403605",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Concurrent enrollment in Algebra 2 or higher and completion of Biology or Marine Biology, or science teacher recommendation.",
+      "description": "Similar to Chemistry in the Earth System, Honors Chemistry in the Earth System is a year-long, college preparatory, laboratory-based physical science course that teaches the properties of matter, its composition, and its changes as it relates to the Earth. This honors course places a heavier emphasis on mathematical analysis and higher-level thinking skills and covers topics in greater depth. This course is designed to introduce students to a wide variety of chemical principles, in preparation for more detailed technical courses in later years. Students investigate phenomena and issues of modern society using their chemical knowledge to propose solutions. In-class chemical demonstrations and laboratory exercises are used to emphasize scientific investigative techniques and science and engineering practices.",
+      "page": 73
+    },
+    {
+      "slug": "anatomy-and-physiology",
+      "name": "Anatomy and Physiology",
+      "department": "science",
+      "grades": "10-12",
+      "courseNumber": "402545",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of both semesters of Biology",
+      "description": "Human Physiology is a complete comprehensive study of the structure and function of the human body. It includes basic chemical, cellular, biological and anatomical concepts. In addition to the basic information, it also includes detailed information about each organ system. Dissection of the vertebrate organism is used to demonstrate how structures relate to the function of the various systems of the body.",
+      "page": 73
+    },
+    {
+      "slug": "honors-human-physiology",
+      "name": "Honors Human Physiology",
+      "department": "science",
+      "grades": "11-12",
+      "courseNumber": "402605",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of both semesters of Biology and Chemistry with a C or better.",
+      "description": "Honors Human Physiology is a comprehensive year-long course focusing on the structures and functions of the human body. This course is eligible for honors-level science credit. The level of understanding is expected to be high. Various body systems will be covered in depth. Laboratory activities are central to the course and are time-consuming. The course includes a comprehensive end-of-year final. A final long-term project is submitted at the end of the course. Dissection of vertebrates is included within the course.",
+      "page": 73
+    },
+    {
+      "slug": "ap-chemistry",
+      "name": "AP Chemistry",
+      "department": "science",
+      "grades": "10-12",
+      "courseNumber": "403705",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of both semesters of Honors Chemistry with a C or better, or science teacher recommendation; see AP requirements",
+      "description": "AP Chemistry is the first-year college chemistry course for science majors. The course covers all those topics and laboratory activities that are common in a first-year science major’s chemistry course.",
+      "page": 74
+    },
+    {
+      "slug": "physics-in-the-universe",
+      "name": "Physics in the Universe",
+      "department": "science",
+      "grades": "9-12",
+      "courseNumber": "404035",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Algebra 1 or Geometry and completion of Biology or Marine Biology",
+      "description": "Have you ever wondered… why large apples fall as fast as little ones?... How much horsepower you can muster?... If so, physics is the course for you. Through experiments and mathematics, we will investigate what scientists before us have discovered about forces, motion, energy, light, electricity, and magnetism. Physics is a college preparatory course where experimental design and mathematics are at the core. Students should already be familiar with manipulating algebraic equations, using scientific notation, and performing dimensional analysis, as well as designing and conducting scientific investigations.",
+      "page": 74
+    },
+    {
+      "slug": "ap-physics-1",
+      "name": "AP Physics 1",
+      "department": "science",
+      "grades": "11-12",
+      "courseNumber": "404205",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Concurrent enrollment in Algebra 2 or higher or science teacher recommendation.",
+      "description": "AP Physics 1 provides an introduction to the main principles of physics, emphasizing mathematical problem-solving. The main topics studied in this course include Newtonian mechanics, waves, optics, electricity, magnetism, atomic physics, and nuclear physics. It is assumed that students are proficient with designing and conducting scientific investigations, as well as using algebra, geometry, and trigonometry. This is a first-year physics course including a laboratory component, and it provides a foundation for college study in the life sciences, pre-medicine, and some applied sciences, as well as other fields not directly related to science. Students pursuing college degrees in physical sciences and engineering would continue with a calculus-based physics course.",
+      "page": 75
+    },
+    {
+      "slug": "ap-physics-2",
+      "name": "AP Physics 2",
+      "department": "science",
+      "grades": "11-12",
+      "courseNumber": "404215",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "AP Physics 1 or a comparable introductory course,",
+      "description": "AP Physics 2 is an algebra-based, introductory college-level physics course that explores topics such as fluid statics and dynamics; thermodynamic with kinetic theory/ PV diagrams and probability; electrostatics; electrical circuits with capacitors; magnetic fields; electromagnetism; physical and geometric optics; and quantum, atomic, and nuclear physics. Through inquiry-based learning, students will develop scientific critical thinking and resolving skills.",
+      "page": 75
+    },
+    {
+      "slug": "ap-biology",
+      "name": "AP Biology",
+      "department": "science",
+      "grades": "11-12",
+      "courseNumber": "403205",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of both semesters of Biology and Chemistry with a grade of a B or better or science teacher recommendation; see AP requirements",
+      "description": "This is a college-level biology course. The course covers a vast amount of material. In addition to a thorough reading of a college biology textbook, the students utilize the writing skills necessary to successfully accomplish the writing portion of the advanced placement exam. Students are prepared for the AP Biotest.",
+      "page": 76
+    },
+    {
+      "slug": "ap-environmental-science",
+      "name": "AP Environmental Science",
+      "department": "science",
+      "grades": "11-12",
+      "courseNumber": "405105",
+      "ucCsu": "D",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "2 years of lab science (1 physical, 1 life)",
+      "description": "Students engage with the scientific principles, concepts, and methodologies required to understand the interrelationships of the natural world. The course requires that students identify and analyze natural and human-made environmental problems, evaluate the relative risks associated with thor problems, and examine alternative solutions for resolving or preventing them. Environmental science is interdisciplinary, embracing topics from geology, biology, environmental studies, environmental science, chemistry, and geography.",
+      "page": 76
+    },
+    {
+      "slug": "bsc-biology-of-the-living-earth",
+      "name": "BSC Biology of the Living Earth",
+      "department": "science",
+      "grades": "9-12",
+      "courseNumber": "463005",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "BSC Biology of the Living Earth is a year-long laboratory life science class based on the Next Generation Science Standards which builds basic student competency in Science and Engineering Practices and Cross-Cutting Concepts with an eye on the Environmental Principles and Concepts. Students investigate real-world phenomena integrating biology and earth science concepts in 6 major areas of focus: ecosystem interactions and energy; history of earth’s atmosphere: photosynthesis and respiration; evidence of evolution; inheritance of traits; structure, function, and growth (from cells to organisms); and ecosystem stability & the response to climate change. Student-centered laboratory activities will emphasize the process of inquiry and critical thinking. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.\n\nThis course is designed to be aligned with state standards using an alternative curriculum to access the standards. Areas to be covered include Life, Earth, and Physical science curriculum tied to functional life skills within the community. Instruction includes classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 76
+    },
+    {
+      "slug": "bsc-physics-in-the-universe",
+      "name": "BSC Physics in the Universe",
+      "department": "science",
+      "grades": "10-12",
+      "courseNumber": "461005",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "BSC Physics in the Universe is a year-long college preparatory laboratory physical science class integrating physics with earth and space science. Guided by the Next Generation Science Standards (NGSS), students explore real-world phenomena in 6 major areas of focus: In Forces and Motion students use Newton’s laws to understand collisions; students explore gravity and electromagnetism in Forces at a Distance; electric power generation and energy transformations are explored with an eye to renewable energy; students develop a model of how the internal structure of the atom changes during nuclear processes, how these changes release energy, and how these processes are the timekeepers of geologic history; earthquakes are a tangible phenomenon that introduce the study of waves; and students analyze patterns in stellar spectra to understand electromagnetic waves and gather evidence about how stars work and the history of the universe. Students will work on projects which demonstrate their mastery of course, regularly conduct experimental investigations, and participate in engineering practices as they use physics to understand the universe and their place in it. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.\n\nThis course is designed to be aligned with state standards using an alternative curriculum to access the standards. Areas to be covered include Life, Earth, and Physical science curriculum tied to functional life skills within the community. Instruction includes classroom activities as well as school-based and community outings to generalize skills and make connections to the content. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 77
+    },
+    {
+      "slug": "prt-biology",
+      "name": "PRT Biology",
+      "department": "science",
+      "grades": "9-12",
+      "courseNumber": "463205",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Biology courses typically cover topics such as structure and function, inheritance and variation of traits, matter and energy in organisms and ecosystems, interdependent relationships in ecosystems, natural selection, evolution, adaptation and biodiversity. Biology courses present students with the opportunity to develop and use biological models, identify cause and effect and recognize human impacts on the natural world. This science course also presents students with the opportunity to develop scientific reasoning skills through Science and Engineering Practices and Crosscutting Concepts This course is designed to be aligned with state standards using an alternative curriculum to access the standard.",
+      "page": 77
+    },
+    {
+      "slug": "prt-earth-and-space-science",
+      "name": "PRT Earth and Space Science",
+      "department": "science",
+      "grades": "9-12",
+      "courseNumber": "463205",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Earth and space science courses typically cover topics associated with Earth's place in the universe, Earth's systems and Earth and human activity. Earth and space science courses present students with the opportunity to develop an understanding of processes that shape the world around them. This course also investigates how humans interact with the natural world by integrating California's Environmental Principles and Concepts. Geoscience is another name used to identify the course. This course is designed to be aligned with state standards using an alternative curriculum to access the standard.",
+      "page": 78
+    },
+    {
+      "slug": "japanese-1",
+      "name": "Japanese 1",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "512105",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "In Japanese 1, you will learn to greet each other right away in the manner that you would use when traveling in a Japanese speaking country. You will learn to express your likes and dislikes, tell about your family and friends, tell time, go shopping, and talk about your daily life activities. Also, you will begin learning to read and write Japanese characters. Throughout the year, you will be exposed to Japanese culture by watching videos and celebrating Japanese holidays.",
+      "page": 79
+    },
+    {
+      "slug": "japanese-2",
+      "name": "Japanese 2",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "512205",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "In Japanese 2, you will build on skills you learned in Japanese 1. You will learn to talk about the past, invite friends to your party, talk about fashion and school rules, make a commercial, and describe things in detail. You will build writing and reading skills with more vocabulary. Also, you will continue to learn about Japanese culture.",
+      "page": 80
+    },
+    {
+      "slug": "japanese-3",
+      "name": "Japanese 3",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "512305",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Level 2 with C or better or consent of instructor",
+      "description": "In Japanese 3, your skills will be refined through a variety of activities. You will read and discuss short stories, and write a play and a personal ad in Japanese. Also, you will interview Japanese people, make a video, write travel plans, talk about your future plans and the difference between Japanese and American high schools, and learn how to consult a doctor.Moreover, you will research Japanese national holidays and events.",
+      "page": 80
+    },
+    {
+      "slug": "japanese-4",
+      "name": "Japanese 4",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "512405",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Level 3 with C or better or consent of instructor",
+      "description": "In Japanese 4, all language skills previously studied will be refined through a variety of activities. You will work on more creative projects that allow you to use your Japanese skills in new ways. This includes: making a video tour of your school and a cooking show and exchanging letters with a pen pal. Also, you will be able to express more complicated ideas and talk about current events,",
+      "page": 80
+    },
+    {
+      "slug": "ap-japanese-language-and-culture",
+      "name": "AP Japanese Language and Culture",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "512805",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Level 3 with C or better or consent of instructor",
+      "description": "IIn Japanese 4/AP Japanese, all language skills previously studied will be refined through a variety of activities. You will work on more creative projects that allow you to use your Japanese skills in new ways. This includes: making a video of a cooking show, using the internet for research, giving a speech, and exchanging letters with a pen pal. Also, you will be able to express more complicated ideas and talk about current issues. Students taking AP Japanese are expected to take the AP Japanese exam in May.",
+      "page": 80
+    },
+    {
+      "slug": "spanish-1",
+      "name": "Spanish 1",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "500105",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "In Spanish 1, you will learn to greet others right away in the manner that you would use when traveling in a Spanish-speaking country. You will learn to express your likes and dislikes, tell about your family and friends, tell time, tell about hobbies and learn about foods, customs, and geography of Spanish-speaking countries. You will watch native speakers as they demonstrate conversational dialogs on videos that accompany the Descubre 1 textbook. You will learn about the music and dances that are popular with young people in Spanish-speaking countries. There will be an opportunity to use technology for cultural research to enhance presentations for skills practice, and for the creation of original projects. In Spanish 1 you will be evaluated in a variety of ways that support students of different learning styles.",
+      "page": 81
+    },
+    {
+      "slug": "spanish-2",
+      "name": "Spanish 2",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "500205",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Spanish 1 with a C or better or consent of instructor.",
+      "description": "Speaking and listening skills will be expanded and refined to reach fluency in more complex conversations of increasing difficulty and to improve written skills. Vocabulary will be expanded with more opportunities to use the spoken language, and further grammatical concepts will be introduced to broaden the basis of the four speaking, listening, reading, and writing skill areas. Students’ familiarity with the peoples and customs of Spanish-speaking countries will be enhanced through additional studies of music, art, sports, recreation activities, festival history, and geography. The study will include the use of technology and the internet as well as videos, books, and presentations.",
+      "page": 81
+    },
+    {
+      "slug": "spanish-3",
+      "name": "Spanish 3",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "500305",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of Spanish 2 with a C or better or consent of instructor.",
+      "description": "All language skills previously studied will be refined through a variety of activities such as reading and discussing short stories, plays, and/or novels; descriptive and expository paragraphs, skits, oral presentations, reports, and the use of technology. Grammatical principles will be reviewed and expanded by the student to ensure fluency in the language. Communication in Spanish is expected. Activities developed are based on the Essential Lifelong Learning Standards set forth by the district and National World Language Standards.",
+      "page": 81
+    },
+    {
+      "slug": "spanish-for-native-speakers-1",
+      "name": "Spanish for Native Speakers 1",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "501305",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Oral fluency in Spanish and teacher recommendation",
+      "description": "This course is not for students who are not able to understand and participate in a class conducted in Spanish. This course is designed for US-born heritage Spanish speakers who can communicate orally but have not had formal reading and writing instruction in Spanish. The emphasis of the course will be grammar structure and spelling. Students will develop their reading and writing skills in Spanish, through a literature-based program that will allow students to transfer academic skills acquired in their English classes such as reading and discussing short stories, analyzing and interpreting prose and poetry. The literature-based program will concentrate on Latino authors. This course will be conducted in Spanish,",
+      "page": 82
+    },
+    {
+      "slug": "spanish-for-native-speakers-2",
+      "name": "Spanish for Native Speakers 2",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "501405",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Fluency in Spanish and teacher recommendation. Students must have a reading and writing ability between 4-6 grades in Spanish. This course is not for students of Hispanic heritage who are monolingual in English.",
+      "description": "This course is designed for native and heritage Spanish-speaking students to strengthen and develop their academic reading and writing skills in Spanish. The emphasis will be on grammatical structure, spelling, and correct usage of Standard Spanish. Skills will be refined through a variety of activities such as reading and discussing short stories, plays, and poems, letter writing and the writing of narrative, descriptive, and expository paragraphs. Students will read a variety of informational and fictional authentic texts. This course helps serve as a pathway to AP Spanish Language.",
+      "page": 82
+    },
+    {
+      "slug": "ap-spanish-language-and-culture",
+      "name": "AP Spanish Language & Culture",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "500805",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Spanish 3 with a B or better or consent of the instructor.",
+      "description": "This course will be the equivalent of a third-year college course in advanced Spanish composition and conversation. It stresses oral skills, composition, and grammar. Students will participate in extemporaneous oral presentations, demonstrations, oral proficiency interviews, journals, songs, games, watching Spanish television, recorded speech, reading the local Hispanic newspaper, and Spanish magazines. Additionally, students will also listen to high-level taped material to hone their comprehension skills. Students will have the opportunity to improve their skills in expository writing by learning to control problems of advanced grammar and vocabulary through reading and increased contact hours with Spanish. Students will take part in small and large group discussions on a wide variety of subjects, plus short skits and role-playing situations to help develop confidence in their speaking and comprehension of Spanish. Regular levels 4 and 5 will be more literature-based. Students will be prepared and strongly encouraged to take the AP exam in May.",
+      "page": 83
+    },
+    {
+      "slug": "ap-spanish-literature-and-culture",
+      "name": "AP Spanish Literature & Culture",
+      "department": "world-language",
+      "grades": "9-12",
+      "courseNumber": "501705",
+      "ucCsu": "E",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Completion of AP Language or Fluency in Spanish and teacher approval.",
+      "description": "We use Spanish as the language of instruction to develop competence in the ability to understand, speak, read, and write Spanish and to provide through the knowledge and use of this language a deepened understanding and appreciation of the literature and culture of people from Spain and Latin America. We also explore the social, historical, religious, political, and ideological backgrounds of the authors and their works. Students will read and analyze texts of several genres including poetry, prose, and theater. Teachers speak almost exclusively in Spanish and students are expected to use as much Spanish as possible. After completing the AP Spanish Language class the year before or the Spanish for native speakers III class, taught entirely in Spanish, students are prepared to discuss and analyze Spanish and Latin American literature in the target language. Throughout this course, students are expected to read works by a variety of authors from Latin America and Spain, while learning about the cultural and historical background of the works, authors, and countries. In addition, they will explore the social and cultural values of Latin America and Spain.",
+      "page": 83
+    },
+    {
+      "slug": "physical-education-core-9",
+      "name": "Physical Education Core 9",
+      "department": "physical-education",
+      "grades": "9",
+      "courseNumber": "725010",
+      "ucCsu": null,
+      "credits": "2.5, Quarter",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "The 9th-grade core will cover the following topics: mechanics of body movement, aquatics, fitness, individual and dual sports, rhythmic/dance, team sports, and fitness testing. All 9th-grade fitness gram results are reported to the state each year.",
+      "page": 84
+    },
+    {
+      "slug": "course-ii-physical-education",
+      "name": "Course II Physical Education",
+      "department": "physical-education",
+      "grades": "10-12",
+      "courseNumber": "7250005",
+      "ucCsu": null,
+      "credits": "2.5, Quarter",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Physical Education Core 9",
+      "description": "The department conducts an “arena registration” at the beginning of each quarter. Students have an opportunity to select from a variety of team and individual activities, combative, gymnastics/tumbling, weight training, dance, and aquatics. All Elective Activity Classes are coed and include the following components:\n• Regular physical conditioning with an emphasis on the development of cardiovascular endurance and muscle tone.\n• Injury prevention and safety considerations specific to the activity.\n• Skill development and instruction in rules, strategies, etiquette as needed for successful participation in the class or as indicated by the carry-over potential of the activity.\n• Proper use and care of equipment and facilities.\n• Organized competitive-cooperative experience as appropriate to the activity.",
+      "page": 84
+    },
+    {
+      "slug": "unified-physical-education",
+      "name": "Unified Physical Education",
+      "department": "physical-education",
+      "grades": "10-12",
+      "courseNumber": "725115",
+      "ucCsu": null,
+      "credits": "2.5, Quarter",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Physical Education Core 9",
+      "description": "Unified Physical Education is a fully inclusive class that combines students with all ability levels. This class will develop awareness, empathy, and relationships to promote success and self-confidence in the Physical Education setting. All students will participate in activities that follow the state standards for a variety of team and individual activities, weight training, outdoor and adventure activities, dance, and aquatics. All classes are co-ed and include the same components as Physical Education Course# 725000.",
+      "page": 85
+    },
+    {
+      "slug": "prt-physical-education",
+      "name": "PRT Physical Education",
+      "department": "physical-education",
+      "grades": "10-12",
+      "courseNumber": "725125",
+      "ucCsu": null,
+      "credits": "2.5, Quarter",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "See “Unified Physical Education”. Students with active IEPs will receive appropriate modifications and accommodations.",
+      "page": 85
+    },
+    {
+      "slug": "physical-education-athletics",
+      "name": "Physical Education Athletics",
+      "department": "physical-education",
+      "grades": "11-12",
+      "courseNumber": "726005",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Consent of Instructor",
+      "note": "Elective Credit Only",
+      "description": "PE Athletics is a class offering students higher levels of conditioning and competition.",
+      "page": 85
+    },
+    {
+      "slug": "health",
+      "name": "Health",
+      "department": "physical-education",
+      "grades": "9 (Class of 2027) and 11-12 (Classes of 2023-2026)",
+      "courseNumber": "742105",
+      "ucCsu": "UC G approved (pending)",
+      "credits": "5.0, Semester Class",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Students will gain knowledge and understanding of the social, physical, emotional, intellectual, and spiritual aspects of the human body. Topics may include mental and emotional health, family and social health, growth and development, nutrition, personal health, and physical activity, alcohol, tobacco, and other drugs, and finally communicable and chronic diseases. This class will include awareness of Hands-Only CPR and how to use an AED. This class satisfies the state mandate known as the California Healthy Youth Act (Ed Code 51930-51939) for comprehensive health education. Mental Health Instruction (Ed Code 51900.5) and Compression Only CPR Instruction and AED Instructions (Ed code 51225.6(a) )",
+      "page": 85
+    },
+    {
+      "slug": "health-2",
+      "name": "Health",
+      "department": "physical-education",
+      "grades": "11-12",
+      "courseNumber": "742100",
+      "ucCsu": null,
+      "credits": "2.5, Quarter class",
+      "ctePathway": null,
+      "offeredAt": [
+        "New Valley",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Students will gain knowledge and understanding of the social, physical, emotional, intellectual, and spiritual aspects of the human body. Topics may include mental and emotional health, family and social health, growth and development, nutrition, personal health, and physical activity, alcohol, tobacco, and other drugs, and finally communicable and chronic diseases. This class will include awareness of Hands-Only CPR and how to use an AED. This class satisfies the state mandate known as the California Healthy Youth Act (Ed Code 51930-51939) for comprehensive health education.",
+      "page": 86
+    },
+    {
+      "slug": "jazz-band",
+      "name": "Jazz Band",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "637005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Band/Orchestra and by Audition and Consent of Instructor",
+      "description": "Jazz Band is an advanced instrumental ensemble, open by audition or consent of instructor as ensemble positions are limited, to students who already know how to play a jazz band instrument. Jazz Band will learn a large volume of literature while exploring a variety of jazz styles, such as swing, funk, rock, Latin, and bebop. Students will be expected to learn advanced music theory and apply it to the literature involved. Students will have regular opportunities to improvise solos on their instruments as well as participate in sections in the ensemble. Individual responsibility, self-directed learning skills, and good practice habits are a must.",
+      "page": 87
+    },
+    {
+      "slug": "string-orchestra",
+      "name": "String Orchestra",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "638005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Audition and Consent of Instructor",
+      "description": "Open to all students who have experience playing a string instrument. Students will study a broad range of musical styles. Students will learn about various composers through rehearsing their works and studying biographical information. Extra curricular activities include pit orchestra, string ensembles, solos, lessons, chamber ensembles, and department activities.",
+      "page": 88
+    },
+    {
+      "slug": "symphonic-band-1",
+      "name": "Symphonic Band 1",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "638105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "One year prior experience, audition, or teacher approval",
+      "description": "This course introduces students to a variety of styles and performance practices. Students will: be able to understand and perform a variety of elements in ensemble music; acquire knowledge of prominent classical and modern music figures; and, develop an appreciation of music history through lectures, readings, discussions, performances, clinics and exercises. The course will also include music history, theory, terms and short papers. Activities include performances on and off campus, festivals, community functions, and more. A concert review will be assigned each semester.",
+      "page": 88
+    },
+    {
+      "slug": "symphonic-band-2",
+      "name": "Symphonic Band 2",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "638115",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "By Audition & Consent of Instructor",
+      "description": "This course is designed to introduce and develop an understanding of the nature, structure and interpretation of music through rehearsal, analysis and performance of band literature. This course helps students increase their skills in ensemble playing and teamwork as it applies to performance. Band is open to students on all levels who already know how to play a band instrument. Co-curricular activities include: winter guard, winter percussion/percussion ensemble, and marching band. Extracurricular activities include: pep band, show orchestra (for musicals), lessons, various ensembles, solos, and department activities.",
+      "page": 88
+    },
+    {
+      "slug": "concert-choir-1",
+      "name": "Concert Choir 1",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "633105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Open to all students with an interest in participating in choral group singing, this course provides for individual vocal development and training towards entry into the advanced concert choir. It is designed to introduce the student to the nature and structure of choral music by rehearsing and performing a variety of choral literature.",
+      "page": 89
+    },
+    {
+      "slug": "concert-choir-2",
+      "name": "Concert Choir 2",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "633205",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Chorus or Audition or Consent of Instructor",
+      "description": "An advanced mixed choral group open to all students who have taken chorus and/or successfully passed an entrance audition. This course provides an opportunity to increase awareness of the nature, structure and meaning of music through rehearsal, analysis and performance of a variety of styles of intermediate and advanced choral literature. Extracurricular activities open to members of the choir include: solos, lessons, small vocal ensembles, and music production.",
+      "page": 89
+    },
+    {
+      "slug": "music-genesis",
+      "name": "Music Genesis",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": null,
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "description": "This is a class that will introduce you to many concepts of music using technology as a tool to create and explore! You will hear music in a new way after taking this course. You will also be challenged to learn and develop musical skills you may have never used before. This course is open to all students interested in the basic elements and concepts of music through the study of Rock, Jazz and Classical music. No previous musical knowledge is required. Class content is based on listening and music videos. Music Genesis covers the elements and concepts of music (beginning piano lessons), an overview of music history and famous composers and styles of music.",
+      "page": 89
+    },
+    {
+      "slug": "theater-2",
+      "name": "Theater 2",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "102725",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "An advanced project and performance based class where students will explore elements of theatrical productions including advanced acting methods and character development, script analysis, scriptwriting, directing, theatre history and theatrical design. In-class work may include improvisation, in-depth scene work, audition and monologue work, and student directed and designed one-acts.",
+      "page": 90
+    },
+    {
+      "slug": "theatre-productions",
+      "name": "Theatre Productions",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "102705",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Consent of Instructor or Audition",
+      "description": "Through this course, students will practice the skills required to produce plays and musicals. Whether an actor or technician, students can gain the experience of going from audition to performance in this class. Students must audition for specific roles and.or interview for technical positions, then accept these positions to remain in class. Students are required to rehearse or work many more hours beyond class time, as well as attend all performances. Students will receive elective credit.",
+      "page": 90
+    },
+    {
+      "slug": "theatre-productions-honors",
+      "name": "Theatre Productions Honors",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "102755",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Consent of Instructor or Audition",
+      "description": "The work of this course is primarily completed through practical application and implementation of theory, design and research. Students will focus on building a solid foundation for acting with a focus on breath, voice and movement. Students will explore theater through improvisation, scene work and the performance of both a play and musical for the public. Students will be required to spend time outside of class in rehearsal. In addition, students will learn the technical aspects of theater through units on set design, light design and costume design.",
+      "page": 90
+    },
+    {
+      "slug": "introduction-to-art",
+      "name": "Introduction to Art",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "606005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Introduction to Art is a basic art class that is a prerequisite for all other art classes. The students will be able to develop skills in drawing, painting, learn color theory and composition and 2 & 3 dimensional design. This course covers:\n• Instruction in developing those basic skills which are necessary for painting.\n• Instruction in developing those basic skills which are necessary for drawing.\n• INstruction in developing an awareness of the principles and elements of design.\n• Instruction in developing basic skills which are necessary for crafts.\n• An awareness of history of art, art appreciation and arts connection to our world.",
+      "page": 91
+    },
+    {
+      "slug": "sculpture",
+      "name": "Sculpture",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "603105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art or Ceramics",
+      "description": "In this course, students will explore the use of different media to create 3-D sculptures. Students will learn about different artists and their motivation to create their art, furthermore, they will be exposed to a variety of media, techniques, vocabulary, and processes. Students will develop their visual communication skills to create art that connects to their personal and world experiences.",
+      "page": 91
+    },
+    {
+      "slug": "painting-1",
+      "name": "Painting 1",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "607105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art with a “C” or better or teacher consent",
+      "description": "Painting and Drawing will provide more advanced instruction in drawing, painting, and composition. Students will apply these skills while exploring a variety of art styles that relate to art history and studio application.",
+      "page": 92
+    },
+    {
+      "slug": "painting-2",
+      "name": "Painting 2",
+      "department": "visual-performing-arts",
+      "grades": "11-12",
+      "courseNumber": "607205",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Painting 1",
+      "description": "This is a third-year course that provides an opportunity for the more serious art student to pursue art in an in-depth method. Students will be working with assignments that go beyond skill development into more in-depth expression.",
+      "page": 92
+    },
+    {
+      "slug": "ap-drawing",
+      "name": "AP Drawing",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "600705",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art and Drawing and Painting, or Teacher Recommendation",
+      "description": "AP Drawing students do not take a written exam but submit a portfolio of their work to be evaluated by the College Board at the end of the school year. The portfolios are scored on a six-point rubric scale. The course addresses the development of the artist's voice through technique, subject matter, and style as well as the ability to articulate that through writing. The structure of the portfolio is divided into two sections, Sustained Investigation where students will create artwork and writing to document their inquiry-guided investigation through practice, experimentation, and revision, and Selected Works that demonstrate skillful synthesis of materials, processes, and ideas. This course is recommended for serious, self-directed art students, willing to produce a large volume of quality work. For more information about AP Art, go to the College Board website at apcentral.collegeboard.com.",
+      "page": 92
+    },
+    {
+      "slug": "ap-2d-art-and-design",
+      "name": "AP 2D Art and Design",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "600725",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art and Drawing and Painting, or Teacher Recommendation",
+      "description": "AP 2D Art and Design students do not take a written exam, but submit a portfolio of their work to be evaluated by the College Board at the end of the school year. The portfolios are scored on a six-point rubric scale. The course addresses the development of the artist's voice through technique, subject matter, and style as well as the ability to articulate that through writing. The structure of the portfolio is divided into two sections, Sustained Investigation where students will create artwork and writing to document their inquiry-guided investigation through practice, experimentation, and revision, and Selected Works that demonstrate skillful synthesis of materials, processes, and ideas. This course is recommended for serious, self-directed art students, willing to produce a large volume of quality work. For more information about AP Art, go to the College Board website at apcentral.collegeboard.com.",
+      "page": 92
+    },
+    {
+      "slug": "ap-3d-art-and-design",
+      "name": "AP 3D Art and Design",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "600715",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art, Sculpture, Ceramics, or Teacher Recommendation",
+      "description": "AP 3D Art and Design students do not take a written exam, but submit a portfolio of their work to be evaluated by the College Board at the end of the school year. The portfolios are scored on a six-point rubric scale. The course addresses the development of the artist's voice through technique, subject matter, and style as well as the ability to articulate that through writing. The structure of the portfolio is divided into two sections, Sustained Investigation where students will create artwork and writing to document their inquiry-guided investigation through practice, experimentation, and revision, and Selected Works that demonstrate skillful synthesis of materials, processes, and ideas. This course is recommended for serious, self-directed art students, willing to produce a large volume of quality work. For more information about AP Art, go to the College Board website at apcentral.collegeboard.com.",
+      "page": 93
+    },
+    {
+      "slug": "ceramics-1",
+      "name": "Ceramics 1",
+      "department": "visual-performing-arts",
+      "grades": "10-12",
+      "courseNumber": "601005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Intro to Art/Graphic Design",
+      "description": "In Ceramics class students will learn the three basic hand-building techniques of pinch, coil, and slab construction. Students will also have the opportunity to learn how to throw on a potter's wheel. The artwork will be decorated and glazed with a variety of materials and techniques. Students will make both sculptural works of art, and functional pieces of pottery.",
+      "page": 93
+    },
+    {
+      "slug": "advanced-ceramics",
+      "name": "Advanced Ceramics",
+      "department": "visual-performing-arts",
+      "grades": "11-12",
+      "courseNumber": "601105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Ceramics 1 with grade of A or Instructor Approval",
+      "description": "Students will receive advanced instruction designed to refine both hand building and wheel throwing techniques. Students will also explore advanced methods of surface decoration. Students will have the opportunity to learn to mix glazes and load and fire kilns. Students will be required to plan, design, and make special projects.",
+      "page": 93
+    },
+    {
+      "slug": "rop-video-production",
+      "name": "ROP Video Production",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "712105",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": "Arts, Media, and Entertainment",
+      "offeredAt": [
+        "New Valley",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "description": "Video Production is a year-long course in which students will learn the foundations of video production: developing an idea or story, pre-production planning, video photography, lighting, and basic sound, and digital post-production using video editing software. Students will learn to evaluate film and videos, will learn essential knowledge of copyright laws as they pertain to video production and ethical issues in media, and will learn to create a variety of published video projects This class may be repeated with instructor approval *Articulation agreement with Mission for college credit *Video Production classes count towards Practical or Fine Arts credits",
+      "page": 94,
+      "alsoIn": [
+        "practical-arts"
+      ],
+      "alsoInDetail": [
+        {
+          "department": "practical-arts",
+          "courseNumber": "712105",
+          "page": 107,
+          "sameDescription": true
+        }
+      ]
+    },
+    {
+      "slug": "prt-art",
+      "name": "PRT Art",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "629005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Introduction to Art is a basic art class that is a prerequisite for all other art classes. The students will be able to develop skills in drawing, painting, learn color theory and composition and 2 & 3 dimensional design. This course covers:\n• Instruction in developing those basic skills which are necessary for painting.\n• Instruction in developing those basic skills which are necessary for drawing.\n• Instruction in developing an awareness of the principles and elements of design.\n• Instruction in developing basic skills which are necessary for crafts.\n• An awareness of history of art, art appreciation and arts connection to our world. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 95
+    },
+    {
+      "slug": "journalism",
+      "name": "Journalism",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "102505",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Consent of Instructor",
+      "description": "While managing all aspects of publishing a print newspaper and online news site, students will acquire skills in researching, reporting, interviewing, writing and revising. They will practice writing in various journalistic genres, from news stories to features, with an emphasis on meeting professional journalistic standards for quality, accuracy, and balance. Those who would like to specialize or pursue more advanced journalism will further develop skills in editing, in-depth reporting, photojournalism, graphic illustrations, or newspaper/web design. This course may be repeated for district graduation credit. It currently does not meet the requirements for English.",
+      "page": 97
+    },
+    {
+      "slug": "small-engines",
+      "name": "Small Engines",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "659005",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Transportation",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "The student in this Small Engines course will develop knowledge skills, and self-confidence in the operation and maintenance of a small internal combustion engine. S/he will be able to identify and describe the six systems of the engine. The student will be able to demonstrate analytical and problem-solving skills that are desirable in career placement and additional training. S/he will be able to communicate procedures for preventative maintenance and engine storage. The student will be able to identify and wisely select for purchase the appropriate two-stroke or four-stroke engine for use in construction, transportation, emergency management, and leisure activities. During the course, the student will work collaboratively and follow a procedure to test run, disassemble, inspect, reassemble, and test run again a Briggs & Stratton 3 horse-power air-cooled engine. The student will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area. The skills developed will be useful for employment in businesses that utilize small engines, equipment sales, or engine repair.",
+      "page": 97
+    },
+    {
+      "slug": "rop-preventative-maintenance",
+      "name": "ROP Preventative Maintenance",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "659105",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 1",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Small Engines",
+      "note": "*Dual enrollment for college credit",
+      "description": "The first semester, Preventative Maintenance, students will develop knowledge, skills, and confidence to service an automobile to keep it in running efficiently, economically, and with a low environmental impact. S/he will be able to identify and describe and perform the basic preventative maintenance procedures such as oil/filter change, checking and maintaining fluid levels, tire maintenance and rotation, basic battery care, and general car care. The student will be able to demonstrate analytical and problem-solving skills that are desirable in career placement and additional training. S/he will be able to communicate procedures for preventative maintenance and general car care. During the course, the student will develop skills for using hand tools and basic automotive shop equipment. Students will demonstrate problem-solving techniques and logical sequences for completing maintenance tasks. Students will work collaboratively to complete tasks such as using shop references and service manuals, servicing vehicles, and maintaining a safe shop environment. The students will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area. The skills developed will be useful in employment in the automotive industry.",
+      "page": 98
+    },
+    {
+      "slug": "rop-engine-systems",
+      "name": "ROP Engine Systems",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "651445",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 1",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Small Engines",
+      "description": "The second semester in Engine Systems, students will develop knowledge, skills, and self-confidence in identifying and describing the mechanical systems of a modern automotive engine. Students will be able to perform basic maintenance and repair of automotive engine systems that include a lubrication system, cooling system, fuel system, engine management systems, and gaskets and seals. S/he will be able to identify and describe the function of components for each system. During the course, the student will work collaboratively while completing classwork and lab activities. The students will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area.",
+      "page": 98
+    },
+    {
+      "slug": "rop-chassis-systems",
+      "name": "ROP Chassis Systems",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "651435",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 2",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Preventative Maintenance and Engine Systems or instructor’s approval",
+      "description": "The students in this first-semester Chassis System class will develop knowledge, skills, and self-confidence in maintaining and repairing automotive chassis systems that include brakes, steering and suspension, and alignment. S/he will be able to identify and describe the function of components for each system. The student will be able to demonstrate analytical and problem-solving skills that are desirable in career placement and for additional training. S/he will be able to communicate procedures for maintenance and repair of brakes, steering and suspension systems, and wheel alignment. During the course, the student will work collaboratively while completing classwork and lab activities. The students will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area.",
+      "page": 99
+    },
+    {
+      "slug": "rop-powertrain-systems",
+      "name": "ROP Powertrain Systems",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "651705",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 2",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Preventative Maintenance and Engine Systems or instructor’s approval",
+      "description": "The students in this second-semester Powertrain class will continue to develop knowledge, skills, and self-confidence in maintaining and repairing automotive powertrain systems that include power train design layout, manual and automatic transmissions and transaxles, CV joints, U-joints, differentials, axles, electronic controls, and alternative/hybrid systems. S/he will be able to identify and describe the function of components for each system. During the course, the student will work collaboratively while completing classwork and lab activities. The students will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area.",
+      "page": 99
+    },
+    {
+      "slug": "rop-electrical-systems",
+      "name": "ROP Electrical Systems",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "659205",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 3",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Preventative Maintenance and Engine Systems or instructor’s approval",
+      "description": "Students in the first-semester Electrical Systems class will develop knowledge, skills, and self-confidence in maintaining and repairing automotive electrical systems that include charging systems, starting systems, chassis electrical systems, and automotive computers, automotive accessories, and hybrid systems. S/he will be able to identify and describe the function of components for each system. The student will be able to demonstrate analytical and problem-solving skills that are desirable in career placement and for additional training. S/he will be able to communicate procedures for maintenance and repair of the electrical system. The student will be able to identify and wisely select appropriate maintenance and repair parts and procedures. During the course, the student will work collaboratively while completing classwork, lab activities, and special projects. The students will practice shop safety, ensure tools are properly, and maintain a clean, environmentally favorable work area.",
+      "page": 99
+    },
+    {
+      "slug": "rop-engine-performance",
+      "name": "ROP Engine Performance",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "651305",
+      "ucCsu": null,
+      "credits": "5/10, Semester/Year",
+      "ctePathway": "Transportation Auto Level 3",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C or better in Preventative Maintenance and Engine Systems or instructor’s approval",
+      "description": "Students in the second-semester Engine Performance class will continue to develop knowledge, skills, and self-confidence in maintaining and repairing automotive systems controlling engine performance. S/he will be able to identify and describe the function of components and systems controlling the engine. These systems include air intake monitoring systems, the fuel delivery system, ignition control system, and emission control systems. S/he will be able to communicate procedures for maintenance and repair of engine performance systems. The student will work collaboratively while completing classwork and lab activities. The students will practice shop safety, use tools properly, and maintain a clean, environmentally favorable work area.",
+      "page": 100
+    },
+    {
+      "slug": "rop-auto-special-projects",
+      "name": "ROP Auto Special Projects",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "651445",
+      "ucCsu": null,
+      "credits": "5, Semester",
+      "ctePathway": "Transportation",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Instructor’s Approval",
+      "description": "This course gives the prevocational student the opportunity to work on his own in a job type situation. There will be no more than three special projects students in any class. The student will work on his own projects three days a week and on shop-related projects two days a week. Maturity and the ability to work without direct supervision are required. There is a material fee. The student is graded with an on-the-job type paycheck system. This course satisfies the practical arts graduation requirement.",
+      "page": 100
+    },
+    {
+      "slug": "marketing-sales-and-service",
+      "name": "Marketing, Sales & Service",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "753305",
+      "ucCsu": null,
+      "credits": "15, Semester",
+      "ctePathway": "Marketing, Sales and Service",
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Students who are 15 years of age and who are employed at least 12 hours a week at an approved job station. Approval of the Retail Sales coordinator is required for enrollment.",
+      "note": "Students may earn up to 15 units per Semester. This class can be taken for four Semesters and up to 60 units.",
+      "description": "The Retail Sales Program is designed to give students an opportunity to discover career interests and to develop skills at a business or industrial workstation. This cooperative program includes training with pay, school credit, school and employer supervision, career exploration and counseling, personal finance, and employment cycle skills.",
+      "page": 101
+    },
+    {
+      "slug": "principles-of-financial-literacy",
+      "name": "Principles of Financial Literacy",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "685305",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Business and Finance",
+      "offeredAt": [
+        "Wilcox",
+        "MECHS"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Financial Literacy is a one-year course that enables students to get a head start on taking control of their financial lives. Students who take charge of their finances are better prepared to invest in themselves and cope with the financial ups and downs that life will bring. In this course, students will examine how to manage their money through well-planned budgets, build and sustain credit, set financial decisions, prepare for taxes, and save/invest in their future.",
+      "page": 102
+    },
+    {
+      "slug": "financial-investing",
+      "name": "Financial Investing",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "685315",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Business and Finance",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Principles of Financial Literacy or instructor approval",
+      "description": "This course provides students with the fundamentals to make sound financial decisions. Study involves the investment environment, the risks and returns associated with different types of investments, and the establishment of investment objectives consistent with an individual’s characteristics, capacities, and restrictions. Other topics include the participants in the investment process including organization listing securities and the laws and regulations covering their activities. Class projects cover techniques of investment analysis, timing, decision making, investment planning and management. *Articulation agreement with Mission for college credit",
+      "page": 102
+    },
+    {
+      "slug": "rop-c-h-a-m-p-1",
+      "name": "ROP C.H.A.M.P. 1",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "677025",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Hospitality, Tourism and Recreation",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "description": "This one-year course is designed for first year culinary students and will provide them with a solid foundation of Food Service and Hospitality Operations. The primary topics covered will be college and career opportunities, employability skills, basic food preparation, techniques and procedures, food safety and sanitation, nutrition, and an introduction to customer services and professionalism.",
+      "page": 103
+    },
+    {
+      "slug": "rop-c-h-a-m-p-2",
+      "name": "ROP C.H.A.M.P. 2",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "677035",
+      "ucCsu": "F",
+      "credits": null,
+      "ctePathway": "Hospitality, Tourism and Recreation",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "C.H.A.M.P. 1 or consent of teacher",
+      "description": "This one-year course is a 2-period block. It is designed for students with some culinary experience. The class will focus on more advanced concepts within the Food Service and Hospitality industry. Emphasis will be on participation in operating our student-run foodservice operation, the Alternative Café. Students will learn the fundamentals of food costing, menu planning, and design, purchasing, scheduling, quantity and quality food preparation, and management concepts. *Articulation agreement with Mission for college credit",
+      "page": 103
+    },
+    {
+      "slug": "fashion-design-and-marketing-i",
+      "name": "Fashion Design & Marketing I",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "655605",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Fashion and Interior Design",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course is designed for first-year fashion students to explore the global fashion industry. Topics taught include fashion illustration, textiles, principles & elements of design, fashion marketing, clothing styles, fashion designers, designing a line of clothing, and digital portfolio creation. Students will sew 3-4 garments that will be shown off in our end-of-year fashion show.",
+      "page": 103
+    },
+    {
+      "slug": "fashion-design-and-marketing-ii",
+      "name": "Fashion Design & Marketing II*",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "655705",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Fashion and Interior Design",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Fashion Design & Marketing I",
+      "description": "In this second-year course a closer examination of the history of fashion, fashion cycle, global textile industry, business creation and marketing trends, social and environmental impacts of fashion, industrial production techniques and resumes. Students will design their own line of clothing and produce at least 2 garments from their own collection. Students will design, plan and manage the end-of-year fashion show. *Articulation agreement with West Valley for college credit",
+      "page": 103
+    },
+    {
+      "slug": "fashion-design-and-marketing-iii",
+      "name": "Fashion Design & Marketing III*",
+      "department": "practical-arts",
+      "grades": "11-12",
+      "courseNumber": "655605",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": "Fashion and Interior Design",
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Fashion Design & Marketing I and II",
+      "description": "This third-year fashion class is focused on individual clothing line development and business creation. *Articulation agreement with West Valley for college credit",
+      "page": 104
+    },
+    {
+      "slug": "exploring-computer-science",
+      "name": "Exploring Computer Science",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "705005",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This year-long course explores the foundational concepts of computer science in a project-based learning environment. Topics include History of Computing, Binary Concepts, Foundations of Programming, Block Programming platforms: Blockly and SCRATCH, Paper Prototyping and the Engineering/Design Process, Application Development utilizing MIT App Inventor, Robotics platforms: Lego Mindstorm, Don't n Dash, sphere, MindBlock, and Ozobot, Introduction to Python and Introduction to HTML Web Design. Students will develop skills in the areas of Critical Thinking, Problem Solving Design Thinking, Computing, and Programming.",
+      "page": 105
+    },
+    {
+      "slug": "ap-computer-science-principles",
+      "name": "AP Computer Science Principles",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "756105",
+      "ucCsu": "D for 3rd year or higher",
+      "credits": "10, Year",
+      "ctePathway": "Information & communication Technologies",
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Digital Media 1, Connectivity & Cybersecurity, Exploring Computer Science or instructor consent",
+      "description": "This course introduces students to the foundational concepts of computer science and challenges them to explore how computing and technology can impact the world. With a unique focus on creative problem solving and real-world applications, the course will introduce students to the creative aspects of programming, abstractions, algorithms, large data sets, the Internet, cybersecurity concerns, and computing impacts.",
+      "page": 105
+    },
+    {
+      "slug": "ap-computer-science-a",
+      "name": "AP Computer Science A",
+      "department": "practical-arts",
+      "grades": "10-12",
+      "courseNumber": "756005",
+      "ucCsu": "D for 3rd year or higher",
+      "credits": "10, Year",
+      "ctePathway": "Information & communication Technologies",
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Computer Science Principles and concurrent enrollment in Algebra II or completed Algebra II with a C or better. Satisfies Practical Arts requirement.",
+      "description": "AP computer Science A is equivalent to a first-semester, college level course in computer science. The course introduces students to computer science with fundamental topics that include problem solving, design strategies and methodologies, organization of data (data structures), approaches to processing data (algorithms), analysis of potential solutions, and the ethical and social implications of computing. The course emphasizes both object-oriented and imperative problem solving and design using Java language. These techniques represent proven approaches for developing solutions that can scale up from small, simple problems to large, complex problems. The AP Computer Science A course curriculum is compatible with manyCS1 courses in colleges and universities.",
+      "page": 106
+    },
+    {
+      "slug": "digital-media-1",
+      "name": "Digital Media 1*",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "712505",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": "Arts, Entertainment and Media",
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "Wilson (through Edmentum)"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "description": "Digital Media 1 focuses on electronic image manipulation and page layout. Students will learn the elements and principles of design, the fundamentals of the design process, and visual communication theory. Students will design and create a variety of real-life projects that demonstrate creativity, communication, critical thinking, and problem-solving. *Articulation agreement with Mission for college credit (Wilcox only)",
+      "page": 107
+    },
+    {
+      "slug": "advanced-video-production",
+      "name": "Advanced Video Production",
+      "department": "practical-arts",
+      "grades": "10 -12",
+      "courseNumber": "712301",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": "Arts, Entertainment and Media",
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "ROP Video Production or Digital Media 1 and receive at least B both semesters.",
+      "description": "In this class, students will learn to create and produce professional-grade videos that advance both creative and technical skills. Collaboration is required for every project, both inside and outside of school. Students will learn advanced levels of pre-production, production, and post-production methodology and practices, and will take on multiple roles including director, copywriter, storyboard artist, camera person, sound recordist, lighting technician, on-camera talent, production assistant, computer editor, and graphic artist. *Video Production classes count towards Practical or Fine Arts credits",
+      "page": 107
+    },
+    {
+      "slug": "yearbook",
+      "name": "Yearbook",
+      "department": "practical-arts",
+      "grades": "9-12",
+      "courseNumber": "609005",
+      "ucCsu": "F",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "MacDonald",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Consent of Instructor",
+      "description": "The publication of the yearbook is the end result of an intense year of work. Students learn desktop publishing techniques with text and photos as they write, edit layout pages, and proofread. Other skills include marketing, distributing, budgeting, and seeking advertising to offset production costs.",
+      "page": 108
+    },
+    {
+      "slug": "data-science",
+      "name": "Data Science",
+      "department": "electives",
+      "grades": "11-12",
+      "courseNumber": "202905",
+      "ucCsu": "C",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MECHS",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": null,
+      "description": "In this course, students will learn to understand, ask questions of, and represent data through project-based units. The units will give students opportunities to be data explorers through active engagement, developing their understanding of data analysis, sampling, correlation/causation, bias and uncertainty, modeling with data, making and evaluating data-based arguments, and the importance of data in society.",
+      "page": 111
+    },
+    {
+      "slug": "leadership",
+      "name": "Leadership",
+      "department": "electives",
+      "grades": "9-12",
+      "courseNumber": "751105",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "MacDonald",
+        "MECHS",
+        "New Valley",
+        "Santa Clara",
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Leadership is a class designed for the student council of each school. The course focuses on developing leadership skills, such as organization, public speaking, and effective meeting management. The students in the course are expected to coordinate, participate in, and/or promote the school’s student activities, academic programs, community outreach, and school improvement efforts.",
+      "page": 111
+    },
+    {
+      "slug": "academic-peer-tutoring",
+      "name": "Academic Peer Tutoring",
+      "department": "electives",
+      "grades": "10-12",
+      "courseNumber": "752345",
+      "ucCsu": null,
+      "credits": "10 or Community Service, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MECHS",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Earned A’s and B’s in “specialty” academic subject. For AP tutors, successful completion of an AP class with a grade of B or higher",
+      "description": "Students will learn peer coaching and tutoring skills, and provide individual and small group tutorial support to peers in your “specialty” academic subject: English, Mathematics, Science or Social Science at any level, including AP.",
+      "page": 112
+    },
+    {
+      "slug": "ethnic-studies",
+      "name": "Ethnic Studies",
+      "department": "electives",
+      "grades": "9",
+      "courseNumber": "303705",
+      "ucCsu": "G",
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MECHS",
+        "New Valley",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "Ethnic Studies covers the history, heritage and culture of [historically-marginalized] groups whose contributions have been long-overlooked and whose struggles to gain rights and fight injustice have been long silenced. The intent is to build empathy and understanding and to empower students to see their stories reflected in what they study in school. Ethnic Studies curriculum should draw attention to the four ethnic and racial groups whose history and stories have been traditionally overlooked and have been the focus of college ethnic studies courses: Blacks, Latinos, Native Americans and Asian Americans. Our SCUSDcurriculum does that while also including discussions on the ethnic heritage and the legacies of students in their communities. Our curriculum includes lesson plans on Sikh, Jewish, Arab and Armenian Americans.",
+      "page": 113
+    },
+    {
+      "slug": "prt-ethnic-studies",
+      "name": "PRT Ethnic Studies",
+      "department": "electives",
+      "grades": "9-12",
+      "courseNumber": "303715",
+      "ucCsu": "G",
+      "credits": "5, Semester",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MECHS",
+        "New Valley",
+        "Wilson",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "description": "This course is designed to be aligned with state standards using an alternative curriculum to access the standard. Ethnic Studies focuses on an in-depth study of one or more ethnic groups, including their history, culture, achievements, contributions, barriers and strategies to overcome these barriers, and status in the United States. Students learn about the characteristics of America's ethnic groups and the similarities and differences of these groups in both their past and present experiences from multiple perspectives. Students learn that Americans, as descendants of many cultures, races, religions, and ethnic groups are bonded by a democratic vision of liberty, equality, and justice.",
+      "page": 113
+    },
+    {
+      "slug": "prt-vocational-training",
+      "name": "PRT Vocational Training",
+      "department": "electives",
+      "grades": "9-12",
+      "courseNumber": "771215",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "Students participate in a pre-vocational/vocational training program. These training programs allow the staff the opportunity to supervise and train students, teach job skills, and determine the potential for community job placement.",
+      "page": 115
+    },
+    {
+      "slug": "bsc-career-skills",
+      "name": "BSC Career Skills",
+      "department": "electives",
+      "grades": "11-12",
+      "courseNumber": "770010",
+      "ucCsu": null,
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Wilcox"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "IEP",
+      "description": "This course is designed as a student-centered course to assist students with analyzing their interests, skills and abilities while identifying careers of interest. Students will develop their self-advocacy skills, and also practice money management and other skills required for independent living. In addition, students will learn about work-readiness skills, soft skills, and community resources to support them after high school graduation. Students will also work toward job placement/volunteer experiences. Students with active IEPs will receive appropriate modifications and accommodations to access the curriculum described above.",
+      "page": 116
+    },
+    {
+      "slug": "avid-1",
+      "name": "AVID 1",
+      "department": "electives",
+      "grades": "9",
+      "courseNumber": "107115",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Application and Screening by the AVID coordinator and Site Team",
+      "description": "AVID (Achievement Via Individual Determination) is a four-year elective class aimed at helping capable first-generation college-bound students and underrepresented students succeed academically and qualify for admission to four-year colleges and universities. The AVID 9th grade program teaches students study skills, time management, self-esteem, and writing strategies to apply across the curriculum. Tutoring by peers and college students, guest speakers, and field trips included as part of the curriculum. This course is UC-G approved at SCHS.",
+      "page": 116
+    },
+    {
+      "slug": "avid-2",
+      "name": "AVID 2",
+      "department": "electives",
+      "grades": "10",
+      "courseNumber": "107225",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Application and Screening by the AVID coordinator and Site Team",
+      "description": "AVID 10th grade program reinforces the study skills learned, self-esteem building, and writing strategies applicable across the academic curriculum. Special focus is put on preparation for the PSAT test in October and other standardized tests. Students investigate career choices to help determine college and major interests. Tutoring by peers and college students, guest speakers, and field trips are included as part of the curriculum. This course is UC-G approved at SCHS.",
+      "page": 117
+    },
+    {
+      "slug": "avid-3",
+      "name": "AVID 3",
+      "department": "electives",
+      "grades": "11",
+      "courseNumber": "107335",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Application and Screening by the AVID coordinator and Site Team",
+      "description": "AVID 11th grade program stresses improving academic GPA as colleges and universities carefully examine 11th grade report cards. Students will take at least one college entrance test (SAT/ACT) and continue to investigate college choices by the end of the junior year, AVID students should have narrowed their choice of colleges to three or four. Students will continue to improve their writing skills. Investigation of the college application process (filling out sample financial aid forms and writing practice entrance essays) will take place. Students will continue to investigate careers to help in determining college majors and minors. A college portfolio of ample college applications and sample essays will serve as a culminating assessment project for the year. This course is UC-G approved at SCHS.",
+      "page": 117
+    },
+    {
+      "slug": "avid-4",
+      "name": "AVID 4",
+      "department": "electives",
+      "grades": "12",
+      "courseNumber": "107345",
+      "ucCsu": "G",
+      "credits": "10, Year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara",
+        "Wilcox",
+        "MacDonald"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "Application and Screening by the AVID coordinator and Site Team",
+      "description": "AVID 12th grade program is the culmination of the student’s years in AVID. The first semester is devoted to the application process and gaining admission to the college/university of choice. This includes the application, filling out financial aid forms, and required entrance essays. If needed, students can retake the SAT/ACT or required SAT II exams. During tutorial sessions, students continue to receive peer and college student assistance. Students will continue to improve their writing skills as well as learn how to become successful college students. The second semester includes preparation for college placement exams, review of note-taking techniques for college courses, continued career exploration, and culminating project in a student's field of study. Students explore classes and schedules online of schools they plan to attend. This course is UC-G approved at SCHS.",
+      "page": 117
+    },
+    {
+      "slug": "animation",
+      "name": "Animation",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "F",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Acquire skills in basic figure drawing, cell animation, 2D and 3D computer animation. Develop an understanding of scriptwriting, storyboarding, and sound design.",
+      "page": 118
+    },
+    {
+      "slug": "auto-body-refinishing",
+      "name": "Auto Body Refinishing",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Use restoration techniques to prepare the surface of vehicle parts for finished spray painting, and detailing work. Learn in a professional shop environment. Develop skills of welding, metal straightening, and finishing, surface preparation to return cars to pre-accident condition.",
+      "page": 118
+    },
+    {
+      "slug": "ev-auto-services",
+      "name": "EV/Auto Services",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D/G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn about passenger cars, electrical circuit boards, trainers, various types of transportation and use of industry tools.",
+      "page": 119
+    },
+    {
+      "slug": "construction-technology",
+      "name": "Construction Technology",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "C",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Design, estimate, and construct buildings with carpentry tools and equipment using industry standards.",
+      "page": 119
+    },
+    {
+      "slug": "culinary-arts",
+      "name": "Culinary Arts",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": null,
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Students train in our well-equipped kitchen to prepare stocks, cuts of meat, poultry, and seafood utilizing a variety of cooking methods. Work in various kitchen positions and restaurant settings while preparing for your career and future college education.",
+      "page": 119
+    },
+    {
+      "slug": "cybersecurity",
+      "name": "Cybersecurity",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Training for technical challenges in a networked computer system and learn methods to protect data in private and public industries.",
+      "page": 119
+    },
+    {
+      "slug": "dental-assisting",
+      "name": "Dental Assisting",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Acquire chair-side assisting skills, laboratory and X-ray procedures, with radiation and clinical experience. Make impressions and models. This course offers opportunities for Dental internships.",
+      "page": 119
+    },
+    {
+      "slug": "electrical-maintenance",
+      "name": "Electrical Maintenance",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "C",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Students learn electrical installations, troubleshooting, and repair in the electrical maintenance field. Successful students are qualified to receive the California Electrical Training card.",
+      "page": 119
+    },
+    {
+      "slug": "fashion-design-and-textile-art",
+      "name": "Fashion Design & Textile Art",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "F",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Teach students entry-level skills in the clothing and fashion field. Style, line, color, and design principles will set the tone for creating garments. Students will apply art elements and principles of fine art and design to their work.",
+      "page": 120
+    },
+    {
+      "slug": "film-and-video-production",
+      "name": "Film & Video Production",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "F",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn to write for television and film, storyboarding, directing, and sound design engineering. Produce videos for business and entertainment from scriptwriting to final edit.",
+      "page": 120
+    },
+    {
+      "slug": "fire-science-first-responder",
+      "name": "Fire Science/First Responder",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Introduce students to Fire Department and Emergency Services related fields and techniques used to perform the job. The class focuses are academics, technical skills, and employability practices.",
+      "page": 120
+    },
+    {
+      "slug": "forensic-sciences",
+      "name": "Forensic Sciences",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Develop the knowledge and training related to forensics while exploring the procedures to solve crimes. Topics include investigating crime scenes and laboratory safety rules and regulations.",
+      "page": 120
+    },
+    {
+      "slug": "heating-ventilation-and-air-conditional-hvac",
+      "name": "Heating, Ventilation, & Air Conditional (HVAC)",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "C",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn maintenance, overhaul, repair, and adjustment of residential and commercial heating, air conditioning, and refrigeration units.",
+      "page": 120
+    },
+    {
+      "slug": "law-enforcement",
+      "name": "Law Enforcement",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Prepare for a career in public and private investigative fields. Understand the criminal justice system, investigate crimes, and improve decision-making skills.",
+      "page": 120
+    },
+    {
+      "slug": "mechatronics-engineering",
+      "name": "Mechatronics Engineering",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "The combination of electrical and mechanical engineering is where students design, build and program robotic mechanisms. Students will apply C++ and Python coding to direct microcontroller parts.",
+      "page": 120
+    },
+    {
+      "slug": "medical-science-health-careers",
+      "name": "Medical Science/ Health Careers",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D/G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Prepare students who aspire to become nurses & doctors for a career in the medical field. This course focuses on human biology and disease, practicing hands-on patient care, medical terms, leadership, and teamwork, with hospital internships in Emergency, Surgery, Physical Therapy, Radiology, Pediatrics, and more.",
+      "page": 121
+    },
+    {
+      "slug": "metals-technology",
+      "name": "Metals Technology",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "C/G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn welding theory and safety with hands-on experience in the operation of welding equipment. Welding is used in auto repair, building construction, ornamental ironwork, and many machinery jobs.",
+      "page": 121
+    },
+    {
+      "slug": "mobile-app-design-and-computer-coding",
+      "name": "Mobile App Design and Computer Coding",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn multimedia design, web development for Internet technology, and programming for mobile platforms and devices. Learn the process of designing, coding, and deploying mobile applications for use in eCommerce, productivity, enterprise, and web purposes.",
+      "page": 121
+    },
+    {
+      "slug": "nursing-careers",
+      "name": "Nursing Careers",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D / G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Understand theoretical concepts and real world applications that are required to work as a Certified Nursing Assistant.",
+      "page": 121
+    },
+    {
+      "slug": "pharmacy-technician",
+      "name": "Pharmacy Technician",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "G",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "This course prepares students with the knowledge and skills required for employment as pharmacy clerks. It focuses on academics, technical skills, and employability practices essential in the pharmacy profession.",
+      "page": 121
+    },
+    {
+      "slug": "sports-medicine-and-kinesiology",
+      "name": "Sports Medicine & Kinesiology",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Acquire skills related to basic anatomy and physiology, nutrition, fitness and exercise, taping procedures, vital signs, training room/office management, injury treatment and training, patient care, safety and ethics, and bio-metrics of movement.",
+      "page": 122
+    },
+    {
+      "slug": "veterinary-science",
+      "name": "Veterinary Science",
+      "department": "svcte",
+      "grades": "11-12",
+      "courseNumber": null,
+      "ucCsu": "D",
+      "credits": null,
+      "ctePathway": null,
+      "offeredAt": null,
+      "offeredAtListed": false,
+      "prerequisite": null,
+      "description": "Learn anatomy and physiology, as well as animal health and disease, animal behavior, and client communication to prepare for employment in Veterinary Careers.",
+      "page": 122
+    }
+  ]
+}

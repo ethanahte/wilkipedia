@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bounty board · Wilkipedia</title>
+<meta name="description" content="Student-written guides to every class at Wilcox High School: test style, grading, homework, study guides, tips and summer homework.">
+<meta property="og:title" content="Bounty board · Wilkipedia">
+<meta property="og:site_name" content="Wilkipedia">
+<link rel="canonical" href="https://ethanahte.github.io/wilkipedia/bounties/">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="../">Wilkipedia</a>
+    <nav class="main-nav" aria-label="Main"><a href="../subjects/">Classes</a><a href="../bounties/" aria-current=page>Bounties</a><a href="../summer/">Summer HW</a><a href="../school/">School info</a><a href="../leaderboard/">Leaderboard</a></nav>
+    <form class="hsearch" action="../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <div id="auth" class="auth"></div>
+  </div>
+</header>
+<main id="main" class="wrap">
+
+<h1>Bounty board</h1>
+<p class="lede">Wilkipedia is written by volunteers. Each bounty is one clear job with a finish line. Claim one, do it, submit it, and a reviewer publishes it with your name on it.</p>
+<div id="stats" class="stats"></div>
+<div class="filters">
+  <div class="chips" id="track-filter"></div>
+  <div class="chips"><button class="chip" data-state="all" aria-pressed="true">Any status</button><button class="chip" data-state="open">Unclaimed</button><button class="chip" data-state="claimed">Claimed</button></div>
+</div>
+<p class="meta" id="count"></p>
+<div id="board" class="board"></div>
+<section class="how">
+  <h2>How a bounty runs</h2>
+  <ol>
+    <li><b>Claim</b> it. Several people can claim the same bounty; reviewers merge the best parts. Claims expire after 14 days.</li>
+    <li><b>Build</b> it with the form. Required fields must be filled.</li>
+    <li><b>Submit.</b> It goes to the review queue, not straight onto the site.</li>
+    <li><b>Review.</b> A reviewer approves it or sends it back with a note saying what to fix.</li>
+    <li><b>Credit.</b> Approved work goes live with your name, and the points go on the leaderboard.</li>
+  </ol>
+  <p><b>Points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>: your comments post instantly.</p>
+  <p>Have an idea for a bounty? Suggest it in a comment on the class page, or tell a reviewer.</p>
+</section>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
+    <p><a href="../rules/">Community rules</a> · <a href="../privacy/">Privacy</a> · <a href="../about/">About</a> · <a href="../submit/">Contribute</a></p>
+    <p class="meta">Course descriptions: SCUSD High School Course Catalog 2025–2026. Teacher lists: Wilcox High School staff directory, September 2026. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
+  </div>
+</footer>
+
+<script type="module" src="../assets/js/bounties.js"></script>
+</body>
+</html>
