@@ -13,6 +13,15 @@ create table public.profiles (
   role         text not null default 'contributor'
                check (role in ('contributor', 'trusted', 'reviewer', 'admin')),
   school_verified boolean not null default false,       -- signed in with an @scusd.net account
+  -- Profile pictures come from a fixed set of icons + colours, never uploads.
+  -- Keys must match AVATARS / AVATAR_COLORS in assets/js/ui.js.
+  avatar       text check (avatar in ('fox', 'panda', 'tiger', 'owl', 'turtle', 'octopus',
+               'frog', 'penguin', 'cat', 'dog', 'koala', 'bee', 'bolt', 'rocket', 'books', 'flask',
+               'palette', 'music', 'ball', 'star')),
+  avatar_color text not null default 'green' check (avatar_color in
+               ('green', 'blue', 'purple', 'red', 'orange', 'teal', 'pink', 'gray')),
+  grad_year    int check (grad_year between 2020 and 2040),
+  show_on_leaderboard boolean not null default true,
   created_at   timestamptz not null default now()
 );
 
@@ -48,10 +57,11 @@ $$;
 alter table public.profiles enable row level security;
 create policy "profiles are public" on public.profiles for select using (true);
 create policy "edit own profile" on public.profiles for update using (id = auth.uid());
--- Users may change their display name and nothing else. Roles are changed by an
--- admin in the Supabase table editor.
+-- Users may change their own profile settings and nothing else. Roles and the
+-- school badge are changed only by an admin in the Supabase table editor.
 revoke update on public.profiles from authenticated;
-grant update (display_name) on public.profiles to authenticated;
+grant update (display_name, avatar, avatar_color, grad_year, show_on_leaderboard)
+  on public.profiles to authenticated;
 
 -- ───────────────────────── bounties ─────────────────────────
 create table public.bounties (
@@ -263,10 +273,14 @@ select p.id, p.display_name, p.role,
                                           then interval '7 months' else interval '0' end), 0)::int
          as semester_points,
        max(subs.approved) as approved,
-       p.school_verified
+       p.school_verified,
+       p.avatar,
+       p.avatar_color,
+       p.grad_year
   from public.profiles p
   join pts on pts.user_id = p.id
   join subs on subs.user_id = p.id
+ where p.show_on_leaderboard
  group by p.id;
 
 grant select on public.leaderboard to anon, authenticated;

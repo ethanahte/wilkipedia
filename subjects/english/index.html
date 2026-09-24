@@ -11,17 +11,20 @@
 <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="../../">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="../../">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="../../subjects/" aria-current=page>Classes</a><a href="../../bounties/">Bounties</a><a href="../../summer/">Summer HW</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="../../map/">Map</a><a href="../../subjects/" aria-current=page>Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="../../summer/">Summer homework</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a><a href="../../teachers/">Teachers</a><a href="../../rules/">Community rules</a><a href="../../about/">About</a></div></details></nav>
     <form class="hsearch" action="../../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="../../bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <nav class="crumbs"><a href="../">All classes</a></nav>
@@ -29,70 +32,70 @@
 
 <p class="lede">22 classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
 <div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
-<ul class="course-list"><li class="course-row is-empty" data-slug="ap-english-language-and-composition" data-kind="ap">
+<ul class="course-list"><li class="course-row is-empty" data-slug="ap-english-language-and-composition" data-name="AP English Language and Composition" data-grade="11" data-kind="ap">
   <a href="../../courses/ap-english-language-and-composition/"><span class="c-name">AP English Language and Composition</span>
   <span class="c-meta">Grades 11 · Nigel Gully, Arianna Nuti</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-english-literature-and-composition" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-english-literature-and-composition" data-name="AP English Literature and Composition" data-grade="12" data-kind="ap">
   <a href="../../courses/ap-english-literature-and-composition/"><span class="c-name">AP English Literature and Composition</span>
   <span class="c-meta">Grades 12 · Ian Jackson, Sanghee Krause, Arianna Nuti</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-10" data-kind="">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-10" data-name="BSC English 10" data-grade="10" data-kind="">
   <a href="../../courses/bsc-english-10/"><span class="c-name">BSC English 10</span>
   <span class="c-meta">Grades 10 · Catherine Thornton</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-11" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-11" data-name="BSC English 11" data-grade="11" data-kind="">
   <a href="../../courses/bsc-english-11/"><span class="c-name">BSC English 11</span>
   <span class="c-meta">Grades 11 · Griselda Renteria</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-12" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-12" data-name="BSC English 12" data-grade="12" data-kind="">
   <a href="../../courses/bsc-english-12/"><span class="c-name">BSC English 12</span>
   <span class="c-meta">Grades 12 · Griselda Renteria</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-9" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-english-9" data-name="BSC English 9" data-grade="9" data-kind="">
   <a href="../../courses/bsc-english-9/"><span class="c-name">BSC English 9</span>
   <span class="c-meta">Grades 9 · Frankie Gilfillan</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="csu-expository-reading-and-writing" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="csu-expository-reading-and-writing" data-name="CSU Expository Reading and Writing" data-grade="12" data-kind="">
   <a href="../../courses/csu-expository-reading-and-writing/"><span class="c-name">CSU Expository Reading and Writing</span>
   <span class="c-meta">Grades 12 · Timothy Allen, Arianna Nuti, Chloe Pounds</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-advanced" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-advanced" data-name="EL Advanced" data-grade="9" data-kind="">
   <a href="../../courses/el-advanced/"><span class="c-name">EL Advanced</span>
   <span class="c-meta">Grades 9-12 · Yana Costa</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-beginning" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-beginning" data-name="EL Beginning" data-grade="9" data-kind="">
   <a href="../../courses/el-beginning/"><span class="c-name">EL Beginning</span>
   <span class="c-meta">Grades 9-12 · Yana Costa, Tomas Montes</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-beginning-grammar-vocabulary-reading" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-beginning-grammar-vocabulary-reading" data-name="EL Beginning-Grammar/Vocabulary/Reading" data-grade="9" data-kind="">
   <a href="../../courses/el-beginning-grammar-vocabulary-reading/"><span class="c-name">EL Beginning-Grammar/Vocabulary/Reading</span>
   <span class="c-meta">Grades 9-12 · Brandon Denault, Nigel Gully</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-intermediate" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="el-intermediate" data-name="EL Intermediate" data-grade="9" data-kind="">
   <a href="../../courses/el-intermediate/"><span class="c-name">EL Intermediate</span>
   <span class="c-meta">Grades 9-12 · Tomas Montes, Junko Mosalem</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-10" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-10" data-name="English 10" data-grade="10" data-kind="">
   <a href="../../courses/english-10/"><span class="c-name">English 10</span>
   <span class="c-meta">Grades 10 · Timothy Allen, Daniel Burkhead, Mark Ooka +1</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-11" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-11" data-name="English 11" data-grade="11" data-kind="">
   <a href="../../courses/english-11/"><span class="c-name">English 11</span>
   <span class="c-meta">Grades 11 · Daniel Burkhead, Harrison Feain, Frankie Gilfillan +1</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-9" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="english-9" data-name="English 9" data-grade="9" data-kind="">
   <a href="../../courses/english-9/"><span class="c-name">English 9</span>
   <span class="c-meta">Grades 9 · Brandon Denault, Nigel Gully, Mark Ooka +1</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-british-literature" data-kind=" honors">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-british-literature" data-name="Honors British Literature" data-grade="11" data-kind=" honors">
   <a href="../../courses/honors-british-literature/"><span class="c-name">Honors British Literature</span>
   <span class="c-meta">Grades 11-12 · Harrison Feain</span></a>
-  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-english-10" data-kind=" honors">
+  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-english-10" data-name="Honors English 10" data-grade="10" data-kind=" honors">
   <a href="../../courses/honors-english-10/"><span class="c-name">Honors English 10</span>
   <span class="c-meta">Grades 10 · Timothy Allen, Harrison Feain</span></a>
-  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-english-9" data-kind=" honors">
+  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-english-9" data-name="Honors English 9" data-grade="9" data-kind=" honors">
   <a href="../../courses/honors-english-9/"><span class="c-name">Honors English 9</span>
   <span class="c-meta">Grades 9 · Chloe Pounds, Claire Robson</span></a>
-  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-10" data-kind="">
+  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: B</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-10" data-name="PRT English 10" data-grade="10" data-kind="">
   <a href="../../courses/prt-english-10/"><span class="c-name">PRT English 10</span>
   <span class="c-meta">Grades 10</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-11" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-11" data-name="PRT English 11" data-grade="11" data-kind="">
   <a href="../../courses/prt-english-11/"><span class="c-name">PRT English 11</span>
   <span class="c-meta">Grades 11</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-12" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-12" data-name="PRT English 12" data-grade="12" data-kind="">
   <a href="../../courses/prt-english-12/"><span class="c-name">PRT English 12</span>
   <span class="c-meta">Grades 12 · Joycelyn Flores, Cris Syquia</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-9" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-english-9" data-name="PRT English 9" data-grade="9" data-kind="">
   <a href="../../courses/prt-english-9/"><span class="c-name">PRT English 9</span>
   <span class="c-meta">Grades 9 · Joycelyn Flores, Cris Syquia</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="reading-intervention" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="reading-intervention" data-name="Reading Intervention" data-grade="9" data-kind="">
   <a href="../../courses/reading-intervention/"><span class="c-name">Reading Intervention</span>
   <span class="c-meta">Grades 9-12</span></a>
   <span class="c-badges"><span class="status"></span></span></li></ul>

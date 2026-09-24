@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, $, esc, byline, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -111,7 +111,7 @@ async function drawComments() {
   const top = all.filter((c) => !c.parent_id).reverse();
   const one = (c, reply = false) => `
     <div class="comment ${reply ? 'reply' : ''}" data-id="${c.id}">
-      <div class="c-head"><b>${esc(c.author)}</b>${byline('', c.verified)} <span class="meta">${ago(c.created_at)}</span>
+      <div class="c-head">${avatarHtml(c)}<b>${esc(c.author)}</b>${byline('', c.verified)} <span class="meta">${ago(c.created_at)}</span>
         ${c.prompt && c.prompt !== 'General' ? `<span class="tag">${esc(c.prompt)}</span>` : ''}
         ${c.status === 'held' ? '<span class="tag warn">Waiting for approval</span>' : ''}
         ${c.status === 'hidden' ? '<span class="tag warn">Hidden (reported)</span>' : ''}</div>

@@ -1,0 +1,6 @@
+{
+  "_about": "Campus map for the Map page. Leave image null until we have a real campus map; the page then shows a room list built from teacher sections. To enable the clickable map: put the picture in assets/ (e.g. assets/campus-map.png), set image to that path, and add one entry per room with x/y as percentages of the picture's width/height (0-100). Never invent rooms: only add ones read off the real map.",
+  "image": null,
+  "alt": "Map of the Wilcox High School campus",
+  "rooms": []
+}

@@ -54,5 +54,17 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
   comments↔profiles also link through comment_likes, so an unnamed embed fails.
 - Schema changes: add a numbered file in `supabase/migrations/` for the live
   database AND fold the change into `schema.sql` for fresh setups.
+- **Navigation:** header = Map + Classes + "More" menu (`NAV`/`MORE` in build.py).
+  The bounty board is members-only: a fixed side tab (`#bounty-tab`) shown by
+  `initHeader` when signed in, and `.members-only` / `.guests-only` sections
+  toggle on `body.signed-in`. Bounty rows stay publicly readable in the database;
+  the gate is presentation only.
+- **Night mode** is a reader choice (`html[data-theme]`, localStorage
+  `wilkipedia-theme`, restored by `THEME_BOOT` in <head>), falling back to the
+  device setting. The dark palette lives in two blocks in style.css; edit both.
+- **Profile pictures are icons + colours, never uploads** (no moderation load, no
+  student photos). Keys are in `AVATARS`/`AVATAR_COLORS` (ui.js) and in the SQL
+  check constraints; keep them in sync.
+- **Map** reads `data/map.json`. Only add rooms read off a real campus map.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

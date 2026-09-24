@@ -36,7 +36,7 @@ CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
-                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy"]
+                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -97,8 +97,16 @@ def load():
 
 # ─────────────────────────── layout ───────────────────────────
 
-NAV = [("subjects/", "Classes"), ("bounties/", "Bounties"), ("summer/", "Summer HW"),
-       ("school/", "School info"), ("leaderboard/", "Leaderboard")]
+# The header shows two ways in (the map and the class list); everything else
+# lives in the "More" menu. The bounty board is not here: it is a side tab that
+# only signed-in members see (see initHeader in assets/js/ui.js).
+NAV = [("map/", "Map"), ("subjects/", "Classes")]
+MORE = [("summer/", "Summer homework"), ("school/", "School info"), ("leaderboard/", "Leaderboard"),
+        ("teachers/", "Teachers"), ("rules/", "Community rules"), ("about/", "About")]
+
+# Applies a saved night-mode choice before first paint, so pages never flash.
+THEME_BOOT = ("<script>try{var t=localStorage.getItem('wilkipedia-theme');"
+              "if(t)document.documentElement.dataset.theme=t}catch(e){}</script>")
 
 
 def page(path, title, body, *, desc="", script=None, active=None, data=None):
@@ -111,8 +119,12 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     if SITE_URL:
         rel = "" if path in ("", "index.html") else path.rstrip("/") + ("/" if not path.endswith(".html") else "")
         canon = f'<link rel="canonical" href="{e(SITE_URL.rstrip("/") + "/" + rel)}">'
-    nav = "".join(f'<a href="{r}{href}"{" aria-current=page" if active == href else ""}>{label}</a>'
-                  for href, label in NAV)
+    cur = lambda href: " aria-current=page" if active == href else ""
+    nav = "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in NAV)
+    more_active = any(active == href for href, _ in MORE)
+    nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""}>More</summary>'
+            f'<div class="menu">' + "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in MORE)
+            + '</div></details>')
     data_tag = ""
     if data is not None:
         blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
@@ -131,6 +143,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <link rel="icon" href="{r}assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="{r}assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{r}assets/style.css">
+{THEME_BOOT}
 </head>
 <body data-root="{r}">
 <a class="skip" href="#main">Skip to content</a>
@@ -139,9 +152,11 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <a class="brand" href="{r}">Wilkipedia</a>
     <nav class="main-nav" aria-label="Main">{nav}</nav>
     <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="{r}bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 {body}
 </main>
@@ -178,7 +193,8 @@ def course_badges(c):
 def course_row(c, r):
     t = c["teachers"]
     who = ", ".join(t[:3]) + (f" +{len(t) - 3}" if len(t) > 3 else "") if t else ""
-    return f"""<li class="course-row is-empty" data-slug="{e(c['slug'])}" data-kind="{'ap' if c['name'].startswith('AP ') else ''}{' honors' if 'Honors' in c['name'] else ''}">
+    m = re.search(r"\d+", c.get("grades") or "")
+    return f"""<li class="course-row is-empty" data-slug="{e(c['slug'])}" data-name="{e(c['name'])}" data-grade="{m.group() if m else ''}" data-kind="{'ap' if c['name'].startswith('AP ') else ''}{' honors' if 'Honors' in c['name'] else ''}">
   <a href="{r}courses/{e(c['slug'])}/"><span class="c-name">{e(c['name'])}</span>
   <span class="c-meta">{e(grades(c))}{' · ' + e(who) if who else ''}</span></a>
   <span class="c-badges">{course_badges(c)}<span class="status"></span></span></li>"""
@@ -206,15 +222,17 @@ def build_home(depts):
 </section>
 
 <section class="three">
+  <a class="panel" href="map/"><span class="label">Campus map</span><b>Find a classroom and who teaches there.</b><span class="meta">Browse by room instead of by class.</span></a>
   <a class="panel" href="summer/"><span class="label">Summer homework</span><b>Every class’s summer work in one place.</b><span class="meta">Collected each May and June.</span></a>
-  <a class="panel" href="school/"><span class="label">School info</span><b>Bell schedule, counselors, passes.</b><span class="meta">The stuff nobody tells freshmen.</span></a>
-  <a class="panel accent" href="bounties/"><span class="label">Help build it</span><b>Claim a bounty. Write a page.</b><span class="meta">Get credit on the leaderboard.</span></a>
+  <a class="panel members-only accent" href="bounties/"><span class="label">Help build it</span><b>Claim a bounty. Write a page.</b><span class="meta">Get credit on the leaderboard.</span></a>
+  <button type="button" class="panel guests-only accent js-signin"><span class="label">Help build it</span><b>Sign in to write pages and earn credit.</b><span class="meta">Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
 <section class="two">
-  <div><h2 class="label-h">Open bounties</h2><div id="home-bounties" class="mini-list"><div class="meta">Loading…</div></div>
-    <a href="bounties/">See the whole board →</a></div>
   <div><h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div></div>
+  <div class="members-only"><h2 class="label-h">Open bounties</h2><div id="home-bounties" class="mini-list"><div class="meta">Loading…</div></div>
+    <a href="bounties/">See the whole board →</a></div>
+  <div class="guests-only"><h2 class="label-h">School info</h2><div class="mini-list"><a href="school/">Bell schedule, counselor appointments, passes and more →</a></div></div>
 </section>
 """, desc="Student-written guides to every class at Wilcox High School in Santa Clara: test style, grading, homework, study guides, tips and summer homework.",
          data={"page": "home"})
@@ -231,8 +249,10 @@ def build_subjects(depts):
     page("subjects/", "All classes", f"""
 <h1>All classes</h1>
 <p class="lede">Every class offered at Wilcox in the {e(CATALOG_SOURCE.split(' ')[-1])} catalog. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> nobody has written it yet</span></p>
-<div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
-{body}""", active="subjects/", data={"page": "subject"})
+<div class="sortbar"><span class="label">Sort</span><div class="chips" id="sort"><button class="chip" data-sort="subject" aria-pressed="true">By subject</button><button class="chip" data-sort="az">A–Z</button><button class="chip" data-sort="grade">By grade</button></div>
+<span class="label">Show</span><div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div></div>
+<div id="by-subject">{body}</div>
+<div id="flat" hidden></div>""", active="subjects/", data={"page": "subject"})
 
     for d in depts:
         svcte = d["slug"] == "svcte"
@@ -322,6 +342,12 @@ def build_teachers(teachers, courses):
 def build_static():
     page("bounties/", "Bounty board", """
 <h1>Bounty board</h1>
+<div id="gate" class="card gate" hidden>
+  <h2>Sign in to see the bounty board</h2>
+  <p>Bounties are jobs for Wilkipedia members: claim one, write a page, get credit on the leaderboard.</p>
+  <p><button type="button" class="btn js-signin">Sign in</button> <span class="meta">Use your school account to get the SCUSD ✓ badge.</span></p>
+</div>
+<div id="members">
 <p class="lede">Wilkipedia is written by volunteers. Each bounty is one clear job with a finish line. Claim one, do it, submit it, and a reviewer publishes it with your name on it.</p>
 <div id="stats" class="stats"></div>
 <div class="filters">
@@ -342,7 +368,8 @@ def build_static():
   <p><b>Points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>. If you signed in with your school account, your comments then post instantly.</p>
   <p><b>Sign in with your school account</b> (@scusd.net) to get the <span class="badge-school">SCUSD ✓</span> badge on everything you write. Personal Google accounts work too, but their comments always go to a reviewer first.</p>
   <p>Have an idea for a bounty? Suggest it in a comment on the class page, or tell a reviewer.</p>
-</section>""", active="bounties/", script="bounties.js")
+</section>
+</div>""", active="bounties/", script="bounties.js")
 
     page("submit/", "Contribute", """
 <h1>Contribute</h1>
@@ -449,6 +476,16 @@ def build_static():
 <h2>Who runs this</h2>
 <p>Wilkipedia is an independent project run by Wilcox High School students. It is not operated by Wilcox High School or Santa Clara Unified School District.</p>
 <p class="meta">Last updated September 2026.</p>""", data={"page": "static"})
+
+    page("map/", "Campus map", """
+<h1>Campus map</h1>
+<p class="lede">Find a classroom, see who teaches there and what they teach.</p>
+<div id="map-view"></div>
+<section><h2>Rooms</h2>
+  <p class="meta">Built from the room numbers students add to teacher sections. <a href="../submit/?kind=teacher_section">Add a teacher’s room</a></p>
+  <div id="room-list"><div class="meta">Loading…</div></div>
+</section>""", active="map/", data={"page": "map"},
+         desc="Map of Wilcox High School classrooms: find a room and see who teaches there.")
 
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})

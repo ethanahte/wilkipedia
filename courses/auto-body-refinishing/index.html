@@ -11,17 +11,20 @@
 <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="../../">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="../../">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="../../subjects/" aria-current=page>Classes</a><a href="../../bounties/">Bounties</a><a href="../../summer/">Summer HW</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="../../map/">Map</a><a href="../../subjects/" aria-current=page>Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="../../summer/">Summer homework</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a><a href="../../teachers/">Teachers</a><a href="../../rules/">Community rules</a><a href="../../about/">About</a></div></details></nav>
     <form class="hsearch" action="../../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="../../bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <nav class="crumbs"><a href="../../subjects/">All classes</a> / <a href="../../subjects/svcte/">SVCTE (off-campus)</a></nav>

@@ -11,17 +11,20 @@
 <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="./assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="./assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="./">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="./">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="./subjects/">Classes</a><a href="./bounties/">Bounties</a><a href="./summer/">Summer HW</a><a href="./school/">School info</a><a href="./leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="./map/">Map</a><a href="./subjects/">Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="./summer/">Summer homework</a><a href="./school/">School info</a><a href="./leaderboard/">Leaderboard</a><a href="./teachers/">Teachers</a><a href="./rules/">Community rules</a><a href="./about/">About</a></div></details></nav>
     <form class="hsearch" action="./search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="./bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <section class="hero">
@@ -50,15 +53,17 @@
 </section>
 
 <section class="three">
+  <a class="panel" href="map/"><span class="label">Campus map</span><b>Find a classroom and who teaches there.</b><span class="meta">Browse by room instead of by class.</span></a>
   <a class="panel" href="summer/"><span class="label">Summer homework</span><b>Every class’s summer work in one place.</b><span class="meta">Collected each May and June.</span></a>
-  <a class="panel" href="school/"><span class="label">School info</span><b>Bell schedule, counselors, passes.</b><span class="meta">The stuff nobody tells freshmen.</span></a>
-  <a class="panel accent" href="bounties/"><span class="label">Help build it</span><b>Claim a bounty. Write a page.</b><span class="meta">Get credit on the leaderboard.</span></a>
+  <a class="panel members-only accent" href="bounties/"><span class="label">Help build it</span><b>Claim a bounty. Write a page.</b><span class="meta">Get credit on the leaderboard.</span></a>
+  <button type="button" class="panel guests-only accent js-signin"><span class="label">Help build it</span><b>Sign in to write pages and earn credit.</b><span class="meta">Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
 <section class="two">
-  <div><h2 class="label-h">Open bounties</h2><div id="home-bounties" class="mini-list"><div class="meta">Loading…</div></div>
-    <a href="bounties/">See the whole board →</a></div>
   <div><h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div></div>
+  <div class="members-only"><h2 class="label-h">Open bounties</h2><div id="home-bounties" class="mini-list"><div class="meta">Loading…</div></div>
+    <a href="bounties/">See the whole board →</a></div>
+  <div class="guests-only"><h2 class="label-h">School info</h2><div class="mini-list"><a href="school/">Bell schedule, counselor appointments, passes and more →</a></div></div>
 </section>
 
 </main>

@@ -63,6 +63,54 @@ export const badge = (verified) => (verified
   ? ' <span class="badge-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : '');
 export const byline = (name, verified) => esc(name) + badge(verified);
 
+// ── profile pictures ──
+// A fixed set of icons and colours: nothing to moderate, no photos of students.
+// Keys must match the check constraints on profiles.avatar / avatar_color.
+export const AVATARS = {
+  fox: '🦊', panda: '🐼', tiger: '🐯', owl: '🦉', turtle: '🐢', octopus: '🐙', frog: '🐸',
+  penguin: '🐧', cat: '🐱', dog: '🐶', koala: '🐨', bee: '🐝', bolt: '⚡', rocket: '🚀',
+  books: '📚', flask: '🧪', palette: '🎨', music: '🎵', ball: '🏀', star: '⭐',
+};
+export const AVATAR_COLORS = {
+  green: '#2f7a57', blue: '#3a6bb0', purple: '#7a5bb5', red: '#b8504a',
+  orange: '#c7772a', teal: '#2a8582', pink: '#b85888', gray: '#6f746c',
+};
+// Accepts a User ({avatar, color, name}) or a row ({avatar, color, author}).
+export function avatarHtml(p, size = 'sm') {
+  const label = p.name ?? p.author ?? p.display_name ?? '?';
+  const glyph = AVATARS[p.avatar] || esc(label.trim().charAt(0).toUpperCase() || '?');
+  const bg = AVATAR_COLORS[p.color ?? p.avatar_color] || AVATAR_COLORS.gray;
+  return `<span class="avatar av-${size}${AVATARS[p.avatar] ? ' has-icon' : ''}" style="--av:${bg}" aria-hidden="true">${glyph}</span>`;
+}
+
+// ── night mode ──
+// "system" follows the device; an explicit choice is remembered per browser.
+// tools/build.py puts a tiny script in <head> that applies it before first paint.
+const THEME_KEY = 'wilkipedia-theme';
+export function themePref() {
+  try { return localStorage.getItem(THEME_KEY) || 'system'; } catch { return 'system'; }
+}
+export function setThemePref(pref) {
+  try { pref === 'system' ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, pref); }
+  catch { /* storage blocked: still applies for this page */ }
+  if (pref === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = pref;
+  paintThemeToggle();
+}
+const isDark = () => (document.documentElement.dataset.theme
+  ? document.documentElement.dataset.theme === 'dark'
+  : matchMedia('(prefers-color-scheme: dark)').matches);
+const SUN = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>';
+function paintThemeToggle() {
+  const b = $('#theme-toggle');
+  if (!b) return;
+  const dark = isDark();
+  b.innerHTML = dark ? SUN : MOON;
+  b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode');
+  b.title = b.getAttribute('aria-label');
+}
+
 export const courseUrl = (slug) => `${root}courses/${slug}/`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 
@@ -75,14 +123,45 @@ export async function initHeader() {
     b.innerHTML = `<b>Demo mode.</b> Supabase isn't connected yet, so claims, submissions and comments are saved only in this browser. <a href="${root}account/">Details</a>`;
     document.body.prepend(b);
   }
+  // Night mode toggle
+  paintThemeToggle();
+  $('#theme-toggle')?.addEventListener('click', () => setThemePref(isDark() ? 'light' : 'dark'));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintThemeToggle);
+
+  // "More" menu: close it when clicking anywhere else or pressing Escape
+  document.addEventListener('click', (e) => {
+    $$('details.more[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') $$('details.more[open]').forEach((d) => { d.open = false; d.querySelector('summary').focus(); });
+  });
+
   const s = await store();
-  const paint = (u) => {
-    if (!slot) return;
-    slot.innerHTML = u
-      ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}
-         <a href="${root}account/" class="who" title="Your account">${esc(u.name)}</a>`
-      : `<button class="btn small" id="signin">Sign in</button>`;
-    $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
+  const tab = $('#bounty-tab');
+  // Any "Sign in" button outside the header (home panel, bounty gate…)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.js-signin')) guard(() => s.signIn());
+  });
+  const paint = async (u) => {
+    // .members-only / .guests-only sections switch on this class (style.css)
+    document.body.classList.toggle('signed-in', !!u);
+    if (slot) {
+      slot.innerHTML = u
+        ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}
+           <a href="${root}account/" class="who" title="Your account">${avatarHtml(u)}<span class="who-name">${esc(u.name)}</span></a>`
+        : `<button class="btn small" id="signin">Sign in</button>`;
+      $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
+    }
+    // The bounty board is for signed-in members: its tab only appears for them.
+    if (tab) {
+      tab.hidden = !u;
+      if (u) {
+        try {
+          const open = (await s.bounties()).filter((b) => b.status === 'open' && !b.claims.length).length;
+          $('.n', tab).textContent = open || '';
+        } catch { /* the tab still works without a count */ }
+      }
+    }
   };
   paint(s.user());
   s.onAuth(paint);

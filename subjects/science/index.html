@@ -11,17 +11,20 @@
 <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="../../">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="../../">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="../../subjects/" aria-current=page>Classes</a><a href="../../bounties/">Bounties</a><a href="../../summer/">Summer HW</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="../../map/">Map</a><a href="../../subjects/" aria-current=page>Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="../../summer/">Summer homework</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a><a href="../../teachers/">Teachers</a><a href="../../rules/">Community rules</a><a href="../../about/">About</a></div></details></nav>
     <form class="hsearch" action="../../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="../../bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <nav class="crumbs"><a href="../">All classes</a></nav>
@@ -29,49 +32,49 @@
 
 <p class="lede">15 classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
 <div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
-<ul class="course-list"><li class="course-row is-empty" data-slug="ap-biology" data-kind="ap">
+<ul class="course-list"><li class="course-row is-empty" data-slug="ap-biology" data-name="AP Biology" data-grade="11" data-kind="ap">
   <a href="../../courses/ap-biology/"><span class="c-name">AP Biology</span>
   <span class="c-meta">Grades 11-12 · Nalinee Srinivasan</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-chemistry" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-chemistry" data-name="AP Chemistry" data-grade="10" data-kind="ap">
   <a href="../../courses/ap-chemistry/"><span class="c-name">AP Chemistry</span>
   <span class="c-meta">Grades 10-12 · Deana Dutton</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-environmental-science" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-environmental-science" data-name="AP Environmental Science" data-grade="11" data-kind="ap">
   <a href="../../courses/ap-environmental-science/"><span class="c-name">AP Environmental Science</span>
   <span class="c-meta">Grades 11-12 · Christopher Vargas</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-physics-1" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-physics-1" data-name="AP Physics 1" data-grade="11" data-kind="ap">
   <a href="../../courses/ap-physics-1/"><span class="c-name">AP Physics 1</span>
   <span class="c-meta">Grades 11-12 · Erin Hughes</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-physics-2" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-physics-2" data-name="AP Physics 2" data-grade="11" data-kind="ap">
   <a href="../../courses/ap-physics-2/"><span class="c-name">AP Physics 2</span>
   <span class="c-meta">Grades 11-12 · David Iverson</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="anatomy-and-physiology" data-kind="">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="anatomy-and-physiology" data-name="Anatomy and Physiology" data-grade="10" data-kind="">
   <a href="../../courses/anatomy-and-physiology/"><span class="c-name">Anatomy and Physiology</span>
   <span class="c-meta">Grades 10-12 · Brad Beadell</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-biology-of-the-living-earth" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-biology-of-the-living-earth" data-name="BSC Biology of the Living Earth" data-grade="9" data-kind="">
   <a href="../../courses/bsc-biology-of-the-living-earth/"><span class="c-name">BSC Biology of the Living Earth</span>
   <span class="c-meta">Grades 9-12 · Vance Campbell</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-physics-in-the-universe" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="bsc-physics-in-the-universe" data-name="BSC Physics in the Universe" data-grade="10" data-kind="">
   <a href="../../courses/bsc-physics-in-the-universe/"><span class="c-name">BSC Physics in the Universe</span>
   <span class="c-meta">Grades 10-12 · Erik Rutgers</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="biology-of-the-living-earth" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="biology-of-the-living-earth" data-name="Biology of the Living Earth" data-grade="9" data-kind="">
   <a href="../../courses/biology-of-the-living-earth/"><span class="c-name">Biology of the Living Earth</span>
   <span class="c-meta">Grades 9-12 · Brad Beadell, Vance Campbell, Clarissa Cordonnier +3</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="chemistry-in-the-earth-system" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="chemistry-in-the-earth-system" data-name="Chemistry in the Earth System" data-grade="10" data-kind="">
   <a href="../../courses/chemistry-in-the-earth-system/"><span class="c-name">Chemistry in the Earth System</span>
   <span class="c-meta">Grades 10-12 · Vance Campbell, Deana Dutton, Rosana Vratny</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-chemistry-in-the-earth-system" data-kind=" honors">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-chemistry-in-the-earth-system" data-name="Honors Chemistry in the Earth System" data-grade="10" data-kind=" honors">
   <a href="../../courses/honors-chemistry-in-the-earth-system/"><span class="c-name">Honors Chemistry in the Earth System</span>
   <span class="c-meta">Grades 10-12 · Clarissa Cordonnier, Rosana Vratny</span></a>
-  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-human-physiology" data-kind=" honors">
+  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="honors-human-physiology" data-name="Honors Human Physiology" data-grade="11" data-kind=" honors">
   <a href="../../courses/honors-human-physiology/"><span class="c-name">Honors Human Physiology</span>
   <span class="c-meta">Grades 11-12 · Mike Buncic</span></a>
-  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-biology" data-kind="">
+  <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-biology" data-name="PRT Biology" data-grade="9" data-kind="">
   <a href="../../courses/prt-biology/"><span class="c-name">PRT Biology</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-earth-and-space-science" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-earth-and-space-science" data-name="PRT Earth and Space Science" data-grade="9" data-kind="">
   <a href="../../courses/prt-earth-and-space-science/"><span class="c-name">PRT Earth and Space Science</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="physics-in-the-universe" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="physics-in-the-universe" data-name="Physics in the Universe" data-grade="9" data-kind="">
   <a href="../../courses/physics-in-the-universe/"><span class="c-name">Physics in the Universe</span>
   <span class="c-meta">Grades 9-12 · Erin Hughes, David Iverson, Erik Rutgers</span></a>
   <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li></ul>

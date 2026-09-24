@@ -11,17 +11,20 @@
 <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="../../">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="../../">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="../../subjects/" aria-current=page>Classes</a><a href="../../bounties/">Bounties</a><a href="../../summer/">Summer HW</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="../../map/">Map</a><a href="../../subjects/" aria-current=page>Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="../../summer/">Summer homework</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a><a href="../../teachers/">Teachers</a><a href="../../rules/">Community rules</a><a href="../../about/">About</a></div></details></nav>
     <form class="hsearch" action="../../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="../../bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <nav class="crumbs"><a href="../">All classes</a></nav>
@@ -29,67 +32,67 @@
 
 <p class="lede">21 classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
 <div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
-<ul class="course-list"><li class="course-row is-empty" data-slug="ap-2d-art-and-design" data-kind="ap">
+<ul class="course-list"><li class="course-row is-empty" data-slug="ap-2d-art-and-design" data-name="AP 2D Art and Design" data-grade="10" data-kind="ap">
   <a href="../../courses/ap-2d-art-and-design/"><span class="c-name">AP 2D Art and Design</span>
   <span class="c-meta">Grades 10-12 · Heather Morton</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-3d-art-and-design" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-3d-art-and-design" data-name="AP 3D Art and Design" data-grade="10" data-kind="ap">
   <a href="../../courses/ap-3d-art-and-design/"><span class="c-name">AP 3D Art and Design</span>
   <span class="c-meta">Grades 10-12 · Paula Estioko</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-drawing" data-kind="ap">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ap-drawing" data-name="AP Drawing" data-grade="10" data-kind="ap">
   <a href="../../courses/ap-drawing/"><span class="c-name">AP Drawing</span>
   <span class="c-meta">Grades 10-12 · Heather Morton</span></a>
-  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="advanced-ceramics" data-kind="">
+  <span class="c-badges"><span class="tag ap">AP</span><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="advanced-ceramics" data-name="Advanced Ceramics" data-grade="11" data-kind="">
   <a href="../../courses/advanced-ceramics/"><span class="c-name">Advanced Ceramics</span>
   <span class="c-meta">Grades 11-12 · David Troup</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ceramics-1" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ceramics-1" data-name="Ceramics 1" data-grade="10" data-kind="">
   <a href="../../courses/ceramics-1/"><span class="c-name">Ceramics 1</span>
   <span class="c-meta">Grades 10-12 · David Troup</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="concert-choir-1" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="concert-choir-1" data-name="Concert Choir 1" data-grade="9" data-kind="">
   <a href="../../courses/concert-choir-1/"><span class="c-name">Concert Choir 1</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="concert-choir-2" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="concert-choir-2" data-name="Concert Choir 2" data-grade="10" data-kind="">
   <a href="../../courses/concert-choir-2/"><span class="c-name">Concert Choir 2</span>
   <span class="c-meta">Grades 10-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="introduction-to-art" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="introduction-to-art" data-name="Introduction to Art" data-grade="9" data-kind="">
   <a href="../../courses/introduction-to-art/"><span class="c-name">Introduction to Art</span>
   <span class="c-meta">Grades 9-12 · Paula Estioko, Heather Morton</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="jazz-band" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="jazz-band" data-name="Jazz Band" data-grade="9" data-kind="">
   <a href="../../courses/jazz-band/"><span class="c-name">Jazz Band</span>
   <span class="c-meta">Grades 9-12 · Philip Aduan</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="music-genesis" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="music-genesis" data-name="Music Genesis" data-grade="9" data-kind="">
   <a href="../../courses/music-genesis/"><span class="c-name">Music Genesis</span>
   <span class="c-meta">Grades 9-12 · Philip Aduan</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-art" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="prt-art" data-name="PRT Art" data-grade="9" data-kind="">
   <a href="../../courses/prt-art/"><span class="c-name">PRT Art</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="painting-1" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="painting-1" data-name="Painting 1" data-grade="10" data-kind="">
   <a href="../../courses/painting-1/"><span class="c-name">Painting 1</span>
   <span class="c-meta">Grades 10-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="painting-2" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="painting-2" data-name="Painting 2" data-grade="11" data-kind="">
   <a href="../../courses/painting-2/"><span class="c-name">Painting 2</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="rop-video-production" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="rop-video-production" data-name="ROP Video Production" data-grade="9" data-kind="">
   <a href="../../courses/rop-video-production/"><span class="c-name">ROP Video Production</span>
   <span class="c-meta">Grades 9-12 · Adrienne Aubry</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="sculpture" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="sculpture" data-name="Sculpture" data-grade="10" data-kind="">
   <a href="../../courses/sculpture/"><span class="c-name">Sculpture</span>
   <span class="c-meta">Grades 10-12 · Paula Estioko</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="string-orchestra" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="string-orchestra" data-name="String Orchestra" data-grade="9" data-kind="">
   <a href="../../courses/string-orchestra/"><span class="c-name">String Orchestra</span>
   <span class="c-meta">Grades 9-12 · Philip Aduan</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="symphonic-band-1" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="symphonic-band-1" data-name="Symphonic Band 1" data-grade="9" data-kind="">
   <a href="../../courses/symphonic-band-1/"><span class="c-name">Symphonic Band 1</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="symphonic-band-2" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="symphonic-band-2" data-name="Symphonic Band 2" data-grade="9" data-kind="">
   <a href="../../courses/symphonic-band-2/"><span class="c-name">Symphonic Band 2</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theater-2" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theater-2" data-name="Theater 2" data-grade="9" data-kind="">
   <a href="../../courses/theater-2/"><span class="c-name">Theater 2</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theatre-productions" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theatre-productions" data-name="Theatre Productions" data-grade="9" data-kind="">
   <a href="../../courses/theatre-productions/"><span class="c-name">Theatre Productions</span>
   <span class="c-meta">Grades 9-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theatre-productions-honors" data-kind=" honors">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="theatre-productions-honors" data-name="Theatre Productions Honors" data-grade="10" data-kind=" honors">
   <a href="../../courses/theatre-productions-honors/"><span class="c-name">Theatre Productions Honors</span>
   <span class="c-meta">Grades 10-12 · Claire Robson</span></a>
   <span class="c-badges"><span class="tag">Honors</span><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li></ul>

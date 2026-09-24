@@ -11,17 +11,20 @@
 <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem('wilkipedia-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-root="../../">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
     <a class="brand" href="../../">Wilkipedia</a>
-    <nav class="main-nav" aria-label="Main"><a href="../../subjects/" aria-current=page>Classes</a><a href="../../bounties/">Bounties</a><a href="../../summer/">Summer HW</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a></nav>
+    <nav class="main-nav" aria-label="Main"><a href="../../map/">Map</a><a href="../../subjects/" aria-current=page>Classes</a><details class="more"><summary>More</summary><div class="menu"><a href="../../summer/">Summer homework</a><a href="../../school/">School info</a><a href="../../leaderboard/">Leaderboard</a><a href="../../teachers/">Teachers</a><a href="../../rules/">Community rules</a><a href="../../about/">About</a></div></details></nav>
     <form class="hsearch" action="../../search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="bounty-tab" class="bounty-tab" href="../../bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
 <main id="main" class="wrap">
 
 <nav class="crumbs"><a href="../">All classes</a></nav>
@@ -29,70 +32,70 @@
 <p class="note">SVCTE programs are taught at the Silicon Valley Career Technical Education campus, not at Wilcox. Ask your counselor about signing up.</p>
 <p class="lede">22 classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
 <div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
-<ul class="course-list"><li class="course-row is-empty" data-slug="animation" data-kind="">
+<ul class="course-list"><li class="course-row is-empty" data-slug="animation" data-name="Animation" data-grade="11" data-kind="">
   <a href="../../courses/animation/"><span class="c-name">Animation</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="auto-body-refinishing" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="auto-body-refinishing" data-name="Auto Body Refinishing" data-grade="11" data-kind="">
   <a href="../../courses/auto-body-refinishing/"><span class="c-name">Auto Body Refinishing</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="construction-technology" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="construction-technology" data-name="Construction Technology" data-grade="11" data-kind="">
   <a href="../../courses/construction-technology/"><span class="c-name">Construction Technology</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="culinary-arts" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="culinary-arts" data-name="Culinary Arts" data-grade="11" data-kind="">
   <a href="../../courses/culinary-arts/"><span class="c-name">Culinary Arts</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="cybersecurity" data-kind="">
+  <span class="c-badges"><span class="status"></span></span></li><li class="course-row is-empty" data-slug="cybersecurity" data-name="Cybersecurity" data-grade="11" data-kind="">
   <a href="../../courses/cybersecurity/"><span class="c-name">Cybersecurity</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="dental-assisting" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="dental-assisting" data-name="Dental Assisting" data-grade="11" data-kind="">
   <a href="../../courses/dental-assisting/"><span class="c-name">Dental Assisting</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ev-auto-services" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="ev-auto-services" data-name="EV/Auto Services" data-grade="11" data-kind="">
   <a href="../../courses/ev-auto-services/"><span class="c-name">EV/Auto Services</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="electrical-maintenance" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="electrical-maintenance" data-name="Electrical Maintenance" data-grade="11" data-kind="">
   <a href="../../courses/electrical-maintenance/"><span class="c-name">Electrical Maintenance</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="fashion-design-and-textile-art" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="fashion-design-and-textile-art" data-name="Fashion Design &amp; Textile Art" data-grade="11" data-kind="">
   <a href="../../courses/fashion-design-and-textile-art/"><span class="c-name">Fashion Design &amp; Textile Art</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="film-and-video-production" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="film-and-video-production" data-name="Film &amp; Video Production" data-grade="11" data-kind="">
   <a href="../../courses/film-and-video-production/"><span class="c-name">Film &amp; Video Production</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="fire-science-first-responder" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: F</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="fire-science-first-responder" data-name="Fire Science/First Responder" data-grade="11" data-kind="">
   <a href="../../courses/fire-science-first-responder/"><span class="c-name">Fire Science/First Responder</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="forensic-sciences" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="forensic-sciences" data-name="Forensic Sciences" data-grade="11" data-kind="">
   <a href="../../courses/forensic-sciences/"><span class="c-name">Forensic Sciences</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="heating-ventilation-and-air-conditional-hvac" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="heating-ventilation-and-air-conditional-hvac" data-name="Heating, Ventilation, &amp; Air Conditional (HVAC)" data-grade="11" data-kind="">
   <a href="../../courses/heating-ventilation-and-air-conditional-hvac/"><span class="c-name">Heating, Ventilation, &amp; Air Conditional (HVAC)</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="law-enforcement" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="law-enforcement" data-name="Law Enforcement" data-grade="11" data-kind="">
   <a href="../../courses/law-enforcement/"><span class="c-name">Law Enforcement</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="mechatronics-engineering" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="mechatronics-engineering" data-name="Mechatronics Engineering" data-grade="11" data-kind="">
   <a href="../../courses/mechatronics-engineering/"><span class="c-name">Mechatronics Engineering</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="medical-science-health-careers" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="medical-science-health-careers" data-name="Medical Science/ Health Careers" data-grade="11" data-kind="">
   <a href="../../courses/medical-science-health-careers/"><span class="c-name">Medical Science/ Health Careers</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="metals-technology" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="metals-technology" data-name="Metals Technology" data-grade="11" data-kind="">
   <a href="../../courses/metals-technology/"><span class="c-name">Metals Technology</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="mobile-app-design-and-computer-coding" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: C/G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="mobile-app-design-and-computer-coding" data-name="Mobile App Design and Computer Coding" data-grade="11" data-kind="">
   <a href="../../courses/mobile-app-design-and-computer-coding/"><span class="c-name">Mobile App Design and Computer Coding</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="nursing-careers" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="nursing-careers" data-name="Nursing Careers" data-grade="11" data-kind="">
   <a href="../../courses/nursing-careers/"><span class="c-name">Nursing Careers</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D / G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="pharmacy-technician" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D / G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="pharmacy-technician" data-name="Pharmacy Technician" data-grade="11" data-kind="">
   <a href="../../courses/pharmacy-technician/"><span class="c-name">Pharmacy Technician</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="sports-medicine-and-kinesiology" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: G</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="sports-medicine-and-kinesiology" data-name="Sports Medicine &amp; Kinesiology" data-grade="11" data-kind="">
   <a href="../../courses/sports-medicine-and-kinesiology/"><span class="c-name">Sports Medicine &amp; Kinesiology</span>
   <span class="c-meta">Grades 11-12</span></a>
-  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="veterinary-science" data-kind="">
+  <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li><li class="course-row is-empty" data-slug="veterinary-science" data-name="Veterinary Science" data-grade="11" data-kind="">
   <a href="../../courses/veterinary-science/"><span class="c-name">Veterinary Science</span>
   <span class="c-meta">Grades 11-12</span></a>
   <span class="c-badges"><span class="tag" title="UC/CSU a–g requirement">a–g: D</span><span class="status"></span></span></li></ul>

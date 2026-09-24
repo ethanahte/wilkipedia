@@ -7,15 +7,17 @@
 //          the database exists.
 //
 // Every method returns plain objects in the shapes documented below.
-//   User       {id, name, role, school}        school = signed in with an @scusd.net account
+//   User       {id, name, role, school, avatar, color, grad_year, show_on_leaderboard}
+//              school = signed in with an @scusd.net account
 //   Bounty     {id, title, track, course_slug, teacher, size, priority, you_get,
 //               done_means, status, created_at, claims: [{user_id, name, expires_at}]}
-//   Submission {id, user_id, author, verified, bounty_id, course_slug, kind, teacher, payload,
+//   Submission {id, user_id, author, verified, avatar, color, bounty_id, course_slug, kind, teacher, payload,
 //               status, review_note, reviewed_at, created_at}
-//   Comment    {id, course_slug, user_id, author, verified, parent_id, prompt, body, status,
+//   Comment    {id, course_slug, user_id, author, verified, avatar, color, parent_id, prompt, body, status,
 //               created_at, likes, liked}
 //   Report     {id, kind, course_slug, target, note, author, resolved, created_at}
-//   Leader     {id, display_name, role, points, semester_points, approved, school_verified}
+//   Leader     {id, display_name, role, points, semester_points, approved, school_verified,
+//               avatar, avatar_color, grad_year}
 //
 // `author` is "Former student" when the account behind a contribution was deleted.
 
@@ -29,6 +31,12 @@ export const TRUSTED_ROLES = ['trusted', 'reviewer', 'admin'];
 // Mirrors on_comment_insert() in schema.sql: personal accounts are always reviewed.
 export const postsInstantly = (u) => REVIEWER_ROLES.includes(u.role) || (u.role === 'trusted' && !!u.school);
 const FORMER = 'Former student';
+
+// The profile columns a user may edit (see the column grant in schema.sql).
+export const PROFILE_FIELDS = ['display_name', 'avatar', 'avatar_color', 'grad_year', 'show_on_leaderboard'];
+const toUser = (p) => ({ id: p.id, name: p.display_name, role: p.role, school: !!p.school_verified,
+                         avatar: p.avatar ?? null, color: p.avatar_color || 'green',
+                         grad_year: p.grad_year ?? null, show_on_leaderboard: p.show_on_leaderboard !== false });
 
 let pending = null;
 export function store() {
@@ -48,10 +56,8 @@ async function live() {
 
   async function loadMe(session) {
     if (!session) { me = null; return; }
-    const { data } = await sb.from('profiles').select('id, display_name, role, school_verified')
-      .eq('id', session.user.id).maybeSingle();
-    me = data ? { id: data.id, name: data.display_name, role: data.role, school: data.school_verified }
-              : { id: session.user.id, name: 'New member', role: 'contributor', school: false };
+    const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    me = toUser(data || { id: session.user.id, display_name: 'New member', role: 'contributor' });
   }
   const { data: { session } } = await sb.auth.getSession();
   await loadMe(session);
@@ -62,10 +68,12 @@ async function live() {
 
   const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
   const withAuthor = (r) => ({ ...r, author: r.profiles?.display_name ?? FORMER,
-                                verified: !!r.profiles?.school_verified, profiles: undefined });
+                                verified: !!r.profiles?.school_verified, avatar: r.profiles?.avatar ?? null,
+                                color: r.profiles?.avatar_color ?? 'gray', profiles: undefined });
   // Name the foreign key in every embed: comments and profiles are also linked
   // through comment_likes, and an unnamed embed is then ambiguous (HTTP 300).
-  const SUB = '*, profiles!submissions_user_id_fkey(display_name, school_verified)';
+  const WHO = 'display_name, school_verified, avatar, avatar_color';
+  const SUB = `*, profiles!submissions_user_id_fkey(${WHO})`;
 
   return {
     mode: 'live',
@@ -75,9 +83,10 @@ async function live() {
       ok(await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } }));
     },
     async signOut() { await sb.auth.signOut(); },
-    async updateName(name) {
-      ok(await sb.from('profiles').update({ display_name: name }).eq('id', me.id));
-      me = { ...me, name };
+    async updateProfile(fields) {
+      const row = Object.fromEntries(Object.entries(fields).filter(([k]) => PROFILE_FIELDS.includes(k)));
+      const data = ok(await sb.from('profiles').update(row).eq('id', me.id).select('*').single());
+      me = toUser(data);
       listeners.forEach((f) => f(me));
     },
 
@@ -127,7 +136,7 @@ async function live() {
 
     async comments(course_slug) {
       const rows = ok(await sb.from('comments')
-        .select('*, profiles!comments_user_id_fkey(display_name, school_verified), comment_likes(user_id)')
+        .select(`*, profiles!comments_user_id_fkey(${WHO}), comment_likes(user_id)`)
         .eq('course_slug', course_slug).order('created_at'));
       return rows.map((c) => ({
         ...withAuthor(c),
@@ -143,7 +152,7 @@ async function live() {
     },
     async deleteComment(id) { ok(await sb.from('comments').delete().eq('id', id)); },
     async heldComments() {
-      return ok(await sb.from('comments').select('*, profiles!comments_user_id_fkey(display_name, school_verified)')
+      return ok(await sb.from('comments').select(`*, profiles!comments_user_id_fkey(${WHO})`)
         .in('status', ['held', 'hidden']).order('created_at')).map(withAuthor);
     },
     async moderateComment(id, status) { ok(await sb.from('comments').update({ status }).eq('id', id)); },
@@ -174,6 +183,8 @@ async function demo() {
   const me = () => db.me && db.users[db.me];
   const name = (uid) => db.users[uid]?.name ?? FORMER;
   const verified = (uid) => !!db.users[uid]?.school;
+  const who = (uid) => ({ author: name(uid), verified: verified(uid),
+                          avatar: db.users[uid]?.avatar ?? null, color: db.users[uid]?.color ?? 'gray' });
   const need = () => { if (!me()) throw new Error('Sign in first.'); return me(); };
   const reviewer = () => { const u = need(); if (!REVIEWER_ROLES.includes(u.role)) throw new Error('Reviewers only.'); return u; };
 
@@ -187,7 +198,7 @@ async function demo() {
     } catch { /* offline: start with an empty board */ }
   }
 
-  const sub = (s) => ({ ...s, author: name(s.user_id), verified: verified(s.user_id) });
+  const sub = (s) => ({ ...s, ...who(s.user_id) });
   const byReviewed = (a, b) => (b.reviewed_at || '').localeCompare(a.reviewed_at || '');
 
   return {
@@ -198,12 +209,19 @@ async function demo() {
       const n = prompt('Demo mode: pick a display name.\n(Real sign-in with Google turns on once Supabase is connected.)', 'Ethan');
       if (!n) return;
       const uid = 'demo-' + n.trim().toLowerCase().replace(/\W+/g, '-');
-      db.users[uid] ??= { id: uid, name: n.trim().slice(0, 40), role: 'admin', school: false };
+      db.users[uid] ??= { id: uid, name: n.trim().slice(0, 40), role: 'admin', school: false,
+                          avatar: null, color: 'green', grad_year: null, show_on_leaderboard: true };
       db.me = uid; save();
       listeners.forEach((f) => f(me()));
     },
     async signOut() { db.me = null; save(); listeners.forEach((f) => f(null)); },
-    async updateName(n) { need().name = n; save(); listeners.forEach((f) => f(me())); },
+    async updateProfile(fields) {
+      const u = need();
+      const map = { display_name: 'name', avatar: 'avatar', avatar_color: 'color',
+                    grad_year: 'grad_year', show_on_leaderboard: 'show_on_leaderboard' };
+      for (const [k, v] of Object.entries(fields)) if (map[k]) u[map[k]] = v;
+      save(); listeners.forEach((f) => f(me()));
+    },
     // Demo only: lets you feel the site as a contributor, trusted user or reviewer.
     async setDemoRole(role) { need().role = role; save(); listeners.forEach((f) => f(me())); },
     async setDemoSchool(on) { need().school = on; save(); listeners.forEach((f) => f(me())); },
@@ -278,7 +296,7 @@ async function demo() {
       const mod = REVIEWER_ROLES.includes(me()?.role);
       return db.comments.filter((c) => c.course_slug === course_slug
           && (c.status === 'visible' || c.user_id === db.me || mod))
-        .map((c) => ({ ...c, author: name(c.user_id), verified: verified(c.user_id),
+        .map((c) => ({ ...c, ...who(c.user_id),
                        likes: db.likes.filter((l) => l.comment_id === c.id).length,
                        liked: db.likes.some((l) => l.comment_id === c.id && l.user_id === db.me) }));
     },
@@ -302,7 +320,7 @@ async function demo() {
     async heldComments() {
       reviewer();
       return db.comments.filter((c) => c.status !== 'visible')
-        .map((c) => ({ ...c, author: name(c.user_id), verified: verified(c.user_id) }));
+        .map((c) => ({ ...c, ...who(c.user_id) }));
     },
     async moderateComment(cid, status) { reviewer(); db.comments.find((c) => c.id === cid).status = status; save(); },
 
@@ -329,8 +347,10 @@ async function demo() {
         .sort((a, b) => a.reviewed_at.localeCompare(b.reviewed_at));
       for (const s of approved) {
         const u = db.users[s.user_id] || { id: s.user_id, name: '?', role: 'contributor' };
+        if (u.show_on_leaderboard === false) continue;
         const r = rows[u.id] ??= { id: u.id, display_name: u.name, role: u.role, points: 0, semester_points: 0,
-                                   approved: 0, school_verified: !!u.school };
+                                   approved: 0, school_verified: !!u.school, avatar: u.avatar ?? null,
+                                   avatar_color: u.color ?? 'green', grad_year: u.grad_year ?? null };
         r.approved++;
         const key = `${s.user_id}|${s.bounty_id ?? 'x' + s.id}`;
         if (paid.has(key)) continue;          // a bounty pays once per person

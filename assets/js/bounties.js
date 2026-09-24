@@ -15,6 +15,10 @@ const dots = (n) => '●'.repeat(n) + '<span class="off">' + '●'.repeat(5 - n)
 
 async function draw() {
   const me = s.user();
+  // The board is for signed-in members only.
+  $('#gate').hidden = !!me;
+  $('#members').hidden = !me;
+  if (!me) return;
   const all = (await s.bounties()).filter((b) => b.status === 'open');
   const tracks = ['All', ...new Set(all.map((b) => b.track))];
   $('#stats').innerHTML = `
