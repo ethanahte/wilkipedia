@@ -49,10 +49,11 @@ function loadWidget() {
     };
     kick();
     document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(); });
-    // Google "corrects" our name to Wikipedia in the tab title; put it back
-    new MutationObserver(() => {
-      if (/Wikipedia/.test(document.title)) document.title = document.title.replace(/Wikipedia/g, 'Wilkipedia');
-    }).observe(document.querySelector('title'), { childList: true, characterData: true, subtree: true });
+    // Google turns our name into "Wikipedia" (维基百科, Wikipedia…) in the tab
+    // title, so the title keeps its original English text.
+    const title = document.title;
+    new MutationObserver(() => { if (document.title !== title) document.title = title; })
+      .observe(document.querySelector('title'), { childList: true, characterData: true, subtree: true });
   };
   const s = document.createElement('script');
   s.id = 'gt-script';
