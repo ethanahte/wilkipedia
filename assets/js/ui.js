@@ -161,6 +161,9 @@ export async function initHeader() {
     b.innerHTML = `<b>Demo mode.</b> Supabase isn't connected yet, so claims, submissions and comments are saved only in this browser. <a href="${root}account/">Details</a>`;
     document.body.prepend(b);
   }
+  // Language picker (Google Translate loads only once a language is chosen)
+  import('./translate.js').then((m) => m.initTranslate());
+
   // Night mode toggle
   paintThemeToggle();
   $('#theme-toggle')?.addEventListener('click', () => setThemePref(isDark() ? 'light' : 'dark'));

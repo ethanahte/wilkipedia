@@ -118,6 +118,7 @@ ICONS = {
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
     "feedback": _I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/>'),
     "bell": _I('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
+    "globe": _I('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
     "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
@@ -208,10 +209,12 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
-    <a class="brand" href="{r}"><span class="w">W</span>ilkipedia</a>
+    <a class="brand" href="{r}" translate="no"><span class="w">W</span>ilkipedia</a>
     <nav class="main-nav" aria-label="Main">{nav}</nav>
     <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search anything…" aria-label="Search Wilkipedia" autocomplete="off"><div class="results-pop" role="listbox" hidden></div></form>
     <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
+    <div class="lang"><button type="button" class="icon-btn lang-btn" id="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false" title="Language / Idioma">{ICONS["globe"]}<span class="lang-code" translate="no"></span></button>
+      <div class="lang-menu" id="lang-menu" role="menu" hidden></div></div>
     <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
@@ -499,7 +502,7 @@ def build_static():
     page("school/", "School info", """
 <h1>School info</h1>
 <p class="lede">Things every Wilcox student should know, written by students.</p>
-<a class="panel bell-link" href="../bell/"><span class="label">Bell schedule</span><b>Period times, block days, finals and special days →</b></a>
+<a class="panel bell-link" href="../bell/"><span class="label"><span class="topic-ico small" aria-hidden="true">""" + ICONS["bell"] + """</span>Bell schedule</span><b>Period times, block days, finals and special days →</b></a>
 <div id="school-list"><div class="meta">Loading…</div></div>
 <p><a class="btn ghost" href="../submit/?kind=school_info">Add school info</a></p>""",
          active="school/", data={"page": "school"})
@@ -548,6 +551,8 @@ def build_static():
 </ul>
 <p>If you sign in with a Santa Clara Unified school account (@scusd.net), your contributions show an <b>SCUSD ✓</b> badge. We work that out from your email's domain; the email itself stays private.</p>
 <p>Your browser keeps a sign-in token so you stay signed in. Signing out removes it.</p>
+<h2>Translation</h2>
+<p>If you pick a language other than English (the 🌐 button), the page is translated by Google Translate: the page’s text is sent to Google to translate, and Google sets a cookie remembering your language. Choosing English turns this off.</p>
 <h2>What you post</h2>
 <p>Submissions are private until a reviewer approves them, and then they're public. Comments are public once they're visible. Reviewers can see pending submissions and held comments.</p>
 <h2>Deleting your data</h2>

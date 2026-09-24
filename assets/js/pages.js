@@ -216,14 +216,25 @@ const pages = {
   },
 
   async school() {
+    const I = (d) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+    const TOPIC_ICONS = {
+      'Bell schedule': I('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
+      'Counselor appointments': I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 15l2 2 4-4"/>'),
+      'Passes & attendance': I('<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M13 6v12" stroke-dasharray="2 2"/>'),
+      'Tech & accounts': I('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20M9 16v4M15 16v4"/>'),
+      'Clubs & activities': I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
+      'Getting around': I('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+      Other: I('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),
+    };
+    const icon = (t) => `<span class="topic-ico" aria-hidden="true">${TOPIC_ICONS[t] || TOPIC_ICONS.Other}</span>`;
     const list = await s.approved({ kind: 'school_info' });
     const by = {};
     for (const x of list) (by[x.payload.topic] ??= []).push(x);
     const order = KINDS.school_info.fields[0].options.filter((t) => t !== 'Bell schedule' || by[t]);
-    $('#school-list').innerHTML = order.map((topic) => `<section class="card topic"><h2>${esc(topic)}</h2>
+    $('#school-list').innerHTML = order.map((topic) => `<section class="card topic"><h2>${icon(topic)}${esc(topic)}</h2>
       ${(by[topic] || []).map((x) => {
         const stale = staleness(x);
-        return `<article><h3>${esc(x.payload.title)}</h3>${prose(x.payload.text)}
+        return `<article><h3>${icon(topic)}${esc(x.payload.title)}</h3>${prose(x.payload.text)}
           ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
           <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
