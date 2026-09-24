@@ -38,7 +38,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
-                  "menu", "clubs", "sports"]
+                  "menu", "clubs", "sports", "feedback"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -116,6 +116,8 @@ ICONS = {
     "food": _I('<path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-2 1.5-3 4-3 7v2h3"/>'),
     "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
+    "feedback": _I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/>'),
+    "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
@@ -123,7 +125,8 @@ ICONS = {
 MORE = [("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("sports/", "Sports", "sports"),
         ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
         ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
-        ("rules/", "Community rules", "rules"), ("about/", "About", "about")]
+        ("rules/", "Community rules", "rules"), ("about/", "About", "about"),
+        ("feedback/", "Send feedback", "feedback")]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -151,8 +154,8 @@ def asset_versions():
 VERSIONS = {}
 
 # Applies a saved night-mode choice before first paint, so pages never flash.
-THEME_BOOT = ("<script>try{var t=localStorage.getItem('wilkipedia-theme');"
-              "if(t)document.documentElement.dataset.theme=t}catch(e){}</script>")
+THEME_BOOT = ("<script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),"
+              "c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c}catch(e){}</script>")
 
 
 def page(path, title, body, *, desc="", script=None, active=None, data=None):
@@ -211,6 +214,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
 <main id="main" class="wrap">
 {body}
@@ -218,7 +222,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -261,6 +265,7 @@ def build_home(depts):
     grid = "".join(f"""<a class="subject" href="subjects/{e(d['slug'])}/"><b>{e(short_dept(d['name']))}</b>
       <span>{len(d['courses'])} classes</span></a>""" for d in depts)
     page("", "Wilkipedia", f"""
+<section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
 <section class="hero">
   <h1>Every class at Wilcox,<br>explained by students.</h1>
   <p class="lede">Test style, grading, homework load, study guides, tips and summer homework, for any class, even ones you’re not taking.</p>
@@ -471,7 +476,7 @@ def build_static():
 
     page("review/", "Review", """
 <h1>Review</h1>
-<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button></div>
+<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button></div>
 <div id="panel"></div>""", script="review.js")
 
     page("leaderboard/", "Leaderboard", """
@@ -492,6 +497,7 @@ def build_static():
     page("school/", "School info", """
 <h1>School info</h1>
 <p class="lede">Things every Wilcox student should know, written by students.</p>
+<section id="bell" class="sec"><h2>Bell schedule</h2><div id="bell-full"><div class="meta">Loading…</div></div></section>
 <div id="school-list"><div class="meta">Loading…</div></div>
 <p><a class="btn ghost" href="../submit/?kind=school_info">Add school info</a></p>""",
          active="school/", data={"page": "school"})
@@ -522,7 +528,7 @@ def build_static():
     page("about/", "About", """
 <h1>About Wilkipedia</h1>
 <p class="lede">A student-built guide to every class at Wilcox High School in Santa Clara.</p>
-<p>Started in 2026 by Ethan Liu and Jonathan. Students write everything through <a href="../bounties/">bounties</a>, and reviewers check it before it’s published.</p>
+<p>Started in 2026 by Ethan Liu and Jonathan Lee. Students write everything through <a href="../bounties/">bounties</a>, and reviewers check it before it’s published.</p>
 <p><b>Where the facts come from.</b> Course names, grade levels, prerequisites and descriptions come from the SCUSD High School Course Catalog 2025–2026. Teacher lists come from the Wilcox staff directory. Everything else is written by students.</p>
 <p><b>Not official.</b> Wilkipedia is an independent student project, not a Wilcox High School or Santa Clara Unified site. Always confirm policies and deadlines with your teacher or counselor. The official site is <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">wilcox.santaclarausd.org ↗</a>.</p>
 <p><b>Something wrong?</b> Every section has a “Report outdated” button. To reach the team, comment on any class page or tell a reviewer.</p>""", data={"page": "static"})
@@ -554,10 +560,6 @@ def build_static():
 <p class="lede">Tap a room to zoom in and see who teaches there, what they teach and when.</p>
 <div class="map-app" id="map-app">
   <div class="map-toolbar">
-    <div class="seg" id="map-mode" role="radiogroup" aria-label="Map style">
-      <button type="button" role="radio" aria-checked="true" data-mode="plan">Map</button>
-      <button type="button" role="radio" aria-checked="false" data-mode="aerial">Aerial photo</button>
-    </div>
     <form id="room-find" class="room-find" role="search"><input id="room-q" list="room-ids" placeholder="Find a room, e.g. B204" aria-label="Find a room" autocomplete="off"><datalist id="room-ids"></datalist></form>
     <div class="zoom"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button><button type="button" id="z-reset">Whole campus</button></div>
   </div>
@@ -611,6 +613,31 @@ def build_static():
 <p><a class="btn ghost" href="../submit/?kind=sport">Add info about a team</a></p>""", active="sports/", data={"page": "sports"},
          desc="Wilcox High School sports teams by season: tryouts, practices and what it's like to play.")
 
+    page("feedback/", "Feedback", """
+<h1>Feedback</h1>
+<p class="lede">Found a bug? Want a feature? Have an idea? Tell the Wilkipedia team. Every message is read.</p>
+<form id="fb-form" class="card fb-form">
+  <div class="field"><span class="flabel">What kind?</span>
+    <div class="seg" id="fb-kind" role="radiogroup" aria-label="Kind of feedback">
+      <button type="button" role="radio" aria-checked="true" data-kind="idea">💡 Idea</button>
+      <button type="button" role="radio" aria-checked="false" data-kind="bug">🐞 Bug</button>
+      <button type="button" role="radio" aria-checked="false" data-kind="feature">✨ Feature request</button>
+      <button type="button" role="radio" aria-checked="false" data-kind="other">💬 Other</button>
+    </div></div>
+  <div class="field"><label for="fb-msg">Your message <span class="req">*</span></label>
+    <div class="hint" id="fb-hint">What would make Wilkipedia better?</div>
+    <textarea id="fb-msg" rows="6" maxlength="2000" required></textarea></div>
+  <div class="field"><label for="fb-page">Which page? <span class="hint-inline">(optional)</span></label>
+    <input id="fb-page" maxlength="300" placeholder="e.g. the campus map, or paste the link"></div>
+  <div class="field"><label for="fb-name">Your name <span class="hint-inline">(optional, so we can thank you)</span></label>
+    <input id="fb-name" maxlength="60"></div>
+  <p id="fb-error" class="error" hidden></p>
+  <button class="btn big">Send feedback</button>
+</form>
+<div id="fb-done" class="done" hidden><h2>Thanks! We got it.</h2><p>The team reads every message on the review desk.</p>
+  <p><button type="button" class="btn ghost" id="fb-again">Send another</button></p></div>""", data={"page": "feedback"},
+         desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
+
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})
 
@@ -648,7 +675,9 @@ SEARCH_PAGES = [
     ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
     ("Privacy", "privacy/", "What we store", "privacy data delete account"),
-    ("About Wilkipedia", "about/", "Who runs this", "about contact"),
+    ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
+    ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
+    ("Bell schedule", "school/#bell", "Period times, block days, finals", "bell schedule period times block day finals minimum day when does school start end"),
 ]
 
 

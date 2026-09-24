@@ -1,7 +1,7 @@
 # CLAUDE.md: Wilkipedia
 
 A student-run guide to every class at Wilcox High School (Santa Clara, SCUSD).
-Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
+Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 `docs/Wilkipedia Team Handbook.docx` has the product decisions. Read both.
 
 ## Stack
@@ -66,8 +66,8 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
   student photos). Keys are in `AVATARS`/`AVATAR_COLORS` (ui.js) and in the SQL
   check constraints; keep them in sync.
 - **Map** (`assets/js/map.js`) reads `data/map.json`: 126 room boxes traced off the
-  school's campus map (`assets/map/campus-map.png`, pixel coordinates) plus a
-  public-domain USDA/USGS aerial photo. The camera is the SVG viewBox. A room's
+  school's campus map (`assets/map/campus-map.png`, pixel coordinates). (An
+  aerial photo view was tried and removed at Ethan's request.) The camera is the SVG viewBox. A room's
   contents come from approved teacher sections whose `room` matches its id
   (normalised: "room b-204" = B204). Only add rooms that are on the real map.
 - **Colours:** Wilcox black/gold/white. `--gold` is the brand fill and always
@@ -86,5 +86,13 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
   `build_search_index` (classes incl. catalog text, teachers, clubs, teams, rooms,
   pages), plus approved student writing added live. Shortcuts live in
   `ALIASES`; add new pages to `SEARCH_PAGES` in build.py.
+- **Bell schedule** (`assets/js/bell.js`, `data/bell.json` from the school's page):
+  strip at the top of home, full tables on School info. Days the school calls
+  "adjusted" without times are shown as adjusted, never guessed. Update each August.
+- **Class colours** (html[data-class]): Class of 2027 blue, 2028 green, 2029
+  yellow, 2030 purple, rotating every 4 years (`classColorOf` in ui.js, from the
+  Wikipedia article on Wilcox). Picked on the account page; 'auto' follows grad year.
+- **Feedback** goes to the `feedback` table (anyone can insert, reviewers read)
+  and shows on the Review page's Feedback tab.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

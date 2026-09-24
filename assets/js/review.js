@@ -70,6 +70,21 @@ const tabs = {
         </div>
       </article>`).join('') : '<div class="empty">No open reports.</div>';
   },
+  async feedback() {
+    const list = await s.feedbackList();
+    const label = { idea: '💡 Idea', bug: '🐞 Bug', feature: '✨ Feature', other: '💬 Other' };
+    return list.length ? list.map((f) => `
+      <article class="card review fb-${f.status}" data-fid="${f.id}">
+        <div class="r-head"><span class="tag">${label[f.kind] || esc(f.kind)}</span>
+          <span class="tag ${f.status === 'new' ? 'warn' : ''}">${esc(f.status)}</span>
+          ${f.page ? `<code>${esc(f.page)}</code>` : ''}
+          <span class="meta">${f.name ? `from ${esc(f.name)} · ` : ''}${ago(f.created_at)}</span></div>
+        ${prose(f.message)}
+        <div class="r-actions">${['new', 'planned', 'done', 'closed'].filter((x) => x !== f.status)
+          .map((x) => `<button class="btn ghost small" data-fstatus="${x}">Mark ${x}</button>`).join('')}
+          <button class="btn ghost danger small" data-fdel>Delete</button></div>
+      </article>`).join('') : '<div class="empty">No feedback yet.</div>';
+  },
   async bounties() {
     const list = await s.bounties();
     return `<form id="bounty-form" class="card">
@@ -132,6 +147,9 @@ document.addEventListener('click', async (e) => {
     await guard(() => (t.dataset.cact === 'delete' ? s.deleteComment(id) : s.moderateComment(id, 'visible')));
     return draw();
   }
+  const fc = t.closest('[data-fid]');
+  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus)); return draw(); }
+  if (fc && 'fdel' in t.dataset) { if (!confirm('Delete this feedback?')) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return draw(); }
   if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return draw(); }
   if (t.dataset.tobounty) {
     tab = 'bounties'; await draw();

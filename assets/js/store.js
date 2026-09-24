@@ -167,6 +167,14 @@ async function live() {
     async leaderboard() {
       return ok(await sb.from('leaderboard').select('*').order('points', { ascending: false }).limit(50));
     },
+
+    // Feedback box: anyone can send; reviewers read and triage
+    async sendFeedback(f) { ok(await sb.from('feedback').insert(f)); },
+    async feedbackList() {
+      return ok(await sb.from('feedback').select('*').order('created_at', { ascending: false }).limit(200));
+    },
+    async setFeedbackStatus(id, status) { ok(await sb.from('feedback').update({ status }).eq('id', id)); },
+    async deleteFeedback(id) { ok(await sb.from('feedback').delete().eq('id', id)); },
   };
 }
 
@@ -175,7 +183,7 @@ async function demo() {
   const KEY = 'wilkipedia-demo-v1';
   const listeners = new Set();
   const blank = () => ({ me: null, users: {}, bounties: [], claims: [], submissions: [],
-                         comments: [], likes: [], reports: [], seq: 1, seeded: false });
+                         comments: [], likes: [], reports: [], feedback: [], seq: 1, seeded: false });
   let db;
   try { db = JSON.parse(localStorage.getItem(KEY)) || blank(); } catch { db = blank(); }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch { /* private mode */ } };
@@ -363,5 +371,12 @@ async function demo() {
       }
       return Object.values(rows).sort((a, b) => b.points - a.points);
     },
+
+    async sendFeedback(f) {
+      (db.feedback ??= []).unshift({ id: id(), status: 'new', created_at: now(), user_id: db.me, ...f }); save();
+    },
+    async feedbackList() { reviewer(); return db.feedback ?? []; },
+    async setFeedbackStatus(fid, status) { reviewer(); db.feedback.find((f) => f.id === fid).status = status; save(); },
+    async deleteFeedback(fid) { reviewer(); db.feedback = db.feedback.filter((f) => f.id !== fid); save(); },
   };
 }

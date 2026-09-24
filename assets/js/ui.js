@@ -125,6 +125,27 @@ export function placeOf(x, courseName = {}) {
   return ['School info', `${root}school/`];
 }
 
+// ── class colours ──
+// Each graduating class keeps one colour for four years; the colours rotate, so
+// the incoming freshmen inherit the graduating seniors' colour
+// (Class of 2027 blue, 2028 green, 2029 yellow, 2030 purple, 2031 blue again).
+export const CLASS_COLORS = { blue: 'Blue', green: 'Green', yellow: 'Yellow', purple: 'Purple' };
+const ROTATION = ['blue', 'green', 'yellow', 'purple'];
+export const classColorOf = (year) => (year ? ROTATION[(((year - 2027) % 4) + 4) % 4] : null);
+
+// The colour theme: 'auto' follows your class year, 'gold' is Wilcox gold,
+// or pick any class colour. Stored per browser; THEME_BOOT applies the
+// resolved value (wilkipedia-class-applied) before first paint.
+const CLASS_KEY = 'wilkipedia-class';
+export function classPref() { try { return localStorage.getItem(CLASS_KEY) || 'auto'; } catch { return 'auto'; } }
+export function applyClassTheme(user, pref = classPref()) {
+  try { pref === 'auto' ? localStorage.removeItem(CLASS_KEY) : localStorage.setItem(CLASS_KEY, pref); } catch { /* ignore */ }
+  const resolved = pref === 'auto' ? classColorOf(user?.grad_year) : pref === 'gold' ? null : pref;
+  if (resolved) document.documentElement.dataset.class = resolved;
+  else delete document.documentElement.dataset.class;
+  try { resolved ? localStorage.setItem(CLASS_KEY + '-applied', resolved) : localStorage.removeItem(CLASS_KEY + '-applied'); } catch { /* ignore */ }
+}
+
 export const courseUrl = (slug) => `${root}courses/${slug}/`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 
@@ -169,6 +190,7 @@ export async function initHeader() {
   const paint = async (u) => {
     // .members-only / .guests-only sections switch on this class (style.css)
     document.body.classList.toggle('signed-in', !!u);
+    if (u) applyClassTheme(u);
     if (slot) {
       slot.innerHTML = u
         ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}

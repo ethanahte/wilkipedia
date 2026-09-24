@@ -4,6 +4,7 @@
 //
 // The camera IS the SVG viewBox, so the room outlines stay crisp at any zoom.
 // Room boxes come from data/map.json (traced off the school's campus map);
+// `mode` is always 'plan' now (an aerial photo view was tried and removed).
 // room contents come from approved teacher sections whose "room" field matches.
 
 import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root } from './ui.js';
@@ -121,7 +122,6 @@ function setMode(m) {
   img.setAttribute('height', dims.height);
   img.setAttribute('class', m);
   $('#map-credit').textContent = dims.credit;
-  $$('#map-mode [data-mode]').forEach((b) => b.setAttribute('aria-checked', b.dataset.mode === m));
   closePanel(false);
   cam = fitCam();
   apply();
@@ -285,7 +285,6 @@ panel.addEventListener('click', (e) => {
 });
 
 // toolbar
-$('#map-mode').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (b && b.dataset.mode !== mode) setMode(b.dataset.mode); });
 const centre = () => { const r = size(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 $('#z-in').onclick = () => { const [x, y] = centre(); const t = { ...cam }; zoomAt(x, y, 1 / 1.5); const to = { ...cam }; cam = t; flyTo(to, 250); };
 $('#z-out').onclick = () => { const [x, y] = centre(); const t = { ...cam }; zoomAt(x, y, 1.5); const to = { ...cam }; cam = t; flyTo(to, 250); };

@@ -6,12 +6,6 @@
   "height": 984,
   "credit": "Campus map: Wilcox High School."
  },
- "aerial": {
-  "image": "assets/map/aerial.jpg",
-  "width": 1600,
-  "height": 1080,
-  "credit": "Aerial photo: USDA / USGS The National Map orthoimagery (2024), public domain."
- },
  "insets": {
   "R": {
    "label": "Classroom Building R: 1st, 2nd and 3rd floors",

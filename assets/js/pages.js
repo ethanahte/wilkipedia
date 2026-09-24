@@ -2,7 +2,8 @@
 // review desk. Each page names itself in its #page-data block.
 
 import { initHeader, courses, dataUrl, placeOf, slugify, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
-         avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref } from './ui.js';
+         avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
+         CLASS_COLORS, classColorOf, classPref, applyClassTheme } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 
@@ -10,6 +11,7 @@ const which = JSON.parse($('#page-data')?.textContent || '{}').page;
 const s = await initHeader();
 
 import { search, attach, addLive, groupedHtml } from './search.js';
+import { mountBellStrip, loadBell, fullHtml } from './bell.js';
 
 // ── subject lists: light up classes that have content ──
 async function markContent() {
@@ -99,6 +101,7 @@ const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.
 
 const pages = {
   async home() {
+    mountBellStrip($('#bell'));
     attach($('#home-q'), $('#home-results'));
     addLive(s);
     const [recent, data] = await Promise.all([s.recent(6), courses()]);
@@ -213,6 +216,7 @@ const pages = {
   },
 
   async school() {
+    loadBell().then((bell) => { $('#bell-full').innerHTML = fullHtml(bell); });
     const list = await s.approved({ kind: 'school_info' });
     const by = {};
     for (const x of list) (by[x.payload.topic] ??= []).push(x);
@@ -242,6 +246,12 @@ const pages = {
       const themeCard = `<section class="card"><h2>Appearance</h2>
         <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">${[['system', 'Match my device'], ['light', 'Day'], ['dark', 'Night']]
           .map(([v, l]) => `<button type="button" role="radio" aria-checked="${themePref() === v}" data-theme-pref="${v}">${l}</button>`).join('')}</div>
+        <h3>Colour</h3>
+        <div class="seg swatch-seg" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class (${CLASS_COLORS[classColorOf(me.grad_year)]})` : 'My class'], ['gold', 'Wilcox gold'],
+          ...Object.entries(CLASS_COLORS).map(([k, v]) => [k, v])]
+          .map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>
+        <p class="meta">${me?.grad_year ? `Class of ${me.grad_year}’s colour is ${CLASS_COLORS[classColorOf(me.grad_year)]}.` : 'Set your class year in your profile and “My class” uses your class colour.'}
+          Class colours: 2027 Blue · 2028 Green · 2029 Yellow · 2030 Purple.</p>
         <p class="meta">Saved in this browser.</p></section>`;
 
       if (!me) {
@@ -320,6 +330,12 @@ const pages = {
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
+      $('#class-seg').onclick = (e) => {
+        const b = e.target.closest('[data-class-pref]');
+        if (!b) return;
+        applyClassTheme(s.user(), b.dataset.classPref);
+        $$('#class-seg [data-class-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
+      };
       $('#theme-seg').onclick = (e) => {
         const b = e.target.closest('[data-theme-pref]');
         if (!b) return;
@@ -337,6 +353,33 @@ const pages = {
 
   clubs() { return activities('club'); },
   sports() { return activities('sport'); },
+
+  feedback() {
+    const hints = { idea: 'What would make Wilkipedia better?', bug: 'What happened, and what did you expect? Which device and browser?',
+                    feature: 'What should it do, and who would use it?', other: 'Anything on your mind.' };
+    let kind = 'idea';
+    $('#fb-kind').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-kind]');
+      if (!b) return;
+      kind = b.dataset.kind;
+      $$('#fb-kind [data-kind]').forEach((x) => x.setAttribute('aria-checked', x === b));
+      $('#fb-hint').textContent = hints[kind];
+    });
+    const ref = document.referrer && new URL(document.referrer).origin === location.origin ? new URL(document.referrer).pathname : '';
+    if (ref && !ref.includes('/feedback')) $('#fb-page').value = ref;
+    $('#fb-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = $('#fb-msg').value.trim();
+      if (message.length < 3) { $('#fb-error').textContent = 'Please write a little more.'; $('#fb-error').hidden = false; return; }
+      $('#fb-error').hidden = true;
+      const ok = await guard(() => s.sendFeedback({ kind, message, page: $('#fb-page').value.trim() || null,
+                                                     name: $('#fb-name').value.trim() || s.user()?.name || null }));
+      if (!ok) return;
+      $('#fb-form').hidden = true;
+      $('#fb-done').hidden = false;
+    });
+    $('#fb-again').onclick = () => { $('#fb-form').reset(); $('#fb-form').hidden = false; $('#fb-done').hidden = true; };
+  },
 
   static() {},
 };
