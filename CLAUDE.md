@@ -92,6 +92,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Class colours** (html[data-class], a small accent only: `--class` tints your avatar ring and class-year chips; the site stays gold): Class of 2027 blue, 2028 green, 2029
   yellow, 2030 purple, rotating every 4 years (`classColorOf` in ui.js, from the
   Wikipedia article on Wilcox). Picked on the account page; 'auto' follows grad year.
+- **Credits** page: founders (static in build.py), reviewers (profiles), contributors (leaderboard) and names left on feedback marked done (`feedback_credits` view: names only).
 - **Feedback** goes to the `feedback` table (anyone can insert, reviewers read)
   and shows on the Review page's Feedback tab.
 - Links between pages are relative (`body[data-root]`), so the site works at

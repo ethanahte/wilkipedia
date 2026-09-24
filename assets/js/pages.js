@@ -382,6 +382,21 @@ const pages = {
     $('#fb-again').onclick = () => { $('#fb-form').reset(); $('#fb-form').hidden = false; $('#fb-done').hidden = true; };
   },
 
+  async credits() {
+    const person = (p, sub) => `<div class="person">${avatarHtml(p, 'md')}<div><b>${esc(p.display_name ?? p.name)}</b>${badge(p.school_verified)}${classChip(p.grad_year)}
+      <span class="meta">${sub}</span></div></div>`;
+    const [team, lb, fb] = await Promise.all([s.team().catch(() => []), s.leaderboard().catch(() => []), s.feedbackCredits().catch(() => [])]);
+    const founders = ['Ethan', 'Ethan Liu', 'Jonathan', 'Jonathan Lee'];
+    const others = team.filter((p) => p.role === 'reviewer' || !founders.includes(p.display_name));
+    $('#cr-team').innerHTML = others.map((p) => person(p, esc(roleLabel(p.role)))).join('')
+      || '<p class="meta">Just the founders so far. Want to help review? Ask Ethan.</p>';
+    $('#cr-contrib').innerHTML = lb.map((p) => person(p, `${p.approved} contribution${p.approved === 1 ? '' : 's'} · ${p.points} pts`)).join('')
+      || '<p class="meta">Be the first: <a href="../bounties/">claim a bounty</a> or <a href="../submit/">add something</a>.</p>';
+    $('#cr-feedback').innerHTML = fb.map((f) => `<div class="person"><span class="avatar av-md" style="--av:#6f746c">${esc(f.name.trim().charAt(0).toUpperCase())}</span>
+      <div><b>${esc(f.name)}</b><span class="meta">${f.helped} idea${f.helped === 1 ? '' : 's'} or fix${f.helped === 1 ? '' : 'es'} used</span></div></div>`).join('')
+      || '<p class="meta">No one yet. Your idea could be first.</p>';
+  },
+
   static() {},
 };
 

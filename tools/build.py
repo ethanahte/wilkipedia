@@ -38,7 +38,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
-                  "menu", "clubs", "sports", "feedback"]
+                  "menu", "clubs", "sports", "feedback", "credits"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -117,6 +117,7 @@ ICONS = {
     "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
     "feedback": _I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/>'),
+    "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
@@ -126,7 +127,7 @@ MORE = [("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("spo
         ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
         ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
         ("rules/", "Community rules", "rules"), ("about/", "About", "about"),
-        ("feedback/", "Send feedback", "feedback")]
+        ("feedback/", "Send feedback", "feedback"), ("credits/", "Credits", "heart")]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -222,7 +223,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -638,6 +639,26 @@ def build_static():
   <p><button type="button" class="btn ghost" id="fb-again">Send another</button></p></div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
 
+    page("credits/", "Credits", """
+<h1>Credits</h1>
+<p class="lede">Wilkipedia exists because students gave their time. Thank you to everyone below.</p>
+<section class="sec credits-sec"><h2>Founders</h2>
+  <div class="people">
+    <div class="person"><span class="avatar av-md" style="--av:#111">E</span><div><b>Ethan Liu</b><span class="meta">Founder · builds the site, final approver</span></div></div>
+    <div class="person"><span class="avatar av-md" style="--av:#111">J</span><div><b>Jonathan Lee</b><span class="meta">Co-founder · reviewer</span></div></div>
+  </div></section>
+<section class="sec credits-sec"><h2>Review team</h2><p class="meta">They check every submission before it goes live.</p><div class="people" id="cr-team"><div class="meta">Loading…</div></div></section>
+<section class="sec credits-sec"><h2>Contributors</h2><p class="meta">Everyone whose writing is on the site: overviews, teacher sections, tips, study guides, club and team info.</p><div class="people" id="cr-contrib"><div class="meta">Loading…</div></div></section>
+<section class="sec credits-sec"><h2>Ideas &amp; bug reports</h2><p class="meta">People whose feedback made it into the site. <a href="../feedback/">Send yours</a> and leave your name to be listed.</p><div class="people" id="cr-feedback"><div class="meta">Loading…</div></div></section>
+<section class="sec credits-sec sec-quiet"><h2>Sources</h2><ul class="sources">
+  <li>Courses: SCUSD High School Course Catalog 2025–2026</li>
+  <li>Teachers, clubs, sports and bell schedule: <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">Wilcox High School website ↗</a></li>
+  <li>Campus map: Wilcox High School campus map</li>
+  <li>Cafeteria menu: Santa Clara Unified Nutrition Services (live)</li>
+  <li>Class colours: Wikipedia, “Adrian C. Wilcox High School”</li>
+  <li>Typeface: Newsreader (SIL Open Font License)</li>
+</ul></section>""", data={"page": "credits"}, desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
+
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})
 
@@ -676,6 +697,7 @@ SEARCH_PAGES = [
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
     ("Privacy", "privacy/", "What we store", "privacy data delete account"),
     ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
+    ("Credits", "credits/", "Everyone who helped build Wilkipedia", "credits thanks thank you contributors helpers founders team"),
     ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
     ("Bell schedule", "school/#bell", "Period times, block days, finals", "bell schedule period times block day finals minimum day when does school start end"),
 ]

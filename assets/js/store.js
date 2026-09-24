@@ -174,6 +174,15 @@ async function live() {
       return ok(await sb.from('feedback').select('*').order('created_at', { ascending: false }).limit(200));
     },
     async setFeedbackStatus(id, status) { ok(await sb.from('feedback').update({ status }).eq('id', id)); },
+    // Credits page: reviewers/admins, and names people left on feedback marked done
+    async team() {
+      return ok(await sb.from('profiles').select('id, display_name, role, avatar, avatar_color, school_verified, grad_year')
+        .in('role', ['reviewer', 'admin']).order('created_at'));
+    },
+    async feedbackCredits() {
+      const { data, error } = await sb.from('feedback_credits').select('*').order('helped', { ascending: false });
+      return error ? [] : data;          // before migration 006, just show none
+    },
     async deleteFeedback(id) { ok(await sb.from('feedback').delete().eq('id', id)); },
   };
 }
@@ -378,5 +387,14 @@ async function demo() {
     async feedbackList() { reviewer(); return db.feedback ?? []; },
     async setFeedbackStatus(fid, status) { reviewer(); db.feedback.find((f) => f.id === fid).status = status; save(); },
     async deleteFeedback(fid) { reviewer(); db.feedback = db.feedback.filter((f) => f.id !== fid); save(); },
+    async team() {
+      return Object.values(db.users).filter((u) => REVIEWER_ROLES.includes(u.role))
+        .map((u) => ({ id: u.id, display_name: u.name, role: u.role, avatar: u.avatar, avatar_color: u.color, school_verified: u.school, grad_year: u.grad_year }));
+    },
+    async feedbackCredits() {
+      const by = {};
+      for (const f of db.feedback ?? []) if (f.status === 'done' && f.name?.trim()) by[f.name] = (by[f.name] || 0) + 1;
+      return Object.entries(by).map(([name, helped]) => ({ name, helped }));
+    },
   };
 }

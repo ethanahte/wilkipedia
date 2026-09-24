@@ -281,6 +281,15 @@ create policy "reviewers read feedback" on public.feedback for select using (pub
 create policy "reviewers update feedback" on public.feedback for update using (public.is_reviewer());
 create policy "reviewers delete feedback" on public.feedback for delete using (public.is_reviewer());
 
+-- Names (only) of people whose feedback was marked done, for the Credits page
+create view public.feedback_credits as
+select name, count(*)::int as helped
+  from public.feedback
+ where status = 'done' and name is not null and btrim(name) <> ''
+ group by name;
+
+grant select on public.feedback_credits to anon, authenticated;
+
 -- ───────────────────────── leaderboard ─────────────────────────
 -- Points: a bounty pays once per person when their first submission for it is
 -- approved (S 10, M 30, L 60). Each approved contribution outside a bounty is 5.
