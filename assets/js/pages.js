@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, dataUrl, placeOf, slugify, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { initHeader, courses, dataUrl, placeOf, slugify, drafts, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip } from './ui.js';
 import { KINDS, staleness } from './forms.js';
@@ -376,6 +376,7 @@ const pages = {
       $$('#fb-kind [data-kind]').forEach((x) => x.setAttribute('aria-checked', x === b));
       $('#fb-hint').textContent = hints[kind];
     });
+    drafts.bind($('#fb-msg'), 'feedback');
     const ref = document.referrer && new URL(document.referrer).origin === location.origin ? new URL(document.referrer).pathname : '';
     if (ref && !ref.includes('/feedback')) $('#fb-page').value = ref;
     $('#fb-form').addEventListener('submit', async (e) => {
@@ -386,6 +387,7 @@ const pages = {
       const ok = await guard(() => s.sendFeedback({ kind, message, page: $('#fb-page').value.trim() || null,
                                                      name: $('#fb-name').value.trim() || s.user()?.name || null }));
       if (!ok) return;
+      drafts.clear('feedback');
       $('#fb-form').hidden = true;
       $('#fb-done').hidden = false;
     });

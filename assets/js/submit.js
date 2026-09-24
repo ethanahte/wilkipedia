@@ -2,7 +2,7 @@
 //   ?course=<slug>&kind=<kind>&teacher=<name>   (from a course page)
 //   ?bounty=<id>                                 (from a claimed bounty)
 
-import { initHeader, requireUser, renderFields, suggestions, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
+import { initHeader, requireUser, renderFields, suggestions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
 import { KINDS } from './forms.js';
 
 const s = await initHeader();
@@ -53,16 +53,30 @@ function paintTeacher() {
   if (!$('#teacher-other').hidden) $('#teacher-other').value = state.teacher;
 }
 
+// The draft is keyed by what's being written, so two different forms don't mix
+const draftKey = () => `submit:${state.kind}:${courseFromInput() || '-'}:${state.bounty || '-'}`;
+function saveDraft() {
+  if (!state.kind || !form) return;
+  const v = form.values();
+  const teacher = $('#teacher-row').hidden ? '' : ($('#teacher').value === '__other' ? $('#teacher-other').value : $('#teacher').value);
+  if (Object.keys(v).some((k) => k !== 'school_year')) drafts.set(draftKey(), { values: v, teacher });
+}
+
 function paint() {
   const scope = state.kind && KINDS[state.kind].scope;
   $('#step2').hidden = !state.kind;
   if (!state.kind) return;
+  const keep = form && $('#fields').dataset.kind === state.kind ? form.values() : null;   // never wipe typing
   $('#course-row').hidden = noCourse(scope);
   paintTeacher();
   const preset = {};
   if (q.get('room')) preset.room = q.get('room').toUpperCase();
   if (q.get('name')) preset.name = q.get('name');
-  form = renderFields($('#fields'), state.kind, preset);
+  const draft = drafts.get(draftKey());
+  if (draft?.teacher && !state.teacher) state.teacher = draft.teacher;
+  form = renderFields($('#fields'), state.kind, { ...preset, ...(draft?.values || {}), ...(keep || {}) });
+  $('#fields').dataset.kind = state.kind;
+  $('#draft-note').hidden = !draft;
   const mine = bounties.filter((b) => b.claims.some((c) => c.user_id === s.user()?.id) || b.id === state.bounty);
   $('#bounty').innerHTML = '<option value="">Not part of a bounty</option>'
     + mine.map((b) => `<option value="${esc(b.id)}" ${b.id === state.bounty ? 'selected' : ''}>${esc(b.id)} · ${esc(b.title)}</option>`).join('');
@@ -74,6 +88,15 @@ $('#course').addEventListener('change', () => { state.course = courseFromInput()
 $('#teacher').addEventListener('change', () => {
   $('#teacher-other').hidden = $('#teacher').value !== '__other';
   state.teacher = $('#teacher').value === '__other' ? '' : $('#teacher').value;
+});
+
+$('#submit-form').addEventListener('input', saveDraft);
+$('#submit-form').addEventListener('change', saveDraft);
+$('#discard-draft').addEventListener('click', () => {
+  drafts.clear(draftKey());
+  form = null;
+  $('#fields').dataset.kind = '';
+  paint();
 });
 
 $('#submit-form').addEventListener('submit', async (e) => {
@@ -100,6 +123,7 @@ $('#submit-form').addEventListener('submit', async (e) => {
     payload: form.values(),
   }));
   if (!ok) return;
+  drafts.clear(draftKey());
   $('#submit-form').hidden = true;
   $('#done').hidden = false;
   const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'] }[state.kind];
@@ -131,5 +155,5 @@ if (state.bounty) {
     $$('#kinds input').forEach((i) => (i.checked = i.value === state.kind));
   }
 }
-s.onAuth(paint);
+s.onAuth(() => { saveDraft(); paint(); });
 paint();

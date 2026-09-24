@@ -228,6 +228,23 @@ export async function requireUser(s, why = 'to do that') {
   return s.user();
 }
 
+// ── drafts ──
+// Text in progress is saved to this browser as you type, so switching tabs,
+// refreshing or closing by accident never loses it. Cleared on submit.
+const DRAFT = 'wilkipedia-draft:';
+export const drafts = {
+  get(key) { try { return JSON.parse(localStorage.getItem(DRAFT + key)); } catch { return null; } },
+  set(key, v) { try { localStorage.setItem(DRAFT + key, JSON.stringify(v)); } catch { /* storage blocked */ } },
+  clear(key) { try { localStorage.removeItem(DRAFT + key); } catch { /* ignore */ } },
+  // Keep one text box's value (e.g. a comment) across visits
+  bind(el, key) {
+    if (!el) return;
+    const saved = this.get(key);
+    if (saved && !el.value) el.value = saved;
+    el.addEventListener('input', () => (el.value.trim() ? this.set(key, el.value) : this.clear(key)));
+  },
+};
+
 // ── forms ──
 // Named suggestion lists for fields with `suggest` (e.g. club names), filled by
 // the page before it renders a form.

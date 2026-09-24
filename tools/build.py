@@ -481,7 +481,10 @@ def build_static():
         <select id="teacher"></select><input id="teacher-other" placeholder="Teacher’s name" hidden></div>
       <div class="field" id="bounty-row" hidden><label for="bounty">Bounty</label><select id="bounty"></select></div>
     </fieldset>
-    <fieldset><legend>3 · The details</legend><div id="fields"></div></fieldset>
+    <fieldset><legend>3 · The details</legend>
+      <p class="draft-note" id="draft-note" hidden>✓ We restored your unsaved draft. <button type="button" class="linkish" id="discard-draft">Start over</button></p>
+      <div id="fields"></div></fieldset>
+    <p class="meta">Your writing is saved in this browser as you type, so you can switch tabs or come back later.</p>
     <label class="check"><input type="checkbox" id="rules-ok"> I didn’t include real test or quiz questions or answer keys, and nothing here is about a teacher as a person. <a href="../rules/" target="_blank">Rules</a></label>
     <p id="form-error" class="error" role="alert" hidden></p>
     <button class="btn big">Submit for review</button>

@@ -62,8 +62,15 @@ async function live() {
   const { data: { session } } = await sb.auth.getSession();
   await loadMe(session);
   // supabase-js deadlocks if the auth callback awaits another query directly.
+  // Supabase re-announces the session whenever the tab regains focus or the
+  // token refreshes. Only tell pages when the user really changed; otherwise
+  // they'd redraw and wipe whatever someone was typing.
   sb.auth.onAuthStateChange((_event, s) => {
-    setTimeout(async () => { await loadMe(s); listeners.forEach((f) => f(me)); }, 0);
+    setTimeout(async () => {
+      const before = JSON.stringify(me);
+      await loadMe(s);
+      if (JSON.stringify(me) !== before) listeners.forEach((f) => f(me));
+    }, 0);
   });
 
   const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };

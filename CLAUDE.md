@@ -101,5 +101,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   Translate (`translate.js`, loaded only after someone picks a language) does
   the rest. New UI text that students will see often? Add a row to ROWS.
   JS-rendered strings can call `t()` / `periodName()` directly.
+- **Never wipe typing:** the live store only notifies `onAuth` listeners when the
+  user actually changes (Supabase re-fires on every tab focus). Forms autosave
+  via `drafts` in ui.js (submit form, comment box, feedback) and clear on submit.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

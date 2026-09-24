@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, drafts, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -131,6 +131,7 @@ async function drawComments() {
 }
 
 $('#comment-prompt').innerHTML = PROMPTS.map((p) => `<option>${esc(p)}</option>`).join('');
+drafts.bind($('#comment-body'), `comment:${page.slug}`);
 
 $('#comment-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -142,6 +143,7 @@ $('#comment-form').addEventListener('submit', async (e) => {
                                               prompt: parent_id ? null : $('#comment-prompt').value }));
   if (!ok) return;
   $('#comment-body').value = '';
+  drafts.clear(`comment:${page.slug}`);
   delete $('#comment-form').dataset.parent;
   $('#replying').hidden = true;
   const mine = (await s.comments(page.slug)).filter((c) => c.user_id === s.user().id).pop();
