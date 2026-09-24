@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
+import { initHeader, courses, placeOf, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -27,7 +27,7 @@ const tabs = {
     return list.length ? list.map((x) => `
       <article class="card review" data-id="${x.id}">
         <div class="r-head"><span class="tag">${esc(KINDS[x.kind].label)}</span>
-          ${x.course_slug ? `<a href="${courseUrl(x.course_slug)}" target="_blank">${esc(courseName(x.course_slug))}</a>` : 'School-wide'}
+          ${(([w, h]) => `<a href="${h}" target="_blank">${esc(w)}</a>`)(placeOf(x, Object.fromEntries(data.courses.map((c) => [c.slug, c.name]))))}
           ${x.teacher ? ` · ${esc(x.teacher)}` : ''}
           ${x.bounty_id ? ` · <span class="tag">${esc(x.bounty_id)}</span>` : ''}
           <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span></div>

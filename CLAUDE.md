@@ -75,5 +75,12 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
   `--gold` text on white.
 - **Cache-busting:** build.py stamps every CSS/JS/data URL with a content hash
   and writes an import map for the JS modules. Always rebuild before pushing.
+- **Cafeteria menu** (`assets/js/menu.js`) is read live in the browser from the
+  district's menu service (api.schoolnutritionandfitness.com GraphQL; it allows
+  our origin). Menu-type ids live in `MENUS`. Never copy menu data into the repo.
+- **Clubs & sports**: `data/activities.json` is the official list scraped from the
+  Wilcox site (see its `sources`/`notes`); students add details as `club`/`sport`
+  submissions (course_slug null, name in payload.name), matched by slugified name.
+  A club's `room` also puts it on the map.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

@@ -1,0 +1,1042 @@
+{
+  "_about": "Clubs and sports as listed on the Wilcox High School website (source URLs below), collected 2026-09-24. Student-written details are added through the site; this file is only the official starting list.",
+  "sources": [
+    "https://wilcox.santaclarausd.org/activities/clubs",
+    "https://wilcox.santaclarausd.org/fs/elements/52778?is_popup=true&post_id=<id>&show_post=true (popup content for each of the 79 club posts)",
+    "https://wilcox.santaclarausd.org/activities",
+    "https://wilcox.santaclarausd.org/activities/associated-student-body-asb",
+    "https://wilcox.santaclarausd.org/activities/gains",
+    "https://wilcox.santaclarausd.org/activities/performance-groups",
+    "https://wilcox.santaclarausd.org/activities/performance-groups/sideline-cheer",
+    "https://wilcox.santaclarausd.org/activities/performance-groups/song-pom-dance-team",
+    "https://wilcox.santaclarausd.org/activities/wilcox-theater",
+    "https://wilcox.santaclarausd.org/activities/wilcox-yearbook",
+    "https://wilcox.santaclarausd.org/activities/wilcox-champs-cafe",
+    "https://wilcox.santaclarausd.org/activities/clubs/robotics",
+    "https://wilcox.santaclarausd.org/activities/clubs/wilcox-business-experience",
+    "https://wilcox.santaclarausd.org/activities/clubs/makerspace",
+    "https://wilcox.santaclarausd.org/activities/computer-science-showcase",
+    "https://wilcox.santaclarausd.org/activities/class-pages",
+    "https://wilcox.santaclarausd.org/activities/senior-class",
+    "https://docs.google.com/spreadsheets/d/1EokX2VyQlsmp5AojVMRaZDbtckmaU1mjlSwRpKSnhl0 (Activities Calendar 26-27; checked, not a club list)",
+    "https://wilcox.santaclarausd.org/athletics",
+    "https://wilcox.santaclarausd.org/athletics/coach-and-athletic-director-contact",
+    "https://wilcox.santaclarausd.org/athletics/athlete-eligibility-requirements-clearance-procedure-season-start-dates",
+    "https://wilcox.santaclarausd.org/athletics/athletic-participation-data",
+    "https://wilcox.santaclarausd.org/athletics/badminton",
+    "https://wilcox.santaclarausd.org/athletics/baseball",
+    "https://wilcox.santaclarausd.org/athletics/boys-basketball",
+    "https://wilcox.santaclarausd.org/athletics/boys-golf",
+    "https://wilcox.santaclarausd.org/athletics/boys-soccer",
+    "https://wilcox.santaclarausd.org/athletics/boys-tennis",
+    "https://wilcox.santaclarausd.org/athletics/boys-volleyball",
+    "https://wilcox.santaclarausd.org/athletics/boys-wrestling",
+    "https://wilcox.santaclarausd.org/athletics/competitive-sports-cheer",
+    "https://wilcox.santaclarausd.org/athletics/flag-football",
+    "https://wilcox.santaclarausd.org/athletics/girls-basketball",
+    "https://wilcox.santaclarausd.org/athletics/girls-golf",
+    "https://wilcox.santaclarausd.org/athletics/girls-gymnastics",
+    "https://wilcox.santaclarausd.org/athletics/girls-lacrosse",
+    "https://wilcox.santaclarausd.org/athletics/girls-soccer",
+    "https://wilcox.santaclarausd.org/athletics/girls-tennis",
+    "https://wilcox.santaclarausd.org/athletics/girls-wrestling",
+    "https://wilcox.santaclarausd.org/athletics/softball"
+  ],
+  "clubs": [
+    {
+      "name": "Acts of Random Kindness Club",
+      "category": "Service & Leadership",
+      "advisor": "Ryan Soykin",
+      "meets": "Thursday Monthly",
+      "description": "Acts of Random Kindness (ARK) Club strives to make Wilcox more welcoming for students and staff by creating a positive atmosphere and building community through uplifting campaigns, activities, and events such as appreciation letters, care packages, and kind notes. In ARK, we believe that even the smallest actions can have a big impact.",
+      "url": null
+    },
+    {
+      "name": "AI Club (Artificial Intelligence)",
+      "category": "STEM",
+      "advisor": "Patty Charles",
+      "meets": "Bimonthly, Wednesday, Thursday, or Friday",
+      "description": "The Wilcox Artificial Intelligence Club introduces students to the world of AI and its growing role in shaping the future of technology, education, and careers. The club provides hands-on opportunities through workshops, competitions, internships, and volunteering to help students build valuable AI-related skills.",
+      "url": null
+    },
+    {
+      "name": "Ambassador Program",
+      "category": "Service & Leadership",
+      "advisor": "Mindy Trisko",
+      "meets": "Every first Tuesday of the month.",
+      "description": "The Wilcox Ambassador Program works to alleviate the challenges experienced by newcomer English learning students and empowers them to succeed.",
+      "url": null
+    },
+    {
+      "name": "American Computer Science League",
+      "category": "STEM",
+      "advisor": "Mike La Fleur",
+      "meets": "Monthly",
+      "description": "The ACSL Club’s mission is to help students explore advanced computer science concepts while preparing them for success in the ACSL tournaments.",
+      "url": null
+    },
+    {
+      "name": "Anime Club",
+      "category": "Interest",
+      "advisor": "Paula Estioko",
+      "meets": "Every Tuesday at lunch",
+      "description": "The anime club is where we show a variety of anime genres monthly to introduce new anime and host a place for students to bond and interact with friends.",
+      "url": null
+    },
+    {
+      "name": "Associated Student Body (ASB)",
+      "category": "Service & Leadership",
+      "advisor": null,
+      "meets": null,
+      "description": "Our Mission: Unite and encourage student enthusiasm to create a fun, inclusive environment.",
+      "url": "https://wilcox.santaclarausd.org/activities/associated-student-body-asb"
+    },
+    {
+      "name": "Bangladeshi",
+      "category": "Culture & Identity",
+      "advisor": "Andrew Bennett",
+      "meets": "Wednesday Weekly",
+      "description": "The Bangladeshi Club is a club focused on educating people about the diverse cultures/traditions of Bangladesh. It is an inclusive environment for everyone to learn, and enjoy some snacks.",
+      "url": null
+    },
+    {
+      "name": "Best Buddies",
+      "category": "Service & Leadership",
+      "advisor": "Cris Syquia",
+      "meets": "Biweekly on Thursday in B116",
+      "description": "The Best Buddies club serves as a safe space for all Wilcox High School students, providing an opportunity for students of all abilities to bond and connect through various crafts, lunches, and other fun activities!",
+      "url": null
+    },
+    {
+      "name": "Biology Club",
+      "category": "STEM",
+      "advisor": "Nalinee Srinivasan",
+      "meets": "Monday weekly",
+      "description": "The Biology Club serves to empower students with biological concepts, prepare students for future careers in science/medicine, create a safe space for students to meet like-minded peers, and deepen a love for life sciences!",
+      "url": null
+    },
+    {
+      "name": "Black Student Union (BSU)",
+      "category": "Culture & Identity",
+      "advisor": "Mike LaFleur",
+      "meets": "Last Tuesday of the month",
+      "description": "The Black Student Union strives to increase cultural awareness through historical and educational trips as well as present college options and career paths for Black students.",
+      "url": null
+    },
+    {
+      "name": "Botany",
+      "category": "STEM",
+      "advisor": "Clarissa Cordonnier",
+      "meets": "Monthly (description: during lunch in room S113)",
+      "description": "The Botany Club is a plant-science club for students fond of biology, the study of plants, and environmental sustainability.",
+      "url": null
+    },
+    {
+      "name": "Bring Change to Mind (BC2M)",
+      "category": "Service & Leadership",
+      "advisor": "Ms Sims",
+      "meets": "We have officer meetings mostly on Mondays, and we have quad events every month.",
+      "description": "Our club is about normalizing conversations about mental health. We want to end stigma and discrimination that has to do with mental illness.",
+      "url": null
+    },
+    {
+      "name": "California Scholastic Federation (CSF)",
+      "category": "Academic",
+      "advisor": "Craig Hedlund",
+      "meets": "Once in the first week of each month.",
+      "description": "CSF is the California State High School Honor Society.",
+      "url": null
+    },
+    {
+      "name": "Cantonese",
+      "category": "Culture & Identity",
+      "advisor": "Jennifer Hight",
+      "meets": "Last Thursday of the month (once a month)",
+      "description": "Cantonese Club is a fun space to learn about Cantonese culture through language, food, music, and traditions. We welcome all students, whether you’re fluent, learning, or just curious!",
+      "url": null
+    },
+    {
+      "name": "Card Game",
+      "category": "Interest",
+      "advisor": "William Haughney",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Chemistry",
+      "category": "STEM",
+      "advisor": "Deana Dutton",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Chinese",
+      "category": "Culture & Identity",
+      "advisor": "Jennifer Woo",
+      "meets": null,
+      "description": "The purpose of the Chinese Club is to raise awareness of Chinese traditions, cultures, and heritages on campus.",
+      "url": null
+    },
+    {
+      "name": "Coastal Conservation",
+      "category": "Service & Leadership",
+      "advisor": "Mindy Trisko",
+      "meets": "Twice a month on Fridays.",
+      "description": "The Coastal Conservation Crew is dedicated to preserving our environment. We host beach clean-ups once a month to help keep the shores clean, as well as get students involved in the community.",
+      "url": null
+    },
+    {
+      "name": "Compassion for Action",
+      "category": "Service & Leadership",
+      "advisor": "Stephanie Scott",
+      "meets": "Bimonthly, Wednesday, Thursday, or Friday (description: monthly meetings in B103)",
+      "description": "CFA (Compassion for Action Club) strives to bring awareness to the situations of those in Santa Clara and the Bay Area who are struggling with homelessness, poverty, and food insecurity. We work to provide relief efforts such as donation drives, volunteer work, and educational meetings.",
+      "url": null
+    },
+    {
+      "name": "Competitive Coding Club (CCC)",
+      "category": "STEM",
+      "advisor": "Erin Hughes",
+      "meets": "Wednesday Weekly",
+      "description": "The CCC's (Competitive Coding Club) main purpose is to bring together people of common interests in order to learn about and gain experience with competitive coding. Our main goals for this club are to prepare members for local and international competitive coding competitions such as USACO.",
+      "url": null
+    },
+    {
+      "name": "Cozy Cards",
+      "category": "Service & Leadership",
+      "advisor": "Amy Peoples",
+      "meets": "Bimonthly, Wednesday, Thursday, or Friday",
+      "description": "Our mission is to brighten the lives of seniors and children by creating personalized, heartfelt greeting cards.",
+      "url": null
+    },
+    {
+      "name": "Creative Writing",
+      "category": "Arts & Performance",
+      "advisor": "Brandon Denault",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Crochet Club",
+      "category": "Arts & Performance",
+      "advisor": "Chloe Pounds",
+      "meets": "Monday biweekly",
+      "description": "The Crochet Club aims to foster a community of creative people who love to crochet at Wilcox. We want to create a safe space in which students can express themselves through the art of crochet.",
+      "url": null
+    },
+    {
+      "name": "Cryptocurrency",
+      "category": "Business",
+      "advisor": "Patty Charles",
+      "meets": "Biweekly, either Monday, Tuesday, or Thursday",
+      "description": "The Wilcox Cryptocurrency Club introduces students to the world of cryptocurrency and blockchain technology, exploring how they shape the future of finance, technology, and careers.",
+      "url": null
+    },
+    {
+      "name": "Culinary Arts Club (CHAMPS Club)",
+      "category": "Interest",
+      "advisor": "Rizi Manzon",
+      "meets": null,
+      "description": "The Culinary Arts Club promotes Culinary Arts and allows members to explore the use of culinary skillsets in relation to entrepreneurship, community service, and soft skills development. The Club also provides leadership opportunities within the club.",
+      "url": null
+    },
+    {
+      "name": "Dance",
+      "category": "Arts & Performance",
+      "advisor": "Sammi Krause",
+      "meets": "Monday weekly",
+      "description": "The Club aims to provide a welcoming space for dancers to connect, discuss, and share their interests in dance.",
+      "url": null
+    },
+    {
+      "name": "Dub C Film Crew",
+      "category": "Arts & Performance",
+      "advisor": "Matt Huth, Erik Rutgers",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Dungeons and Dragons",
+      "category": "Interest",
+      "advisor": "Daniel Burkhead",
+      "meets": null,
+      "description": "Dungeons and Dragons is a social game; you have to work together towards a common goal.",
+      "url": null
+    },
+    {
+      "name": "Environmental Justice",
+      "category": "Service & Leadership",
+      "advisor": "Rizi Manzon",
+      "meets": "Last Tuesday of the month",
+      "description": "The main purpose of the Environmental Justice Club is to address climate issues at both local and global scales, while introducing tangible environmental interactions to raise awareness and foster climate advocacy among youth.",
+      "url": null
+    },
+    {
+      "name": "Filipino-American Student Association (FASA)",
+      "category": "Culture & Identity",
+      "advisor": "Rhodora Rebustes",
+      "meets": "Thursday monthly",
+      "description": "FASA brings together Filipino American students as well as those who are interested in taking part in the culture through hosting monthly meetings, potlucks, and participating in the multicultural rally!",
+      "url": null
+    },
+    {
+      "name": "Forensics",
+      "category": "STEM",
+      "advisor": "Deana Dutton",
+      "meets": "Once a month on Wednesdays or Tuesdays",
+      "description": "The Wilcox Forensics Club invites you to dive into the world of crime labs, evidence analysis, and real-life investigative techniques.",
+      "url": null
+    },
+    {
+      "name": "French",
+      "category": "Culture & Identity",
+      "advisor": "Amy Peoples",
+      "meets": "Friday Monthly",
+      "description": "The Wilcox French Club invites students interested in exploring the depths of Francophone culture!",
+      "url": null
+    },
+    {
+      "name": "Gender Sexuality Minority Alliance",
+      "category": "Culture & Identity",
+      "advisor": "Chris Vargas",
+      "meets": "Wednesday, weekly",
+      "description": "GSMA is a safe space for LGBTQ+ and allied students to be themselves, meet other members of the community, and have fun.",
+      "url": null
+    },
+    {
+      "name": "Genes in Diseases and Symptoms",
+      "category": "STEM",
+      "advisor": "Nalinee Srinivasan",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Girl Up",
+      "category": "Service & Leadership",
+      "advisor": "Ms. Aggarwal",
+      "meets": "Meeting information will be posted on our Instagram, usually it's on the 3rd Tuesday of the month.",
+      "description": "We advocate for girls around the world and for ending gender stigma and misogyny.",
+      "url": null
+    },
+    {
+      "name": "Girls Achieving in Non-Traditional Subjects (GAINS)",
+      "category": "Other",
+      "advisor": "Kenny Contreras",
+      "meets": "monthly GAINS meetings",
+      "description": "GAINS is always looking for hard-working, enthusiastic guest speakers at our monthly GAINS meetings.",
+      "url": "https://wilcox.santaclarausd.org/activities/gains"
+    },
+    {
+      "name": "Girls Who Code (GWC)",
+      "category": "STEM",
+      "advisor": "Olga Galperin",
+      "meets": "Thursdays at lunch, Biweekly",
+      "description": "The Girls Who Code club at Wilcox is an extension of the national GWC Organization. This club was founded to educate, equip, and inspire girls with the computing skills they’ll need to pursue 21st-century opportunities.",
+      "url": null
+    },
+    {
+      "name": "Healing Art",
+      "category": "Arts & Performance",
+      "advisor": "Paula Estioko",
+      "meets": "Once a month, the day will be decided by officer discussions in the group chat.",
+      "description": "The club is for students to come in and do small arts and crafts. It's a type of therapy to help calm down the brain if someone is stressed.",
+      "url": null
+    },
+    {
+      "name": "Health Occupation Students of America (HOSA)",
+      "category": "STEM",
+      "advisor": "Clarissa Cordonnier, Rosana Vratny",
+      "meets": "Monday, once a month.",
+      "description": "Wilcox HOSA (Health Occupations of America) is an international student-run organization meant to assist prospective health and medical students.",
+      "url": null
+    },
+    {
+      "name": "Indian Club",
+      "category": "Culture & Identity",
+      "advisor": "Mrs. Nalinee Srinivasan",
+      "meets": "Second week of every month during lunch",
+      "description": "Indian Club is a cultural community that celebrates the richness of Indian heritage through dance, music, and events.",
+      "url": null
+    },
+    {
+      "name": "Interact Club",
+      "category": "Service & Leadership",
+      "advisor": "Ms. Dutton",
+      "meets": "2nd Tuesday or 2nd Wednesday, monthly",
+      "description": "Wilcox Interact is a community service club affiliated with Interact District 5170.",
+      "url": null
+    },
+    {
+      "name": "Japanese Club",
+      "category": "Culture & Identity",
+      "advisor": "Itsuko Tamaki-Suzuki",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Jewish Club",
+      "category": "Culture & Identity",
+      "advisor": "Olga Galperin",
+      "meets": "Meetings mainly for Jewish holidays, with a few extra meetings during times when there aren't many holidays.",
+      "description": "Our goal is to provide a safe space for Jewish students on campus as well as bring awareness to Jewish culture and traditions.",
+      "url": null
+    },
+    {
+      "name": "Justice Club",
+      "category": "Academic",
+      "advisor": "Chloe Pounds",
+      "meets": "Friday once or twice a month",
+      "description": "The Wilcox Justice Club explores the world of law and justice through mock trials, guest speakers, and case studies.",
+      "url": null
+    },
+    {
+      "name": "Key Club",
+      "category": "Service & Leadership",
+      "advisor": "Mark Stott",
+      "meets": "We don't have a tentative schedule, but probably Monday or Tuesday",
+      "description": "Key Club is a student-led service organization that focuses on community service, leadership development, and character building.",
+      "url": null
+    },
+    {
+      "name": "Korean Club",
+      "category": "Culture & Identity",
+      "advisor": "Cathy Thornton",
+      "meets": "Meeting information will be posted on our Instagram and be announced on the daily announcements",
+      "description": "Korean club is a student-led organization that strives to share Korean culture through various ways within the Wilcox community",
+      "url": null
+    },
+    {
+      "name": "Kpop",
+      "category": "Interest",
+      "advisor": "Robert Chapman",
+      "meets": "Mondays and Wednesdays",
+      "description": "It’s for students who are interested in K-pop and connecting with other students or making friends with people who share their interests.",
+      "url": null
+    },
+    {
+      "name": "Literature",
+      "category": "Academic",
+      "advisor": "Harrison Feain",
+      "meets": "Second Wednesday of every month",
+      "description": "Literature Club strives to promote reading and literature in the Wilcox community through interactive events and community service opportunities.",
+      "url": null
+    },
+    {
+      "name": "LSU (Latino Student Union) - MECHA",
+      "category": "Culture & Identity",
+      "advisor": "Ms. Gándara",
+      "meets": "Wednesday Biweekly; at lunch in room R 201.",
+      "description": "The Latino Student Union is a cultural Hispanic club where everyone is welcome. We partake in many Latin American celebrations and in the multicultural Rally.",
+      "url": null
+    },
+    {
+      "name": "Magic the Gathering",
+      "category": "Interest",
+      "advisor": "Philip Aduan",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Math Club",
+      "category": "STEM",
+      "advisor": "Rex Riley",
+      "meets": "Tuesday weekly",
+      "description": "Math Club is a dynamic group for students who love exploring the world of mathematics. We engage in fun challenges, problem-solving sessions, and competitions, all while fostering a collaborative and supportive environment.",
+      "url": null
+    },
+    {
+      "name": "Media Society Club",
+      "category": "Arts & Performance",
+      "advisor": "Adrienne Aubry",
+      "meets": "every 3rd Wednesday",
+      "description": "The Media Society is an adventure into the world of Video Productions.",
+      "url": null
+    },
+    {
+      "name": "Medical Equity and Diversity",
+      "category": "Service & Leadership",
+      "advisor": "Rex Riley",
+      "meets": "Fridays, monthly",
+      "description": "The Wilcox Medical Equity (MED) club is dedicated to promoting equity within healthcare.",
+      "url": null
+    },
+    {
+      "name": "Music Club",
+      "category": "Arts & Performance",
+      "advisor": "Philip Aduan",
+      "meets": "Thursdays once a month",
+      "description": "Music Club intends to share the diversity of musical culture and unite music lovers through fun activities and events.",
+      "url": null
+    },
+    {
+      "name": "National Art Honor Society - Wilcox Chapter (NAHS)",
+      "category": "Arts & Performance",
+      "advisor": "Heather Morton",
+      "meets": "Tuesday Biweekly",
+      "description": "The National Art Honor Society aims to bring art in numerous forms—whether through displays at school, art-related volunteer opportunities, and more—to all Wilcox students.",
+      "url": null
+    },
+    {
+      "name": "New Life Campus Outreach",
+      "category": "Other",
+      "advisor": "Becki Shuler, Linda Smith",
+      "meets": "The club meets every other Tuesday",
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Origami Club",
+      "category": "Arts & Performance",
+      "advisor": "Itsuko Tamaki-Suzuki",
+      "meets": "Thursday every two weeks",
+      "description": "Origami Club is a place for people to enjoy the art of folding paper.",
+      "url": null
+    },
+    {
+      "name": "Pacific Islander Student Association",
+      "category": "Culture & Identity",
+      "advisor": "Brad Beadell",
+      "meets": "Monthly (either Wednesday, Thursday, or Friday)",
+      "description": "PISA aims to educate students about the Pacific Islands' culture. We also encourage students of various cultural backgrounds to share and learn about our culture.",
+      "url": null
+    },
+    {
+      "name": "Party Game",
+      "category": "Interest",
+      "advisor": "Deana Dutton",
+      "meets": "Every Friday, S112",
+      "description": "The Party Game Club provides short, easy-to-play games to help students socialize and meet new friends.",
+      "url": null
+    },
+    {
+      "name": "Physics",
+      "category": "STEM",
+      "advisor": "Amy Peoples",
+      "meets": "Thursday Lunch, every other week.",
+      "description": "Physics Club is a club that is open to anyone curious and interested in physics and related sciences. This student-led club offers problem-solving workshops, preparation for competitions, and fun discussions about physics in the real world.",
+      "url": null
+    },
+    {
+      "name": "Pickleball",
+      "category": "Interest",
+      "advisor": "Arianna Nuti",
+      "meets": "Monthly",
+      "description": "Pickleball Club is an exciting experience for all students involved.",
+      "url": null
+    },
+    {
+      "name": "Programming Club",
+      "category": "STEM",
+      "advisor": "Ms Armstrong",
+      "meets": null,
+      "description": "Students who are interested in programming host an annual Hackathon and ongoing Cyber security learning.",
+      "url": null
+    },
+    {
+      "name": "Psychology Club",
+      "category": "Academic",
+      "advisor": "Samantha Herman",
+      "meets": "Thursday during lunch once a month.",
+      "description": "The Wilcox Psychology Club is for anyone curious about the field of psychology. We do fun activities, have discussions, and sometimes hear from guest speakers like the school psychologists.",
+      "url": null
+    },
+    {
+      "name": "Santa Clara Sister Cities (SCSC)",
+      "category": "Culture & Identity",
+      "advisor": "Yvonne Park",
+      "meets": "3rd Thursday of the Month",
+      "description": "Santa Clara Sister Cities works with city council and schools across Santa Clara to foster international relationships and student exchanges.",
+      "url": null
+    },
+    {
+      "name": "Science Squad",
+      "category": "STEM",
+      "advisor": "Deana Dutton",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Sideline Cheer",
+      "category": "Arts & Performance",
+      "advisor": "Cassidy Joyce (Coach)",
+      "meets": null,
+      "description": "Currently our Sideline Cheer Teams, we have JV and Varsity, participate at our Football and Basketball games and may attend other sporting events as well. Tryouts for Sideline Cheer are in the Spring each year for the following year.",
+      "url": "https://wilcox.santaclarausd.org/activities/performance-groups/sideline-cheer"
+    },
+    {
+      "name": "Sikh Honors and Service",
+      "category": "Culture & Identity",
+      "advisor": "Clarissa Cordonnier",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Song Pom Dance Team",
+      "category": "Arts & Performance",
+      "advisor": "Amy Peoples, Laura Stott (Interim Advisors)",
+      "meets": null,
+      "description": "Song Pom is a mixture of using Song Pom technique, Jazz and Hip Hop with Pom Pons to entertain our audiences throughout the majority of our routines.",
+      "url": "https://wilcox.santaclarausd.org/activities/performance-groups/song-pom-dance-team"
+    },
+    {
+      "name": "Speech and Debate Club",
+      "category": "Academic",
+      "advisor": null,
+      "meets": "Tuesday Biweekly",
+      "description": "Wilcox Speech & Debate Club was established by students of Wilcox High School to foster critical thinking, effective communication, and competitive debate skills.",
+      "url": null
+    },
+    {
+      "name": "Student Engagement in Environmental Discovery",
+      "category": "STEM",
+      "advisor": "Jennifer Hight",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Student Performance and Athlete Resilience",
+      "category": "Other",
+      "advisor": "Arianna Nuti",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Survival",
+      "category": "Interest",
+      "advisor": "Christopher Vargas",
+      "meets": "Last Tuesday of the month in S115",
+      "description": "The Wilcox Survival Club is focused on teaching students fundamental survival skills. Anyone is welcome to join and be a member of our club.",
+      "url": null
+    },
+    {
+      "name": "Taiwanese Student Association (TSA)",
+      "category": "Culture & Identity",
+      "advisor": "Ms. Slate",
+      "meets": "Once every month (description: in Ms. Slate's room)",
+      "description": "The Wilcox Taiwanese Student Association is a student-run organization with guidance from the faculty advisor. All students who are interested in Taiwanese culture are welcome to join our monthly meetings in Ms. Slate's room.",
+      "url": null
+    },
+    {
+      "name": "United Nations International Children's Emergency Fund (UNICEF)",
+      "category": "Service & Leadership",
+      "advisor": "Mark Stott",
+      "meets": "Meeting information will be announced on the daily announcements.",
+      "description": "Wilcox UNICEF partners with the U.S. Fund for UNICEF to educate, advocate, and fundraise — work that is vital to UNICEF's ability to save children in more than 190 countries and territories around the globe.",
+      "url": null
+    },
+    {
+      "name": "Vietnamese Student Association (VSA)",
+      "category": "Culture & Identity",
+      "advisor": "Ms. Dutton",
+      "meets": null,
+      "description": "VSA is a student-organized club with the purpose of celebrating the Vietnamese language and culture through activities, as well as, enriching and educating the community about Vietnamese tradition.",
+      "url": null
+    },
+    {
+      "name": "Wilcox Animal Group (WAG)",
+      "category": "Interest",
+      "advisor": "Mrs. Slate",
+      "meets": "First Wednesday of every month, with some months having 2 meetings.",
+      "description": "Wilcox Animal Group is a club that welcomes all animal lovers!",
+      "url": null
+    },
+    {
+      "name": "Wilcox Business Experience (WBE)",
+      "category": "Business",
+      "advisor": "Anthony Raffetto",
+      "meets": "Weekly",
+      "description": "The Wilcox Business Experience (WBE) is a student-run organization that helps students explore business through competitions, internships, and community service. Our club provides hands-on opportunities to build professional skills while engaging with local organizations and events.",
+      "url": "https://wilcox.santaclarausd.org/activities/clubs/wilcox-business-experience"
+    },
+    {
+      "name": "Wilcox Cricket Club (WCC)",
+      "category": "Interest",
+      "advisor": "Mark Ooka",
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Wilcox Mentorship Association",
+      "category": "Service & Leadership",
+      "advisor": null,
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Wilcox Music",
+      "category": "Arts & Performance",
+      "advisor": null,
+      "meets": null,
+      "description": null,
+      "url": null
+    },
+    {
+      "name": "Wilcox Muslim Student Association (MSA)",
+      "category": "Culture & Identity",
+      "advisor": "Dunia Hassan",
+      "meets": "Weekly - Every Friday!",
+      "description": "Our club works to educate about the religion of Islam while creating a safe environment for Muslim students to connect and practice together.",
+      "url": null
+    },
+    {
+      "name": "Wilcox Robotics",
+      "category": "STEM",
+      "advisor": "Karen Hardy",
+      "meets": "Every day after school 3-5 pm, Rm. P-120",
+      "description": "Participates in FTC (First Tech Challenge) Team 8872 & 13190. Demonstrates the inner workings and nuances of robotics.",
+      "url": "https://wilcox.santaclarausd.org/activities/clubs/robotics"
+    },
+    {
+      "name": "Wilcox Stage Company (WSC)",
+      "category": "Arts & Performance",
+      "advisor": "Claire Robson",
+      "meets": "Once a month",
+      "description": "Wilcox Stage Company is an established club on the Wilcox campus and is responsible for working in conjunction with our productions course to produce the shows at Wilcox. Club members enjoy field trips, real-world tech, and performance experience.",
+      "url": "https://wilcox.santaclarausd.org/activities/wilcox-theater"
+    },
+    {
+      "name": "Wilcox Stock Market Analysis Club (SMA)",
+      "category": "Business",
+      "advisor": "Patty Charles",
+      "meets": "Meeting information will be posted on our Instagram.",
+      "description": "To empower our members with the knowledge, skills, and insights needed to excel in the dynamic world of the stock market and investing.",
+      "url": null
+    },
+    {
+      "name": "Wilcox Yearbook",
+      "category": "Arts & Performance",
+      "advisor": "Ms. Sanghee Krause",
+      "meets": null,
+      "description": null,
+      "url": "https://wilcox.santaclarausd.org/activities/wilcox-yearbook"
+    }
+  ],
+  "sports": [
+    {
+      "name": "Badminton",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Jennifer Nguyen"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/badminton"
+    },
+    {
+      "name": "Baseball",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "Frosh-Soph"
+      ],
+      "coaches": [
+        "Matt Huth",
+        "Jim Greco"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/baseball"
+    },
+    {
+      "name": "Boys Basketball",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Ruben Camacho"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-basketball"
+    },
+    {
+      "name": "Boys Golf",
+      "season": "Spring",
+      "levels": [
+        "Varsity"
+      ],
+      "coaches": [
+        "Dan Chaid"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-golf"
+    },
+    {
+      "name": "Boys Soccer",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Joshua Foley",
+        "Justin Foley",
+        "Jonathan Mendoza",
+        "Brian Diaz"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-soccer"
+    },
+    {
+      "name": "Boys Tennis",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "Frosh-Soph"
+      ],
+      "coaches": [],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-tennis"
+    },
+    {
+      "name": "Boys Volleyball",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "Frosh-Soph"
+      ],
+      "coaches": [],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-volleyball"
+    },
+    {
+      "name": "Boys Water Polo",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Rich Cruzen"
+      ],
+      "url": null
+    },
+    {
+      "name": "Boys Wrestling",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Gilbert Ortiz"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/boys-wrestling"
+    },
+    {
+      "name": "Competitive Sports Cheer",
+      "season": "Spring",
+      "levels": [
+        "Varsity"
+      ],
+      "coaches": [
+        "Cassidy Joyce Likio"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/competitive-sports-cheer"
+    },
+    {
+      "name": "Cross Country",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV",
+        "Frosh-Soph"
+      ],
+      "coaches": [
+        "David Garza"
+      ],
+      "url": null
+    },
+    {
+      "name": "Football",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "Frosh-Soph",
+        "Frosh"
+      ],
+      "coaches": [
+        "Conor Dunn"
+      ],
+      "url": null
+    },
+    {
+      "name": "Girls Basketball",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Justin Fujihara",
+        "Ryan Fujihara",
+        "Louie Mosqueda",
+        "Kim Ramirez",
+        "Janice Chen",
+        "Taylor Carpenter",
+        "Ashley Chen"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-basketball"
+    },
+    {
+      "name": "Girls Flag Football",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Christina Watkins",
+        "Jeff Muralt",
+        "Dylan Werth",
+        "Emmit Palacios",
+        "Jeff Haulk",
+        "David Currie"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/flag-football"
+    },
+    {
+      "name": "Girls Golf",
+      "season": "Fall",
+      "levels": [
+        "Varsity"
+      ],
+      "coaches": [
+        "Dan Chaid"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-golf"
+    },
+    {
+      "name": "Girls Gymnastics",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Garry DeGuzman"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-gymnastics"
+    },
+    {
+      "name": "Girls Lacrosse",
+      "season": "Spring",
+      "levels": [
+        "Varsity"
+      ],
+      "coaches": [
+        "Morgan Smith",
+        "John Buter"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-lacrosse"
+    },
+    {
+      "name": "Girls Soccer",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Tomas Montes"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-soccer"
+    },
+    {
+      "name": "Girls Tennis",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Bayani Alkuino"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-tennis"
+    },
+    {
+      "name": "Girls Volleyball",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV/Fresh"
+      ],
+      "coaches": [
+        "April Lujan"
+      ],
+      "url": null
+    },
+    {
+      "name": "Girls Water Polo",
+      "season": "Fall",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Rich Cruzen"
+      ],
+      "url": null
+    },
+    {
+      "name": "Girls Wrestling",
+      "season": "Winter",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "Ted Pettigrew"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/girls-wrestling"
+    },
+    {
+      "name": "Softball",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "JV"
+      ],
+      "coaches": [
+        "John Butler"
+      ],
+      "url": "https://wilcox.santaclarausd.org/athletics/softball"
+    },
+    {
+      "name": "Swimming and Diving",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "JV",
+        "Frosh-Soph"
+      ],
+      "coaches": [
+        "Rich Cruzen"
+      ],
+      "url": null
+    },
+    {
+      "name": "Track and Field",
+      "season": "Spring",
+      "levels": [
+        "Varsity",
+        "JV",
+        "Frosh-Soph"
+      ],
+      "coaches": [
+        "David Garza"
+      ],
+      "url": null
+    }
+  ],
+  "notes": "CLUBS: The official Clubs page (/activities/clubs) lists 79 clubs as Finalsite 'posts' that open in a popup; their text is not in the page HTML and was read from the popup endpoint /fs/elements/52778?is_popup=true&post_id=<id>&show_post=true. Those popups have no standalone page URL, so 'url' is null for them. Each post shows a date: 39 are dated Aug-Dec 2023, 4 May 2024, 34 Jan-Feb 2026, 1 May 2026 and 1 Aug 2026 (Programming Club). These look like original publish dates rather than last-edit dates, since several 2023 posts have clearly been edited since, but the 2023 ones may still carry stale advisors or meeting details. Meeting details are copied verbatim, including vague ones ('Monthly', 'Bimonthly, Wednesday, Thursday, or Friday'); where a room appears only in the description it is added in parentheses. Clubs with blank Description/Meeting fields on the site (description or meets left null): Card Game, Chemistry, Creative Writing, Dub C Film Crew, Genes in Diseases and Symptoms, Japanese Club, Magic the Gathering, New Life Campus Outreach, Science Squad, Sikh Honors and Service, Student Engagement in Environmental Discovery, Student Performance and Athlete Resilience, Wilcox Cricket Club, Wilcox Mentorship Association (no advisor either), Wilcox Robotics (filled from its /activities/clubs/robotics page). Speech and Debate has no advisor listed. Magic the Gathering's post shows the Party Game club's Instagram handle, apparently a copy-paste error. Compassion for Action says 'Bimonthly' in Meeting Details but 'monthly meetings' in its description. The site's own topic filter tags (Arts/Crafts, Diversity, Entertainment, Health and Wellness, Service, STEM) were used as a hint; the 'category' field is our best-fit mapping, not a school label. MERGES: Wilcox Robotics merges the club post with /activities/clubs/robotics (FTC Teams 8872 & 13190; 'Mrs. Hardy'; room P-120). Wilcox Business Experience merges the club post (advisor 'Tony Raffetto') with its own page (advisor 'Anthony Raffetto'; 'We used to be called DECA'). Wilcox Stage Company links to the Wilcox Theater page, which says WSC is the theater group that, with the Theater Productions Honors class, typically produces two shows a year (Fall and Spring). ADDED FROM ACTIVITIES PAGES (not on the Clubs list): ASB (no advisor named; contacts are the VP of Activities and the ASB Secretary; the page also lists the 2026-27 ASB and class councils), GAINS (contact Kenny Contreras; also mentions Mr. Beadell), and the three Performance Groups: Song Pom Dance Team, Sideline Cheer, and Wilcox Music. Wilcox Music links only to the external boosters site https://whmboosters.com/, so url is null. Also Wilcox Yearbook (advisor Ms. Sanghee Krause). Left out as not clubs: CHAMPs Cafe (a student-run restaurant operated by the second-year C.H.A.M.P. culinary program; the club is 'Culinary Arts Club (CHAMPS Club)'), MakerSpace (a facility), Computer Science Showcase (class websites), Class Pages / Senior Class (mostly empty templates). The Activities Calendar Google Sheet (1EokX2Vy...) was checked; it is a 2026-27 events calendar, not a club list. No Google Doc club list was found. SPORTS: Names are as on the Athletics homepage (the contact page adds: Badminton (Co-ed), Swimming and Diving (Boys' and Girls'), Track and Field (Co-Ed)). Team list and seasons come from the Athletics homepage's Fall/Winter/Spring team tabs. Levels come from the '2025-2026' block of Athletic Participation Data (updated June 30, 2026). Combined teams merge both genders' levels: Cross Country = Boys Varsity & Frosh-Soph, Girls Varsity & JV; Track & Field = the same split; Swimming & Diving = Boys Varsity/Frosh-Soph, Girls Varsity/JV. Football is 'Varsity / Frosh-Soph and Frosh'; Girls Volleyball is 'Varsity / Junior Varsity/Fresh'. Badminton, Boys Wrestling and Girls Wrestling are listed as 'Varsity and Junior Varsity' combined. Coaches come from Coach and Athletic Director Contact (head coach per sport) plus staff named on the team's own page. Conflicts: Girls Lacrosse lists Morgan Smith on the contact page but 'John Buter' (sic, maybe 'John Butler', the softball coach) as Head Coach on the team page; both are kept. Boys Tennis and Boys Volleyball show 'TBD' (their pages name only an athletic director), so coaches is []. The contact page writes Joshua Foley as 'Josh Foley' and Competitive Sport Cheer as 'Competitive Sport Cheer, Stunt'. The Sideline Cheer page says 'Coach - Cassidy Joyce'; the cheer team page says 'Coach Cassidy'. Girls Tennis has an unfilled 'Head JV Coach' ('Info coming soon'). Trainer Wilson Hsieh and the athletic directors (Paul Rosa, Laura Stott Hardesty) are not listed as coaches. Teams whose 'Learn More' goes to an off-site page (url null here): Cross Country and Track and Field -> wilcoxrunning.org; Football -> sites.google.com/scusd.net/wilcoxfootball; Girls Volleyball -> sites.google.com/scusd.net/wilcoxgirlsvolleyball; Boys and Girls Water Polo and Swimming & Diving -> wilcoxaquatics.weebly.com. These were not scraped. Former sports that appear only in older participation data (Field Hockey through 2023-24; co-ed Wrestling before 2019-20) are not included. Season start dates stated on the Athletics page: fall begins at the beginning of August, winter at the end of October or beginning of November (Winter 2026: November 2, 2026), spring at the end of January or early February (Spring 2027: February 1, 2027). The eligibility page itself has no per-sport list. No emails or phone numbers were recorded, and no student officer names."
+}

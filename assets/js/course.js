@@ -22,20 +22,23 @@ function meta(sub, target) {
 }
 
 function fieldList(kind, payload, skip = []) {
-  return KINDS[kind].fields
+  const facts = KINDS[kind].fields
     .filter((f) => payload[f.key] && !skip.includes(f.key) && f.key !== 'school_year')
     .map((f) => {
       const v = payload[f.key];
       const body = f.type === 'url'
-        ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener nofollow">${esc(v)}</a>` : esc(v))
+        ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener nofollow">Open link ↗</a>` : esc(v))
         : f.type === 'textarea' ? prose(v) : esc(v);
-      return `<div class="kv"><div class="k">${esc(f.label)}</div><div class="v">${body}</div></div>`;
+      return `<div class="fact"><div class="label">${esc(f.label)}</div><div class="v">${body}</div></div>`;
     }).join('');
+  return facts ? `<div class="kv-grid">${facts}</div>` : '';
 }
 
 function empty(text, kind, teacher, cta = 'Add it') {
-  return `<div class="empty">${esc(text)} <a href="${submitUrl(kind, teacher)}">${esc(cta)} →</a></div>`;
+  return `<div class="empty-card"><p>${esc(text)}</p><a class="btn small" href="${submitUrl(kind, teacher)}">${esc(cta)}</a></div>`;
 }
+
+const initial = (name) => esc(name.trim().split(/\s+/).pop().charAt(0).toUpperCase());
 
 async function draw() {
   const subs = await s.approved({ course_slug: page.slug });
@@ -43,28 +46,27 @@ async function draw() {
 
   // Overview
   const ov = latest('course_overview');
+  const stat = (label, v) => (v ? `<div class="stat"><span class="label">${label}</span><b>${esc(v)}</b></div>` : '');
   $('#overview').innerHTML = ov
-    ? `<div class="facts">
-         ${ov.payload.workload ? `<div><span class="label">Time outside class</span>${esc(ov.payload.workload)}</div>` : ''}
-         ${ov.payload.difficulty ? `<div><span class="label">Difficulty</span>${esc(ov.payload.difficulty)}</div>` : ''}
-         ${ov.payload.ap_exam ? `<div><span class="label">AP exam</span>${esc(ov.payload.ap_exam)}</div>` : ''}
-       </div>
-       <div class="lede">${prose(ov.payload.summary)}</div>
+    ? `<div class="stat-grid">${stat('Time outside class', ov.payload.workload)}${stat('Difficulty', ov.payload.difficulty)}${stat('AP exam', ov.payload.ap_exam)}</div>
+       <blockquote class="quote">${prose(ov.payload.summary)}</blockquote>
        ${fieldList('course_overview', ov.payload, ['summary', 'workload', 'difficulty', 'ap_exam'])}
        ${meta(ov, 'overview')}
        <a class="edit" href="${submitUrl('course_overview')}">Suggest an update</a>`
-    : empty('No student overview yet.', 'course_overview', null, 'Write the overview');
+    : empty('No student overview yet. Took this class? Tell next year’s students what it’s really like.', 'course_overview', null, 'Write the overview');
 
   // Teachers: directory list first, then anyone who only appears in submissions
   const names = [...page.teachers];
   for (const x of subs) if (x.kind === 'teacher_section' && x.teacher && !names.includes(x.teacher)) names.push(x.teacher);
   const sections = names.map((t) => [t, latest('teacher_section', (x) => x.teacher === t)]);
+  const tLink = (t) => (page.teacherSlugs?.[t] ? `<a href="${root}teachers/${page.teacherSlugs[t]}/">${esc(t)}</a>` : esc(t));
   $('#teachers').innerHTML = names.length ? sections.map(([t, sec]) => `
     <article class="teacher ${sec ? '' : 'is-empty'}" id="t-${esc(t.toLowerCase().replace(/\W+/g, '-'))}">
-      <h3>${esc(t)}</h3>
-      ${sec ? fieldList('teacher_section', sec.payload) + meta(sec, `teacher:${t}`)
+      <header class="t-head"><span class="t-av" aria-hidden="true">${initial(t)}</span>
+        <div><h3>${tLink(t)}</h3>${sec?.payload.room ? `<a class="meta" href="${root}map/#${encodeURIComponent(sec.payload.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, ''))}">Room ${esc(sec.payload.room)} · on the map</a>` : ''}</div></header>
+      ${sec ? fieldList('teacher_section', sec.payload, ['room', 'source']) + meta(sec, `teacher:${t}`)
               + `<a class="edit" href="${submitUrl('teacher_section', t)}">Suggest an update</a>`
-            : empty('No info yet for this teacher.', 'teacher_section', t, 'Fill it in')}
+            : `<p class="meta">Nobody has described this teacher’s version yet.</p><a class="btn small ghost" href="${submitUrl('teacher_section', t)}">Fill it in</a>`}
     </article>`).join('')
     : empty('We don’t know who teaches this yet.', 'teacher_section', null, 'Add a teacher');
 
@@ -79,21 +81,21 @@ async function draw() {
 
   // Resources
   const res = subs.filter((x) => x.kind === 'resource');
-  $('#resources').innerHTML = res.length ? `<ul class="res">${res.map((r) => {
+  $('#resources').innerHTML = res.length ? `<div class="res-list">${res.map((r) => {
     const u = safeUrl(r.payload.url);
-    return `<li><span class="tag">${esc(r.payload.type)}</span>
-      ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(r.payload.title)}</a>` : esc(r.payload.title)}
-      ${r.payload.note ? `<div class="note">${esc(r.payload.note)}</div>` : ''}
-      <div class="meta">Shared by ${byline(r.author, r.verified)}</div></li>`;
-  }).join('')}</ul><a class="edit" href="${submitUrl('resource')}">Share another</a>`
-    : empty('No resources yet.', 'resource', null, 'Share one');
+    return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card">
+      <span class="tag">${esc(r.payload.type)}</span><b>${esc(r.payload.title)}</b>
+      ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
+      <span class="meta">Shared by ${byline(r.author, r.verified)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
+  }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>`
+    : empty('No resources yet. Made a study guide or found a great video?', 'resource', null, 'Share one');
 
   // Tips
   const tips = subs.filter((x) => x.kind === 'tip');
-  $('#tips').innerHTML = tips.length ? `<ul class="tips">${tips.map((t) => `<li>${prose(t.payload.text)}
-      <div class="meta">${byline(t.author, t.verified)}${t.teacher ? ` · for ${esc(t.teacher)}’s class` : ''}</div></li>`).join('')}</ul>
+  $('#tips').innerHTML = tips.length ? `<div class="tip-list">${tips.map((t) => `<figure class="tip-card">${prose(t.payload.text)}
+      <figcaption class="meta">${byline(t.author, t.verified)}${t.teacher ? ` · ${esc(t.teacher)}’s class` : ''}</figcaption></figure>`).join('')}</div>
       <a class="edit" href="${submitUrl('tip')}">Add a tip</a>`
-    : empty('No tips yet.', 'tip', null, 'Add the first tip');
+    : empty('No tips yet. What do you wish you’d known on day one?', 'tip', null, 'Add the first tip');
 
   // Summer homework
   const sh = subs.filter((x) => x.kind === 'summer_hw');

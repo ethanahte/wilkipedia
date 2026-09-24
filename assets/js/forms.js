@@ -107,7 +107,43 @@ export const KINDS = {
         hint: 'e.g. the student handbook, the counseling office page, or "from experience".' },
     ],
   },
+
+  club: {
+    label: 'Club',
+    blurb: 'When and where a club meets, what it does, and how to join.',
+    scope: 'activity',
+    fields: [
+      { key: 'name', label: 'Club name', type: 'text', required: true, suggest: 'clubs',
+        hint: 'Pick it from the list if it’s there, so your info lands on the right club.' },
+      { key: 'what', label: 'What the club does', type: 'textarea', required: true },
+      { key: 'meets', label: 'When it meets', type: 'text', hint: 'e.g. "Tuesdays at lunch" or "Every other Friday after school".' },
+      { key: 'room', label: 'Room', type: 'text', hint: 'As it appears on the campus map, e.g. B204. This puts the club on the map.' },
+      { key: 'advisor', label: 'Advisor', type: 'text' },
+      { key: 'join', label: 'How to join', type: 'textarea', hint: 'Sign-up form, Club Rush, just show up…' },
+      { key: 'link', label: 'Club link', type: 'url', hint: 'Its official page, Google Classroom, or public account. Optional.' },
+      { key: 'school_year', label: 'School year this is about', type: 'select', required: true, options: YEARS },
+    ],
+  },
+
+  sport: {
+    label: 'Sports team',
+    blurb: 'Tryouts, practice, and what being on the team is like.',
+    scope: 'activity',
+    fields: [
+      { key: 'name', label: 'Team', type: 'text', required: true, suggest: 'sports',
+        hint: 'Pick it from the list if it’s there, e.g. "Girls Volleyball".' },
+      { key: 'tryouts', label: 'Tryouts', type: 'textarea', hint: 'When, what they test, whether there are cuts.' },
+      { key: 'practice', label: 'Practice schedule', type: 'textarea', hint: 'e.g. "Mon–Fri 3:30–5:30, games Tue/Thu".' },
+      { key: 'experience', label: 'What it’s like', type: 'textarea', required: true,
+        hint: 'Time commitment, vibe, whether beginners can join. About the team, not individual people.' },
+      { key: 'tips', label: 'Tips for new players', type: 'textarea' },
+      { key: 'school_year', label: 'School year this is about', type: 'select', required: true, options: YEARS },
+    ],
+  },
 };
+
+// Kinds that belong to no class: they live on their own pages
+export const ACTIVITY_KINDS = ['club', 'sport'];
 
 export const optionsOf = (f) => (typeof f.options === 'function' ? f.options() : f.options);
 

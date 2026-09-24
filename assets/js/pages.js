@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, dataUrl, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { initHeader, courses, dataUrl, placeOf, slugify, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
@@ -42,6 +42,75 @@ async function markContent() {
   });
 }
 
+// ── clubs & sports ──
+// The official list (data/activities.json, from the Wilcox website) plus what
+// students have written, matched by name. Student-added clubs show up too.
+async function activities(kind) {
+  const [acts, subs] = await Promise.all([
+    fetch(dataUrl('data/activities.json')).then((r) => (r.ok ? r.json() : { clubs: [], sports: [] })).catch(() => ({ clubs: [], sports: [] })),
+    s.approved({ kind }),
+  ]);
+  const official = (kind === 'club' ? acts.clubs : acts.sports) || [];
+  const byName = {};
+  for (const o of official) byName[slugify(o.name)] = { ...o, info: null };
+  for (const x of subs) {                     // newest first: first one wins
+    const k = slugify(x.payload.name);
+    if (!k) continue;
+    byName[k] ??= { name: x.payload.name, category: 'Added by students', season: null, levels: [], coaches: [], url: null };
+    byName[k].info ??= x;
+  }
+  const items = Object.entries(byName).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+  const groupOf = (o) => (kind === 'club' ? o.category || 'Other' : o.season || 'Season not listed');
+  const order = kind === 'club' ? null : ['Fall', 'Winter', 'Spring', 'Season not listed'];
+  const groups = [...new Set(items.map(([, o]) => groupOf(o)))].sort((a, b) =>
+    order ? order.indexOf(a) - order.indexOf(b) : a.localeCompare(b));
+  if (acts.sources?.length) $('#act-source').innerHTML = `Official list from the <a href="${esc(acts.sources[0])}" target="_blank" rel="noopener">Wilcox website ↗</a>. Details are written by students.`;
+
+  const field = (label, v) => (v ? `<div class="fact"><div class="label">${label}</div><div class="v">${prose(v)}</div></div>` : '');
+  const card = ([k, o]) => {
+    const p = o.info?.payload || {};
+    const room = p.room ? p.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '') : null;
+    const add = `${root}submit/?kind=${kind}&name=${encodeURIComponent(o.name)}`;
+    const body = kind === 'club'
+      ? field('What they do', p.what || o.description) + field('Meets', p.meets || o.meets)
+        + (room ? `<div class="fact"><div class="label">Room</div><div class="v"><a href="${root}map/#${esc(room)}">${esc(p.room)} · on the map</a></div></div>` : '')
+        + field('Advisor', p.advisor || o.advisor) + field('How to join', p.join)
+      : field('Tryouts', p.tryouts) + field('Practice', p.practice) + field('What it’s like', p.experience) + field('Tips', p.tips)
+        + (o.coaches?.length ? field('Coach' + (o.coaches.length > 1 ? 'es' : ''), o.coaches.join(', ')) : '');
+    const link = safeLink(p.link) || o.url;
+    return `<article class="act-card" id="${esc(k)}" data-group="${esc(groupOf(o))}" data-name="${esc(o.name.toLowerCase())}">
+      <header><h3>${esc(o.name)}</h3>${kind === 'sport' && o.levels?.length ? o.levels.map((l) => `<span class="tag">${esc(l)}</span>`).join('') : ''}</header>
+      ${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
+      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}</span>` : ''}
+        <span class="act-links">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener nofollow">Page ↗</a>` : ''}
+        <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>
+    </article>`;
+  };
+  const draw = () => {
+    const q = $('#act-q').value.trim().toLowerCase();
+    const g = $('#act-filter [aria-pressed="true"]')?.dataset.g || 'all';
+    const vis = items.filter(([, o]) => (g === 'all' || groupOf(o) === g) && (!q || o.name.toLowerCase().includes(q)));
+    $('#act-list').innerHTML = !items.length ? `<div class="empty">Nothing listed yet. <a href="${root}submit/?kind=${kind}">Add the first one</a>.</div>`
+      : kind === 'club' ? (vis.length ? `<div class="act-grid">${vis.map(card).join('')}</div>` : '<div class="empty">No matches.</div>')
+        : groups.map((grp) => { const list = vis.filter(([, o]) => groupOf(o) === grp);
+            return list.length ? `<section class="season"><h2>${esc(grp)}</h2><div class="act-grid">${list.map(card).join('')}</div></section>` : ''; }).join('')
+          || '<div class="empty">No matches.</div>';
+  };
+  $('#act-filter').innerHTML = `<button class="chip" data-g="all" aria-pressed="true">All</button>`
+    + groups.map((grp) => `<button class="chip" data-g="${esc(grp)}" aria-pressed="false">${esc(grp)}</button>`).join('');
+  $('#act-filter').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-g]');
+    if (!b) return;
+    $$('#act-filter .chip').forEach((c) => c.setAttribute('aria-pressed', c === b));
+    draw();
+  });
+  $('#act-q').addEventListener('input', draw);
+  draw();
+  const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (target) { target.classList.add('flash'); target.scrollIntoView({ block: 'center' }); }
+}
+const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
+
 const pages = {
   async home() {
     const q = $('#home-q');
@@ -51,9 +120,9 @@ const pages = {
     });
     const [recent, data] = await Promise.all([s.recent(6), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
-    $('#home-recent').innerHTML = recent.map((x) => `<a href="${x.course_slug ? courseUrl(x.course_slug) : root + 'school/'}">
-      ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(name[x.course_slug] || 'School info')}</b>
-      <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`).join('')
+    $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name); return `<a href="${href}">
+      ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(where)}</b>
+      <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`; }).join('')
       || '<div class="meta">Nothing yet. The first pages are being written now.</div>';
   },
 
@@ -224,7 +293,7 @@ const pages = {
 
           <section><h2>Your submissions</h2>${mine.length ? `<ul class="subs">${mine.map((x) => `<li>
             <span class="tag st-${x.status}">${label[x.status]}</span> ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}
-            · ${x.course_slug ? `<a href="${courseUrl(x.course_slug)}">${esc(name[x.course_slug] || x.course_slug)}</a>` : 'School info'}
+            · ${(([w, h]) => `<a href="${h}">${esc(w)}</a>`)(placeOf(x, name))}
             <span class="meta">${ago(x.created_at)}</span>
             ${x.review_note ? `<div class="note">Reviewer: ${esc(x.review_note)}</div>` : ''}</li>`).join('')}</ul>`
             : `<p class="meta">Nothing yet. <a href="${root}bounties/">Find a bounty</a>.</p>`}</section>
@@ -273,6 +342,9 @@ const pages = {
     s.onAuth(draw);
     draw();
   },
+
+  clubs() { return activities('club'); },
+  sports() { return activities('sport'); },
 
   static() {},
 };

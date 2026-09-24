@@ -125,7 +125,8 @@ create table public.submissions (
   bounty_id   text references public.bounties on delete set null,
   course_slug text,                                   -- null for school-wide info
   kind        text not null check (kind in
-              ('course_overview', 'teacher_section', 'resource', 'tip', 'summer_hw', 'school_info')),
+              ('course_overview', 'teacher_section', 'resource', 'tip', 'summer_hw', 'school_info',
+               'club', 'sport')),
   teacher     text,
   payload     jsonb not null,
   status      text not null default 'pending'

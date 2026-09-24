@@ -37,7 +37,8 @@ CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
-                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map"]
+                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
+                  "menu", "clubs", "sports"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -112,10 +113,17 @@ ICONS = {
     "teachers": _I('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>'),
     "rules": _I('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>'),
     "about": _I('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),
+    "food": _I('<path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-2 1.5-3 4-3 7v2h3"/>'),
+    "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
+    "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
+    "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+    "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
-MORE = [("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
+MORE = [("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("sports/", "Sports", "sports"),
+        ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
         ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
         ("rules/", "Community rules", "rules"), ("about/", "About", "about")]
+WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
 def _version(path):
@@ -162,6 +170,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""} aria-label="More pages">'
             f'{ICONS["menu"]}<span>More</span>{ICONS["chev"]}</summary><div class="menu">'
             + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon in MORE)
+            + f'<a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
             + '</div></details>')
     v = VERSIONS
     importmap = json.dumps({"imports": {f"{r}assets/{k}": f"{r}assets/{k}?v={h}"
@@ -200,14 +209,14 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div id="auth" class="auth"></div>
   </div>
 </header>
-<a id="bounty-tab" class="bounty-tab" href="{r}bounties/" hidden><span class="star" aria-hidden="true">★</span><span class="t">Bounties</span><span class="n" aria-label="open bounties"></span></a>
+<a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
 <main id="main" class="wrap">
 {body}
 </main>
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -308,45 +317,61 @@ def build_subjects(depts):
              active="subjects/", data={"page": "subject"})
 
 
+SEC_ICONS = {
+    "overview": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    "catalog": '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+    "teachers": '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>',
+    "resources": '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+    "tips": '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+    "summer": '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    "comments": '<path d="M7 8h10M7 12h6"/><path d="M21 12a8 8 0 0 1-11.8 7L3 21l2-6.2A8 8 0 1 1 21 12z"/>',
+}
+
+
+def sec_head(key, title, sub=""):
+    icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{SEC_ICONS[key]}</svg>'
+    return f'<div class="sec-head"><span class="sec-icon">{icon}</span><div><h2>{title}</h2>{f"<p class=meta>{sub}</p>" if sub else ""}</div></div>'
+
+
 def build_courses(depts, courses):
     dept_name = {d["slug"]: short_dept(d["name"]) for d in depts}
     for c in courses.values():
-        facts = [(k, c.get(f)) for k, f in [("Grades", "grades"), ("UC/CSU a–g", "ucCsu"), ("Credits", "credits"),
-                                             ("Course #", "courseNumber"), ("Prerequisite", "prerequisite")]]
-        facts_html = "".join(f'<div><span class="label">{k}</span>{e(v)}</div>' for k, v in facts if v)
+        stats = [(k, c.get(f)) for k, f in [("Grades", "grades"), ("UC/CSU a–g", "ucCsu"), ("Credits", "credits"),
+                                             ("Course #", "courseNumber")]]
+        stats_html = "".join(f'<div class="stat"><span class="label">{k}</span><b>{e(v)}</b></div>' for k, v in stats if v)
+        prereq = c.get("prerequisite")
         desc_html = "".join(f"<p>{e(p)}</p>" for p in (c.get("description") or "").split("\n\n") if p.strip())
         is_ap = c["name"].startswith("AP ")
         where = "" if c.get("offeredAtListed", True) else '<p class="note">This program is taught off campus at SVCTE, not at Wilcox.</p>'
         page(f"courses/{c['slug']}/", c["name"], f"""
 <nav class="crumbs"><a href="../../subjects/">All classes</a> / <a href="../../subjects/{e(c['department'])}/">{e(dept_name[c['department']])}</a></nav>
-<header class="course-head">
-  <h1>{e(c['name'])}</h1>
-  <div class="c-badges">{course_badges(c)}</div>
+<header class="course-hero">
+  <div class="hero-top">
+    <div><div class="label">{e(dept_name[c['department']])}</div><h1>{e(c['name'])}</h1></div>
+    <div class="c-badges">{course_badges(c)}</div>
+  </div>
+  <div class="stat-grid">{stats_html}</div>
+  {f'<div class="prereq"><span class="label">Prerequisite</span>{e(prereq)}</div>' if prereq else ''}
+  {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
 </header>
 {where}
-<div class="facts">{facts_html}</div>
-{f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
 
-<nav class="toc" aria-label="On this page"><a href="#s-overview">Overview</a><a href="#s-teachers">Teachers</a><a href="#s-resources">Resources</a><a href="#s-tips">Tips</a><a href="#s-summer">Summer HW</a><a href="#comments">Comments</a></nav>
+<nav class="toc pills" aria-label="On this page"><a href="#s-overview">Overview</a><a href="#s-teachers">Teachers</a><a href="#s-resources">Resources</a><a href="#s-tips">Tips</a><a href="#s-summer">Summer HW</a><a href="#comments">Comments</a><a href="#s-catalog">Catalog</a></nav>
 
-<section id="s-overview"><h2>What students say</h2><div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
+<section id="s-overview" class="sec">{sec_head("overview", "What students say")}<div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
 
-<section id="s-catalog"><details {'open' if not desc_html else ''}><summary><h2>Catalog description</h2></summary>
-  <div class="catalog-desc">{desc_html or '<p class="meta">The catalog has no description for this class.</p>'}
-  <p class="meta">From the {e(CATALOG_SOURCE)}, page {e(c.get('page', '?') - 1 if isinstance(c.get('page'), int) else '?')}.</p></div></details></section>
-
-<section id="s-teachers"><h2>Teachers</h2>
-  <p class="meta">From the {e(DIRECTORY_SOURCE)}. Each teacher’s section is written by their students.</p>
+<section id="s-teachers" class="sec">{sec_head("teachers", "Teachers", "Each teacher’s section is written by their students.")}
   <div id="teachers" class="teachers dyn"></div>
   <div id="compare" hidden><h3>Side by side</h3><div class="scroll-x"><table id="compare-table" class="compare"></table></div></div>
 </section>
 
-<section id="s-resources"><h2>Resources & study guides</h2><div id="resources" class="dyn"></div></section>
-<section id="s-tips"><h2>Tips from past students</h2><div id="tips" class="dyn"></div></section>
-<section id="s-summer"><h2>Summer homework</h2><div id="summer" class="dyn"></div></section>
+<div class="sec-row">
+  <section id="s-resources" class="sec">{sec_head("resources", "Resources &amp; study guides")}<div id="resources" class="dyn"></div></section>
+  <section id="s-tips" class="sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
+</div>
+<section id="s-summer" class="sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
 
-<section id="comments"><h2>Comments</h2>
-  <p class="meta">About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a></p>
+<section id="comments" class="sec">{sec_head("comments", "Comments", 'About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a>')}
   <form id="comment-form" class="comment-form">
     <div id="replying" class="meta" hidden>Replying to a comment · <button type="button" class="linkish" id="cancel-reply">cancel</button></div>
     <label class="sr" for="comment-prompt">Topic</label><select id="comment-prompt"></select>
@@ -356,10 +381,14 @@ def build_courses(depts, courses):
   </form>
   <div id="comment-list"></div>
 </section>
+
+<section id="s-catalog" class="sec sec-quiet">{sec_head("catalog", "Catalog description", f"From the {e(CATALOG_SOURCE)}, page {e(c.get('page') - 1 if isinstance(c.get('page'), int) else '?')}.")}
+  <div class="catalog-desc">{desc_html or '<p class="meta">The catalog has no description for this class.</p>'}</div></section>
 """, desc=f"{c['name']} at Wilcox High School: what students say about tests, grading and homework, plus study guides and tips."
           + (" Includes AP exam info." if is_ap else ""),
              active="subjects/", script="course.js",
-             data={"slug": c["slug"], "name": c["name"], "teachers": c["teachers"]})
+             data={"slug": c["slug"], "name": c["name"], "teachers": c["teachers"],
+                   "teacherSlugs": {t: slugify(t) for t in c["teachers"]}})
 
 
 def build_teachers(teachers, courses):
@@ -493,7 +522,7 @@ def build_static():
 <p class="lede">A student-built guide to every class at Wilcox High School in Santa Clara.</p>
 <p>Started in 2026 by Ethan Liu and Jonathan. Students write everything through <a href="../bounties/">bounties</a>, and reviewers check it before it’s published.</p>
 <p><b>Where the facts come from.</b> Course names, grade levels, prerequisites and descriptions come from the SCUSD High School Course Catalog 2025–2026. Teacher lists come from the Wilcox staff directory. Everything else is written by students.</p>
-<p><b>Not official.</b> Wilkipedia is an independent student project, not a Wilcox High School or Santa Clara Unified site. Always confirm policies and deadlines with your teacher or counselor.</p>
+<p><b>Not official.</b> Wilkipedia is an independent student project, not a Wilcox High School or Santa Clara Unified site. Always confirm policies and deadlines with your teacher or counselor. The official site is <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">wilcox.santaclarausd.org ↗</a>.</p>
 <p><b>Something wrong?</b> Every section has a “Report outdated” button. To reach the team, comment on any class page or tell a reviewer.</p>""", data={"page": "static"})
 
     page("privacy/", "Privacy", """
@@ -542,6 +571,43 @@ def build_static():
   <div id="room-list"><div class="meta">Loading…</div></div>
 </section>""", active="map/", script="map.js", data={"page": "map"},
          desc="Interactive map of Wilcox High School: tap a classroom to see who teaches there, what they teach and when.")
+
+    page("menu/", "Cafeteria menu", """
+<h1>Cafeteria menu</h1>
+<p class="lede">Breakfast and lunch at Wilcox this week, straight from the district’s menu.</p>
+<div id="menu-app">
+  <div class="menu-bar">
+    <div class="seg" id="menu-which" role="radiogroup" aria-label="Meal">
+      <button type="button" role="radio" data-which="breakfast">Breakfast</button>
+      <button type="button" role="radio" data-which="lunch">Lunch</button>
+    </div>
+    <div class="week-nav"><button type="button" class="icon-btn plain" id="prev-week" aria-label="Previous week">‹</button>
+      <b id="week-label"></b><button type="button" class="icon-btn plain" id="next-week" aria-label="Next week">›</button>
+      <button type="button" class="chip" id="this-week">This week</button></div>
+  </div>
+  <div id="menu-days" class="menu-days"></div>
+  <p class="meta">Menus can change. <b>(V)</b> vegetarian · <b>(VG)</b> vegan · <b>(GF)</b> gluten-free. For allergens and nutrition, see the
+    <a id="official" href="#" target="_blank" rel="noopener">official menu ↗</a>. Menu data: Santa Clara Unified Nutrition Services.</p>
+</div>""", active="menu/", script="menu.js", data={"page": "menu"},
+         desc="This week’s breakfast and lunch menu at Wilcox High School.")
+
+    page("clubs/", "Clubs", """
+<h1>Clubs</h1>
+<p class="lede">Every club at Wilcox: what it does, when it meets, and how to join.</p>
+<div class="list-tools"><input id="act-q" type="search" placeholder="Search clubs" aria-label="Search clubs"><div class="chips" id="act-filter"></div></div>
+<div id="act-list" class="act-grid"><div class="meta">Loading…</div></div>
+<p class="meta" id="act-source"></p>
+<p><a class="btn ghost" href="../submit/?kind=club">Add info about a club</a></p>""", active="clubs/", data={"page": "clubs"},
+         desc="Clubs at Wilcox High School: what they do, when they meet, and how to join.")
+
+    page("sports/", "Sports", """
+<h1>Sports</h1>
+<p class="lede">Wilcox Chargers teams by season: tryouts, practice, and what it’s like to play.</p>
+<div class="list-tools"><input id="act-q" type="search" placeholder="Search teams" aria-label="Search teams"><div class="chips" id="act-filter"></div></div>
+<div id="act-list"><div class="meta">Loading…</div></div>
+<p class="meta" id="act-source"></p>
+<p><a class="btn ghost" href="../submit/?kind=sport">Add info about a team</a></p>""", active="sports/", data={"page": "sports"},
+         desc="Wilcox High School sports teams by season: tryouts, practices and what it's like to play.")
 
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})

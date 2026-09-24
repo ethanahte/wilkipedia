@@ -115,6 +115,16 @@ function paintThemeToggle() {
   b.title = b.getAttribute('aria-label');
 }
 
+export const slugify = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+// Where a submission lives, as [label, url]: its class page, a club/team card, or School info.
+export function placeOf(x, courseName = {}) {
+  if (x.kind === 'club') return [x.payload?.name || 'Club', `${root}clubs/#${slugify(x.payload?.name)}`];
+  if (x.kind === 'sport') return [x.payload?.name || 'Sports team', `${root}sports/#${slugify(x.payload?.name)}`];
+  if (x.course_slug) return [courseName[x.course_slug] || x.course_slug, `${root}courses/${x.course_slug}/`];
+  return ['School info', `${root}school/`];
+}
+
 export const courseUrl = (slug) => `${root}courses/${slug}/`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 
@@ -181,6 +191,9 @@ export async function requireUser(s, why = 'to do that') {
 }
 
 // ── forms ──
+// Named suggestion lists for fields with `suggest` (e.g. club names), filled by
+// the page before it renders a form.
+export const suggestions = {};
 // Renders KINDS[kind] into `el`. Returns {values(), check()}; check() marks and
 // returns the first missing required field.
 export function renderFields(el, kind, preset = {}) {
@@ -198,7 +211,9 @@ export function renderFields(el, kind, preset = {}) {
         ${optionsOf(f).map((o) => `<option ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('')}
       </select>`;
     } else {
-      input = `<input id="${id}" name="${f.key}" type="${f.type === 'url' ? 'url' : 'text'}" value="${esc(val)}" ${f.required ? 'required' : ''} ${f.type === 'url' ? 'placeholder="https://…"' : ''}>`;
+      const list = f.suggest && suggestions[f.suggest] ? `list="dl-${f.key}"` : '';
+      input = `<input id="${id}" name="${f.key}" type="${f.type === 'url' ? 'url' : 'text'}" value="${esc(val)}" ${list} autocomplete="off" ${f.required ? 'required' : ''} ${f.type === 'url' ? 'placeholder="https://…"' : ''}>`
+        + (list ? `<datalist id="dl-${f.key}">${suggestions[f.suggest].map((o) => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
     }
     return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label>
       ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;

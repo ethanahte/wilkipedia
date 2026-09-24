@@ -6,7 +6,8 @@
 // Room boxes come from data/map.json (traced off the school's campus map);
 // room contents come from approved teacher sections whose "room" field matches.
 
-import { initHeader, courses, dataUrl, $, $$, esc, courseUrl, root } from './ui.js';
+import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root } from './ui.js';
+import { todaysLunch, sortedCats, itemHtml } from './menu.js';
 
 const s = await initHeader();
 const svg = $('#map-svg');
@@ -29,9 +30,17 @@ const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').re
 
 // ── room contents from approved teacher sections ──
 let byRoom = {};
+let clubsByRoom = {};
 async function loadRooms() {
-  const sections = await s.approved({ kind: 'teacher_section' });
+  const [sections, clubs] = await Promise.all([s.approved({ kind: 'teacher_section' }), s.approved({ kind: 'club' })]);
   byRoom = {};
+  clubsByRoom = {};
+  for (const c of clubs) {
+    const id = normRoom(c.payload.room);
+    if (!id || !c.payload.name) continue;
+    const list = (clubsByRoom[id] ??= []);
+    if (!list.some((x) => x.name === c.payload.name)) list.push({ name: c.payload.name, meets: c.payload.meets });
+  }
   for (const x of sections) {
     const id = normRoom(x.payload.room);
     if (!id || !x.teacher) continue;
@@ -98,7 +107,7 @@ function frame(box, zoom = 3.2) {
 // ── drawing ──
 function drawSpots() {
   spots.innerHTML = mode !== 'plan' ? '' : map.rooms.map((r) => {
-    const has = !!byRoom[r.id];
+    const has = !!byRoom[r.id] || !!clubsByRoom[r.id] || r.id === 'CAFETERIA';
     return `<rect class="room k-${r.kind}${has ? ' has' : ''}" data-id="${esc(r.id)}" x="${r.x}" y="${r.y}"
       width="${r.w}" height="${r.h}" rx="2" tabindex="0" role="button" aria-label="${esc(r.label)}"><title>${esc(r.label)}</title></rect>`;
   }).join('');
@@ -124,15 +133,24 @@ let selected = null;
 const badges = (c) => `${c.name.startsWith('AP ') ? '<span class="tag ap">AP</span>' : ''}${/Honors/.test(c.name) ? '<span class="tag">Honors</span>' : ''}`;
 
 function panelHtml(r) {
-  const where = [r.buildingName, r.floor ? `Floor ${r.floor}` : null].filter(Boolean).join(' · ');
+  const multiFloor = map.rooms.some((x) => x.building === r.building && x.floor && x.floor !== r.floor);
+  const where = [r.buildingName, multiFloor && r.floor ? `Floor ${r.floor}` : null].filter(Boolean).join(' · ');
   const head = `<div class="mp-head"><div><div class="label">${esc(where)}</div><h2>${esc(r.label)}</h2></div>
     <button type="button" class="icon-btn mp-close" aria-label="Close">✕</button></div>`;
   if (r.kind === 'building') {
     return `${head}<p>${esc(map.insets[r.target]?.label || '')}</p>
       <p><button type="button" class="btn" data-inset="${esc(r.target)}">Show the floors</button></p>`;
   }
+  if (r.id === 'CAFETERIA') {
+    return `${head}<div class="mp-menu"><div class="label">Today’s lunch</div><div id="mp-menu"><p class="meta">Loading…</p></div>
+      <p><a class="btn" href="${root}menu/">Full breakfast &amp; lunch menu</a></p></div>`;
+  }
   const list = byRoom[r.id] || [];
+  const clubs = clubsByRoom[r.id] || [];
+  const clubHtml = clubs.length ? `<section class="mp-teacher"><h3>Clubs that meet here</h3><ul class="mp-clubs">${clubs.map((c) =>
+    `<li><a href="${root}clubs/#${slugify(c.name)}">${esc(c.name)}</a>${c.meets ? `<span class="meta"> · ${esc(c.meets)}</span>` : ''}</li>`).join('')}</ul></section>` : '';
   const add = `${root}submit/?kind=teacher_section&room=${encodeURIComponent(r.id)}`;
+  if (!list.length && clubs.length) return head + clubHtml;
   if (!list.length) {
     return `${head}<div class="mp-empty">
       <p>${r.kind === 'classroom' ? 'Nobody has added who teaches here yet.' : r.kind === 'office' ? 'An office, not a classroom.' : 'A shared space, not a classroom.'}</p>
@@ -149,7 +167,7 @@ function panelHtml(r) {
       <div class="kv"><div class="k">Schedule</div><div class="v">${t.schedule
         ? `${esc(t.schedule)}${t.year ? ` <span class="tag">${esc(t.year)}</span>` : ''}`
         : `<span class="meta">Not added yet.</span> <a href="${add}">Add it</a>`}</div></div>
-    </section>`).join('')}
+    </section>`).join('')}${clubHtml}
     <p class="meta mp-foot">Wrong or missing? <a href="${add}">Update this room</a></p>`;
 }
 
@@ -165,6 +183,15 @@ function select(id, { fly = true } = {}) {
   requestAnimationFrame(() => panel.classList.add('open'));
   $('#map-hint').hidden = true;
   if (fly) frame(r);
+  if (id === 'CAFETERIA') {
+    todaysLunch().then((day) => {
+      const el = $('#mp-menu');
+      if (!el) return;
+      const main = day ? sortedCats(day).filter((c) => c === 'Entrees' || c === 'Proteins') : [];
+      el.innerHTML = day ? main.map((c) => `<ul class="menu-list">${day[c].map(itemHtml).join('')}</ul>`).join('')
+        : '<p class="meta">No lunch today (weekend or holiday).</p>';
+    }).catch(() => { const el = $('#mp-menu'); if (el) el.innerHTML = '<p class="meta">Couldn’t load the menu right now.</p>'; });
+  }
   history.replaceState(null, '', '#' + encodeURIComponent(id));
   return true;
 }
@@ -276,12 +303,12 @@ new ResizeObserver(() => { if (!selected) { cam = fitCam(); apply(); } else appl
 
 // ── room list under the map ──
 function drawList() {
-  const ids = Object.keys(byRoom).filter((id) => roomById[id]);
+  const ids = [...new Set([...Object.keys(byRoom), ...Object.keys(clubsByRoom)])].filter((id) => roomById[id]);
   const groups = {};
   for (const id of ids) (groups[roomById[id].buildingName] ??= []).push(id);
   $('#room-list').innerHTML = ids.length ? Object.entries(groups).sort().map(([b, list]) => `<div class="room-group">
       <h3>${esc(b)}</h3><div class="chips">${list.sort((a, c) => a.localeCompare(c, undefined, { numeric: true }))
-        .map((id) => `<button type="button" class="chip" data-goto="${esc(id)}">${esc(id)} · ${esc(byRoom[id].map((t) => t.teacher).join(', '))}</button>`).join('')}</div></div>`).join('')
+        .map((id) => `<button type="button" class="chip" data-goto="${esc(id)}">${esc(id)} · ${esc([...(byRoom[id] || []).map((t) => t.teacher), ...(clubsByRoom[id] || []).map((c) => c.name)].join(', '))}</button>`).join('')}</div></div>`).join('')
     : '<div class="empty">No rooms have info yet. When students add a room number to a teacher section, it shows up on the map.</div>';
 }
 $('#room-list').addEventListener('click', (e) => {
