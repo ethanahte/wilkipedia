@@ -715,3 +715,18 @@ font[style*="background-color"] { background: none !important; box-shadow: none 
 .danger-link { color: var(--bad) !important; }
 .pub-sum { margin: 4px 0; font-size: .92rem; }
 a.chip { text-decoration: none; }
+
+/* ── edit dialog & notifications ── */
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 16px; }
+.modal-card { width: min(680px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; background: var(--card); color: var(--ink);
+  border-radius: 16px; border-top: 5px solid var(--gold); padding: 20px 22px; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+.modal-card .field { max-width: none; }
+.note-bell { position: relative; color: var(--bar-ink); display: grid; place-items: center; width: 34px; height: 34px; }
+.note-bell[hidden] { display: none; }
+.note-bell .n { position: absolute; top: 0; right: -2px; min-width: 17px; height: 17px; border-radius: 999px; background: var(--bad);
+  color: #fff; font: 700 .64rem/17px var(--sans); text-align: center; padding: 0 4px; }
+.notes { list-style: none; padding: 0; margin: 0; }
+.notes li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.notes li.unread { font-weight: 600; }
+.notes li.unread::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 7px; }
+.edited-mark { font-style: italic; }

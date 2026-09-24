@@ -200,9 +200,20 @@ export async function initHeader() {
     if (slot) {
       slot.innerHTML = u
         ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}
+           <a href="${root}account/#notifications" class="note-bell" hidden title="Notifications" aria-label="Notifications">
+             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n"></span></a>
            <a href="${root}account/" class="who" title="Your account">${avatarHtml(u)}<span class="who-name">${esc(u.name)}</span></a>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
+    }
+    // Unread notifications (edits, published, unpublished…)
+    if (u && s.unreadCount) {
+      s.unreadCount().then((n) => {
+        const b = $('.note-bell', slot);
+        if (!b) return;
+        b.hidden = !n;
+        $('.n', b).textContent = n > 9 ? '9+' : n;
+      }).catch(() => {});
     }
     // The bounty board is for signed-in members: its tab only appears for them.
     if (tab) {
@@ -226,6 +237,40 @@ export async function requireUser(s, why = 'to do that') {
   toast(`Sign in ${why}.`);
   await s.signIn();
   return s.user();
+}
+
+// ── reviewer editing ──
+// Opens the submission's own form, filled in, plus a required reason. Saving
+// keeps the old version and notifies the author (edit_submission in schema.sql).
+export function openEditor(store, sub, onSaved) {
+  const wrap = document.createElement('div');
+  wrap.className = 'modal';
+  wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+      <div class="lang-top"><div><h2 id="ed-title">Edit ${esc(KINDS[sub.kind]?.label || 'submission')}</h2>
+        <p class="meta">By ${esc(sub.author)}. They’ll get a notice with your reason, and the old version is kept.</p></div>
+        <button type="button" class="icon-btn lang-x" data-close aria-label="Close">✕</button></div>
+      <div id="ed-fields"></div>
+      <div class="field"><label for="ed-note">What did you change, and why? <span class="req">*</span></label>
+        <div class="hint">The author sees this, e.g. “Fixed a typo in the grading weights”.</div>
+        <input id="ed-note" maxlength="500" required></div>
+      <p class="error" id="ed-err" hidden></p>
+      <div class="r-actions"><button class="btn">Save changes</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
+    </form>`;
+  document.body.append(wrap);
+  const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
+  const close = () => wrap.remove();
+  wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
+  $('form', wrap).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = (m) => { $('#ed-err', wrap).textContent = m; $('#ed-err', wrap).hidden = false; };
+    const missing = fields.check();
+    if (missing) return err(missing);
+    const note = $('#ed-note', wrap).value.trim();
+    if (!note) return err('Please say what you changed and why.');
+    const ok = await guard(() => store.editSubmission(sub.id, { ...sub.payload, ...fields.values() }, note), 'Saved. The author has been notified.');
+    if (ok) { close(); onSaved?.(); }
+  });
+  $('#ed-note', wrap).focus();
 }
 
 // ── drafts ──

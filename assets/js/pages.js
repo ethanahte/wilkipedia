@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, dataUrl, placeOf, slugify, drafts, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip } from './ui.js';
 import { KINDS, staleness } from './forms.js';
@@ -63,7 +63,7 @@ async function activities(kind) {
     return `<article class="act-card" id="${esc(k)}" data-group="${esc(groupOf(o))}" data-name="${esc(o.name.toLowerCase())}">
       <header><h3>${esc(o.name)}</h3>${kind === 'sport' && o.levels?.length ? o.levels.map((l) => `<span class="tag">${esc(l)}</span>`).join('') : ''}</header>
       ${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
-      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : ''}</span>` : ''}
+      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${o.info.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : ''}</span>` : ''}
         <span class="act-links">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener nofollow">Page ↗</a>` : ''}
         <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>
     </article>`;
@@ -88,6 +88,8 @@ async function activities(kind) {
   });
   $('#act-q').addEventListener('input', draw);
   $('#act-list').addEventListener('click', async (e) => {
+    const ed = e.target.closest('[data-edit]');
+    if (ed) { openEditor(s, subs.find((x) => String(x.id) === ed.dataset.edit), () => location.reload()); return; }
     const u = e.target.closest('[data-unpub]');
     if (u) {
       const note = prompt('Unpublish this info? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
@@ -243,10 +245,12 @@ const pages = {
         const stale = staleness(x);
         return `<article><h3>${icon(topic)}${esc(x.payload.title)}</h3>${prose(x.payload.text)}
           ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : ''}</div></article>`;
+          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${x.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : ''}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
     </section>`).join('');
     $('#school-list').addEventListener('click', async (e) => {
+      const ed = e.target.closest('[data-edit]');
+      if (ed) { openEditor(s, list.find((x) => String(x.id) === ed.dataset.edit), () => location.reload()); return; }
       const u = e.target.closest('[data-unpub]');
       if (!u) return;
       const note = prompt('Unpublish this article? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
@@ -283,9 +287,13 @@ const pages = {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
           <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${themeCard}${demoTools}`;
       } else {
-        const [mine, data] = await Promise.all([s.mySubmissions(), courses()]);
+        const [mine, data, notes] = await Promise.all([s.mySubmissions(), courses(), s.notifications ? s.notifications() : []]);
         const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
         $('#account').innerHTML = `
+          <section class="card" id="notifications"><h2>Notifications</h2>${notes.length ? `<ul class="notes">${notes.map((n) =>
+            `<li class="${n.read ? '' : 'unread'}"><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
+              <div class="meta">${ago(n.created_at)}</div></div></li>`).join('')}</ul>`
+            : '<p class="meta">Nothing yet. You’ll hear here when your work is published or a reviewer edits it.</p>'}</section>
           <section class="card profile">
             <div class="profile-head">${avatarHtml(me, 'lg')}
               <div><b class="profile-name">${esc(me.name)}</b>${badge(me.school)}
@@ -352,6 +360,7 @@ const pages = {
                                         show_on_leaderboard: $('#lb').checked }), 'Profile saved.');
         };
         $('#signout').onclick = () => guard(() => s.signOut());
+        if (notes.some((n) => !n.read)) s.markAllRead().then(() => { const b = $('.note-bell'); if (b) b.hidden = true; });
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }

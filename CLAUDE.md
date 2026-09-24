@@ -104,5 +104,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Never wipe typing:** the live store only notifies `onAuth` listeners when the
   user actually changes (Supabase re-fires on every tab focus). Forms autosave
   via `drafts` in ui.js (submit form, comment box, feedback) and clear on submit.
+- **Editing & notifications:** reviewers edit published work only through the
+  `edit_submission` RPC (keeps the old version in `submission_edits`, sets
+  edited_at, notifies the author). Status changes notify authors via the
+  `on_status_notify` trigger. Users read their `notifications` on the account
+  page; the header bell shows the unread count.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

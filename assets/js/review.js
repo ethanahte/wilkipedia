@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, placeOf, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
+import { initHeader, courses, placeOf, openEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -22,6 +22,7 @@ function payloadHtml(kind, p) {
   }).join('');
 }
 
+let pubList = [];
 const tabs = {
   async submissions() {
     const list = await s.pending();
@@ -44,6 +45,7 @@ const tabs = {
   async published() {
     const showOff = location.hash === '#published-off';
     const list = await s.byStatus(showOff ? 'rejected' : 'approved');
+    pubList = list;
     const names = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     const summary = (x) => { const p = x.payload || {}; return p.title || p.summary || p.text || p.test_style || p.what || p.name || ''; };
     return `<div class="list-tools"><input id="pub-q" type="search" placeholder="Filter by class, teacher, author or text" aria-label="Filter">
@@ -59,7 +61,7 @@ const tabs = {
         ${x.review_note ? `<p class="meta">Note: ${esc(x.review_note)}</p>` : ''}
         <div class="r-actions">${showOff
           ? '<button class="btn ghost small" data-act="approved">Republish</button>'
-          : '<button class="btn ghost danger small" data-act="rejected">Unpublish…</button>'}</div>
+          : '<button class="btn ghost small" data-editpub>Edit…</button><button class="btn ghost danger small" data-act="rejected">Unpublish…</button>'}</div>
       </article>`).join('') : `<div class="empty">${showOff ? 'Nothing unpublished.' : 'Nothing published yet.'}</div>`}`;
   },
   async comments() {
@@ -156,6 +158,7 @@ document.addEventListener('click', async (e) => {
   if (!t) return;
   if (t.dataset.tab) { tab = t.dataset.tab; history.replaceState(null, '', '#' + tab); return draw(); }
   const card = t.closest('[data-id]');
+  if ('editpub' in t.dataset && card) { openEditor(s, pubList.find((x) => String(x.id) === card.dataset.id), draw); return; }
   if (t.dataset.act && card) {
     let note = null;
     if (t.dataset.act !== 'approved') {

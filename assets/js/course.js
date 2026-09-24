@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, drafts, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, drafts, openEditor, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -15,14 +15,16 @@ const PROMPTS = ['General', 'What surprised you?', 'How much time did it take ea
 
 // Reviewers get an Unpublish link on everything students wrote
 const isMod = () => REVIEWER_ROLES.includes(s.user()?.role);
-const unpub = (sub) => (isMod() ? ` · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : '');
+let subsById = {};
+const unpub = (sub) => (isMod() ? ` · <button class="linkish" data-edit="${sub.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : '');
+const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">edited by a reviewer ${fmtDate(sub.edited_at)}</span>` : '');
 
 function meta(sub, target) {
   const stale = staleness(sub);
   return `${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
     <div class="meta">By ${byline(sub.author, sub.verified)} · checked ${fmtDate(sub.reviewed_at)}
       ${sub.payload.school_year ? ` · ${esc(sub.payload.school_year)}` : ''}
-      · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
+      ${edited(sub)} · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
 }
 
 function fieldList(kind, payload, skip = []) {
@@ -46,6 +48,7 @@ const initial = (name) => esc(name.trim().split(/\s+/).pop().charAt(0).toUpperCa
 
 async function draw() {
   const subs = await s.approved({ course_slug: page.slug });
+  subsById = Object.fromEntries(subs.map((x) => [x.id, x]));
   const latest = (kind, pred = () => true) => subs.find((x) => x.kind === kind && pred(x));
 
   // Overview
@@ -165,6 +168,11 @@ $('#cancel-reply').addEventListener('click', () => {
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('button');
   if (!t) return;
+  if (t.dataset.edit) {
+    e.preventDefault();
+    openEditor(s, subsById[t.dataset.edit], draw);
+    return;
+  }
   if (t.dataset.unpub) {
     e.preventDefault();                       // it may sit inside a resource link
     const note = prompt('Unpublish this? It comes off the page but stays saved (you can republish it from Review → Published).\n\nReason (the author will see this):');

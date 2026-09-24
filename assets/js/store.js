@@ -179,6 +179,22 @@ async function live() {
       return ok(await sb.from('leaderboard').select('*').order('points', { ascending: false }).limit(50));
     },
 
+    // Reviewer edits (the database saves the old version and notifies the author)
+    async editSubmission(id, payload, note) {
+      ok(await sb.rpc('edit_submission', { p_id: id, p_payload: payload, p_note: note }));
+    },
+    async notifications() {
+      if (!me) return [];
+      const { data, error } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+      return error ? [] : data;                 // before migration 007: none
+    },
+    async unreadCount() {
+      if (!me) return 0;
+      const { count, error } = await sb.from('notifications').select('id', { count: 'exact', head: true }).eq('read', false);
+      return error ? 0 : count;
+    },
+    async markAllRead() { if (me) await sb.from('notifications').update({ read: true }).eq('read', false); },
+
     // Feedback box: anyone can send; reviewers read and triage
     async sendFeedback(f) { ok(await sb.from('feedback').insert(f)); },
     async feedbackList() {
@@ -203,7 +219,7 @@ async function demo() {
   const KEY = 'wilkipedia-demo-v1';
   const listeners = new Set();
   const blank = () => ({ me: null, users: {}, bounties: [], claims: [], submissions: [],
-                         comments: [], likes: [], reports: [], feedback: [], seq: 1, seeded: false });
+                         comments: [], likes: [], reports: [], feedback: [], notes: [], seq: 1, seeded: false });
   let db;
   try { db = JSON.parse(localStorage.getItem(KEY)) || blank(); } catch { db = blank(); }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch { /* private mode */ } };
@@ -313,6 +329,13 @@ async function demo() {
       const u = reviewer();
       const s = db.submissions.find((x) => x.id === sid);
       const wasApproved = s.status === 'approved';
+      if (s.status !== status && s.user_id && s.user_id !== u.id) {
+        const what = s.kind.replace('_', ' ');
+        (db.notes ??= []).unshift({ id: id(), user_id: s.user_id, read: false, created_at: now(), link: 'account/',
+          message: status === 'approved' ? `Your ${what} was published. Thank you!` : status === 'changes'
+            ? `A reviewer asked for changes to your ${what}: ${review_note || ''}` : wasApproved
+            ? `Your ${what} was unpublished. Reason: ${review_note || ''}` : `Your ${what} wasn’t accepted. Reason: ${review_note || ''}` });
+      }
       Object.assign(s, { status, review_note, reviewed_by: u.id, reviewed_at: now() });
       if (status === 'approved' && !wasApproved) {
         const author = db.users[s.user_id];
@@ -392,6 +415,20 @@ async function demo() {
       }
       return Object.values(rows).sort((a, b) => b.points - a.points);
     },
+
+    async editSubmission(sid, payload, note) {
+      const u = reviewer();
+      if (!note?.trim()) throw new Error('Say what you changed and why');
+      const x = db.submissions.find((y) => y.id === sid);
+      Object.assign(x, { payload, edited_at: now(), edited_by: u.id });
+      if (x.user_id && x.user_id !== u.id) {
+        (db.notes ??= []).unshift({ id: id(), user_id: x.user_id, message: `${u.name} (reviewer) edited your ${x.kind.replace('_', ' ')}. Reason: ${note.trim()}`, link: 'account/', read: false, created_at: now() });
+      }
+      save();
+    },
+    async notifications() { return (db.notes ?? []).filter((n) => n.user_id === db.me); },
+    async unreadCount() { return (db.notes ?? []).filter((n) => n.user_id === db.me && !n.read).length; },
+    async markAllRead() { (db.notes ?? []).forEach((n) => { if (n.user_id === db.me) n.read = true; }); save(); },
 
     async sendFeedback(f) {
       (db.feedback ??= []).unshift({ id: id(), status: 'new', created_at: now(), user_id: db.me, ...f }); save();
