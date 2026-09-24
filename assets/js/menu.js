@@ -53,8 +53,8 @@ export function itemHtml(it) {
   const tags = [];
   const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, t) => { tags.push(t); return ''; });
   const label = { V: 'Vegetarian', VG: 'Vegan', GF: 'Gluten-free' };
-  return `<li><span>${esc(name)}</span>${tags.map((t) => `<span class="diet d-${t.toLowerCase()}" title="${label[t]}">${t}</span>`).join('')}
-    ${it.calories ? `<span class="cal">${it.calories} cal</span>` : ''}</li>`;
+  return `<li><span class="item">${esc(name)} ${tags.map((t) => `<span class="diet d-${t.toLowerCase()}" title="${label[t]}">${t}</span>`).join(' ')}</span>
+    <span class="cal">${it.calories ? `${it.calories} cal` : ''}</span></li>`;
 }
 
 export async function todaysLunch() {

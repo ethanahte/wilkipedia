@@ -82,5 +82,9 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
   Wilcox site (see its `sources`/`notes`); students add details as `club`/`sport`
   submissions (course_slug null, name in payload.name), matched by slugified name.
   A club's `room` also puts it on the map.
+- **Search** (`assets/js/search.js`): one index, `data/search.json`, built by
+  `build_search_index` (classes incl. catalog text, teachers, clubs, teams, rooms,
+  pages), plus approved student writing added live. Shortcuts live in
+  `ALIASES`; add new pages to `SEARCH_PAGES` in build.py.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

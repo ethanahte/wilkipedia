@@ -152,6 +152,16 @@ export async function initHeader() {
 
   const s = await store();
   const tab = $('#bounty-tab');
+
+  // Header search: live suggestions on every page (loaded on first focus)
+  const hs = $('.hsearch input');
+  if (hs) hs.addEventListener('focus', () => {
+    import('./search.js').then(({ attach, addLive }) => {
+      attach(hs, $('.hsearch .results-pop'));
+      addLive(s);
+      hs.dispatchEvent(new Event('input'));
+    });
+  }, { once: true });
   // Any "Sign in" button outside the header (home panel, bounty gate…)
   document.addEventListener('click', (e) => {
     if (e.target.closest('.js-signin')) guard(() => s.signIn());

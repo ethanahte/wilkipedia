@@ -116,6 +116,7 @@ ICONS = {
     "food": _I('<path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-2 1.5-3 4-3 7v2h3"/>'),
     "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
+    "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
@@ -204,7 +205,8 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
   <div class="wrap bar">
     <a class="brand" href="{r}"><span class="w">W</span>ilkipedia</a>
     <nav class="main-nav" aria-label="Main">{nav}</nav>
-    <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search classes & teachers" aria-label="Search classes and teachers"></form>
+    <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search anything…" aria-label="Search Wilkipedia" autocomplete="off"><div class="results-pop" role="listbox" hidden></div></form>
+    <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
     <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
     <div id="auth" class="auth"></div>
   </div>
@@ -263,10 +265,10 @@ def build_home(depts):
   <h1>Every class at Wilcox,<br>explained by students.</h1>
   <p class="lede">Test style, grading, homework load, study guides, tips and summer homework, for any class, even ones you’re not taking.</p>
   <form class="big-search" action="search/" role="search">
-    <input name="q" id="home-q" type="search" placeholder="Try “AP Chem” or a teacher’s name" aria-label="Search" autocomplete="off">
+    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search anything: “apush”, “robotics club”, “B204”, “lunch”…" aria-label="Search" autocomplete="off">
+    <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
     <button class="btn">Search</button>
   </form>
-  <div id="home-results" class="results"></div>
 </section>
 
 <section>
@@ -500,7 +502,7 @@ def build_static():
 
     page("search/", "Search", """
 <h1>Search</h1>
-<form class="big-search" role="search"><input name="q" id="search-q" type="search" placeholder="Class or teacher" aria-label="Search" autocomplete="off"><button class="btn">Search</button></form>
+<form class="big-search" role="search"><input name="q" id="search-q" type="search" placeholder="Search classes, teachers, clubs, sports, rooms…" aria-label="Search" autocomplete="off" autofocus><button class="btn">Search</button></form>
 <div id="search-results" class="results page"></div>""", data={"page": "search"})
 
     page("rules/", "Community rules", """
@@ -581,8 +583,8 @@ def build_static():
       <button type="button" role="radio" data-which="breakfast">Breakfast</button>
       <button type="button" role="radio" data-which="lunch">Lunch</button>
     </div>
-    <div class="week-nav"><button type="button" class="icon-btn plain" id="prev-week" aria-label="Previous week">‹</button>
-      <b id="week-label"></b><button type="button" class="icon-btn plain" id="next-week" aria-label="Next week">›</button>
+    <div class="week-nav"><button type="button" class="week-btn" id="prev-week" aria-label="Previous week">‹</button>
+      <b id="week-label"></b><button type="button" class="week-btn" id="next-week" aria-label="Next week">›</button>
       <button type="button" class="chip" id="this-week">This week</button></div>
   </div>
   <div id="menu-days" class="menu-days"></div>
@@ -595,7 +597,7 @@ def build_static():
 <h1>Clubs</h1>
 <p class="lede">Every club at Wilcox: what it does, when it meets, and how to join.</p>
 <div class="list-tools"><input id="act-q" type="search" placeholder="Search clubs" aria-label="Search clubs"><div class="chips" id="act-filter"></div></div>
-<div id="act-list" class="act-grid"><div class="meta">Loading…</div></div>
+<div id="act-list"><div class="meta">Loading…</div></div>
 <p class="meta" id="act-source"></p>
 <p><a class="btn ghost" href="../submit/?kind=club">Add info about a club</a></p>""", active="clubs/", data={"page": "clubs"},
          desc="Clubs at Wilcox High School: what they do, when they meet, and how to join.")
@@ -618,10 +620,7 @@ def build_data(depts, courses, teachers):
     (DATA / "courses.json").write_text(json.dumps(
         {"departments": [{"slug": d["slug"], "name": short_dept(d["name"])} for d in depts], "courses": slim},
         ensure_ascii=False, separators=(",", ":")))
-    idx = [{"t": "c", "n": c["name"], "s": c["slug"], "d": short_dept(next(d["name"] for d in depts if d["slug"] == c["department"])),
-            "x": " ".join(c["teachers"])} for c in courses.values()]
-    idx += [{"t": "t", "n": t["name"], "s": t["slug"], "d": ", ".join(t["departments"]),
-             "x": " ".join(courses[s]["name"] for s in t["courses"])} for t in teachers]
+    idx = build_search_index(depts, courses, teachers)
     (DATA / "search.json").write_text(json.dumps(idx, ensure_ascii=False, separators=(",", ":")))
 
     seed = json.loads((DATA / "seed-bounties.json").read_text())
@@ -631,6 +630,62 @@ def build_data(depts, courses, teachers):
     (ROOT / "supabase" / "seed.sql").write_text(
         "-- Generated by tools/build.py from data/seed-bounties.json. Run after schema.sql.\n"
         f"insert into public.bounties ({', '.join(cols)}) values\n{rows}\non conflict (id) do nothing;\n")
+
+
+# Pages the search box should find, with the words people use for them.
+SEARCH_PAGES = [
+    ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
+    ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),
+    ("Cafeteria menu", "menu/", "Breakfast and lunch this week", "menu lunch breakfast food cafeteria eat today meal"),
+    ("Clubs", "clubs/", "Every club at Wilcox", "clubs activities join"),
+    ("Sports", "sports/", "Chargers teams by season", "sports athletics teams tryouts chargers"),
+    ("Summer homework", "summer/", "Summer assignments", "summer homework assignments"),
+    ("School info", "school/", "Bell schedule, counselors, passes", "bell schedule counselor appointment pass bathroom attendance tech"),
+    ("Bounty board", "bounties/", "Help build Wilkipedia", "bounties bounty contribute help volunteer"),
+    ("Contribute", "submit/", "Add info, a tip or a study guide", "submit add write contribute study guide tip"),
+    ("Leaderboard", "leaderboard/", "Top contributors", "leaderboard points top"),
+    ("Teachers", "teachers/", "Every teacher", "teachers staff"),
+    ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
+    ("Community rules", "rules/", "What you can post", "rules guidelines"),
+    ("Privacy", "privacy/", "What we store", "privacy data delete account"),
+    ("About Wilkipedia", "about/", "Who runs this", "about contact"),
+]
+
+
+def build_search_index(depts, courses, teachers):
+    """Everything the search box can find, one compact record each:
+    t=type, n=name, u=url (relative to the site root), d=subtitle, k=extra words."""
+    dept = {d["slug"]: short_dept(d["name"]) for d in depts}
+    words = lambda text, n=70: " ".join((text or "").split()[:n])
+    idx = []
+    for c in courses.values():
+        idx.append({"t": "c", "n": c["name"], "u": f"courses/{c['slug']}/",
+                    "d": " · ".join(x for x in [dept[c["department"]], f"Grades {c['grades']}" if c.get("grades") else ""] if x),
+                    "k": " ".join([dept[c["department"]], " ".join(c["teachers"]), c.get("courseNumber") or "",
+                                   words(c.get("description"))])})
+    for t in teachers:
+        idx.append({"t": "t", "n": t["name"], "s": t["slug"], "u": f"teachers/{t['slug']}/",
+                    "d": ", ".join(t["departments"]),
+                    "k": " ".join(courses[x]["name"] for x in t["courses"]) + " teacher"})
+    acts_file = DATA / "activities.json"
+    acts = json.loads(acts_file.read_text()) if acts_file.exists() else {"clubs": [], "sports": []}
+    for c in acts["clubs"]:
+        idx.append({"t": "club", "n": c["name"], "u": f"clubs/#{slugify(c['name'])}", "d": f"Club · {c.get('category') or 'Other'}",
+                    "k": " ".join(x for x in [c.get("advisor"), c.get("meets"), words(c.get("description"), 40), "club"] if x)})
+    for t in acts["sports"]:
+        idx.append({"t": "sport", "n": t["name"], "u": f"sports/#{slugify(t['name'])}",
+                    "d": f"Sport · {t.get('season') or 'Season not listed'}",
+                    "k": " ".join(t.get("coaches", []) + t.get("levels", []) + ["team sport athletics", t.get("season") or ""])})
+    rooms = json.loads((DATA / "map.json").read_text())["rooms"]
+    for r in rooms:
+        if r["kind"] == "building":
+            continue
+        idx.append({"t": "room", "n": r["label"] if r["label"] != r["id"] else f"Room {r['id']}", "u": f"map/#{r['id']}",
+                    "d": " · ".join(x for x in [r["buildingName"], f"Floor {r['floor']}" if r["building"] in ("B", "R") else ""] if x),
+                    "k": f"{r['id']} room {r['kind']}"})
+    for name, url, sub, kw in SEARCH_PAGES:
+        idx.append({"t": "page", "n": name, "u": url, "d": sub, "k": kw})
+    return idx
 
 
 def build_seo(courses, teachers, depts):

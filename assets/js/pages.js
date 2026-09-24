@@ -9,28 +9,7 @@ import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
 const s = await initHeader();
 
-// ── search (home live results + search page) ──
-let index;
-async function search(q) {
-  index ??= await fetch(dataUrl('data/search.json')).then((r) => r.json());
-  const terms = q.toLowerCase().replace(/\bap\b/g, 'ap').split(/\s+/).filter(Boolean);
-  if (!terms.length) return [];
-  const alias = { chem: 'chemistry', calc: 'calculus', apush: 'ap us history', bio: 'biology', lit: 'literature',
-                  lang: 'language', gov: 'government', econ: 'economics', stats: 'statistics', physio: 'physiology',
-                  apes: 'ap environmental science', csa: 'computer science a', csp: 'computer science principles' };
-  const expanded = terms.map((t) => alias[t] || t);   // an alias matches as a phrase
-  return index.map((it) => {
-    const name = it.n.toLowerCase();
-    const hay = `${name} ${it.d.toLowerCase()} ${it.x.toLowerCase()}`;
-    if (!expanded.every((t) => hay.includes(t))) return null;
-    let score = expanded.filter((t) => name.includes(t)).length * 10;
-    if (name.startsWith(expanded[0])) score += 5;
-    if (it.t === 'c') score += 1;
-    return { ...it, score };
-  }).filter(Boolean).sort((a, b) => b.score - a.score || a.n.length - b.n.length).slice(0, 30);
-}
-const resultHtml = (r) => `<a class="result" href="${root}${r.t === 'c' ? 'courses' : 'teachers'}/${r.s}/">
-  <b>${esc(r.n)}</b><span class="meta">${r.t === 'c' ? 'Class' : 'Teacher'} · ${esc(r.d)}</span></a>`;
+import { search, attach, addLive, groupedHtml } from './search.js';
 
 // ── subject lists: light up classes that have content ──
 async function markContent() {
@@ -66,13 +45,14 @@ async function activities(kind) {
     order ? order.indexOf(a) - order.indexOf(b) : a.localeCompare(b));
   if (acts.sources?.length) $('#act-source').innerHTML = `Official list from the <a href="${esc(acts.sources[0])}" target="_blank" rel="noopener">Wilcox website ↗</a>. Details are written by students.`;
 
-  const field = (label, v) => (v ? `<div class="fact"><div class="label">${label}</div><div class="v">${prose(v)}</div></div>` : '');
+  const field = (label, v, cls = '') => (v ? `<div class="fact ${cls}"><div class="label">${label}</div><div class="v">${prose(v)}</div>
+    ${cls === 'desc' && v.length > 220 ? '<button type="button" class="linkish more-btn">Show more</button>' : ''}</div>` : '');
   const card = ([k, o]) => {
     const p = o.info?.payload || {};
     const room = p.room ? p.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '') : null;
     const add = `${root}submit/?kind=${kind}&name=${encodeURIComponent(o.name)}`;
     const body = kind === 'club'
-      ? field('What they do', p.what || o.description) + field('Meets', p.meets || o.meets)
+      ? field('What they do', p.what || o.description, 'desc') + field('Meets', p.meets || o.meets)
         + (room ? `<div class="fact"><div class="label">Room</div><div class="v"><a href="${root}map/#${esc(room)}">${esc(p.room)} · on the map</a></div></div>` : '')
         + field('Advisor', p.advisor || o.advisor) + field('How to join', p.join)
       : field('Tryouts', p.tryouts) + field('Practice', p.practice) + field('What it’s like', p.experience) + field('Tips', p.tips)
@@ -105,6 +85,12 @@ async function activities(kind) {
     draw();
   });
   $('#act-q').addEventListener('input', draw);
+  $('#act-list').addEventListener('click', (e) => {
+    const b = e.target.closest('.more-btn');
+    if (!b) return;
+    const open = b.closest('.fact').classList.toggle('open');
+    b.textContent = open ? 'Show less' : 'Show more';
+  });
   draw();
   const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
   if (target) { target.classList.add('flash'); target.scrollIntoView({ block: 'center' }); }
@@ -113,11 +99,8 @@ const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.
 
 const pages = {
   async home() {
-    const q = $('#home-q');
-    q.addEventListener('input', async () => {
-      const r = await search(q.value);
-      $('#home-results').innerHTML = q.value.trim() ? (r.slice(0, 6).map(resultHtml).join('') || '<div class="meta">No matches.</div>') : '';
-    });
+    attach($('#home-q'), $('#home-results'));
+    addLive(s);
     const [recent, data] = await Promise.all([s.recent(6), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name); return `<a href="${href}">
@@ -174,17 +157,26 @@ const pages = {
   },
 
   async search() {
-    const q = new URLSearchParams(location.search).get('q') || '';
     const input = $('#search-q');
-    input.value = q;
+    input.value = new URLSearchParams(location.search).get('q') || '';
+    let seq = 0;
     const run = async () => {
-      const r = await search(input.value);
-      $('#search-results').innerHTML = input.value.trim()
-        ? (r.map(resultHtml).join('') || `<div class="empty">No classes or teachers match “${esc(input.value)}”.</div>`) : '';
+      const my = ++seq;
+      const q = input.value.trim();
+      const r = q ? await search(q, 80) : [];
+      if (my !== seq) return;
+      history.replaceState(null, '', q ? `?q=${encodeURIComponent(q)}` : location.pathname);
+      $('#search-results').innerHTML = !q ? '<p class="meta">Try a class (“apush”), a teacher, a club, a sport, a room (“B204”), or anything students wrote about.</p>'
+        : r.length ? `<p class="meta">${r.length} result${r.length === 1 ? '' : 's'}</p>${groupedHtml(r, q)}`
+        : `<div class="empty">Nothing matches “${esc(q)}”. Try fewer words, or check the spelling.</div>`;
     };
     input.addEventListener('input', run);
+    $('#search-q').form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
+    await run();          // static index first, so results appear at once
+    await addLive(s);     // then include what students have written
     run();
   },
+
 
   async leaderboard() {
     const rows = await s.leaderboard();
