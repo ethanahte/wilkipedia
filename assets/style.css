@@ -113,6 +113,10 @@ textarea { resize: vertical; }
   padding: 1px 6px; border: 1px solid var(--rule); border-radius: 3px; color: var(--muted); vertical-align: middle;
 }
 .tag.ap { color: var(--accent); border-color: var(--accent); }
+.badge-school {
+  display: inline-block; font: 600 .62rem/1.5 var(--mono); letter-spacing: .04em; white-space: nowrap;
+  padding: 0 5px; margin-left: 4px; border-radius: 3px; background: var(--accent-soft); color: var(--accent); vertical-align: 1px;
+}
 .tag.warn, .tag.st-changes { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
 .tag.st-approved { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 .tag.st-rejected { color: var(--bad); border-color: var(--bad); }

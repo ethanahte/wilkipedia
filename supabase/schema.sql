@@ -12,18 +12,22 @@ create table public.profiles (
   display_name text not null check (char_length(display_name) between 1 and 40),
   role         text not null default 'contributor'
                check (role in ('contributor', 'trusted', 'reviewer', 'admin')),
+  school_verified boolean not null default false,       -- signed in with an @scusd.net account
   created_at   timestamptz not null default now()
 );
 
 -- Every new sign-in gets a profile. Display name defaults to the Google first
 -- name only, so a full name is never published without the student choosing it.
+-- An @scusd.net account earns the school badge; the email itself is never shown.
 create function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, left(coalesce(
-    nullif(split_part(new.raw_user_meta_data->>'full_name', ' ', 1), ''),
-    split_part(new.email, '@', 1)), 40));
+  insert into public.profiles (id, display_name, school_verified)
+  values (new.id,
+          left(coalesce(
+            nullif(split_part(new.raw_user_meta_data->>'full_name', ' ', 1), ''),
+            split_part(new.email, '@', 1)), 40),
+          lower(coalesce(new.email, '')) like '%@scusd.net');
   return new;
 end $$;
 
@@ -103,10 +107,11 @@ create trigger claims_insert before insert on public.claims
 
 -- ───────────────────────── submissions ─────────────────────────
 -- One table holds everything students contribute. A submission becomes public
--- content the moment a reviewer sets status = 'approved'.
+-- content the moment a reviewer sets status = 'approved'. Work outlives its
+-- author's account: deleting a profile leaves user_id null ("Former student").
 create table public.submissions (
   id          bigint generated always as identity primary key,
-  user_id     uuid not null default auth.uid() references public.profiles on delete cascade,
+  user_id     uuid default auth.uid() references public.profiles on delete set null,
   bounty_id   text references public.bounties on delete set null,
   course_slug text,                                   -- null for school-wide info
   kind        text not null check (kind in
@@ -116,7 +121,7 @@ create table public.submissions (
   status      text not null default 'pending'
               check (status in ('pending', 'approved', 'changes', 'rejected')),
   review_note text,
-  reviewed_by uuid references public.profiles,
+  reviewed_by uuid references public.profiles on delete set null,
   reviewed_at timestamptz,
   created_at  timestamptz not null default now()
 );
@@ -154,7 +159,7 @@ create trigger submissions_review before update on public.submissions
 create table public.comments (
   id          bigint generated always as identity primary key,
   course_slug text not null,
-  user_id     uuid not null default auth.uid() references public.profiles on delete cascade,
+  user_id     uuid default auth.uid() references public.profiles on delete set null,
   parent_id   bigint references public.comments on delete cascade,
   prompt      text,
   body        text not null check (char_length(body) between 1 and 2000),
@@ -163,14 +168,21 @@ create table public.comments (
 );
 create index on public.comments (course_slug, status);
 
--- New users' comments wait for approval; trusted users post instantly.
+-- Comments wait for approval unless the author is a reviewer, or is trusted
+-- AND signed in with a school account. Personal accounts are always reviewed.
 create function public.on_comment_insert() returns trigger
 language plpgsql security definer set search_path = public as $$
+declare
+  r text;
+  school boolean;
 begin
+  select role, school_verified into r, school from public.profiles where id = auth.uid();
   new.user_id := auth.uid();
   new.created_at := now();
-  new.status := case when public.my_role() in ('trusted', 'reviewer', 'admin')
-                     then 'visible' else 'held' end;
+  new.status := case
+    when r in ('reviewer', 'admin') then 'visible'
+    when r = 'trusted' and school then 'visible'
+    else 'held' end;
   return new;
 end $$;
 
@@ -250,7 +262,8 @@ select p.id, p.display_name, p.role,
          date_trunc('year', now()) + case when extract(month from now()) >= 8
                                           then interval '7 months' else interval '0' end), 0)::int
          as semester_points,
-       max(subs.approved) as approved
+       max(subs.approved) as approved,
+       p.school_verified
   from public.profiles p
   join pts on pts.user_id = p.id
   join subs on subs.user_id = p.id

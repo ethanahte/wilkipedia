@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, $, $$, esc, prose, fmtDate, ago, guard, courseUrl, roleLabel, root } from './ui.js';
+import { initHeader, courses, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS } from './store.js';
 
@@ -56,7 +56,7 @@ const pages = {
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     $('#home-recent').innerHTML = recent.map((x) => `<a href="${x.course_slug ? courseUrl(x.course_slug) : root + 'school/'}">
       ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(name[x.course_slug] || 'School info')}</b>
-      <span class="meta">by ${esc(x.author)} · ${ago(x.reviewed_at)}</span></a>`).join('')
+      <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`).join('')
       || '<div class="meta">Nothing yet. The first pages are being written now.</div>';
   },
 
@@ -94,7 +94,7 @@ const pages = {
     let key = 'points';
     const draw = () => {
       const sorted = [...rows].sort((a, b) => b[key] - a[key]).filter((r) => r[key] > 0);
-      $('#board').innerHTML = sorted.map((r) => `<li><span class="who">${esc(r.display_name)}
+      $('#board').innerHTML = sorted.map((r) => `<li><span class="who">${byline(r.display_name, r.school_verified)}
         ${r.role !== 'contributor' ? `<span class="tag">${esc(roleLabel(r.role))}</span>` : ''}</span>
         <span class="meta">${r.approved} approved</span><b>${r[key]}</b></li>`).join('')
         || '<li class="empty">No points yet. <a href="../bounties/">Claim the first bounty</a>.</li>';
@@ -132,7 +132,7 @@ const pages = {
         const stale = staleness(x);
         return `<article><h3>${esc(x.payload.title)}</h3>${prose(x.payload.text)}
           ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-          <div class="meta">By ${esc(x.author)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}</div></article>`;
+          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
     </section>`).join('');
   },
@@ -143,7 +143,8 @@ const pages = {
       const demoTools = MODE === 'demo' ? `<section class="card"><h2>Demo mode</h2>
         <p>Supabase isn’t connected, so everything here lives only in this browser. Once Ethan pastes the Supabase URL and key into <code>assets/js/config.js</code>, real Google sign-in and the shared database switch on.</p>
         ${me ? `<p><label>Try the site as: <select id="demo-role">${['contributor', 'trusted', 'reviewer', 'admin'].map((r) =>
-          `<option value="${r}" ${me.role === r ? 'selected' : ''}>${roleLabel(r)}</option>`).join('')}</select></label></p>` : ''}
+          `<option value="${r}" ${me.role === r ? 'selected' : ''}>${roleLabel(r)}</option>`).join('')}</select></label>
+          <label class="check"><input type="checkbox" id="demo-school" ${me.school ? 'checked' : ''}> Pretend this is a school account</label></p>` : ''}
         <p><button class="btn ghost danger" id="demo-reset">Erase demo data</button></p></section>` : '';
       if (!me) {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
@@ -155,7 +156,10 @@ const pages = {
         const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
         const label = { pending: 'Waiting for review', approved: 'Published', changes: 'Needs changes', rejected: 'Not accepted' };
         $('#account').innerHTML = `<section class="card">
-            <p><span class="tag">${esc(roleLabel(me.role))}</span></p>
+            <p><span class="tag">${esc(roleLabel(me.role))}</span>${badge(me.school)}</p>
+            <p class="meta">${me.school
+              ? 'You signed in with your school account, so your work shows the SCUSD ✓ badge.'
+              : 'You signed in with a personal account. Your comments always go to a reviewer first. Sign in with your @scusd.net school account to get the SCUSD ✓ badge.'}</p>
             <form id="name-form" class="inline"><label for="dn">Display name</label>
               <input id="dn" value="${esc(me.name)}" maxlength="40" required><button class="btn small">Save</button></form>
             <p class="meta">Shown on your contributions and comments. Your first name, or a name people know you by.</p>
@@ -169,6 +173,7 @@ const pages = {
         $('#signout').onclick = () => guard(() => s.signOut());
         $('#name-form').onsubmit = (e) => { e.preventDefault(); guard(() => s.updateName($('#dn').value.trim()), 'Saved.'); };
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
+        $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
       $('#demo-reset')?.addEventListener('click', async () => {
         if (!confirm('Erase all demo claims, submissions and comments in this browser?')) return;

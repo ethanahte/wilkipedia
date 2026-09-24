@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, $, esc, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, $, esc, byline, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -16,7 +16,7 @@ const PROMPTS = ['General', 'What surprised you?', 'How much time did it take ea
 function meta(sub, target) {
   const stale = staleness(sub);
   return `${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-    <div class="meta">By ${esc(sub.author)} · checked ${fmtDate(sub.reviewed_at)}
+    <div class="meta">By ${byline(sub.author, sub.verified)} · checked ${fmtDate(sub.reviewed_at)}
       ${sub.payload.school_year ? ` · ${esc(sub.payload.school_year)}` : ''}
       · <button class="linkish" data-report="${esc(target)}">Report outdated</button></div>`;
 }
@@ -84,14 +84,14 @@ async function draw() {
     return `<li><span class="tag">${esc(r.payload.type)}</span>
       ${u ? `<a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(r.payload.title)}</a>` : esc(r.payload.title)}
       ${r.payload.note ? `<div class="note">${esc(r.payload.note)}</div>` : ''}
-      <div class="meta">Shared by ${esc(r.author)}</div></li>`;
+      <div class="meta">Shared by ${byline(r.author, r.verified)}</div></li>`;
   }).join('')}</ul><a class="edit" href="${submitUrl('resource')}">Share another</a>`
     : empty('No resources yet.', 'resource', null, 'Share one');
 
   // Tips
   const tips = subs.filter((x) => x.kind === 'tip');
   $('#tips').innerHTML = tips.length ? `<ul class="tips">${tips.map((t) => `<li>${prose(t.payload.text)}
-      <div class="meta">${esc(t.author)}${t.teacher ? ` · for ${esc(t.teacher)}’s class` : ''}</div></li>`).join('')}</ul>
+      <div class="meta">${byline(t.author, t.verified)}${t.teacher ? ` · for ${esc(t.teacher)}’s class` : ''}</div></li>`).join('')}</ul>
       <a class="edit" href="${submitUrl('tip')}">Add a tip</a>`
     : empty('No tips yet.', 'tip', null, 'Add the first tip');
 
@@ -111,7 +111,7 @@ async function drawComments() {
   const top = all.filter((c) => !c.parent_id).reverse();
   const one = (c, reply = false) => `
     <div class="comment ${reply ? 'reply' : ''}" data-id="${c.id}">
-      <div class="c-head"><b>${esc(c.author)}</b> <span class="meta">${ago(c.created_at)}</span>
+      <div class="c-head"><b>${esc(c.author)}</b>${byline('', c.verified)} <span class="meta">${ago(c.created_at)}</span>
         ${c.prompt && c.prompt !== 'General' ? `<span class="tag">${esc(c.prompt)}</span>` : ''}
         ${c.status === 'held' ? '<span class="tag warn">Waiting for approval</span>' : ''}
         ${c.status === 'hidden' ? '<span class="tag warn">Hidden (reported)</span>' : ''}</div>

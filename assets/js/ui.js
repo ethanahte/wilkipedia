@@ -57,6 +57,12 @@ export function courses() {
   return coursesCache;
 }
 
+// The school-account badge: the account's email is @scusd.net. It says SCUSD,
+// not Wilcox, because that's all an email address can prove.
+export const badge = (verified) => (verified
+  ? ' <span class="badge-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : '');
+export const byline = (name, verified) => esc(name) + badge(verified);
+
 export const courseUrl = (slug) => `${root}courses/${slug}/`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 

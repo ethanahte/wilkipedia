@@ -43,5 +43,16 @@ Founders: Ethan Liu and Jonathan. README.md has setup and architecture;
 - Leaderboard points: S 10 / M 30 / L 60 per bounty, paid **once per person
   per bounty**; 5 per non-bounty contribution. Defined in both the SQL view and
   demo `leaderboard()`.
+- **School badge:** `profiles.school_verified` is set from the email domain
+  (@scusd.net) at sign-up and shown as "SCUSD ✓" (not "Wilcox": an email
+  can't prove the school). Personal-account comments are always held
+  (`postsInstantly` in store.js mirrors `on_comment_insert()`). Sign-in stays
+  open to any Google account, because school accounts are deleted at graduation.
+- **Content outlives accounts:** submissions/comments use `on delete set null`
+  and render as "Former student". Never switch these back to cascade.
+- **Always name the FK in PostgREST embeds** (`profiles!comments_user_id_fkey`):
+  comments↔profiles also link through comment_likes, so an unnamed embed fails.
+- Schema changes: add a numbered file in `supabase/migrations/` for the live
+  database AND fold the change into `schema.sql` for fresh setups.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

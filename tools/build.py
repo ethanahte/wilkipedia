@@ -339,7 +339,8 @@ def build_static():
     <li><b>Review.</b> A reviewer approves it or sends it back with a note saying what to fix.</li>
     <li><b>Credit.</b> Approved work goes live with your name, and the points go on the leaderboard.</li>
   </ol>
-  <p><b>Points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>: your comments post instantly.</p>
+  <p><b>Points:</b> S (~30 min) = 10 · M (~2 hrs) = 30 · L (~5+ hrs) = 60 · anything outside a bounty = 5. After 3 approved submissions you become <b>Trusted</b>. If you signed in with your school account, your comments then post instantly.</p>
+  <p><b>Sign in with your school account</b> (@scusd.net) to get the <span class="badge-school">SCUSD ✓</span> badge on everything you write. Personal Google accounts work too, but their comments always go to a reviewer first.</p>
   <p>Have an idea for a bounty? Suggest it in a comment on the class page, or tell a reviewer.</p>
 </section>""", active="bounties/", script="bounties.js")
 
@@ -438,11 +439,13 @@ def build_static():
   <li><b>Public:</b> your display name, which is your first name unless you change it on your account page. It appears next to your approved work, your comments and your leaderboard points.</li>
   <li><b>Never public:</b> your email address. Only the site's admins can see it, and only to run the site.</li>
 </ul>
+<p>If you sign in with a Santa Clara Unified school account (@scusd.net), your contributions show an <b>SCUSD ✓</b> badge. We work that out from your email's domain; the email itself stays private.</p>
 <p>Your browser keeps a sign-in token so you stay signed in. Signing out removes it.</p>
 <h2>What you post</h2>
 <p>Submissions are private until a reviewer approves them, and then they're public. Comments are public once they're visible. Reviewers can see pending submissions and held comments.</p>
 <h2>Deleting your data</h2>
-<p>Ask a Wilkipedia admin to delete your account. We'll remove your account, submissions and comments.</p>
+<p>Ask a Wilkipedia admin to delete your account. We'll remove your account and your email address. Pages you helped write stay on the site, credited to "Former student". If you'd rather your submissions and comments be removed too, say so and we'll delete them.</p>
+<p>School accounts are usually closed after graduation. Your work stays on Wilkipedia afterwards.</p>
 <h2>Who runs this</h2>
 <p>Wilkipedia is an independent project run by Wilcox High School students. It is not operated by Wilcox High School or Santa Clara Unified School District.</p>
 <p class="meta">Last updated September 2026.</p>""", data={"page": "static"})

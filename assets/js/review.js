@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, $, $$, esc, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
+import { initHeader, courses, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -30,7 +30,7 @@ const tabs = {
           ${x.course_slug ? `<a href="${courseUrl(x.course_slug)}" target="_blank">${esc(courseName(x.course_slug))}</a>` : 'School-wide'}
           ${x.teacher ? ` · ${esc(x.teacher)}` : ''}
           ${x.bounty_id ? ` · <span class="tag">${esc(x.bounty_id)}</span>` : ''}
-          <span class="meta">by ${esc(x.author)} · ${ago(x.created_at)}</span></div>
+          <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span></div>
         ${payloadHtml(x.kind, x.payload)}
         <div class="checklist meta">Check: facts have a source · no real test questions or answer keys · nothing personal about a teacher · links work</div>
         <div class="r-actions">
@@ -45,8 +45,8 @@ const tabs = {
     return list.length ? list.map((c) => `
       <article class="card review" data-cid="${c.id}">
         <div class="r-head"><a href="${courseUrl(c.course_slug)}#comments" target="_blank">${esc(courseName(c.course_slug))}</a>
-          <span class="tag ${c.status === 'hidden' ? 'warn' : ''}">${c.status === 'hidden' ? 'Reported' : 'New user'}</span>
-          <span class="meta">by ${esc(c.author)} · ${ago(c.created_at)}</span></div>
+          <span class="tag ${c.status === 'hidden' ? 'warn' : ''}">${c.status === 'hidden' ? 'Reported' : c.verified ? 'New member' : 'Personal account'}</span>
+          <span class="meta">by ${byline(c.author, c.verified)} · ${ago(c.created_at)}</span></div>
         ${c.prompt && c.prompt !== 'General' ? `<div class="meta">${esc(c.prompt)}</div>` : ''}
         ${prose(c.body)}
         <div class="r-actions">
