@@ -129,7 +129,7 @@ MORE = [("bell/", "Bell schedule", "bell"), ("menu/", "Cafeteria menu", "food"),
         ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
         ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
         ("rules/", "Community rules", "rules"), ("about/", "About", "about"),
-        ("feedback/", "Send feedback", "feedback"), ("credits/", "Credits", "heart")]
+        ("feedback/", "Send feedback", "feedback"), ("credits/", "Credits & thanks", "heart")]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -227,7 +227,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits &amp; thanks</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -653,7 +653,7 @@ def build_static():
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
     page("credits/", "Credits", """
-<h1>Credits</h1>
+<h1>Credits &amp; thanks</h1>
 <p class="lede">Wilkipedia exists because students gave their time. Thank you to everyone below.</p>
 <section class="sec credits-sec"><h2>Founders</h2>
   <div class="people">

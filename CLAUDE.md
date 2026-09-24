@@ -95,5 +95,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Credits** page: founders (static in build.py), reviewers (profiles), contributors (leaderboard) and names left on feedback marked done (`feedback_credits` view: names only).
 - **Feedback** goes to the `feedback` table (anyone can insert, reviewers read)
   and shows on the Review page's Feedback tab.
+- **Translation**: `assets/js/i18n.js` holds hand-written translations of the
+  site's own words (menus, headings, labels, bell schedule) in 15 languages;
+  they replace exact-match text and are fenced with translate="no". Google
+  Translate (`translate.js`, loaded only after someone picks a language) does
+  the rest. New UI text that students will see often? Add a row to ROWS.
+  JS-rendered strings can call `t()` / `periodName()` directly.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.

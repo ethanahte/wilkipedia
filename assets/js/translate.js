@@ -8,18 +8,9 @@
 // The Privacy page says so.
 
 import { $, $$, esc } from './ui.js';
+import { LANGS, currentLang, watchGlossary } from './i18n.js';
 
-// Languages common among Wilcox / Santa Clara families, in their own names
-export const LANGS = [
-  ['en', 'English'], ['es', 'Español'], ['vi', 'Tiếng Việt'], ['zh-CN', '简体中文'], ['zh-TW', '繁體中文'],
-  ['ko', '한국어'], ['ja', '日本語'], ['tl', 'Tagalog'], ['hi', 'हिन्दी'], ['pa', 'ਪੰਜਾਬੀ'], ['te', 'తెలుగు'],
-  ['ta', 'தமிழ்'], ['ar', 'العربية'], ['fa', 'فارسی'], ['ru', 'Русский'], ['pt', 'Português'],
-];
-
-export function currentLang() {
-  const m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^/]+\/([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : 'en';
-}
+export { LANGS, currentLang };
 
 function setCookie(lang) {
   const host = location.hostname;
@@ -72,21 +63,34 @@ function loadWidget() {
 
 export function initTranslate() {
   const btn = $('#lang-btn');
-  const menu = $('#lang-menu');
-  if (!btn || !menu) return;
+  const sheet = $('#lang-menu');
+  if (!btn || !sheet) return;
   const cur = currentLang();
-  // Leave <html lang="en">: Google skips pages already tagged with the target language.
   btn.querySelector('.lang-code').textContent = cur === 'en' ? '' : cur.split('-')[0].toUpperCase();
-  menu.innerHTML = `<div class="lang-head">Language · Idioma · Ngôn ngữ · 语言</div>`
-    + LANGS.map(([code, name]) => `<button type="button" role="menuitemradio" aria-checked="${code === cur}" data-lang="${code}" translate="no">${esc(name)}</button>`).join('')
-    + '<p class="lang-note">Translated by Google. Student writing is translated too, so it may not be perfect.</p>';
-  btn.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute('aria-expanded', !menu.hidden); });
-  document.addEventListener('click', (e) => { if (!menu.contains(e.target)) { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
-  menu.addEventListener('click', (e) => {
+
+  // A centred panel of language cards: native name big, English name small
+  sheet.innerHTML = `<div class="lang-card" role="dialog" aria-modal="true" aria-labelledby="lang-title" translate="no">
+      <div class="lang-top"><div><h2 id="lang-title">Choose your language</h2>
+        <p class="meta">Elige tu idioma · Chọn ngôn ngữ · 选择语言 · 언어 선택</p></div>
+        <button type="button" class="icon-btn lang-x" aria-label="Close">✕</button></div>
+      <div class="lang-grid">${LANGS.map(([code, native, english]) => `<button type="button" data-lang="${code}" aria-pressed="${code === cur}">
+        <b>${esc(native)}</b><span>${esc(english)}</span></button>`).join('')}</div>
+      <p class="lang-note">Menus and buttons use our own translations. Everything else, including what students write, is translated by Google and may not be perfect.</p>
+    </div>`;
+  const open = (v) => { sheet.hidden = !v; btn.setAttribute('aria-expanded', v); if (v) $('[aria-pressed="true"]', sheet)?.focus(); };
+  btn.addEventListener('click', (e) => { e.stopPropagation(); open(sheet.hidden); });
+  sheet.addEventListener('click', (e) => {
+    if (e.target === sheet || e.target.closest('.lang-x')) return open(false);
     const b = e.target.closest('[data-lang]');
-    if (!b || b.dataset.lang === cur) return;
+    if (!b) return;
+    if (b.dataset.lang === cur) return open(false);
     setCookie(b.dataset.lang);
     location.reload();
   });
-  if (cur !== 'en') loadWidget();
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) open(false); });
+
+  if (cur !== 'en') {
+    watchGlossary();   // our translations first, and fenced off from Google
+    loadWidget();
+  }
 }
