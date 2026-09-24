@@ -730,3 +730,7 @@ a.chip { text-decoration: none; }
 .notes li.unread { font-weight: 600; }
 .notes li.unread::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 7px; }
 .edited-mark { font-style: italic; }
+.res-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.teacher-tag { color: var(--accent); border-color: var(--accent); }
+.res-card[hidden] { display: none; }
+.res-filter { margin: 0 0 10px; }

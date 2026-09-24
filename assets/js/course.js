@@ -88,10 +88,15 @@ async function draw() {
 
   // Resources
   const res = subs.filter((x) => x.kind === 'resource');
-  $('#resources').innerHTML = res.length ? `<div class="res-list">${res.map((r) => {
+  // Filter chips when resources are tied to more than one teacher
+  const resTeachers = [...new Set(res.map((r) => r.teacher).filter(Boolean))];
+  const resFilter = resTeachers.length >= 2 || (resTeachers.length === 1 && res.some((r) => !r.teacher))
+    ? `<div class="chips res-filter">${['All', ...resTeachers].map((t, i) =>
+        `<button type="button" class="chip" data-res-t="${i ? esc(t) : ''}" aria-pressed="${!i}">${esc(t)}</button>`).join('')}</div>` : '';
+  $('#resources').innerHTML = res.length ? `${resFilter}<div class="res-list">${res.map((r) => {
     const u = safeUrl(r.payload.url);
-    return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card">
-      <span class="tag">${esc(r.payload.type)}</span><b>${esc(r.payload.title)}</b>
+    return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card" data-teacher="${esc(r.teacher || '')}">
+      <span class="res-tags"><span class="tag">${esc(r.payload.type)}</span>${r.teacher ? `<span class="tag teacher-tag">For ${esc(r.teacher)}’s class</span>` : ''}</span><b>${esc(r.payload.title)}</b>
       ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
       <span class="meta">${r.payload.author
         ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
@@ -168,6 +173,13 @@ $('#cancel-reply').addEventListener('click', () => {
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('button');
   if (!t) return;
+  if ('resT' in t.dataset) {
+    const want = t.dataset.resT;
+    document.querySelectorAll('.res-filter .chip').forEach((c) => c.setAttribute('aria-pressed', c === t));
+    // "All" shows everything; a teacher shows theirs plus guides for any teacher
+    document.querySelectorAll('.res-card').forEach((c) => (c.hidden = !!want && !!c.dataset.teacher && c.dataset.teacher !== want));
+    return;
+  }
   if (t.dataset.edit) {
     e.preventDefault();
     openEditor(s, subsById[t.dataset.edit], draw);

@@ -60,7 +60,7 @@ export const KINDS = {
   resource: {
     label: 'Resource or study guide',
     blurb: 'A study guide you made, or a useful link. Never actual tests or answer keys.',
-    scope: 'course',
+    scope: 'course-or-teacher',   // optional teacher: guides often follow one teacher's units
     fields: [
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'type', label: 'Type', type: 'select', required: true,
