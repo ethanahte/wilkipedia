@@ -84,6 +84,9 @@ roles in the table editor.
 3. On github.com: repo → **Settings → Pages** → *Deploy from a branch* → `main` / `(root)`.
 4. After a minute the site is at `https://<your-username>.github.io/wilkipedia/`.
 
+**Live now at https://wilcoxwiki.org** (domain bought on Porkbun, with auto-renew on). DNS has four A records
+(185.199.108–111.153) and `www` → `ethanahte.github.io`. The `CNAME` file in the repo root holds the domain; don't delete it.
+
 **When you buy a domain:** add it in Settings → Pages → Custom domain, set
 `SITE_URL` in `tools/build.py`, rebuild (that turns on `sitemap.xml` and
 `robots.txt`), add the domain to Supabase's redirect URLs, then submit the

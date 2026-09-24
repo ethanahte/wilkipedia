@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /review/
 Disallow: /account/
 Disallow: /submit/
-Sitemap: https://ethanahte.github.io/wilkipedia/sitemap.xml
+Sitemap: https://wilcoxwiki.org/sitemap.xml

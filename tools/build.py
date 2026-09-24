@@ -30,7 +30,7 @@ DATA = ROOT / "data"
 
 # Set once the domain exists, e.g. "https://wilkipedia.org". Used for the
 # sitemap and canonical links; leave empty until then.
-SITE_URL = "https://ethanahte.github.io/wilkipedia"
+SITE_URL = "https://wilcoxwiki.org"
 
 CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
