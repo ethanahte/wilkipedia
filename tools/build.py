@@ -125,11 +125,22 @@ ICONS = {
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
-MORE = [("bell/", "Bell schedule", "bell"), ("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("sports/", "Sports", "sports"),
-        ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
-        ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
-        ("rules/", "Community rules", "rules"), ("about/", "About", "about"),
-        ("feedback/", "Send feedback", "feedback"), ("credits/", "Credits & thanks", "heart")]
+# The "More" panel: grouped columns, each link with an icon and a short line
+MORE_GROUPS = [
+    ("School day", [("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
+                    ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
+                    ("school/", "School info", "school", "Counselors, passes, tech"),
+                    ("summer/", "Summer homework", "summer", "What’s due before school starts")]),
+    ("Get involved", [("clubs/", "Clubs", "clubs", "85 clubs and how to join"),
+                      ("sports/", "Sports", "sports", "Chargers teams by season"),
+                      ("leaderboard/", "Leaderboard", "leaderboard", "Top contributors"),
+                      ("feedback/", "Send feedback", "feedback", "Ideas, bugs, feature requests")]),
+    ("About Wilkipedia", [("teachers/", "Teachers", "teachers", "Every teacher and their classes"),
+                          ("rules/", "Community rules", "rules", "What you can post"),
+                          ("about/", "About", "about", "Who runs this and why"),
+                          ("credits/", "Credits & thanks", "heart", "Everyone who helped")]),
+]
+MORE = [(href, label, icon) for _, items in MORE_GROUPS for href, label, icon, _ in items]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -175,8 +186,11 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     nav = "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in NAV)
     more_active = any(active == href for href, _, _ in MORE)
     nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""} aria-label="More pages">'
-            f'{ICONS["menu"]}<span>More</span>{ICONS["chev"]}</summary><div class="menu">'
-            + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon in MORE)
+            f'{ICONS["menu"]}<span>More</span>{ICONS["chev"]}</summary><div class="menu mega">'
+            + "".join(f'<div class="mega-col"><div class="mega-h">{group}</div>'
+                      + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span class="mt"><span>{label}</span><small>{sub}</small></span></a>'
+                                for href, label, icon, sub in items) + '</div>'
+                      for group, items in MORE_GROUPS)
             + f'<a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
             + '</div></details>')
     v = VERSIONS

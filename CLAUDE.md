@@ -54,7 +54,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   comments↔profiles also link through comment_likes, so an unnamed embed fails.
 - Schema changes: add a numbered file in `supabase/migrations/` for the live
   database AND fold the change into `schema.sql` for fresh setups.
-- **Navigation:** header = Map + Classes + "More" menu (`NAV`/`MORE` in build.py).
+- **Navigation:** header = Map + Classes + a "More" panel grouped into columns (`NAV`/`MORE_GROUPS` in build.py).
   The bounty board is members-only: a fixed side tab (`#bounty-tab`) shown by
   `initHeader` when signed in, and `.members-only` / `.guests-only` sections
   toggle on `body.signed-in`. Bounty rows stay publicly readable in the database;

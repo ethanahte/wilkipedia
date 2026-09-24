@@ -693,3 +693,21 @@ font[style*="background-color"] { background: none !important; box-shadow: none 
 .topic h3 .topic-ico svg { width: 14px; height: 14px; }
 .topic-ico.small { width: 20px; height: 20px; border-radius: 5px; margin-right: 6px; vertical-align: -5px; }
 .topic-ico.small svg { width: 13px; height: 13px; }
+
+/* ── "More" as a grouped panel ── */
+.more .menu.mega { display: grid; grid-template-columns: repeat(3, minmax(200px, 1fr)); gap: 4px 14px; width: min(760px, 92vw);
+  left: 50%; transform: translateX(-38%); padding: 14px; }
+.mega-col { display: flex; flex-direction: column; }
+.mega-h { font: 600 .66rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 4px 10px 6px; }
+.main-nav .more .menu.mega a { align-items: flex-start; padding: 8px 10px; }
+.main-nav .more .menu.mega a svg { margin-top: 2px; }
+.mt { display: flex; flex-direction: column; min-width: 0; }
+.mt > span { font-weight: 600; }
+.mt small { color: var(--muted); font-size: .76rem; line-height: 1.3; }
+.main-nav .more .menu.mega a.ext { grid-column: 1 / -1; align-items: center; margin-top: 6px; }
+@media (max-width: 760px) {
+  .more .menu.mega { position: fixed; top: 104px; left: 8px; right: 8px; width: auto; transform: none;
+    grid-template-columns: 1fr 1fr; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .mt small { display: none; }
+}
+@media (max-width: 420px) { .more .menu.mega { grid-template-columns: 1fr; } .mt small { display: block; } }
