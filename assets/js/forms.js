@@ -99,7 +99,7 @@ export const KINDS = {
     scope: 'school',
     fields: [
       { key: 'topic', label: 'Topic', type: 'select', required: true,
-        options: ['Bell schedule', 'Counselor appointments', 'Passes & attendance', 'Tech & accounts',
+        options: ['Counselor appointments', 'Passes & attendance', 'Tech & accounts',
                   'Clubs & activities', 'Getting around', 'Other'] },
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'text', label: 'Details', type: 'textarea', required: true },

@@ -86,7 +86,7 @@ export function fullHtml(bell, compact = false) {
       `<li><span>${esc(n)}</span><span>${clock(a)}–${clock(b)}</span></li>`).join('')}</ul></div>`; };
   const regular = ['monday', 'odd', 'even'].map(table).join('');
   if (compact) return `<div class="bell-grid">${regular}</div>
-    <p class="meta">Special days and finals: <a href="school/#bell">School info</a> · <a href="${esc(bell.source)}" target="_blank" rel="noopener">official page ↗</a></p>`;
+    <p class="meta">Finals and special days: <a href="bell/">Bell schedule page</a> · <a href="${esc(bell.source)}" target="_blank" rel="noopener">official page ↗</a></p>`;
   const specials = bell.special.map((s) => {
     const ds = s.dates.map((x) => new Date(x + 'T12:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
     const what = s.off ? `No school · ${s.off}` : s.adjusted || bell.schedules[s.schedule].label;
@@ -99,16 +99,19 @@ export function fullHtml(bell, compact = false) {
 }
 
 // The strip on the home page. Re-renders every 30 s so "now" stays true.
-export async function mountBellStrip(el) {
+export async function mountBellStrip(el, { expandable = true } = {}) {
   const bell = await loadBell();
   let open = false;
   const paint = () => {
     el.innerHTML = stripHtml(bell, new Date());
     const b = $('.bell-more', el);
+    if (!expandable) { b.remove(); $('.bell-full', el).remove(); }
+    else {
     b.setAttribute('aria-expanded', open);
     b.textContent = open ? 'Hide' : 'Full schedule';
     $('.bell-full', el).hidden = !open;
     b.onclick = () => { open = !open; paint(); };
+    }
     // centre the current period in its own row, without moving the page
     const row = $('.bell-chips', el), on = row && $('.on', row);
     if (on) row.scrollLeft = on.offsetLeft - row.clientWidth / 2 + on.clientWidth / 2;

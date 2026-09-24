@@ -38,7 +38,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
-                  "menu", "clubs", "sports", "feedback", "credits"]
+                  "menu", "clubs", "sports", "feedback", "credits", "bell"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -117,13 +117,14 @@ ICONS = {
     "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
     "feedback": _I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/>'),
+    "bell": _I('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
     "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
-MORE = [("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("sports/", "Sports", "sports"),
+MORE = [("bell/", "Bell schedule", "bell"), ("menu/", "Cafeteria menu", "food"), ("clubs/", "Clubs", "clubs"), ("sports/", "Sports", "sports"),
         ("summer/", "Summer homework", "summer"), ("school/", "School info", "school"),
         ("leaderboard/", "Leaderboard", "leaderboard"), ("teachers/", "Teachers", "teachers"),
         ("rules/", "Community rules", "rules"), ("about/", "About", "about"),
@@ -498,7 +499,7 @@ def build_static():
     page("school/", "School info", """
 <h1>School info</h1>
 <p class="lede">Things every Wilcox student should know, written by students.</p>
-<section id="bell" class="sec"><h2>Bell schedule</h2><div id="bell-full"><div class="meta">Loading…</div></div></section>
+<a class="panel bell-link" href="../bell/"><span class="label">Bell schedule</span><b>Period times, block days, finals and special days →</b></a>
 <div id="school-list"><div class="meta">Loading…</div></div>
 <p><a class="btn ghost" href="../submit/?kind=school_info">Add school info</a></p>""",
          active="school/", data={"page": "school"})
@@ -639,6 +640,13 @@ def build_static():
   <p><button type="button" class="btn ghost" id="fb-again">Send another</button></p></div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
 
+    page("bell/", "Bell schedule", """
+<h1>Bell schedule</h1>
+<p class="lede">When every period starts and ends at Wilcox, 2026–27.</p>
+<section id="bell" class="bell bell-page" aria-label="Today"><div class="meta">Loading today…</div></section>
+<div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
+         desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
+
     page("credits/", "Credits", """
 <h1>Credits</h1>
 <p class="lede">Wilkipedia exists because students gave their time. Thank you to everyone below.</p>
@@ -699,7 +707,7 @@ SEARCH_PAGES = [
     ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
     ("Credits", "credits/", "Everyone who helped build Wilkipedia", "credits thanks thank you contributors helpers founders team"),
     ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
-    ("Bell schedule", "school/#bell", "Period times, block days, finals", "bell schedule period times block day finals minimum day when does school start end"),
+    ("Bell schedule", "bell/", "Period times, block days, finals", "bell schedule period times block day finals minimum day when does school start end"),
 ]
 
 

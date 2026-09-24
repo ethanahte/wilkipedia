@@ -216,11 +216,10 @@ const pages = {
   },
 
   async school() {
-    loadBell().then((bell) => { $('#bell-full').innerHTML = fullHtml(bell); });
     const list = await s.approved({ kind: 'school_info' });
     const by = {};
     for (const x of list) (by[x.payload.topic] ??= []).push(x);
-    const order = KINDS.school_info.fields[0].options;
+    const order = KINDS.school_info.fields[0].options.filter((t) => t !== 'Bell schedule' || by[t]);
     $('#school-list').innerHTML = order.map((topic) => `<section class="card topic"><h2>${esc(topic)}</h2>
       ${(by[topic] || []).map((x) => {
         const stale = staleness(x);
@@ -395,6 +394,11 @@ const pages = {
     $('#cr-feedback').innerHTML = fb.map((f) => `<div class="person"><span class="avatar av-md" style="--av:#6f746c">${esc(f.name.trim().charAt(0).toUpperCase())}</span>
       <div><b>${esc(f.name)}</b><span class="meta">${f.helped} idea${f.helped === 1 ? '' : 's'} or fix${f.helped === 1 ? '' : 'es'} used</span></div></div>`).join('')
       || '<p class="meta">No one yet. Your idea could be first.</p>';
+  },
+
+  async bell() {
+    mountBellStrip($('#bell'), { expandable: false });
+    $('#bell-full').innerHTML = fullHtml(await loadBell());
   },
 
   static() {},

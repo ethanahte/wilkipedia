@@ -646,3 +646,14 @@ body:has(#submit-form) .contribute-fab { display: none; }
 .people > p { grid-column: 1 / -1; margin: 0; }
 .sources { margin: 0; padding-left: 20px; }
 .sources li { margin-bottom: 4px; }
+
+/* ── bell schedule page ── */
+.bell-link { margin: 8px 0 18px; }
+.bell-page { margin-bottom: 20px; }
+.bell-full-page .bell-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.bell-full-page .bell-table { background: var(--card); border: 1px solid var(--rule); border-top: 4px solid var(--gold); border-radius: 12px; padding: 14px 18px; }
+.bell-full-page .bell-table h4 { font: 500 1.15rem var(--serif); margin-bottom: 8px; }
+.bell-full-page .bell-table li { padding: 7px 0; font-size: 1rem; }
+.bell-full-page h3 { margin-top: 1.6em; }
+.bell-full-page .bell-special { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 8px 18px; }
+.bell-full-page .bell-special li { padding: 8px 0; font-size: .95rem; }
