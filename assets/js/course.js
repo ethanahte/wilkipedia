@@ -86,7 +86,9 @@ async function draw() {
     return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card">
       <span class="tag">${esc(r.payload.type)}</span><b>${esc(r.payload.title)}</b>
       ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
-      <span class="meta">Shared by ${byline(r.author, r.verified)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
+      <span class="meta">${r.payload.author
+        ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
+        : `Made by ${byline(r.author, r.verified)}`}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
   }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>`
     : empty('No resources yet. Made a study guide or found a great video?', 'resource', null, 'Share one');
 

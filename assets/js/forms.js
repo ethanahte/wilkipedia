@@ -67,6 +67,8 @@ export const KINDS = {
         options: ['Study guide (student-made)', 'Textbook (link)', 'Practice problems', 'Video', 'Website', 'Other'] },
       { key: 'url', label: 'Link', type: 'url', required: true,
         hint: 'For a study guide, share it from Google Drive as "Anyone with the link can view".' },
+      { key: 'author', label: 'Who made it?', type: 'text',
+        hint: 'Leave blank if you made it yourself. If someone else made it, put their name so they get the credit, and check they’re OK with it being shared.' },
       { key: 'note', label: 'What it is good for', type: 'textarea' },
     ],
   },

@@ -102,6 +102,7 @@ const ROWS = {
   'School day': ['El día escolar', 'Ngày học', '上学日常', '上學日常', '학교생활', '学校の一日', 'Araw sa paaralan', 'स्कूल का दिन', 'ਸਕੂਲ ਦਾ ਦਿਨ', 'బడి రోజు', 'பள்ளி நாள்', 'اليوم الدراسي', 'روز مدرسه', 'Школьный день', 'Dia na escola'],
   'Get involved': ['Participa', 'Tham gia', '参与其中', '參與其中', '참여하기', '参加しよう', 'Makilahok', 'जुड़ें', 'ਸ਼ਾਮਲ ਹੋਵੋ', 'పాల్గొనండి', 'பங்கேற்க', 'شارك', 'مشارکت کنید', 'Участвуй', 'Participe'],
   'About Wilkipedia': ['Sobre Wilkipedia', 'Về Wilkipedia', '关于 Wilkipedia', '關於 Wilkipedia', 'Wilkipedia 소개', 'Wilkipediaについて', 'Tungkol sa Wilkipedia', 'Wilkipedia के बारे में', 'Wilkipedia ਬਾਰੇ', 'Wilkipedia గురించి', 'Wilkipedia பற்றி', 'عن Wilkipedia', 'درباره Wilkipedia', 'О Wilkipedia', 'Sobre a Wilkipedia'],
+  'Who made it?': ['¿Quién lo hizo?', 'Ai làm tài liệu này?', '作者是谁？', '作者是誰？', '누가 만들었나요?', '誰が作りましたか？', 'Sino ang gumawa?', 'इसे किसने बनाया?', 'ਇਹ ਕਿਸਨੇ ਬਣਾਇਆ?', 'దీన్ని ఎవరు తయారు చేశారు?', 'இதை உருவாக்கியவர் யார்?', 'من أعدّه؟', 'چه کسی آن را ساخته؟', 'Кто автор?', 'Quem fez?'],
   // pieces of the live bell schedule
   'Now': ['Ahora', 'Bây giờ', '现在', '現在', '지금', '現在', 'Ngayon', 'अभी', 'ਹੁਣ', 'ఇప్పుడు', 'இப்போது', 'الآن', 'اکنون', 'Сейчас', 'Agora'],
   'ends {t}': ['termina a las {t}', 'kết thúc lúc {t}', '{t} 结束', '{t} 結束', '{t} 종료', '{t}に終了', 'matatapos ng {t}', '{t} बजे खत्म', '{t} ਵਜੇ ਖ਼ਤਮ', '{t}కి ముగుస్తుంది', '{t}க்கு முடியும்', 'تنتهي {t}', 'پایان {t}', 'до {t}', 'termina às {t}'],
