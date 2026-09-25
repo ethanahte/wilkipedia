@@ -310,6 +310,7 @@ async function boot() {
   // ── the loop ──
   const clock = new THREE.Clock();
   let t = 0, pickT = 0, mapT = 0, slow = 0, running = 0, tilt = 1;
+  const _focus = new THREE.Vector3();
   const lightRight = new THREE.Vector3(), lightUp = new THREE.Vector3();
   function frame(dt) {
     t += dt;
@@ -364,8 +365,9 @@ async function boot() {
     // tilt-shift (the miniature look) only from the air
     tilt += ((controls.mode === 'fly' ? 1 : 0) - tilt) * Math.min(1, dt * 3);
     SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);
+    const focusZ = camera.position.distanceTo(_focus.set(controls.orbit.tx, 0, controls.orbit.tz));   // where the lens is sharp
     post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value,
-      fog: scene.fog.color, tilt });
+      fog: scene.fog.color, tilt, focus: focusZ });
   }
   function loop() {
     const dt = Math.min(0.05, clock.getDelta());

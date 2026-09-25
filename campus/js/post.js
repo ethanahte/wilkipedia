@@ -11,8 +11,10 @@
 //            gaps in tree crowns and past the rooflines (a quarter-size pass).
 //   haze:    the air on the sun's side glows warm with distance, and from
 //            the air the diorama's base dissolves into the peach mist below it.
-//   tilt:    from the air, the top and bottom of the picture go soft (a
-//            tilt-shift lens), so the campus reads as a miniature.
+//   tilt:    from the air, whatever is much nearer or further than the spot
+//            you're looking at goes soft (a tilt-shift lens: by depth, not by
+//            screen position, so a straight-down view stays sharp), and the
+//            campus reads as a miniature.
 //   quality: high = ink + bloom + rays + 4× MSAA; medium = ink + rays; low = colour only.
 
 import * as THREE from 'three';
@@ -23,7 +25,7 @@ const COMPOSITE = `
 precision highp float;
 uniform sampler2D tColor, tND, tBloom, tRays, tSoft;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ;
 uniform vec3 fogCol;
 uniform mat4 proj, projInv, viewInv;
 uniform vec3 viewUp, sunDir;
@@ -101,7 +103,8 @@ void main(){
   col = mix(col, col * mix(vec3(0.62, 0.52, 0.52), vec3(0.26, 0.24, 0.36), night), edge * ink * mix(0.55, 1.0, night));
   // tilt-shift: soften toward the top and bottom of the frame
   if (tiltK > 0.0) {
-    float tb = smoothstep(0.16, 0.47, abs(vUv.y - 0.5)) * tiltK;
+    float dz = min(abs(texture2D(tND, vUv).a), 6000.0);
+    float tb = smoothstep(0.06, 0.26, abs(dz - focusZ) / max(focusZ, 1.0)) * tiltK;
     col = mix(col, texture2D(tSoft, vUv).rgb, tb);
   }
   // the ground falls away into mist below the diorama's top (by day)
@@ -109,7 +112,10 @@ void main(){
     float dz = abs(texture2D(tND, vUv).a);
     if (dz < 3000.0) {
       float wy = (viewInv * vec4(viewPos(vUv, dz), 1.0)).y;
-      col = mix(col, fogCol, smoothstep(0.5, -13.0, wy) * 0.92);
+      // (the stored depth is half-float: ~1 part in 1000, so leave that much slack
+      // below the ground or distant ground would flicker into the mist)
+      float slack = dz * 0.0025;
+      col = mix(col, fogCol, smoothstep(-0.5 - slack, -13.0 - slack, wy) * 0.92);
     }
   }
   if (useBloom > 0.5) col += texture2D(tBloom, vUv).rgb * bloomK;
@@ -191,7 +197,7 @@ export class Post {
       wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
       tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
-      tSoft: { value: null }, tiltK: { value: 0 }, fogCol: { value: new THREE.Color() },
+      tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, fogCol: { value: new THREE.Color() },
     });
     this.rayMask = mk(RAYMASK, { tND: { value: null }, tColor: { value: null }, sunUV: { value: new THREE.Vector2() }, aspect: { value: 1 } });
     this.rayBlur = mk(RAYBLUR, { tSrc: { value: null }, sunUV: { value: new THREE.Vector2() }, span: { value: 1 } });
@@ -282,6 +288,7 @@ export class Post {
     u.fogCol.value.copy(env.fog || u.fogCol.value);
     // tilt-shift: a blurred quarter-size copy of the picture to fade into
     u.tiltK.value = this.inkOn ? (env.tilt || 0) * (env.night ? 0.6 : 1) : 0;
+    u.focusZ.value = env.focus || 1000;
     if (u.tiltK.value > 0.01) {
       this.bright.uniforms.tColor.value = this.gbuf.textures[0];
       this.bright.uniforms.thresh.value = -2;           // everything passes: a plain copy

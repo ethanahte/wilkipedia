@@ -136,8 +136,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Look (by day: the owner's reference is the diorama game *High Above*): a
     near-isometric miniature floating in warm peach mist. From the air the
     camera uses a long lens (`fovFly` 24°, distance × `lensK` in controls.js;
-    orbit.dist stays in 62°-lens units) with a tilt-shift blur top and bottom
-    (post.js, `tilt`), and height fog dissolves the plinth into the haze. Light
+    orbit.dist stays in 62°-lens units) with a tilt-shift blur by depth (post.js, `tilt` +
+    `focusZ` = distance to the orbit target: sharp there, soft much nearer or
+    further; screen-position blur looked like fog when looking straight down), and height fog dissolves the plinth into the haze. Light
     is soft and pastel: a peachy-pink sky fill so shadows go warm mauve, a
     gentle sun (~22° up, SW), a soft linear-filtered light ramp (the unlit side
     is ~0.18, not black), barely-there warm outlines by day (crisper at night),
