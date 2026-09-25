@@ -159,13 +159,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     otherwise smear into a block).
   - **Two styles**, switched with the top-bar button / P key and saved in
     localStorage `wilcox-campus-style`: 'diorama' (default, above) and 'pixel'
-    (the owner's reference: the game Summerhouse). Pixel = post.js draws the
-    scene at 1/3 CSS resolution with no MSAA and nearest filtering, a firm
-    one-art-pixel dark outline, a 12-step palette with a light 4×4 Bayer
-    dither, then blits it up with square pixels (`setPixel`); no tilt-shift or
-    sunbeams. `setHardLight` (toon.js) snaps the light ramps to hard steps; the
-    sky shader's `pixel` uniform paints a deep summer blue; clouds switch to
-    white/blue tones (`CLOUD_TONES` in main.js); `PIXEL_DAY` is its daylight.
+    (the owner's reference: the game Summerhouse). Pixel art lives ON the
+    surfaces, fixed in the world (owner's call: pixels keep their size on the
+    model as you zoom, not a screen-space mosaic): `PIXEL` in toon.js switches
+    every painted material to a PX_D = 8 px/m grid on its own plane
+    (`pxPlane`): textures are read at each grid pixel's centre (the texture
+    mapping is solved from screen derivatives and sampled with textureGrad),
+    each pixel gets a slight 2×2-clustered shade and rare specks, and the lit
+    colour steps through 16 levels with a light Bayer dither on the grid. It
+    all fades out where a grid pixel is smaller than a screen pixel (`pxFade`),
+    so the air view doesn't shimmer. Also: `setHardLight` (stepped ramps), a
+    firmer outline and no tilt-shift/beams in post.js, the sky's `pixel`
+    uniform (deep summer blue), white/blue `CLOUD_TONES`, `PIXEL_DAY` light.
   - Tyndall light: by day post.js draws sunbeams (open sky near the sun, i.e.
     depth > 4500, radially smeared toward the sun at quarter size), so shafts
     fall through tree crowns, past roofs and between clouds, plus warm haze on

@@ -15,10 +15,9 @@
 //            you're looking at goes soft (a tilt-shift lens: by depth, not by
 //            screen position, so a straight-down view stays sharp), and the
 //            campus reads as a miniature.
-//   pixel:   the other style (like the game Summerhouse): the scene is drawn
-//            at a third of the size with no smoothing, inked with dark
-//            one-pixel outlines, dithered down to a small palette, then
-//            blown up with hard square pixels.
+//   pixel:   the other style (like the game Summerhouse). The pixels live on
+//            the surfaces (toon.js paints a world-space pixel grid), so here
+//            it only means a firmer, darker outline and no tilt-shift or beams.
 //   quality: high = ink + bloom + rays + 4× MSAA; medium = ink + rays; low = colour only.
 
 import * as THREE from 'three';
@@ -30,10 +29,7 @@ precision highp float;
 uniform sampler2D tColor, tND, tBloom, tRays, tSoft;
 uniform vec2 texel;
 uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ, pixel;
-uniform vec2 lowRes;
-// 4×4 ordered-dither threshold (0-1) for an art pixel
-float bayer2(vec2 a){ a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
-float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+
 uniform vec3 fogCol;
 uniform mat4 proj, projInv, viewInv;
 uniform vec3 viewUp, sunDir;
@@ -143,12 +139,7 @@ void main(){
   col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night) * (1.0 - pixel);
   if (any(isnan(col))) col = fogCol;
   col = toSRGB(col);
-  if (pixel > 0.5) {
-    // a small palette (12 steps a channel), with a light ordered dither so
-    // gradients band cleanly and flat colours stay flat
-    float lv = 11.0;
-    col = floor(col * lv + 0.5 + (bayer4(vUv * lowRes) - 0.5) * 0.55) / lv;
-  } else col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
+  if (pixel < 0.5) col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -177,9 +168,6 @@ void main(){
   }
   gl_FragColor = vec4(vec3(acc / 24.0), 1.0);
 }`;
-
-// Pixel style, last step: blow the small picture up with hard square pixels.
-const BLIT = `uniform sampler2D tSrc; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(tSrc, vUv).rgb, 1.0); }`;
 
 const BRIGHT = `
 uniform sampler2D tColor; uniform float thresh; varying vec2 vUv;
@@ -216,9 +204,8 @@ export class Post {
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
       tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
       tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, fogCol: { value: new THREE.Color() },
-      pixel: { value: 0 }, lowRes: { value: new THREE.Vector2(1, 1) },
+      pixel: { value: 0 },
     });
-    this.blit = mk(BLIT, { tSrc: { value: null } });
     this.pixel = false;
     this.rayMask = mk(RAYMASK, { tND: { value: null }, tColor: { value: null }, sunUV: { value: new THREE.Vector2() }, aspect: { value: 1 } });
     this.rayBlur = mk(RAYBLUR, { tSrc: { value: null }, sunUV: { value: new THREE.Vector2() }, span: { value: 1 } });
@@ -229,26 +216,23 @@ export class Post {
   }
 
   setQuality(q) { this.quality = q; this.dispose(); if (this.w) this.setSize(this.w, this.h, this.dpr); }
-  setPixel(on) { this.pixel = !!on; if (this.w) this.setSize(this.w, this.h, this.dpr); }
+  setPixel(on) { this.pixel = !!on; this.comp.uniforms.pixel.value = this.pixel ? 1 : 0; }
 
   dispose() {
-    for (const k of ['gbuf', 'bA', 'bB', 'rA', 'rB', 'sA', 'sB', 'pix']) { this[k]?.dispose(); this[k] = null; }
+    for (const k of ['gbuf', 'bA', 'bB', 'rA', 'rB', 'sA', 'sB']) { this[k]?.dispose(); this[k] = null; }
   }
 
   setSize(w, h, dpr) {
     this.w = w; this.h = h; this.dpr = dpr;
-    // pixel style: one art pixel = 3 CSS pixels, whatever the screen's density
-    const PX = 3;
-    const W = Math.max(1, Math.floor(this.pixel ? w / PX : w * dpr)), H = Math.max(1, Math.floor(this.pixel ? h / PX : h * dpr));
+    const W = Math.max(1, Math.floor(w * dpr)), H = Math.max(1, Math.floor(h * dpr));
     const ink = this.quality !== 'low' && this.floatOK;
     const type = this.floatOK ? THREE.HalfFloatType : THREE.UnsignedByteType;
     this.dispose();
     this.gbuf = new THREE.WebGLRenderTarget(W, H, {
       count: ink ? 2 : 1, type, depthBuffer: true,
-      samples: this.quality === 'high' && !this.pixel ? 4 : 0,     // pixel art wants hard edges
+      samples: this.quality === 'high' ? 4 : 0,
     });
-    const filt = this.pixel ? THREE.NearestFilter : THREE.LinearFilter;
-    for (const t of this.gbuf.textures) { t.minFilter = t.magFilter = filt; t.generateMipmaps = false; }
+    for (const t of this.gbuf.textures) { t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; }
     if (ink) this.gbuf.textures[1].minFilter = this.gbuf.textures[1].magFilter = THREE.NearestFilter;
     const bw = Math.max(1, W >> 2), bh = Math.max(1, H >> 2);
     this.bA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
@@ -258,17 +242,12 @@ export class Post {
     this.sA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.sB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.rayMask.uniforms.aspect.value = W / H;
-    if (this.pixel) {
-      this.pix = new THREE.WebGLRenderTarget(W, H, { type: THREE.UnsignedByteType, depthBuffer: false });
-      this.pix.texture.minFilter = this.pix.texture.magFilter = THREE.NearestFilter;
-    }
     this.inkOn = ink;
     const u = this.comp.uniforms;
     u.texel.value.set(1 / W, 1 / H);
     u.ink.value = ink ? 1 : 0;
-    u.inkW.value = this.pixel ? 1 : Math.max(1.15, dpr * 0.72);   // a clear, confident line
+    u.inkW.value = Math.max(1.15, dpr * 0.72);   // a clear, confident line
     u.pixel.value = this.pixel ? 1 : 0;
-    u.lowRes.value.set(W, H);
     u.useBloom.value = this.quality === 'high' ? 1 : 0;
     this.bloomTexel = new THREE.Vector2(1 / bw, 1 / bh);
   }
@@ -345,10 +324,6 @@ export class Post {
       }
       u.tBloom.value = this.bA.texture;
     }
-    if (this.pixel) {
-      this.pass(this.comp, this.pix);
-      this.blit.uniforms.tSrc.value = this.pix.texture;
-      this.pass(this.blit, null);
-    } else this.pass(this.comp, null);
+    this.pass(this.comp, null);
   }
 }

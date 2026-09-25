@@ -63,6 +63,22 @@ function paintTex() {
 // (the rim light and the window streaks are sunlight things).
 export const SUN_VIEW = { value: new THREE.Vector3(0, 1, 0) };
 export const DAY = { value: 1 };
+// PIXEL: 1 in the pixel-art style. Every painted surface then gets a pixel grid
+// fixed in the world (PX_D pixels a metre, so the pixels grow and shrink with
+// the model as you zoom, like a pixel-art object): textures are read one whole
+// pixel at a time, each pixel gets its own slight colour and the odd speck, and
+// the light steps through a small palette with an ordered dither on the grid.
+export const PIXEL = { value: 0 };
+const PX_FNS = `uniform float uPixel;
+#define PX_D 8.0
+float pxHash(vec2 p){ p = fract(p * vec2(0.1031, 0.1030)); p += dot(p, p.yx + 33.33); return fract((p.x + p.y) * p.x); }
+float pxBayer2(vec2 a){ a = floor(a); return fract(a.x / 2.0 + a.y * a.y * 0.75); }
+float pxBayer(vec2 a){ return pxBayer2(0.5 * a) * 0.25 + pxBayer2(a); }
+// the two world axes a surface is laid out on (ground: x/z, walls: x/y or z/y)
+vec2 pxPlane(vec3 p, vec3 n){ vec3 a = abs(n); return a.y > max(a.x, a.z) ? p.xz : (a.x > a.z ? p.zy : p.xy); }
+// how many grid pixels one screen pixel covers (above ~1 the grid is too fine to show)
+float pxFade(vec2 pp){ float fw = max(length(dFdx(pp)), length(dFdy(pp))) * PX_D; return 1.0 - smoothstep(0.35, 0.9, fw); }
+`;
 
 // ── the G-buffer patch ──
 // ink: 'normal' | 'soft' (foliage: only its outline against what's behind it) |
@@ -94,15 +110,40 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
   #endif
   vPaintPos = (modelMatrix * pw).xyz;
   vPaintNrm = mat3(modelMatrix) * pn;`);
-      fs = 'uniform sampler2D tPaint;\nvarying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + fs.replace('#include <color_fragment>', `#include <color_fragment>
+      s.uniforms.uPixel = PIXEL;
+      fs = 'uniform sampler2D tPaint;\nvarying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + PX_FNS + fs.replace('#include <color_fragment>', `#include <color_fragment>
   {
     vec3 an = abs(normalize(vPaintNrm)) + 1e-3;
     float pz = texture2D(tPaint, vPaintPos.xz * 0.085).r * an.y + texture2D(tPaint, vPaintPos.xy * 0.085).r * an.z + texture2D(tPaint, vPaintPos.zy * 0.085).r * an.x;
     pz /= an.x + an.y + an.z;
-    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.17;          // hand-painted, a little weathered
+    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.17 * (1.0 - uPixel);   // hand-painted, a little weathered
     float wall = 1.0 - clamp(an.y, 0.0, 1.0);
-    diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, vPaintPos.y)), wall);
+    float wy = uPixel > 0.5 ? floor(vPaintPos.y * PX_D) / PX_D : vPaintPos.y;   // stepped, in pixel art
+    diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, wy)), wall);
+    if (uPixel > 0.5) {
+      // each grid pixel its own slight shade, and the odd darker or lighter speck
+      vec2 pp = pxPlane(vPaintPos, vPaintNrm);
+      float layer = floor(dot(vPaintPos, step(max(an.yzx, an.zxy), an)) * 2.0 + 0.5);   // which face (so parallel walls differ)
+      // (clustered in 2×2 blocks so it reads as texture, not static)
+      float h = pxHash(floor(pp * PX_D * 0.5) + layer * 17.0), h2 = pxHash(floor(pp * PX_D) + layer * 31.0);
+      float speck = (h - 0.5) * 0.06 + (h2 > 0.965 ? -0.09 : 0.0) + (h2 < 0.03 ? 0.07 : 0.0);
+      diffuseColor.rgb *= 1.0 + speck * pxFade(pp);
+    }
   }`);
+      // read textures one whole grid pixel at a time: move the lookup to the
+      // centre of this pixel (the surface's own texture mapping, solved from
+      // screen derivatives, so it works for any flat textured surface)
+      fs = fs.replace('#include <map_fragment>', `#ifdef USE_MAP
+  vec2 mUv = vMapUv;
+  vec2 gx = dFdx(vMapUv), gy = dFdy(vMapUv);
+  if (uPixel > 0.5) {
+    vec2 pp0 = pxPlane(vPaintPos, vPaintNrm);
+    vec2 sp0 = (floor(pp0 * PX_D) + 0.5) / PX_D;
+    mat2 mw = mat2(dFdx(pp0), dFdy(pp0));
+    if (abs(determinant(mw)) > 1e-12) mUv += mat2(gx, gy) * (inverse(mw) * (sp0 - pp0));
+  }
+  diffuseColor *= textureGrad(map, mUv, gx, gy);
+#endif`);
     }
     const toon = /#include <opaque_fragment>/.test(fs) && /vViewPosition/.test(fs) && hasNormal;
     if (toon && (rim || streaks)) {
@@ -120,9 +161,20 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
   }` : ''}
   #include <opaque_fragment>`);
     }
+    // pixel art: the light steps through a small palette, dithered on the grid
+    if (/uniform float uPixel;/.test(fs) && /#include <opaque_fragment>/.test(fs)) {
+      fs = fs.replace('#include <opaque_fragment>', `if (uPixel > 0.5) {
+    vec2 pq = pxPlane(vPaintPos, vPaintNrm);
+    float bd = mix(0.5, pxBayer(floor(pq * PX_D)), pxFade(pq));
+    vec3 gq = pow(max(outgoingLight, 0.0), vec3(1.0 / 2.2));
+    gq = floor(gq * 16.0 + 0.5 + (bd - 0.5) * 0.45) / 16.0;
+    outgoingLight = pow(gq, vec3(2.2));
+  }
+  #include <opaque_fragment>`);
+    }
     s.fragmentShader = fs;
   };
-  mat.customProgramCacheKey = () => `gbuf4|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${rim ? 1 : 0}|${streaks ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
+  mat.customProgramCacheKey = () => `gbuf5|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${rim ? 1 : 0}|${streaks ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
   return mat;
 }
 

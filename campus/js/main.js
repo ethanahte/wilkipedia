@@ -12,7 +12,7 @@
 
 import * as THREE from 'three';
 import { World, distToLine, inPoly } from './geo.js';
-import { makeTextures, makeMaterials, setAniso, setHardLight, SUN_VIEW, DAY as DAYLIGHT } from './toon.js';
+import { makeTextures, makeMaterials, setAniso, setHardLight, SUN_VIEW, DAY as DAYLIGHT, PIXEL } from './toon.js';
 import { buildGround } from './ground.js';
 import { buildBuildings } from './buildings.js';
 import { buildLandmarks } from './landmarks.js';
@@ -144,7 +144,7 @@ async function boot() {
   const DAY = { hemi: ['#f0cfc4', '#e3cdb0', 2.35], sun: ['#fff0dc', 2.05], fog: '#f6dccb', density: 0.0022 };
   const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
   // the pixel style's daylight: a clear blue summer day, bright sun, hard shadows
-  const PIXEL_DAY = { hemi: ['#b8cdf5', '#d8c8a2', 1.8], sun: ['#fff6e2', 2.8], fog: '#86b1ea', density: 0.0015 };
+  const PIXEL_DAY = { hemi: ['#d4ddef', '#dccfae', 1.75], sun: ['#fff4dc', 2.7], fog: '#86b1ea', density: 0.0015 };
   // Two looks: 'diorama' (the soft peach miniature) and 'pixel' (pixel art, like
   // Summerhouse). Remembered once the viewer picks one.
   const SKEY = 'wilcox-campus-style';
@@ -157,6 +157,7 @@ async function boot() {
   const applyStyle = () => {
     const px = style === 'pixel';
     post.setPixel(px);
+    PIXEL.value = px ? 1 : 0;
     setHardLight(px);
     sky.material.uniforms.pixel.value = px ? 1 : 0;
     const [l, m, d] = CLOUD_TONES[style];
