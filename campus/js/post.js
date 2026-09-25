@@ -37,6 +37,8 @@ float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453
 vec3 toSRGB(vec3 c){ c = max(c, 0.0); return mix(c * 12.92, 1.055 * pow(c, vec3(1.0/2.4)) - 0.055, step(0.0031308, c)); }
 void main(){
   vec3 col = texture2D(tColor, vUv).rgb;
+  // a pixel the GPU got wrong (NaN/inf) would print black: show the haze instead
+  if (any(isnan(col)) || any(isinf(col))) col = fogCol;
   float edge = 0.0;
   if (ink > 0.0) {
     vec4 c = ND(vec2(0.0)), l = ND(vec2(-1.0, 0.0)), r = ND(vec2(1.0, 0.0)), u = ND(vec2(0.0, 1.0)), d = ND(vec2(0.0, -1.0));
@@ -123,6 +125,7 @@ void main(){
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
   col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night);
+  if (any(isnan(col))) col = fogCol;
   col = toSRGB(col);
   col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
@@ -167,6 +170,7 @@ void main(){
   vec3 s = texture2D(tSrc, vUv).rgb * 0.227;
   s += (texture2D(tSrc, vUv + dir * 1.385).rgb + texture2D(tSrc, vUv - dir * 1.385).rgb) * 0.316;
   s += (texture2D(tSrc, vUv + dir * 3.231).rgb + texture2D(tSrc, vUv - dir * 3.231).rgb) * 0.070;
+  if (any(isnan(s)) || any(isinf(s))) s = vec3(0.0);
   gl_FragColor = vec4(s, 1.0);
 }`;
 
