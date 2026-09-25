@@ -19,12 +19,12 @@ export const setAniso = (n) => { maxAniso = n; };
 // flat colour (the anime way), and shadow-map acne can't show on it.
 function ramp(values) {
   const t = new THREE.DataTexture(new Uint8Array(values), values.length, 1, THREE.RedFormat);
-  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.minFilter = t.magFilter = THREE.LinearFilter;   // soft painted falloff, not hard cel bands
   t.generateMipmaps = false;
   t.needsUpdate = true;
   return t;
 }
-export const TOON = ramp([0, 0, 0, 0, 140, 255, 255, 255]);
+export const TOON = ramp([46, 46, 52, 70, 150, 225, 255, 255]);
 export const SOFT = ramp([150, 150, 150, 190, 225, 255, 255, 255]);
 
 // ── the painted-surface patch ──
@@ -95,7 +95,7 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
     vec3 an = abs(normalize(vPaintNrm)) + 1e-3;
     float pz = texture2D(tPaint, vPaintPos.xz * 0.085).r * an.y + texture2D(tPaint, vPaintPos.xy * 0.085).r * an.z + texture2D(tPaint, vPaintPos.zy * 0.085).r * an.x;
     pz /= an.x + an.y + an.z;
-    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.1;
+    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.17;          // hand-painted, a little weathered
     float wall = 1.0 - clamp(an.y, 0.0, 1.0);
     diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, vPaintPos.y)), wall);
   }`);
@@ -108,7 +108,7 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
     vec3 Vv = normalize(vViewPosition);
     float ndv = clamp(dot(normal, Vv), 0.0, 1.0);
     float lit = smoothstep(0.02, 0.3, dot(normal, uSunView));
-    outgoingLight += diffuseColor.rgb * vec3(1.0, 0.84, 0.6) * pow(1.0 - ndv, 3.0) * lit * 0.6 * uDay;
+    outgoingLight += diffuseColor.rgb * vec3(1.0, 0.86, 0.7) * pow(1.0 - ndv, 3.0) * lit * 0.3 * uDay;
   }` : ''}${streaks && /vPaintPos/.test(fs) ? `{
     float st = fract(dot(vPaintPos, vec3(0.45, 0.9, 0.45)) * 0.42);
     float band = smoothstep(0.0, 0.03, st) * (1.0 - smoothstep(0.12, 0.15, st)) + smoothstep(0.22, 0.24, st) * (1.0 - smoothstep(0.27, 0.29, st));

@@ -9,7 +9,7 @@ import { gbuffer, SOFT, TOON, canvasTex } from './toon.js';
 import { FRONT, STAGE } from './layout.js';
 
 export const SUN = new THREE.Vector3(-0.66, 0.37, 0.66).normalize();   // golden-afternoon sun, ~22° up in the south-west
-export const HORIZON = new THREE.Color('#dde8f3');
+export const HORIZON = new THREE.Color('#f6dccb');
 
 // ── sky dome ──
 // A vertical gradient painted like an anime background: deep saturated blue
@@ -31,20 +31,21 @@ export function makeSky() {
       void main(){
         vec3 d = normalize(vDir);
         float h = clamp(d.y, -0.2, 1.0);
-        vec3 zen = toLin(vec3(0.13, 0.40, 0.86)), mid = toLin(vec3(0.40, 0.67, 0.97)), hor = toLin(vec3(0.84, 0.91, 0.98));
+        // a warm peach haze all round, a little rosier overhead (the diorama-game sky)
+        vec3 zen = toLin(vec3(0.95, 0.78, 0.69)), mid = toLin(vec3(0.97, 0.85, 0.77)), hor = toLin(vec3(0.99, 0.91, 0.85));
         vec3 c = mix(hor, mid, smoothstep(0.0, 0.24, h));
         c = mix(c, zen, smoothstep(0.24, 0.95, h));
         // the sun's side of the sky is warmer and brighter low down
         float s = max(dot(d, sun), 0.0);
         vec2 dh = normalize(d.xz + 1e-4), sh = normalize(sun.xz);
         float side = pow(max(dot(dh, sh), 0.0), 2.5) * (1.0 - smoothstep(0.0, 0.45, h));
-        c = mix(c, toLin(vec3(1.0, 0.86, 0.64)), side * 0.6);
+        c = mix(c, toLin(vec3(1.0, 0.93, 0.84)), side * 0.6);
         // cirrus: long wisps, projected onto a high flat layer and stretched
         vec2 uv = d.xz / max(d.y, 0.04);
         uv = mat2(0.87, -0.5, 0.5, 0.87) * uv;
         float w = fbm(vec2(uv.x * 0.9, uv.y * 3.6) + vec2(time * 0.004, 0.0));
         w = smoothstep(0.52, 0.86, w) * smoothstep(0.02, 0.22, d.y) * (1.0 - smoothstep(0.55, 0.95, d.y));
-        c = mix(c, mix(toLin(vec3(0.98, 0.99, 1.0)), toLin(vec3(1.0, 0.9, 0.74)), side), w * 0.8);
+        c = mix(c, mix(toLin(vec3(1.0, 0.96, 0.93)), toLin(vec3(1.0, 0.95, 0.88)), side), w * 0.55);
         // the sun: a wide warm halo, a tighter glow and a small white disc
         c += toLin(vec3(1.0, 0.9, 0.72)) * (pow(s, 6.0) * 0.2 + pow(s, 60.0) * 0.45 + pow(s, 1400.0) * 6.0);
         float e = asin(clamp(d.y, -1.0, 1.0));
@@ -87,7 +88,8 @@ export function makeClouds(n = 16) {
   const group = new THREE.Group();
   const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: CLOUD_RAMP, vertexColors: true, fog: false }), { ink: 'cloud', paint: false });
   // a touch cool, so the warm afternoon sun lights them white rather than yellow
-  const white = color('#eef2ff'), shade = color('#d4dbf5'), base = color('#bcc5e8');
+  // pastel: warm white tops, dusty rose undersides, like clouds in a peach sky
+  const white = color('#fff3ec'), shade = color('#f1d3cc'), base = color('#e6c0bb');
   for (let i = 0; i < n; i++) {
     const W = new World();
     const k = 38 + R() * 46;               // big: they sit a kilometre out
@@ -109,18 +111,28 @@ export function makeClouds(n = 16) {
       }
     }
     // flat base
-    W.blob('c', 0, 0, 0, k * 1.9, k * 0.22, k * 0.95, base, 1);
+    W.blob('c', 0, k * 0.08, 0, k * 1.55, k * 0.36, k * 0.85, base, 2);
     const g = new THREE.Group();
     W.build({ c: mat }, g, { shadows: false });
-    const a = R() * Math.PI * 2, d = 760 + R() * 700;    // out by the horizon, clear of the aerial view
-    g.position.set(Math.cos(a) * d, 150 + R() * 150, Math.sin(a) * d);
+    // most sit out by the horizon; a few drift low round the diorama's edge,
+    // level with it, so the model floats among them (the diorama-game look)
+    const low = i % 3 === 1;
+    const a = R() * Math.PI * 2, d = low ? 480 + R() * 140 : 760 + R() * 700;
+    g.position.set(75 + Math.cos(a) * d, low ? -35 + R() * 45 : 150 + R() * 150, 78 + Math.sin(a) * d);
+    if (low) g.scale.setScalar(0.45 + R() * 0.25);
     g.userData.speed = 1.2 + R() * 1.6;
+    Object.assign(g.userData, { low, a, d });
     group.add(g);
   }
   group.userData.update = (dt) => {
     for (const c of group.children) {
+      if (c.userData.low) {                                   // the low ones circle slowly instead of crossing the model
+        c.userData.a += dt * 0.004;
+        c.position.x = 75 + Math.cos(c.userData.a) * c.userData.d; c.position.z = 78 + Math.sin(c.userData.a) * c.userData.d;
+        continue;
+      }
       c.position.x += c.userData.speed * dt;
-      if (c.position.x > 1500) c.position.x = -1500;
+      if (c.position.x > 1575) c.position.x = -1425;
     }
   };
   return group;
@@ -403,7 +415,7 @@ export function makeLightCones(lights) {
     fragmentShader: ADD_OUT + `uniform float strength; varying float vT; varying vec3 vN, vV;
       void main(){
         float face = pow(abs(dot(normalize(vN), normalize(vV))), 3.0);   // thicker through the middle, soft at the edges
-        float a = face * pow(1.0 - vT, 2.2) * smoothstep(0.0, 0.08, vT);
+        float a = face * pow(clamp(1.0 - vT, 0.0, 1.0), 2.2) * smoothstep(0.0, 0.08, vT);
         gl_FragColor = vec4(vec3(1.0, 0.78, 0.5) * a * strength, 1.0);
         gNormalDepth = vec4(0.0);
       }`,

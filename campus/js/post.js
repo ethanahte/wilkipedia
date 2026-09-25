@@ -9,7 +9,10 @@
 //   rays:    Tyndall light shafts: open sky near the sun, smeared toward the
 //            sun on the screen, so beams fall between clouds, through the
 //            gaps in tree crowns and past the rooflines (a quarter-size pass).
-//   haze:    the air on the sun's side glows warm with distance.
+//   haze:    the air on the sun's side glows warm with distance, and from
+//            the air the diorama's base dissolves into the peach mist below it.
+//   tilt:    from the air, the top and bottom of the picture go soft (a
+//            tilt-shift lens), so the campus reads as a miniature.
 //   quality: high = ink + bloom + rays + 4× MSAA; medium = ink + rays; low = colour only.
 
 import * as THREE from 'three';
@@ -18,9 +21,10 @@ const VERT = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(positi
 
 const COMPOSITE = `
 precision highp float;
-uniform sampler2D tColor, tND, tBloom, tRays;
+uniform sampler2D tColor, tND, tBloom, tRays, tSoft;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK;
+uniform vec3 fogCol;
 uniform mat4 proj, projInv, viewInv;
 uniform vec3 viewUp, sunDir;
 varying vec2 vUv;
@@ -90,18 +94,35 @@ void main(){
       col += hitCol * hit * fres * k * 0.85;
     }
   }
-  // ink is a darker, cooler shade of whatever it outlines, never pure black
-  col = mix(col, col * vec3(0.26, 0.24, 0.36), edge * ink);
+  // ink is a darker shade of whatever it outlines, never pure black; by day it's
+  // barely there (a soft painted edge), at night it's crisper
+  col = mix(col, col * mix(vec3(0.62, 0.52, 0.52), vec3(0.26, 0.24, 0.36), night), edge * ink * mix(0.55, 1.0, night));
+  // tilt-shift: soften toward the top and bottom of the frame
+  if (tiltK > 0.0) {
+    float tb = smoothstep(0.16, 0.47, abs(vUv.y - 0.5)) * tiltK;
+    col = mix(col, texture2D(tSoft, vUv).rgb, tb);
+  }
+  // the ground falls away into mist below the diorama's top (by day)
+  if (ink > 0.0 && night < 0.5) {
+    float dz = abs(texture2D(tND, vUv).a);
+    if (dz < 3000.0) {
+      float wy = (viewInv * vec4(viewPos(vUv, dz), 1.0)).y;
+      col = mix(col, fogCol, smoothstep(0.5, -13.0, wy) * 0.92);
+    }
+  }
   if (useBloom > 0.5) col += texture2D(tBloom, vUv).rgb * bloomK;
   // the light shafts, golden where they're thick
   if (raysK > 0.0) { float r = texture2D(tRays, vUv).r; r = r / (1.0 + r); col += mix(vec3(1.0, 0.84, 0.6), vec3(1.0, 0.95, 0.85), r) * r * raysK; }
   // grade (the anime background look): richer colour, lavender-blue shadows, warm golden light
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(lum), col, mix(1.24, 1.14, night));
-  col *= mix(vec3(0.86, 0.9, 1.14), vec3(1.04, 1.0, 0.94), smoothstep(0.08, 0.6, lum));
+  col = mix(vec3(lum), col, mix(0.92, 1.14, night));   // day: a little muted, pastel
+  // day: pastel (shadows go warm mauve, blacks lift into the peach haze); night: cool blue shadows
+  col *= mix(mix(vec3(0.96, 0.88, 0.9), vec3(1.03, 1.0, 0.95), smoothstep(0.08, 0.6, lum)),
+             mix(vec3(0.86, 0.9, 1.14), vec3(1.04, 1.0, 0.94), smoothstep(0.08, 0.6, lum)), night);
+  col = mix(col, fogCol, 0.08 * (1.0 - night));
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
-  col *= 1.0 - dot(q, q) * 0.42;
+  col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night);
   col = toSRGB(col);
   col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
@@ -135,7 +156,10 @@ void main(){
 
 const BRIGHT = `
 uniform sampler2D tColor; uniform float thresh; varying vec2 vUv;
-void main(){ vec3 c = texture2D(tColor, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(thresh, thresh + 0.5, l), 1.0); }`;
+void main(){ vec3 c = texture2D(tColor, vUv).rgb;
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);     // one bad pixel must not smear into a block
+  c = min(c, vec3(64.0));
+  float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(thresh, thresh + 0.5, l), 1.0); }`;
 
 const BLUR = `
 uniform sampler2D tSrc; uniform vec2 dir; varying vec2 vUv;
@@ -163,6 +187,7 @@ export class Post {
       wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
       tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
+      tSoft: { value: null }, tiltK: { value: 0 }, fogCol: { value: new THREE.Color() },
     });
     this.rayMask = mk(RAYMASK, { tND: { value: null }, tColor: { value: null }, sunUV: { value: new THREE.Vector2() }, aspect: { value: 1 } });
     this.rayBlur = mk(RAYBLUR, { tSrc: { value: null }, sunUV: { value: new THREE.Vector2() }, span: { value: 1 } });
@@ -175,7 +200,7 @@ export class Post {
   setQuality(q) { this.quality = q; this.dispose(); if (this.w) this.setSize(this.w, this.h, this.dpr); }
 
   dispose() {
-    for (const k of ['gbuf', 'bA', 'bB', 'rA', 'rB']) { this[k]?.dispose(); this[k] = null; }
+    for (const k of ['gbuf', 'bA', 'bB', 'rA', 'rB', 'sA', 'sB']) { this[k]?.dispose(); this[k] = null; }
   }
 
   setSize(w, h, dpr) {
@@ -195,6 +220,8 @@ export class Post {
     this.bB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.rA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.rB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
+    this.sA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
+    this.sB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.rayMask.uniforms.aspect.value = W / H;
     this.inkOn = ink;
     const u = this.comp.uniforms;
@@ -245,8 +272,22 @@ export class Post {
         this.rayBlur.uniforms.tSrc.value = this.rA.texture; this.rayBlur.uniforms.span.value = 0.9; this.pass(this.rayBlur, this.rB);
         this.rayBlur.uniforms.tSrc.value = this.rB.texture; this.rayBlur.uniforms.span.value = 0.35; this.pass(this.rayBlur, this.rA);
         u.tRays.value = this.rA.texture;
-        u.raysK.value = k * 0.5;
+        u.raysK.value = k * 0.32;
       }
+    }
+    u.fogCol.value.copy(env.fog || u.fogCol.value);
+    // tilt-shift: a blurred quarter-size copy of the picture to fade into
+    u.tiltK.value = this.inkOn ? (env.tilt || 0) * (env.night ? 0.6 : 1) : 0;
+    if (u.tiltK.value > 0.01) {
+      this.bright.uniforms.tColor.value = this.gbuf.textures[0];
+      this.bright.uniforms.thresh.value = -2;           // everything passes: a plain copy
+      this.pass(this.bright, this.sA);
+      for (let i = 0; i < 3; i++) {
+        this.blur.uniforms.tSrc.value = this.sA.texture; this.blur.uniforms.dir.value.set(this.bloomTexel.x * 1.5, 0); this.pass(this.blur, this.sB);
+        this.blur.uniforms.tSrc.value = this.sB.texture; this.blur.uniforms.dir.value.set(0, this.bloomTexel.y * 1.5); this.pass(this.blur, this.sA);
+      }
+      u.tSoft.value = this.sA.texture;
+      this.bright.uniforms.thresh.value = env.night ? 0.55 : 0.8;
     }
     if (u.useBloom.value > 0.5) {
       this.bright.uniforms.tColor.value = this.gbuf.textures[0];

@@ -22,6 +22,11 @@ export class Controls {
     this.vy = 0;
     this.keys = new Set();
     this.orbit = { tx: 0, tz: 0, dist: 260, az: 0.6, el: 0.95 };
+    // From the air the camera looks through a long lens from further back, so
+    // the campus reads as a near-isometric miniature (like a diorama game);
+    // on foot it's a normal eye. orbit.dist stays in "62° lens" units.
+    this.fovWalk = 62; this.fovFly = 24;
+    this.lensK = Math.tan(THREE.MathUtils.degToRad(31)) / Math.tan(THREE.MathUtils.degToRad(12));
     this.trans = null;
     this.locked = false;
     this.stick = { x: 0, y: 0, id: null, ox: 0, oy: 0 };
@@ -195,13 +200,16 @@ export class Controls {
   }
 
   _walkPose(cam) {
+    cam.fov = this.fovWalk;
     cam.position.set(this.pos.x, this.pos.y + EYE, this.pos.z);
     cam.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
   }
 
   _flyPose(cam) {
     const o = this.orbit;
-    const h = o.dist * Math.sin(o.el), r = o.dist * Math.cos(o.el);
+    cam.fov = this.fovFly;
+    const d = o.dist * this.lensK;
+    const h = d * Math.sin(o.el), r = d * Math.cos(o.el);
     cam.position.set(o.tx + Math.sin(o.az) * r, h, o.tz + Math.cos(o.az) * r);
     cam.lookAt(o.tx, 0, o.tz);
   }
@@ -219,6 +227,10 @@ export class Controls {
       cam.position.lerpVectors(T.from.position, target.position, k);
       cam.position.y += lift;
       cam.quaternion.slerpQuaternions(T.from.quaternion, target.quaternion, k);
+      // swap lenses along the way (in angle-of-view terms, so the zoom feels even)
+      const fa = Math.tan(THREE.MathUtils.degToRad(T.from.fov / 2)), fb = Math.tan(THREE.MathUtils.degToRad(target.fov / 2));
+      cam.fov = THREE.MathUtils.radToDeg(2 * Math.atan(fa + (fb - fa) * k));
+      cam.updateProjectionMatrix();
       if (T.t >= 1) {
         this.mode = T.to; this.trans = null;
         this.onModeChange(this.mode);
@@ -239,6 +251,7 @@ export class Controls {
       this.orbit.tx = THREE.MathUtils.clamp(this.orbit.tx, -215, 365);
       this.orbit.tz = THREE.MathUtils.clamp(this.orbit.tz, -150, 305);
       this._flyPose(cam);
+      cam.updateProjectionMatrix();
       return;
     }
     // walk
@@ -260,6 +273,7 @@ export class Controls {
     if (g > this.pos.y && this.vy <= 0) this.pos.y = Math.min(g, this.pos.y + dt * 6);
     else { this.vy -= 14 * dt; this.pos.y = Math.max(g, this.pos.y + this.vy * dt); if (this.pos.y === g) this.vy = 0; }
     this._walkPose(cam);
+    cam.updateProjectionMatrix();
   }
 
   _step(mx, mz) {

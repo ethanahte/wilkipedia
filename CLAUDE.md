@@ -133,19 +133,26 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Never invent what something looks like.** Every facade kit and landmark is
     from a photo the owner sent (listed in the file headers). Ask for a photo
     before adding a building's detail, interior, or a logo placement.
-  - Look (三渲二, Japanese anime slice-of-life): toon materials with the far
-    side of the ramp = 0 (form and cast shadows match), a lavender-blue sky
-    light so every shadow is cool, a warm golden-afternoon sun (~22° up, SW),
-    FogExp2 haze, a painted sky (deep blue, warm on the sun's side, cirrus; no
-    mountains, owner's call) and two-tone cauliflower cumulus out by the horizon.
-    `gbuffer()` in toon.js patches every material: it writes normal+depth to a
-    second target for the ink pass, adds a world-space watercolour grain +
-    contact darkening at wall bases, a warm rim light on sunlit edges, and (glass
-    only) anime diagonal glints. Any new material must go through `gbuffer()`.
+  - Look (by day: the owner's reference is the diorama game *High Above*): a
+    near-isometric miniature floating in warm peach mist. From the air the
+    camera uses a long lens (`fovFly` 24°, distance × `lensK` in controls.js;
+    orbit.dist stays in 62°-lens units) with a tilt-shift blur top and bottom
+    (post.js, `tilt`), and height fog dissolves the plinth into the haze. Light
+    is soft and pastel: a peachy-pink sky fill so shadows go warm mauve, a
+    gentle sun (~22° up, SW), a soft linear-filtered light ramp (the unlit side
+    is ~0.18, not black), barely-there warm outlines by day (crisper at night),
+    a stronger hand-painted grain, a slightly muted grade that lifts toward the
+    fog colour. Peach sky dome (follows the camera; no mountains, owner's call),
+    pastel cauliflower clouds by the horizon and a few low ones circling the
+    diorama at its own level. `gbuffer()` in toon.js patches every material: it
+    writes normal+depth to a second target for the ink pass, adds the grain +
+    contact darkening at wall bases, a soft warm rim on sunlit edges and (glass
+    only) diagonal glints. Any new material must go through `gbuffer()`.
     ink modes: 'soft' (foliage: depth stored negated, only its outline is inked),
     'sky' (depth 5000), 'cloud' (depth 4000: no ink, but blocks sunbeams),
     'none', 'add'. `SUN_VIEW`/`DAY` in toon.js are shared uniforms main.js
-    updates each frame.
+    updates each frame. Blur/bloom inputs are NaN-guarded (one bad pixel would
+    otherwise smear into a block).
   - Tyndall light: by day post.js draws sunbeams (open sky near the sun, i.e.
     depth > 4500, radially smeared toward the sun at quarter size), so shafts
     fall through tree crowns, past roofs and between clouds, plus warm haze on

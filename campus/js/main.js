@@ -57,7 +57,7 @@ async function boot() {
   const scene = new THREE.Scene();
   // haze: distance melts into the pale horizon, as in a painted background
   scene.fog = new THREE.FogExp2(HORIZON, 0.0021);
-  const camera = new THREE.PerspectiveCamera(62, 1, 0.15, 3200);
+  const camera = new THREE.PerspectiveCamera(62, 1, 0.15, 7000);   // far: the aerial long lens sits ~2 km out
 
   // light: sky + ground bounce, and one warm afternoon sun that follows you with its shadows
   // warm sun; the sky light is a lavender blue, which is the colour every shadow takes on
@@ -140,7 +140,8 @@ async function boot() {
   const TKEY = 'wilcox-campus-sky2';
   let env = { night: false, rain: false };
   try { Object.assign(env, JSON.parse(localStorage.getItem(TKEY)) || {}); } catch { /* defaults */ }
-  const DAY = { hemi: ['#a4b9f0', '#dcc6a2', 1.7], sun: ['#ffe4b8', 2.75], fog: '#e3e8ef', density: 0.0019 };
+  // soft pastel daylight: a peachy-pink sky fill (every shadow goes warm mauve) and a gentle sun
+  const DAY = { hemi: ['#f0cfc4', '#e3cdb0', 2.35], sun: ['#fff0dc', 2.05], fog: '#f6dccb', density: 0.0022 };
   const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
   const applyEnv = () => {
     const E = env.night ? NIGHT : DAY;
@@ -171,7 +172,7 @@ async function boot() {
   controls.setWalk(fx + 1.5, fz - 2.2, 0.35 + Math.PI, 0);
   controls.yaw = Math.PI - 0.25;
   controls.mode = 'fly';
-  Object.assign(controls.orbit, { tx: 75, tz: 78, dist: 640, el: 0.62, az: 0.75 });
+  Object.assign(controls.orbit, { tx: 75, tz: 78, dist: 440, el: 0.6, az: 0.75 });
   controls.autoRotate = true;
   controls.onModeChange = (m) => { hud.setMode(m); if (m !== 'walk') hud.tip(null); };
   hud.setMode('fly');
@@ -308,11 +309,12 @@ async function boot() {
 
   // ── the loop ──
   const clock = new THREE.Clock();
-  let t = 0, pickT = 0, mapT = 0, slow = 0, running = 0;
+  let t = 0, pickT = 0, mapT = 0, slow = 0, running = 0, tilt = 1;
   const lightRight = new THREE.Vector3(), lightUp = new THREE.Vector3();
   function frame(dt) {
     t += dt;
     controls.update(dt);
+    sky.position.copy(camera.position);                   // the sky dome travels with you
     sky.userData.update(dt); clouds.userData.update(dt); birds.userData.update(dt, t); flags.userData.update(dt, t);
     const walking = controls.mode === 'walk';
     if (env.night) {
@@ -324,7 +326,7 @@ async function boot() {
     rain.userData.update(dt, camera.position, env.rain, !walking);
     ripples.userData.update(dt, walking ? controls.pos : camera.position, env.rain && walking);
     const dens = (env.night ? NIGHT : DAY).density * (env.rain ? 1.3 : 1);
-    scene.fog.density = walking ? dens : dens * 0.08;
+    scene.fog.density = walking ? dens : dens * 0.11;
     // the sun's shadow box follows what you're looking at, snapped to its texels so edges don't crawl
     const focus = controls.mode === 'fly' ? new THREE.Vector3(controls.orbit.tx, 0, controls.orbit.tz) : controls.pos.clone();
     if (controls.mode !== 'fly') focus.addScaledVector(new THREE.Vector3(-Math.sin(controls.yaw), 0, -Math.cos(controls.yaw)), 30);
@@ -358,9 +360,12 @@ async function boot() {
     // everything is at least (height - 35) away.
     const nearWant = Math.min(40, Math.max(0.15, (camera.position.y - 35) * 0.5));
     if (Math.abs(camera.near - nearWant) > 0.05) { camera.near = nearWant; camera.updateProjectionMatrix(); }
-    const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * 2.4) : 420;
+    const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * controls.lensK * 1.5) : 420;
+    // tilt-shift (the miniature look) only from the air
+    tilt += ((controls.mode === 'fly' ? 1 : 0) - tilt) * Math.min(1, dt * 3);
     SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);
-    post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value });
+    post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value,
+      fog: scene.fog.color, tilt });
   }
   function loop() {
     const dt = Math.min(0.05, clock.getDelta());
