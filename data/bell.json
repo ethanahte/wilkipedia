@@ -1,42 +1,398 @@
 {
-  "_about": "Wilcox bell schedule, copied from the official page (source). Times are 24-hour. 'weekdays' maps JS getDay() (1=Mon) to a schedule. 'special' overrides specific dates: off = no school (with reason), schedule = a named schedule, adjusted = the school says the day is adjusted but gives no times (the widget says so rather than guessing). Update every August from the school's page.",
-  "source": "https://wilcox.santaclarausd.org/about/bell-schedule",
-  "year": "2026–27",
-  "schedules": {
-    "monday": { "label": "Monday · all 7 periods", "periods": [
-      ["1st Period", "08:45", "09:35"], ["2nd Period", "09:40", "10:30"], ["3rd Period", "10:40", "11:30"],
-      ["4th Period + announcements", "11:35", "12:30"], ["Lunch", "12:30", "13:05"], ["5th Period", "13:10", "14:00"],
-      ["6th Period", "14:05", "14:55"], ["7th Period", "15:00", "15:50"] ] },
-    "odd": { "label": "Tuesday/Thursday · periods 1, 3, 5, 7", "periods": [
-      ["Period 1", "08:45", "10:15"], ["Period 3 + announcements", "10:25", "12:00"], ["Lunch", "12:00", "12:35"],
-      ["Period 5", "12:40", "14:10"], ["Period 7", "14:15", "15:45"] ] },
-    "even": { "label": "Wednesday/Friday · periods 2, 4, 6", "periods": [
-      ["Period 2", "08:45", "10:15"], ["SSR + announcements", "10:25", "11:20"], ["Lunch", "11:20", "11:50"],
-      ["Period 4", "12:00", "13:30"], ["Period 6", "13:35", "15:05"] ] },
-    "homecoming": { "label": "Homecoming parade day", "periods": [
-      ["Homecoming Parade", "08:45", "09:45"], ["2nd Period", "10:00", "11:30"], ["4th Period", "12:10", "13:40"], ["6th Period", "13:45", "15:15"] ] },
-    "finals1": { "label": "Finals day 1 · periods 1, 2, 7", "periods": [
-      ["1st Period final", "08:45", "10:45"], ["2nd Period final", "10:50", "12:50"], ["Lunch", "12:50", "13:25"], ["7th Period final", "13:30", "15:30"] ] },
-    "finals2": { "label": "Finals day 2 · periods 3, 4", "periods": [
-      ["3rd Period final", "08:45", "10:45"], ["Brunch", "10:45", "11:00"], ["4th Period final", "11:05", "13:05"] ] },
-    "finals3": { "label": "Finals day 3 · periods 5, 6", "periods": [
-      ["5th Period final", "08:45", "10:45"], ["Brunch", "10:45", "11:00"], ["6th Period final", "11:05", "13:05"] ] }
+ "_about": "Wilcox bell schedule, copied from the official page (source). Times are 24-hour. 'weekdays' maps JS getDay() (1=Mon) to a schedule. 'special' overrides specific dates: off = no school (with reason), schedule = a named schedule, adjusted = the school says the day is adjusted but gives no times (the widget says so rather than guessing). Update every August from the school's page. Spring 2027 days (breaks, holidays, PD days, June finals) come from the school's official 2026-27 Wilcox Activities Calendar, linked from the same page; June finals give no times, so they're 'adjusted'.",
+ "source": "https://wilcox.santaclarausd.org/about/bell-schedule",
+ "year": "2026–27",
+ "schedules": {
+  "monday": {
+   "label": "Monday · all 7 periods",
+   "periods": [
+    [
+     "1st Period",
+     "08:45",
+     "09:35"
+    ],
+    [
+     "2nd Period",
+     "09:40",
+     "10:30"
+    ],
+    [
+     "3rd Period",
+     "10:40",
+     "11:30"
+    ],
+    [
+     "4th Period + announcements",
+     "11:35",
+     "12:30"
+    ],
+    [
+     "Lunch",
+     "12:30",
+     "13:05"
+    ],
+    [
+     "5th Period",
+     "13:10",
+     "14:00"
+    ],
+    [
+     "6th Period",
+     "14:05",
+     "14:55"
+    ],
+    [
+     "7th Period",
+     "15:00",
+     "15:50"
+    ]
+   ]
   },
-  "weekdays": { "1": "monday", "2": "odd", "3": "even", "4": "odd", "5": "even" },
-  "special": [
-    { "dates": ["2026-08-11", "2026-08-12"], "adjusted": "All 7 periods (1–7 bell schedule)" },
-    { "dates": ["2026-09-07"], "off": "Labor Day" },
-    { "dates": ["2026-09-08"], "off": "In-service day" },
-    { "dates": ["2026-09-09"], "adjusted": "Adjusted bell schedule, all 7 periods" },
-    { "dates": ["2026-10-09"], "schedule": "homecoming" },
-    { "dates": ["2026-10-12", "2026-10-13"], "off": "Holiday" },
-    { "dates": ["2026-10-14"], "adjusted": "Adjusted bell schedule, all 7 periods" },
-    { "dates": ["2026-11-10"], "adjusted": "Adjusted bell schedule, all 7 periods" },
-    { "dates": ["2026-11-11"], "off": "Veterans Day" },
-    { "dates": ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27"], "off": "Thanksgiving break" },
-    { "dates": ["2026-12-15"], "adjusted": "Adjusted bell schedule, all 7 periods" },
-    { "dates": ["2026-12-16"], "schedule": "finals1" },
-    { "dates": ["2026-12-17"], "schedule": "finals2" },
-    { "dates": ["2026-12-18"], "schedule": "finals3" }
-  ]
+  "odd": {
+   "label": "Tuesday/Thursday · periods 1, 3, 5, 7",
+   "periods": [
+    [
+     "Period 1",
+     "08:45",
+     "10:15"
+    ],
+    [
+     "Period 3 + announcements",
+     "10:25",
+     "12:00"
+    ],
+    [
+     "Lunch",
+     "12:00",
+     "12:35"
+    ],
+    [
+     "Period 5",
+     "12:40",
+     "14:10"
+    ],
+    [
+     "Period 7",
+     "14:15",
+     "15:45"
+    ]
+   ]
+  },
+  "even": {
+   "label": "Wednesday/Friday · periods 2, 4, 6",
+   "periods": [
+    [
+     "Period 2",
+     "08:45",
+     "10:15"
+    ],
+    [
+     "SSR + announcements",
+     "10:25",
+     "11:20"
+    ],
+    [
+     "Lunch",
+     "11:20",
+     "11:50"
+    ],
+    [
+     "Period 4",
+     "12:00",
+     "13:30"
+    ],
+    [
+     "Period 6",
+     "13:35",
+     "15:05"
+    ]
+   ]
+  },
+  "homecoming": {
+   "label": "Homecoming parade day",
+   "periods": [
+    [
+     "Homecoming Parade",
+     "08:45",
+     "09:45"
+    ],
+    [
+     "2nd Period",
+     "10:00",
+     "11:30"
+    ],
+    [
+     "4th Period",
+     "12:10",
+     "13:40"
+    ],
+    [
+     "6th Period",
+     "13:45",
+     "15:15"
+    ]
+   ]
+  },
+  "finals1": {
+   "label": "Finals day 1 · periods 1, 2, 7",
+   "periods": [
+    [
+     "1st Period final",
+     "08:45",
+     "10:45"
+    ],
+    [
+     "2nd Period final",
+     "10:50",
+     "12:50"
+    ],
+    [
+     "Lunch",
+     "12:50",
+     "13:25"
+    ],
+    [
+     "7th Period final",
+     "13:30",
+     "15:30"
+    ]
+   ]
+  },
+  "finals2": {
+   "label": "Finals day 2 · periods 3, 4",
+   "periods": [
+    [
+     "3rd Period final",
+     "08:45",
+     "10:45"
+    ],
+    [
+     "Brunch",
+     "10:45",
+     "11:00"
+    ],
+    [
+     "4th Period final",
+     "11:05",
+     "13:05"
+    ]
+   ]
+  },
+  "finals3": {
+   "label": "Finals day 3 · periods 5, 6",
+   "periods": [
+    [
+     "5th Period final",
+     "08:45",
+     "10:45"
+    ],
+    [
+     "Brunch",
+     "10:45",
+     "11:00"
+    ],
+    [
+     "6th Period final",
+     "11:05",
+     "13:05"
+    ]
+   ]
+  }
+ },
+ "weekdays": {
+  "1": "monday",
+  "2": "odd",
+  "3": "even",
+  "4": "odd",
+  "5": "even"
+ },
+ "special": [
+  {
+   "dates": [
+    "2026-08-11",
+    "2026-08-12"
+   ],
+   "adjusted": "All 7 periods (1–7 bell schedule)"
+  },
+  {
+   "dates": [
+    "2026-09-07"
+   ],
+   "off": "Labor Day"
+  },
+  {
+   "dates": [
+    "2026-09-08"
+   ],
+   "off": "In-service day"
+  },
+  {
+   "dates": [
+    "2026-09-09"
+   ],
+   "adjusted": "Adjusted bell schedule, all 7 periods"
+  },
+  {
+   "dates": [
+    "2026-10-09"
+   ],
+   "schedule": "homecoming"
+  },
+  {
+   "dates": [
+    "2026-10-12",
+    "2026-10-13"
+   ],
+   "off": "Holiday"
+  },
+  {
+   "dates": [
+    "2026-10-14"
+   ],
+   "adjusted": "Adjusted bell schedule, all 7 periods"
+  },
+  {
+   "dates": [
+    "2026-11-10"
+   ],
+   "adjusted": "Adjusted bell schedule, all 7 periods"
+  },
+  {
+   "dates": [
+    "2026-11-11"
+   ],
+   "off": "Veterans Day"
+  },
+  {
+   "dates": [
+    "2026-11-23",
+    "2026-11-24",
+    "2026-11-25",
+    "2026-11-26",
+    "2026-11-27"
+   ],
+   "off": "Thanksgiving break"
+  },
+  {
+   "dates": [
+    "2026-12-15"
+   ],
+   "adjusted": "Adjusted bell schedule, all 7 periods"
+  },
+  {
+   "dates": [
+    "2026-12-16"
+   ],
+   "schedule": "finals1"
+  },
+  {
+   "dates": [
+    "2026-12-17"
+   ],
+   "schedule": "finals2"
+  },
+  {
+   "dates": [
+    "2026-12-18"
+   ],
+   "schedule": "finals3"
+  },
+  {
+   "dates": [
+    "2026-12-21",
+    "2026-12-22",
+    "2026-12-23",
+    "2026-12-24",
+    "2026-12-25",
+    "2026-12-28",
+    "2026-12-29",
+    "2026-12-30",
+    "2026-12-31",
+    "2027-01-01"
+   ],
+   "off": "Winter break"
+  },
+  {
+   "dates": [
+    "2027-01-04"
+   ],
+   "off": "Professional development day"
+  },
+  {
+   "dates": [
+    "2027-01-05",
+    "2027-01-06"
+   ],
+   "adjusted": "All 7 periods (first days of semester 2)"
+  },
+  {
+   "dates": [
+    "2027-01-18"
+   ],
+   "off": "MLK, Jr. Holiday"
+  },
+  {
+   "dates": [
+    "2027-02-15",
+    "2027-02-16",
+    "2027-02-17",
+    "2027-02-18",
+    "2027-02-19"
+   ],
+   "off": "February break"
+  },
+  {
+   "dates": [
+    "2027-03-18",
+    "2027-03-19"
+   ],
+   "off": "Professional development day"
+  },
+  {
+   "dates": [
+    "2027-04-12",
+    "2027-04-13",
+    "2027-04-14",
+    "2027-04-15",
+    "2027-04-16"
+   ],
+   "off": "Spring break"
+  },
+  {
+   "dates": [
+    "2027-05-28"
+   ],
+   "adjusted": "Special schedule (Goodbye Rally)"
+  },
+  {
+   "dates": [
+    "2027-05-31"
+   ],
+   "off": "Memorial Day"
+  },
+  {
+   "dates": [
+    "2027-06-01"
+   ],
+   "adjusted": "Finals week: all 7 periods"
+  },
+  {
+   "dates": [
+    "2027-06-02"
+   ],
+   "adjusted": "Final exams: periods 1, 2, 7"
+  },
+  {
+   "dates": [
+    "2027-06-03"
+   ],
+   "adjusted": "Final exams: periods 3, 4"
+  },
+  {
+   "dates": [
+    "2027-06-04"
+   ],
+   "adjusted": "Final exams: periods 5, 6 · last day of school"
+  }
+ ]
 }

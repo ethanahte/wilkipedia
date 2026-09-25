@@ -115,6 +115,7 @@ tools/build.py         the site generator (Python standard library only)
 tools/parse_catalog.py rebuilds data/catalog.json from next year's catalog PDF
 tools/osm_campus.py    rebuilds campus/js/osm.js (streets, houses, creek) from OpenStreetMap
 tools/trace_map.py     traces the official campus map into data/map-plan.json (the Map page's vector plan)
+tools/school_calendar.py  pulls Wilcox's official activities calendar into data/calendar.json (the Calendar page)
 docs/                  the team handbook
 campus/                the 3D campus (three.js app, hand-written; only index.html is generated)
   js/layout.js         where everything is, in metres (edit this to fix a building)

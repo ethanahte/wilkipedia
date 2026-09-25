@@ -1,0 +1,1214 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wilkipedia//Wilcox calendar//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Wilcox 2026–27 (Wilkipedia)
+BEGIN:VEVENT
+UID:wilcox-2026-08-03-0@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260803
+DTEND;VALUE=DATE:20260804
+SUMMARY:Freshman Orientation
+DESCRIPTION:8:30 am - 12:30 pm · Main Gym · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-03-1@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260803
+DTEND;VALUE=DATE:20260804
+SUMMARY:Freshman Parent Meeting
+DESCRIPTION:9:00 am · Theater · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-07-2@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260807
+DTEND;VALUE=DATE:20260808
+SUMMARY:First Official Day of Fall Athletic Season
+DESCRIPTION:Athletics (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-10-3@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260810
+DTEND;VALUE=DATE:20260811
+SUMMARY:First Day of School
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-18-4@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260818
+DTEND;VALUE=DATE:20260819
+SUMMARY:Picture Day
+DESCRIPTION:Period 3 · Small Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-26-5@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260826
+DTEND;VALUE=DATE:20260827
+SUMMARY:Club Training
+DESCRIPTION:Lunch · Science Lecture Hall · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-08-27-6@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260827
+DTEND;VALUE=DATE:20260828
+SUMMARY:Club Training
+DESCRIPTION:Lunch · Science Lecture Hall · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-03-7@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260903
+DTEND;VALUE=DATE:20260904
+SUMMARY:Club Fair - STEM\, Service\, Leadership
+DESCRIPTION:Lunch · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-04-8@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260904
+DTEND;VALUE=DATE:20260905
+SUMMARY:Club Fair - Culture\, Arts\, Community
+DESCRIPTION:Lunch · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-07-9@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260907
+DTEND;VALUE=DATE:20260908
+SUMMARY:Labor Day - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-08-10@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260908
+DTEND;VALUE=DATE:20260909
+SUMMARY:Professional Development Day - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-09-11@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260909
+DTEND;VALUE=DATE:20260910
+SUMMARY:Adjusted Bell Schedule
+DESCRIPTION:Periods 1-7 · Schedule change (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-09-12@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260909
+DTEND;VALUE=DATE:20260910
+SUMMARY:Back to School Night
+DESCRIPTION:6 pm · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-16-13@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260916
+DTEND;VALUE=DATE:20260917
+SUMMARY:Junior/Senior Parent Night
+DESCRIPTION:7 - 8:30 pm · On Zoom · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-18-14@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260918
+DTEND;VALUE=DATE:20260919
+SUMMARY:Fall Spirit Rally
+DESCRIPTION:Tutorial · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-23-15@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260923
+DTEND;VALUE=DATE:20260924
+SUMMARY:College Financial Aid Planning Night (presented by DGM)
+DESCRIPTION:7 pm · Zoom (link to come) · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-23-16@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260923
+DTEND;VALUE=DATE:20260924
+SUMMARY:ELAC Meeting
+DESCRIPTION:5:30 - 7 pm · Staff Lounge · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-23-17@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260923
+DTEND;VALUE=DATE:20260924
+SUMMARY:Picture Retake Day
+DESCRIPTION:10 am - 2 pm · Theater Lobby · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-09-30-18@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20260930
+DTEND;VALUE=DATE:20261001
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-05-19@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261005
+DTEND;VALUE=DATE:20261010
+SUMMARY:Homecoming Week *Special Schedule on 10/9
+DESCRIPTION:Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-07-20@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261007
+DTEND;VALUE=DATE:20261008
+SUMMARY:Skit Night
+DESCRIPTION:6 - 8 pm · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-08-21@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261008
+DTEND;VALUE=DATE:20261009
+SUMMARY:Homecoming Float Building Night
+DESCRIPTION:4 - 10 pm · Quad\, Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-09-22@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261009
+DTEND;VALUE=DATE:20261010
+SUMMARY:8th Grade Rally
+DESCRIPTION:10:15 am · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-09-23@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261009
+DTEND;VALUE=DATE:20261010
+SUMMARY:End of Quarter 1
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-09-24@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261009
+DTEND;VALUE=DATE:20261010
+SUMMARY:Homecoming Football Game
+DESCRIPTION:7 pm · Stadium Field · Athletics (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-09-25@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261009
+DTEND;VALUE=DATE:20261010
+SUMMARY:Homecoming Parade
+DESCRIPTION:8:45 - 9:45 am · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-10-26@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261010
+DTEND;VALUE=DATE:20261011
+SUMMARY:Homecoming Dance
+DESCRIPTION:7 - 10 pm · Cafeteria · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-10-27@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261010
+DTEND;VALUE=DATE:20261011
+SUMMARY:Homecoming Float Clean-Up
+DESCRIPTION:10 am - 12 pm · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-12-28@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261012
+DTEND;VALUE=DATE:20261013
+SUMMARY:Holiday - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-13-29@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261013
+DTEND;VALUE=DATE:20261014
+SUMMARY:Holiday - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-14-30@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261015
+SUMMARY:Adjusted Bell Schedule
+DESCRIPTION:Periods 1-7 · Schedule change (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-14-31@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261015
+SUMMARY:UCLA Night
+DESCRIPTION:6 - 8 pm · Theater · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-14-32@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261015
+SUMMARY:Wilcox-Peterson Orchestra Exchange
+DESCRIPTION:10 am - 1:30 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-15-33@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261015
+DTEND;VALUE=DATE:20261016
+SUMMARY:Great California ShakeOut
+DESCRIPTION:10:30 am · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-17-34@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261017
+DTEND;VALUE=DATE:20261018
+SUMMARY:West Valley Performance
+DESCRIPTION:6 - 8 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-20-35@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:PSAT Testing
+DESCRIPTION:8 am - 12 pm · Main Gym / Small Gym · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-21-36@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261021
+DTEND;VALUE=DATE:20261022
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-21-37@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261021
+DTEND;VALUE=DATE:20261022
+SUMMARY:Fall Music Concert
+DESCRIPTION:7 - 9:30 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-22-38@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261022
+DTEND;VALUE=DATE:20261023
+SUMMARY:Fall Blood Drive
+DESCRIPTION:8 am - 4 pm · Small Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-27-39@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:College Fair
+DESCRIPTION:6 - 8 pm · Main Gym · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-10-27-40@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:PSAT Make-Up Testing
+DESCRIPTION:8 am - 12 pm · SLH · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-02-41@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:First Official Day of Winter Athletic Season
+DESCRIPTION:Athletics (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-02-42@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:Start of ASB Clothing Drive
+DESCRIPTION:Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-03-43@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:Teen Read Week: Mystery\, Mayhem & Magic (Tues - Fri)
+DESCRIPTION:Library · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-04-44@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261104
+DTEND;VALUE=DATE:20261105
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-04-45@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261104
+DTEND;VALUE=DATE:20261105
+SUMMARY:Sophomore Parent Night
+DESCRIPTION:7 - 8:30 pm · On Zoom · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-06-46@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261106
+DTEND;VALUE=DATE:20261107
+SUMMARY:Senior Panorama Picture
+DESCRIPTION:Tutorial · Stadium Field · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-06-47@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261106
+DTEND;VALUE=DATE:20261107
+SUMMARY:Staff Picture
+DESCRIPTION:8:15 am · Main Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-09-48@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261109
+DTEND;VALUE=DATE:20261110
+SUMMARY:Seniors Order Caps\, Gowns\, Announcements
+DESCRIPTION:All Periods · Science Lecture Hall · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-10-49@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261110
+DTEND;VALUE=DATE:20261111
+SUMMARY:Adjusted Bell Schedule
+DESCRIPTION:Periods 1-7 · Schedule change (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-11-50@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261111
+DTEND;VALUE=DATE:20261112
+SUMMARY:Veteran's Day - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-18-51@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261118
+DTEND;VALUE=DATE:20261119
+SUMMARY:Club Photo Day
+DESCRIPTION:Tutorial · Main Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-18-52@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261118
+DTEND;VALUE=DATE:20261119
+SUMMARY:Open House
+DESCRIPTION:6 pm · Theater\, various locations · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-20-53@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261120
+DTEND;VALUE=DATE:20261121
+SUMMARY:Club Photo Day
+DESCRIPTION:Tutorial · Main Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-11-23-54@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261123
+DTEND;VALUE=DATE:20261128
+SUMMARY:Thanksgiving Break - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-02-55@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261202
+DTEND;VALUE=DATE:20261203
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-02-56@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261202
+DTEND;VALUE=DATE:20261203
+SUMMARY:Junior Parent Night
+DESCRIPTION:7 - 8:30 pm · On Zoom · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-03-57@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261203
+DTEND;VALUE=DATE:20261204
+SUMMARY:Theatre - Fall Production
+DESCRIPTION:6:30 - 10 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-09-58@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261209
+DTEND;VALUE=DATE:20261210
+SUMMARY:ELAC Meeting
+DESCRIPTION:5:30 - 7 pm · Staff Lounge · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-09-59@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261209
+DTEND;VALUE=DATE:20261210
+SUMMARY:Winter Music Concert
+DESCRIPTION:7pm - 9:30 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-11-60@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261211
+DTEND;VALUE=DATE:20261212
+SUMMARY:Ambassador Program End of Year Awards & Celebration
+DESCRIPTION:Lunch · Science Lecture Hall · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-15-61@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261215
+DTEND;VALUE=DATE:20261216
+SUMMARY:Finals Week: Periods 1-7
+DESCRIPTION:Periods 1-7 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-16-62@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261216
+DTEND;VALUE=DATE:20261217
+SUMMARY:Final Exams: Periods 1\, 2\, 7
+DESCRIPTION:Periods 1\, 2\, 7 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-17-63@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261217
+DTEND;VALUE=DATE:20261218
+SUMMARY:Final Exams: Periods 3\, 4
+DESCRIPTION:Periods 3\, 4 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-18-64@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:End of Semester 1
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-18-65@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261219
+SUMMARY:Final Exams: Periods 5\, 6
+DESCRIPTION:Periods 5\, 6 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2026-12-21-66@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20261221
+DTEND;VALUE=DATE:20261222
+SUMMARY:First Day of Winter Break
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-04-67@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270104
+DTEND;VALUE=DATE:20270105
+SUMMARY:Professional Development Day - Student Holiday
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-05-68@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270105
+DTEND;VALUE=DATE:20270106
+SUMMARY:First Day of Semester 2: Periods 1-7
+DESCRIPTION:Periods 1-7 · School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-06-69@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270106
+DTEND;VALUE=DATE:20270107
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-06-70@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270106
+DTEND;VALUE=DATE:20270107
+SUMMARY:Second Day of Semester 2: Periods 1-7
+DESCRIPTION:Periods 1-7 · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-13-71@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270113
+DTEND;VALUE=DATE:20270114
+SUMMARY:Elective Information Night
+DESCRIPTION:6 - 8 pm · Theater\, various locations · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-15-72@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270115
+DTEND;VALUE=DATE:20270116
+SUMMARY:Winter Spirit Rally
+DESCRIPTION:Tutorial · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-18-73@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270118
+DTEND;VALUE=DATE:20270119
+SUMMARY:MLK\, Jr. Holiday - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-20-74@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270120
+DTEND;VALUE=DATE:20270121
+SUMMARY:ASB Council Election Meeting
+DESCRIPTION:Lunch · ASB Office · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-20-75@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270120
+DTEND;VALUE=DATE:20270121
+SUMMARY:Freshman Parent Night
+DESCRIPTION:7 - 8:30 pm · On Zoom · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-01-30-76@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270130
+DTEND;VALUE=DATE:20270131
+SUMMARY:Winter Ball
+DESCRIPTION:7 - 11 pm · Santa Clara Convention Center · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-01-77@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270201
+DTEND;VALUE=DATE:20270202
+SUMMARY:First Official Day of Spring Athletic Season
+DESCRIPTION:Athletics (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-03-78@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270203
+DTEND;VALUE=DATE:20270204
+SUMMARY:Begin ASB Campaigning
+DESCRIPTION:Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-03-79@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270203
+DTEND;VALUE=DATE:20270204
+SUMMARY:Community College Presentation & Fair
+DESCRIPTION:Tutorial & Lunch · Theater & Small Gym · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-03-80@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270203
+DTEND;VALUE=DATE:20270204
+SUMMARY:ELAC Meeting
+DESCRIPTION:5 - 6:30 pm · Staff Lounge · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-10-81@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270210
+DTEND;VALUE=DATE:20270211
+SUMMARY:ASB Council Election
+DESCRIPTION:Tutorial · Main Gym / classrooms · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-10-82@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270210
+DTEND;VALUE=DATE:20270211
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-12-83@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270212
+DTEND;VALUE=DATE:20270213
+SUMMARY:Best Buddies Valentine's Dance
+DESCRIPTION:9:30 - 11:30 am · Small Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-15-84@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270215
+DTEND;VALUE=DATE:20270220
+SUMMARY:February Break - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-02-26-85@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270226
+DTEND;VALUE=DATE:20270227
+SUMMARY:Spring Spirit Rally
+DESCRIPTION:Tutorial · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-01-86@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270301
+DTEND;VALUE=DATE:20270306
+SUMMARY:Fantastics Week
+DESCRIPTION:Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-04-87@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270304
+DTEND;VALUE=DATE:20270305
+SUMMARY:Incoming 9th Grade Summit
+DESCRIPTION:6 - 8 pm · Theater\, Cafeteria\, etc. · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-04-88@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270304
+DTEND;VALUE=DATE:20270305
+SUMMARY:Quad Night
+DESCRIPTION:4 - 10 pm · Quad\, Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-05-89@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270305
+DTEND;VALUE=DATE:20270306
+SUMMARY:Fantastics Night
+DESCRIPTION:6 - 9 pm · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-09-90@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270309
+DTEND;VALUE=DATE:20270310
+SUMMARY:SAT
+DESCRIPTION:8 am - 12 pm · Small Gym · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-10-91@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270310
+DTEND;VALUE=DATE:20270311
+SUMMARY:8th Grade Parent Night
+DESCRIPTION:7 - 8:30 pm · On Zoom · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-10-92@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270310
+DTEND;VALUE=DATE:20270311
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-17-93@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270317
+DTEND;VALUE=DATE:20270318
+SUMMARY:End of Quarter 3
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-17-94@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270317
+DTEND;VALUE=DATE:20270318
+SUMMARY:Music Concert - March Orchestra Festival
+DESCRIPTION:6 - 9 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-18-95@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270318
+DTEND;VALUE=DATE:20270319
+SUMMARY:Professional Development Day - Student Holiday
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-19-96@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270319
+DTEND;VALUE=DATE:20270320
+SUMMARY:Professional Development Day - Student Holiday
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-22-97@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270322
+DTEND;VALUE=DATE:20270323
+SUMMARY:Freshman Class Council Applications Due
+DESCRIPTION:4 pm · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-23-98@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270323
+DTEND;VALUE=DATE:20270327
+SUMMARY:CAASPP Testing Week 1: Tuesday - Friday (ELA)
+DESCRIPTION:SLH · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-24-99@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270324
+DTEND;VALUE=DATE:20270325
+SUMMARY:Class Council Election Meeting
+DESCRIPTION:Lunch · ASB Office · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-24-100@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270324
+DTEND;VALUE=DATE:20270325
+SUMMARY:Music Concert - March Band Festival
+DESCRIPTION:6 - 8:30 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-29-101@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270329
+DTEND;VALUE=DATE:20270330
+SUMMARY:Freshman Class Council Interviews
+DESCRIPTION:3 - 5 pm · A-130 · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-30-102@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270403
+SUMMARY:CAASPP Testing Week 2: Tuesday - Friday (Math)
+DESCRIPTION:SLH · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-03-30-103@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270330
+DTEND;VALUE=DATE:20270331
+SUMMARY:Freshman Class Council Interviews
+DESCRIPTION:3 - 5 pm · A-130 · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-01-104@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270401
+DTEND;VALUE=DATE:20270402
+SUMMARY:BOTS Quad Night
+DESCRIPTION:3 - 9 pm · Quad\, Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-02-105@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270402
+DTEND;VALUE=DATE:20270403
+SUMMARY:Battle of the Schools (BOTS)
+DESCRIPTION:6 - 8 pm · TBD · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-02-106@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270402
+DTEND;VALUE=DATE:20270403
+SUMMARY:CMEA Concert
+DESCRIPTION:5 - 7 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-03-107@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270403
+DTEND;VALUE=DATE:20270404
+SUMMARY:CMEA Concert
+DESCRIPTION:5 - 7 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-06-108@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270406
+DTEND;VALUE=DATE:20270410
+SUMMARY:CAASPP Testing Week 3: Tuesday - Friday (CAST)
+DESCRIPTION:SLH · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-07-109@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270407
+DTEND;VALUE=DATE:20270408
+SUMMARY:Class Council Elections
+DESCRIPTION:Tutorial · Classrooms · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-08-110@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270408
+DTEND;VALUE=DATE:20270409
+SUMMARY:Spring Blood Drive
+DESCRIPTION:8 am - 4 pm · Small Gym · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-09-111@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270409
+DTEND;VALUE=DATE:20270410
+SUMMARY:Senior Meeting
+DESCRIPTION:Tutorial · Theater · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-12-112@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270412
+DTEND;VALUE=DATE:20270417
+SUMMARY:Spring Break - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-21-113@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270421
+DTEND;VALUE=DATE:20270422
+SUMMARY:Attendance Matters: A Family Support Session
+DESCRIPTION:5:30 - 7 pm · Science Lecture Hall · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-26-114@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270426
+DTEND;VALUE=DATE:20270427
+SUMMARY:Multicultural Week Begins
+DESCRIPTION:Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-28-115@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270428
+DTEND;VALUE=DATE:20270429
+SUMMARY:Multicultural Lunch Market
+DESCRIPTION:Lunch · Quad · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-28-116@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270428
+DTEND;VALUE=DATE:20270429
+SUMMARY:Theatre - Spring Production (Student Performance)
+DESCRIPTION:8 am - 1 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-29-117@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270429
+DTEND;VALUE=DATE:20270430
+SUMMARY:Multicultural Night Rally
+DESCRIPTION:7 - 8 pm · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-30-118@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270430
+DTEND;VALUE=DATE:20270501
+SUMMARY:Multicultural School Day Rally
+DESCRIPTION:Tutorial · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-04-30-119@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270430
+DTEND;VALUE=DATE:20270501
+SUMMARY:Theatre - Spring Production
+DESCRIPTION:7 - 10 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-01-120@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270501
+DTEND;VALUE=DATE:20270502
+SUMMARY:Theatre - Spring Production
+DESCRIPTION:7 - 10 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-03-121@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270503
+DTEND;VALUE=DATE:20270508
+SUMMARY:AP Testing
+DESCRIPTION:Various · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-08-122@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270508
+DTEND;VALUE=DATE:20270509
+SUMMARY:Dance Team Showcase
+DESCRIPTION:7 - 9 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-10-123@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270510
+DTEND;VALUE=DATE:20270515
+SUMMARY:AP Testing
+DESCRIPTION:Various · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-12-124@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270512
+DTEND;VALUE=DATE:20270513
+SUMMARY:Art Expo
+DESCRIPTION:3 - 7 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-12-125@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270512
+DTEND;VALUE=DATE:20270513
+SUMMARY:ELAC Meeting
+DESCRIPTION:5:30 - 7 pm · Staff Lounge · Families & info nights (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-14-126@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270514
+DTEND;VALUE=DATE:20270515
+SUMMARY:Film Festival
+DESCRIPTION:6 - 9 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-17-127@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270517
+DTEND;VALUE=DATE:20270522
+SUMMARY:AP Late Testing
+DESCRIPTION:Various · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-17-128@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270517
+DTEND;VALUE=DATE:20270518
+SUMMARY:Fashion Show Dress Rehearsal
+DESCRIPTION:4 - 9 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-19-129@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270519
+DTEND;VALUE=DATE:20270520
+SUMMARY:Pops Music Concert
+DESCRIPTION:7 - 9:30 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-19-130@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270519
+DTEND;VALUE=DATE:20270520
+SUMMARY:Yearbook Distribution
+DESCRIPTION:Lunch · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-20-131@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270520
+DTEND;VALUE=DATE:20270521
+SUMMARY:Yearbook Distribution
+DESCRIPTION:Lunch · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-21-132@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270521
+DTEND;VALUE=DATE:20270522
+SUMMARY:Ambassador Program End of Year Awards & Celebration
+DESCRIPTION:Lunch · Science Lecture Hall · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-21-133@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270521
+DTEND;VALUE=DATE:20270522
+SUMMARY:Fashion Show
+DESCRIPTION:7 - 9 pm · Theater · Arts & shows (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-21-134@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270521
+DTEND;VALUE=DATE:20270522
+SUMMARY:Yearbook Distribution
+DESCRIPTION:Lunch · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-22-135@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270522
+DTEND;VALUE=DATE:20270523
+SUMMARY:Prom
+DESCRIPTION:7 - 11 pm · Glass House · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-26-136@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270526
+DTEND;VALUE=DATE:20270527
+SUMMARY:Awards Night
+DESCRIPTION:4:30 - 8 pm · Quad · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-28-137@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270528
+DTEND;VALUE=DATE:20270529
+SUMMARY:Chicano Commencement
+DESCRIPTION:5:30 - 9 pm · Theater · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-28-138@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270528
+DTEND;VALUE=DATE:20270529
+SUMMARY:Goodbye Rally
+DESCRIPTION:Special Schedule · Main Gym · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-05-31-139@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270531
+DTEND;VALUE=DATE:20270601
+SUMMARY:Memorial Day - No School
+DESCRIPTION:No school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-01-140@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270601
+DTEND;VALUE=DATE:20270602
+SUMMARY:Finals Week: Periods 1-7
+DESCRIPTION:Periods 1-7 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-01-141@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270601
+DTEND;VALUE=DATE:20270602
+SUMMARY:Senior Breakfast & Check-Out / Gown Pickup
+DESCRIPTION:9 am - 1 pm · Cafeteria / ASB Office · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-01-142@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270601
+DTEND;VALUE=DATE:20270602
+SUMMARY:Seniors' Last Day
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-02-143@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270602
+DTEND;VALUE=DATE:20270603
+SUMMARY:Final Exams: Periods 1\, 2\, 7
+DESCRIPTION:Periods 1\, 2\, 7 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-02-144@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270602
+DTEND;VALUE=DATE:20270603
+SUMMARY:Graduation Practice
+DESCRIPTION:8:30 am · Main Gym / Stadium Field · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-03-145@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270603
+DTEND;VALUE=DATE:20270604
+SUMMARY:Final Exams: Periods 3\, 4
+DESCRIPTION:Periods 3\, 4 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-03-146@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270603
+DTEND;VALUE=DATE:20270604
+SUMMARY:Graduation Practice
+DESCRIPTION:8:30 am · Main Gym / Stadium Field · Around school (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-04-147@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270604
+DTEND;VALUE=DATE:20270605
+SUMMARY:End of Semester 2
+DESCRIPTION:School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-04-148@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270604
+DTEND;VALUE=DATE:20270605
+SUMMARY:Final Exams: Periods 5\, 6
+DESCRIPTION:Periods 5\, 6 · Tests & finals (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-04-149@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270604
+DTEND;VALUE=DATE:20270605
+SUMMARY:Graduation
+DESCRIPTION:6:15 - 7:15 pm · Stadium Field · School year (from Wilcox’s official activities calendar)
+END:VEVENT
+BEGIN:VEVENT
+UID:wilcox-2027-06-05-150@wilcoxwiki.org
+DTSTAMP:20260101T000000Z
+DTSTART;VALUE=DATE:20270605
+DTEND;VALUE=DATE:20270606
+SUMMARY:Senior Send-Off
+DESCRIPTION:7pm - 12am · Quad · Spirit & dances (from Wilcox’s official activities calendar)
+END:VEVENT
+END:VCALENDAR

@@ -39,7 +39,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides", "numbers",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
-                  "menu", "clubs", "sports", "feedback", "credits", "bell"]
+                  "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -127,6 +127,7 @@ ICONS = {
     "cube": _I('<path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+    "calendar": _I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/>'),
     "book": _I('<path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM4 19a2 2 0 0 0 2 2h14"/><path d="M9 7h7"/>'),
     "notes": _I('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>'),
     "pin": _I('<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>'),
@@ -134,7 +135,8 @@ ICONS = {
 }
 # The "More" panel: grouped columns, each link with an icon and a short line
 MORE_GROUPS = [
-    ("School day", [("campus/", "3D campus", "cube", "Walk the whole school, drawn like an anime"),
+    ("School day", [("calendar/", "Calendar", "calendar", "Breaks, finals and events, all year"),
+                    ("campus/", "3D campus", "cube", "Walk the whole school, drawn like an anime"),
                     ("numbers/", "By the numbers", "chart", "Classes, clubs and the semester in charts"),
                     ("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
                     ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
@@ -857,6 +859,7 @@ def build_data(depts, courses, teachers):
 
 # Pages the search box should find, with the words people use for them.
 SEARCH_PAGES = [
+    ("Calendar", "calendar/", "Important dates, 2026–27", "calendar dates events breaks holidays no school finals exams psat sat ap caaspp homecoming prom graduation rally dance concert winter spring break first day last day"),
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
     ("3D campus", "campus/", "Walk the school in 3D", "3d campus walk tour virtual quad cedar building gym stadium three.js anime"),
     ("By the numbers", "numbers/", "Wilcox in charts", "numbers charts graphs stats a-g ucsc requirements clubs meeting day grade classes semester calendar"),
@@ -924,7 +927,7 @@ def build_seo(courses, teachers, depts):
             (ROOT / f).unlink(missing_ok=True)
         return
     base = SITE_URL.rstrip("/")
-    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "map/", "campus/"]
+    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "map/", "campus/", "calendar/"]
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")
@@ -1038,6 +1041,58 @@ def build_campus():
 """)
 
 
+# ─────────────────────────── calendar ───────────────────────────
+
+def ics_text(s):
+    return s.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+
+def build_calendar():
+    """The Calendar page: data/calendar.json (from the school's official
+    activities calendar, via tools/school_calendar.py), shown as a month view by
+    assets/js/calendar.js, with the whole list in the HTML (works without JS)
+    and a .ics file for adding it all to a phone or Google Calendar."""
+    from datetime import date, timedelta
+    cal = json.loads((DATA / "calendar.json").read_text())
+    labels, events = cal["labels"], cal["events"]
+    months, cur = [], None
+    for ev in events:
+        d0 = date.fromisoformat(ev["start"])
+        key = d0.strftime("%B %Y")
+        if key != cur:
+            months.append((key, []))
+            cur = key
+        d1 = date.fromisoformat(ev["end"])
+        when = d0.strftime("%a %b ") + str(d0.day) + (f" – {d1.strftime('%a %b ')}{d1.day}" if d1 != d0 else "")
+        extra = " · ".join(x for x in (ev["time"], ev["where"]) if x)
+        months[-1][1].append(f'<li class="cal-row c-{e(ev["cat"])}"><span class="cal-when">{e(when)}</span>'
+                             f'<span class="cal-what">{e(ev["title"])}{f"<small>{e(extra)}</small>" if extra else ""}</span></li>')
+    listing = "".join(f'<section class="cal-month-list"><h2>{e(m)}</h2><ul class="cal-rows">{"".join(rows)}</ul></section>'
+                      for m, rows in months)
+    ics_name = "wilcox-" + cal["year"].replace("–", "-") + ".ics"
+    page("calendar/", "Calendar", f"""
+<h1>Calendar</h1>
+<p class="lede">Important dates for the {e(cal["year"])} school year: breaks and no-school days, finals and testing, rallies, dances, shows and family nights.</p>
+<p class="cal-src meta">From Wilcox’s <a href="{e(cal["source"])}" target="_blank" rel="noopener">official activities calendar</a>, linked from the <a href="{e(cal["sourcePage"])}" target="_blank" rel="noopener">bell schedule page</a>. Dates can change: the school’s calendar is the final word.
+  <a class="btn ghost small" href="{ics_name}" download>Add to my calendar (.ics)</a></p>
+<div id="cal-app" class="cal-app"></div>
+<div id="cal-list">{listing}</div>""", active="calendar/", script="calendar.js", data={"page": "calendar"},
+         desc=f"Wilcox High School calendar {cal['year']}: no-school days, breaks, finals, PSAT/SAT/AP testing, rallies, dances, concerts and family nights.")
+    # the .ics: all-day events (the sheet's times are free text), times and places in the notes
+    stamp = "20260101T000000Z"
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Wilkipedia//Wilcox calendar//EN", "CALSCALE:GREGORIAN",
+             f"X-WR-CALNAME:Wilcox {cal['year']} (Wilkipedia)"]
+    for i, ev in enumerate(events):
+        d0 = date.fromisoformat(ev["start"]); d1 = date.fromisoformat(ev["end"]) + timedelta(days=1)
+        note = " · ".join(x for x in (ev["time"], ev["where"], labels.get(ev["cat"], "")) if x)
+        lines += ["BEGIN:VEVENT", f"UID:wilcox-{ev['start']}-{i}@wilcoxwiki.org", f"DTSTAMP:{stamp}",
+                  f"DTSTART;VALUE=DATE:{d0.strftime('%Y%m%d')}", f"DTEND;VALUE=DATE:{d1.strftime('%Y%m%d')}",
+                  f"SUMMARY:{ics_text(ev['title'])}", f"DESCRIPTION:{ics_text(note + ' (from Wilcox’s official activities calendar)')}",
+                  "END:VEVENT"]
+    lines.append("END:VCALENDAR")
+    (ROOT / "calendar" / ics_name).write_text("\r\n".join(lines) + "\r\n")
+
+
 def main():
     for d in GENERATED_DIRS:
         shutil.rmtree(ROOT / d, ignore_errors=True)
@@ -1051,6 +1106,7 @@ def main():
     build_static()
     build_seo(courses, teachers, depts)
     build_campus()
+    build_calendar()
     linked = sum(1 for c in courses.values() if c["teachers"])
     print(f"Built {len(courses)} course pages ({linked} with teachers), {len(teachers)} teacher pages, {len(depts)} subjects.")
 

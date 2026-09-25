@@ -105,6 +105,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   Links: guide→class hub, guide↔guide by shared title/note keywords (STOP list
   filters study filler; "unit/ch N" only links inside one class), class↔class
   by pathways.json prerequisites. ECharts links by `name`, so node name = id.
+- **Calendar** (`calendar/`, `assets/js/calendar.js`, `build_calendar` in
+  build.py): the school year from Wilcox's OFFICIAL activities calendar (a
+  Google Sheet the school links from its bell schedule page).
+  `tools/school_calendar.py` (named so it doesn't shadow stdlib `calendar`)
+  exports it to `data/calendar.json`: multi-day rows expanded, a category per
+  event from its own wording, Zoom links dropped (reposting them invites
+  zoom-bombing). Re-run it when the school updates the sheet. The page is a
+  month view + "Coming up" + filters, the whole list in the HTML for no-JS,
+  and a generated `.ics` to add everything to a phone calendar. The spring
+  no-school days and June finals in bell.json came from the same sheet.
 - **3D campus** (`campus/`): a walkable, toon-shaded (三渲二) three.js model of
   the whole school. Its own app, NOT generated: `campus/js/*.js`,
   `campus/campus.css`, three.js r169 vendored at `campus/vendor/`. build.py only
