@@ -75,7 +75,11 @@ function plane(x0, z0, x1, z1, y, tex, t0) {
   g.setAttribute('position', new THREE.Float32BufferAttribute([x0, y, z1, x1, y, z1, x1, y, z0, x0, y, z1, x1, y, z0, x0, y, z0], 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute([u(x0), v(z1), u(x1), v(z1), u(x1), v(z0), u(x0), v(z1), u(x1), v(z0), u(x0), v(z0)], 2));
-  const m = new THREE.Mesh(g, gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON })));
+  const mat = new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON });
+  // a detail layer lies 2 cm over the ground: also pull it forward in depth, or
+  // at a distance / a glancing angle the two can't be told apart and flicker
+  if (y > 0) { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -4; }
+  const m = new THREE.Mesh(g, gbuffer(mat));
   m.receiveShadow = true;
   m.matrixAutoUpdate = false;
   return m;

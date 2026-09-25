@@ -346,6 +346,13 @@ async function boot() {
       const nm = controls.mode === 'walk' ? where(p.x, p.z) : 'Wilcox from above';
       if (nm !== placeName) { placeName = nm; hud.place(nm); }
     }
+    // Depth precision: push the near plane out as the camera climbs. With it
+    // stuck at 0.15 m, the aerial view (~640 m away) can only tell surfaces
+    // ~16 cm apart, so the field's detail layer (2 cm up) and window panes
+    // flicker against what's under them. Nothing stands taller than ~35 m, so
+    // everything is at least (height - 35) away.
+    const nearWant = Math.min(40, Math.max(0.15, (camera.position.y - 35) * 0.5));
+    if (Math.abs(camera.near - nearWant) > 0.05) { camera.near = nearWant; camera.updateProjectionMatrix(); }
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * 2.4) : 420;
     post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0 });
   }

@@ -85,8 +85,9 @@ function louverAt(W, e, t, y, w, h) {
   });
 }
 
-function parapet(W, poly, h, col, t = 0.32, rise = 0.55) {
+function parapet(W, poly, h, col, t = 0.32, rise = 0.55, skip = () => false) {
   for (const e of edges(poly)) {
+    if (skip(e)) continue;
     W.beam('stucco', e.ax - e.nx * t / 2, e.az - e.nz * t / 2, e.bx - e.nx * t / 2, e.bz - e.nz * t / 2, h - rise, h, t, col);
     // coping: a lighter cap
     W.beam('flat', e.ax - e.nx * t / 2, e.az - e.nz * t / 2, e.bx - e.nx * t / 2, e.bz - e.nz * t / 2, h, h + 0.08, t + 0.06, C.fin);
@@ -232,7 +233,9 @@ export function buildBuildings(W) {
     const roofY = b.h - 0.5;
     if (b.style === 'theatre-lobby') { lobbyGlass(W, b); continue; }
     W.prism('stucco', b.poly, 0, roofY, wall, { top: true, topMat: 'roof', topCol: C.roof });
-    parapet(W, b.poly, b.h, wall);
+    // no parapet on a wall shared with a neighbour at least as tall: it would be
+    // hidden, and its coping would overlap the neighbour's and flicker
+    parapet(W, b.poly, b.h, wall, undefined, undefined, (e) => BUILDINGS.some((o) => o !== b && o.h >= b.h - 0.01 && sharesEdge(e, o)));
     if (b.gable) gable(W, b, roofY);
     else if (b.barrel) barrels(W, b, roofY);
     else if (b.style !== 'r') rooftop(W, b, R, roofY);
@@ -241,6 +244,17 @@ export function buildBuildings(W) {
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
   }
+}
+
+// Does building o have a wall back to back with edge e (same line, facing the other way, overlapping)?
+function sharesEdge(e, o) {
+  const mx = (e.ax + e.bx) / 2, mz = (e.az + e.bz) / 2;
+  return edges(o.poly).some((f) => {
+    if (e.nx * f.nx + e.nz * f.nz > -0.99) return false;
+    const t = (mx - f.ax) * f.dx + (mz - f.az) * f.dz;
+    if (t < 0 || t > f.len) return false;
+    return Math.abs((mx - f.ax) * f.nx + (mz - f.az) * f.nz) < 0.05;
+  });
 }
 
 // Flat roof overhang on the long sides, on square posts.

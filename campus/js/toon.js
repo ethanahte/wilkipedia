@@ -255,6 +255,9 @@ export function makeMaterials(T) {
     soft: gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, vertexColors: true })),
   };
   M.fence.userData.noCast = true;
+  // window panes sit a few cm proud of their walls: nudge them forward in depth
+  // too, so far-off windows never flicker into the wall behind
+  M.glass.polygonOffset = true; M.glass.polygonOffsetFactor = -1; M.glass.polygonOffsetUnits = -2;
   // leaf cards cast dappled shadows only if the shadow pass also cuts out the clear parts
   M.foliage.userData.depthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: T.leaves, alphaTest: 0.5, side: THREE.DoubleSide });
   return M;
