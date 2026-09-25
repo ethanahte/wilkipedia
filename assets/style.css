@@ -1345,3 +1345,18 @@ html[data-motion="reduce"] .nb-card .draw { stroke-dasharray: none; stroke-dasho
 .cal-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cal-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 @media (max-width: 520px) { .cal-form-row { grid-template-columns: 1fr; } }
+/* Terms of Service: page contents and the agree screen for new members */
+.terms-toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 8px; }
+.terms-toc a { padding: 5px 12px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink); text-decoration: none; font-size: .88rem; }
+.terms-toc a:hover { border-color: var(--ink); }
+main h2[id] { scroll-margin-top: 80px; }
+html.gated { overflow: hidden; }
+.terms-gate { z-index: 70; }
+.terms-gate .modal-card { width: min(560px, 100%); }
+.terms-gate h2 { margin: 0 0 6px; }
+.tg-list { margin: 10px 0 16px; padding-left: 20px; line-height: 1.5; }
+.tg-list li + li { margin-top: 6px; }
+.tg-ok { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); cursor: pointer; line-height: 1.45; }
+.tg-ok input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--on-bg); }
+.tg-acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+.terms-gate .meta { margin: 12px 0 0; }

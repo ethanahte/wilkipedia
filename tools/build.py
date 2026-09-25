@@ -38,7 +38,7 @@ CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides", "numbers",
-                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
+                  "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "terms", "map",
                   "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
@@ -270,7 +270,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}settings/#cookies">Cookie settings</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits &amp; thanks</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}terms/">Terms</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}settings/#cookies">Cookie settings</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits &amp; thanks</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -640,6 +640,59 @@ def build_static():
 <p><b>Not official.</b> Wilkipedia is an independent student project, not a Wilcox High School or Santa Clara Unified site. Always confirm policies and deadlines with your teacher or counselor. The official site is <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">wilcox.santaclarausd.org ↗</a>.</p>
 <p><b>Something wrong?</b> Every section has a “Report outdated” button. To reach the team, comment on any class page or tell a reviewer.</p>""", data={"page": "static"})
 
+    page("terms/", "Terms of Service", """
+<h1>Terms of Service</h1>
+<p class="lede">The deal for using Wilkipedia, in plain words. You agree to it when you first sign in. Reading the site needs no account and no agreement.</p>
+<nav class="terms-toc" aria-label="On this page"><a href="#who">Who we are</a><a href="#account">Your account</a><a href="#posting">What you post</a><a href="#yours">Who owns it</a><a href="#moderation">Reviewers</a><a href="#accuracy">Accuracy</a><a href="#changes">Changes</a></nav>
+
+<h2 id="who">1. Who we are</h2>
+<p>Wilkipedia is an independent student project started by Ethan Liu and Jonathan Lee. It is <b>not</b> run by Wilcox High School or Santa Clara Unified School District, and nothing here speaks for them.</p>
+
+<h2 id="account">2. Your account</h2>
+<ul>
+  <li>You need to be at least 13 to make an account.</li>
+  <li>You sign in with Google. One account per person. Don't share it or use anyone else's.</li>
+  <li>Use your real first name or a name people know you by. Don't pretend to be someone else.</li>
+  <li>You're responsible for what you post from your account.</li>
+  <li>You can ask an admin to delete your account at any time. The <a href="../privacy/">Privacy page</a> says what happens to your data.</li>
+</ul>
+
+<h2 id="posting">3. What you post</h2>
+<p>Everything you post follows the <a href="../rules/">Community rules</a>. In short:</p>
+<ul>
+  <li><b>No real tests, quizzes or answer keys</b>, and no helping anyone cheat. Describing the test style is fine.</li>
+  <li><b>About the class, not the person.</b> Nothing insulting, personal or private about any teacher or student. No teacher ratings.</li>
+  <li><b>Only what's true.</b> Facts need a source, and opinions are labelled as student experience. If you don't know, leave it blank.</li>
+  <li><b>Only what's yours to share.</b> Don't upload textbooks, teacher packets or anything else you didn't make. Link to it instead.</li>
+  <li><b>No personal information</b> about anyone else: phone numbers, addresses, photos, schedules or accounts.</li>
+  <li><b>No spam, ads or harmful links.</b> Don't try to break, overload or get around how the site works.</li>
+</ul>
+<p>Your school's own rules still apply to you. Following these Terms doesn't replace them.</p>
+
+<h2 id="yours">4. Who owns what you post</h2>
+<p>What you write is still yours. By posting it, you let Wilkipedia show it on the site, and let reviewers fix mistakes, formatting or wording, translate it, and combine it with what other students wrote. You also agree it can stay on the site after you leave. If your account is deleted, your pages stay up, credited to “Former student”, unless you ask us to remove them.</p>
+<p>You promise you have the right to post it: you wrote it, or it's a fact anyone can share.</p>
+
+<h2 id="moderation">5. Reviewers and moderation</h2>
+<ul>
+  <li>Reviewers check submissions before they're published, and can edit, hold, unpublish or delete anything that breaks these Terms or the Community rules.</li>
+  <li>Breaking the rules, especially more than once, can mean losing the ability to post or losing your account.</li>
+  <li>Leaderboard points and roles like Trusted or Reviewer are a thank-you, not a prize. They have no money value, and admins can correct or remove them.</li>
+  <li>See something wrong? Use “Report outdated” or report a comment, or tell us through <a href="../feedback/">Feedback</a>.</li>
+</ul>
+
+<h2 id="accuracy">6. Accuracy and availability</h2>
+<p>Wilkipedia is written by students and may be wrong or out of date. Always confirm grading, deadlines and policies with your teacher or counselor. Don't rely on Wilkipedia alone for decisions like which classes to take. The official site is <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">wilcox.santaclarausd.org ↗</a>.</p>
+<p>We run Wilkipedia for free and as well as we can, but we can't promise it will always be online or that nothing will ever be lost. Keep your own copy of anything important.</p>
+
+<h2 id="privacy">7. Privacy and cookies</h2>
+<p>How we handle your name and email is on the <a href="../privacy/">Privacy page</a>. What your browser saves, and how to turn it off, is in <a href="../settings/#cookies">Cookie settings</a>. There are no ads and no tracking.</p>
+
+<h2 id="changes">8. Changes to these Terms</h2>
+<p>If we change these Terms in a way that matters, you'll be asked to agree again the next time you visit while signed in. Until you do, you can still read everything, but you can't post.</p>
+<p class="meta">Version 1 · September 2026</p>""", data={"page": "static"},
+         desc="The Terms of Service for Wilkipedia, the student-built guide to Wilcox High School, in plain words.")
+
     page("privacy/", "Privacy", """
 <h1>Privacy</h1>
 <p class="lede">Short version: reading needs no account. If you sign in, we store only what's needed to credit your work, and we never sell or share it.</p>
@@ -654,7 +707,7 @@ def build_static():
 </ul>
 <p>All of it stays in your browser and is never sent to us. You can switch the last two off, see exactly what's saved, or delete it all in <a href="../settings/#cookies">Cookie settings</a>.</p>
 <h2>Signing in</h2>
-<p>Sign-in uses Google. When you sign in, Google tells us your name and email address. We store them in our database (hosted by Supabase) so that your claims, submissions and comments belong to you.</p>
+<p>Signing in means agreeing to the <a href="../terms/">Terms of Service</a>. Sign-in uses Google. When you sign in, Google tells us your name and email address. We store them in our database (hosted by Supabase) so that your claims, submissions and comments belong to you.</p>
 <ul>
   <li><b>Public:</b> your display name, which is your first name unless you change it on your account page. It appears next to your approved work, your comments and your leaderboard points.</li>
   <li><b>Never public:</b> your email address. Only the site's admins can see it, and only to run the site.</li>
@@ -900,6 +953,7 @@ SEARCH_PAGES = [
     ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
     ("Privacy", "privacy/", "What we store", "privacy data delete account cookies tracking"),
+    ("Terms of Service", "terms/", "The deal for using Wilkipedia", "terms of service tos agreement conditions legal sign up rules"),
     ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
     ("Credits", "credits/", "Everyone who helped build Wilkipedia", "credits thanks thank you contributors helpers founders team"),
     ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
@@ -949,7 +1003,7 @@ def build_seo(courses, teachers, depts):
             (ROOT / f).unlink(missing_ok=True)
         return
     base = SITE_URL.rstrip("/")
-    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "map/", "campus/", "calendar/"]
+    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "terms/", "privacy/", "map/", "campus/", "calendar/"]
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")

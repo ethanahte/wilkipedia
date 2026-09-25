@@ -1,7 +1,7 @@
 // Shared DOM helpers: escaping, the header's sign-in slot, toasts, and the
 // form renderer used by the submit page and the course page's quick-add.
 
-import { store, MODE, REVIEWER_ROLES } from './store.js';
+import { store, MODE, REVIEWER_ROLES, TERMS_VERSION } from './store.js';
 import { KINDS, optionsOf } from './forms.js';
 
 export const root = document.body.dataset.root || './';
@@ -229,6 +229,48 @@ export function applyClassTheme(user, pref = classPref()) {
 export const courseUrl = (slug) => `${root}courses/${slug}/`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 
+// ── Terms of Service ──
+// A signed-in member who hasn't agreed to the current Terms (a new sign-up, or
+// the Terms changed) gets this before anything else. It can't be closed: agree,
+// or sign out. The database enforces the same (require_terms in migration 012),
+// so this is the friendly half. The Terms, rules and Privacy pages stay readable.
+function termsGate(s, u) {
+  const need = !!u && u.terms != null && u.terms < TERMS_VERSION;
+  const open = $('#terms-gate');
+  if (!need || /\/(terms|rules|privacy)\/$/.test(location.pathname)) { open?.remove(); document.documentElement.classList.remove('gated'); return; }
+  if (open) return;
+  const again = u.terms > 0;
+  const wrap = document.createElement('div');
+  wrap.className = 'modal terms-gate';
+  wrap.id = 'terms-gate';
+  wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tg-title">
+      <h2 id="tg-title">${again ? 'We updated the Terms' : `Welcome to Wilkipedia, ${esc(u.name)}`}</h2>
+      <p>${again ? 'Please read and agree to the new Terms of Service to keep posting.' : 'One step before you start. The short version:'}</p>
+      <ul class="tg-list">
+        <li><b>About the class, not the person.</b> Nothing mean or personal about teachers or students, and no teacher ratings.</li>
+        <li><b>No real tests, quizzes or answer keys.</b> Don't use Wilkipedia to cheat.</li>
+        <li><b>Only post what's true and yours to share.</b> Reviewers check everything before it's published.</li>
+        <li><b>Your email stays private.</b> Your first name shows next to your work, which can stay on the site after you leave.</li>
+      </ul>
+      <label class="tg-ok"><input type="checkbox" id="tg-check"> <span>I'm at least 13, and I agree to the <a href="${root}terms/" target="_blank" rel="noopener">Terms of Service</a> and the <a href="${root}rules/" target="_blank" rel="noopener">Community rules</a>.</span></label>
+      <div class="tg-acts"><button type="button" class="btn ghost" id="tg-out">Sign out</button>
+        <button class="btn" id="tg-agree" disabled>Agree and continue</button></div>
+      <p class="meta">Also see how we handle your data: <a href="${root}privacy/" target="_blank" rel="noopener">Privacy</a>.</p>
+    </form>`;
+  const check = $('#tg-check', wrap), agree = $('#tg-agree', wrap);
+  check.onchange = () => { agree.disabled = !check.checked; };
+  $('#tg-out', wrap).onclick = () => guard(() => s.signOut());
+  $('form', wrap).onsubmit = async (e) => {
+    e.preventDefault();
+    if (!check.checked) return;
+    agree.disabled = true;
+    if (!(await guard(() => s.acceptTerms(), 'Thanks! You’re all set.'))) agree.disabled = false;
+  };
+  document.body.append(wrap);
+  document.documentElement.classList.add('gated');
+  check.focus();
+}
+
 // ── header ──
 export async function initHeader() {
   const slot = $('#auth');
@@ -313,6 +355,8 @@ export async function initHeader() {
   };
   paint(s.user());
   s.onAuth(paint);
+  termsGate(s, s.user());
+  s.onAuth((u) => termsGate(s, u));
   return s;
 }
 

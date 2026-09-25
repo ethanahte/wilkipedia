@@ -36,10 +36,16 @@ export const postsInstantly = (u) => REVIEWER_ROLES.includes(u.role) || (u.role 
 const FORMER = 'Former student';
 
 // The profile columns a user may edit (see the column grant in schema.sql).
+// The Terms of Service version everyone must agree to before posting (terms/).
+// Bump together with terms_current() in supabase (migration 012) when the Terms
+// change in a way that matters: everyone is asked again.
+export const TERMS_VERSION = 1;
 export const PROFILE_FIELDS = ['display_name', 'avatar', 'avatar_color', 'grad_year', 'show_on_leaderboard'];
 const toUser = (p) => ({ id: p.id, name: p.display_name, role: p.role, school: !!p.school_verified,
                          avatar: p.avatar ?? null, color: p.avatar_color || 'green',
-                         grad_year: p.grad_year ?? null, show_on_leaderboard: p.show_on_leaderboard !== false });
+                         grad_year: p.grad_year ?? null, show_on_leaderboard: p.show_on_leaderboard !== false,
+                         // null: the database has no Terms columns yet (migration 012 not run), so nobody is asked
+                         terms: 'terms_version' in p ? (p.terms_version ?? 0) : ('terms' in p ? p.terms : null) });
 
 let pending = null;
 export function store() {
@@ -95,6 +101,11 @@ async function live() {
       ok(await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } }));
     },
     async signOut() { await sb.auth.signOut(); },
+    async acceptTerms() {
+      ok(await sb.rpc('accept_terms', { v: TERMS_VERSION }));
+      me = { ...me, terms: TERMS_VERSION };
+      listeners.forEach((f) => f(me));
+    },
     async updateProfile(fields) {
       const row = Object.fromEntries(Object.entries(fields).filter(([k]) => PROFILE_FIELDS.includes(k)));
       const data = ok(await sb.from('profiles').update(row).eq('id', me.id).select('*').single());
@@ -295,11 +306,12 @@ async function demo() {
       if (!n) return;
       const uid = 'demo-' + n.trim().toLowerCase().replace(/\W+/g, '-');
       db.users[uid] ??= { id: uid, name: n.trim().slice(0, 40), role: 'admin', school: false,
-                          avatar: null, color: 'green', grad_year: null, show_on_leaderboard: true };
+                          avatar: null, color: 'green', grad_year: null, show_on_leaderboard: true, terms: 0 };
       db.me = uid; save();
       listeners.forEach((f) => f(me()));
     },
     async signOut() { db.me = null; save(); listeners.forEach((f) => f(null)); },
+    async acceptTerms() { need().terms = TERMS_VERSION; save(); listeners.forEach((f) => f(me())); },
     async updateProfile(fields) {
       const u = need();
       const map = { display_name: 'name', avatar: 'avatar', avatar_color: 'color',

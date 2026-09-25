@@ -80,6 +80,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   THEME_BOOT. Use `lessMotion()` for anything animated. Adding a pref: default
   in PREF_DEFAULTS, the name in THEME_BOOT's list, CSS, a row on the page, and
   its key in the page's reset list.
+- **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
+  with the Community rules and the Privacy page. A signed-in member whose
+  `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen
+  that can't be dismissed (`termsGate` in ui.js): tick the box and agree, or sign
+  out. It doesn't appear on terms/, rules/ or privacy/. Agreeing calls the
+  `accept_terms` RPC, which stamps the time on the server. The `require_terms`
+  trigger (migration 012) blocks inserts into submissions, claims, comments,
+  comment_likes and reports until the member agrees. Feedback stays open.
+  `user.terms` is null when the database has no Terms columns, and then nobody is
+  asked. **Changing the Terms in a way that matters:** bump `terms_current()` in
+  SQL, `TERMS_VERSION` in store.js, and the "Version N" line on the page, all
+  together. Everyone is then asked again.
 - **Cookie settings** (Settings → Cookies & storage, `#cookies`; footer link).
   There are no ads, analytics or tracking cookies, and there must never be any: the
   Privacy page and the one-time note both promise it. `STORAGE_GATE` in build.py

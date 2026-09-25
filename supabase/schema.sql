@@ -491,3 +491,43 @@ create policy "calendar edits are public" on public.calendar_events for select u
 create policy "admins add calendar events" on public.calendar_events for insert with check (public.is_admin());
 create policy "admins edit calendar events" on public.calendar_events for update using (public.is_admin());
 create policy "admins delete calendar events" on public.calendar_events for delete using (public.is_admin());
+
+-- ───────────────────────── terms of service (migration 012) ─────────────────────────
+-- Agreeing is stored as a version number; bump terms_current() and TERMS_VERSION
+-- in assets/js/store.js together when the Terms change.
+alter table public.profiles
+  add column terms_version int,
+  add column terms_accepted_at timestamptz;
+
+create function public.terms_current() returns int
+language sql immutable as $$ select 1 $$;
+
+-- The only way to set the columns above: the server stamps the time.
+create function public.accept_terms(v int) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'Sign in first.'; end if;
+  if v is distinct from public.terms_current() then
+    raise exception 'The Terms have changed since this page loaded. Reload and try again.';
+  end if;
+  update public.profiles set terms_version = v, terms_accepted_at = now() where id = auth.uid();
+end $$;
+revoke all on function public.accept_terms(int) from public, anon;
+grant execute on function public.accept_terms(int) to authenticated;
+
+create function public.require_terms() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and not exists (
+    select 1 from public.profiles where id = auth.uid() and terms_version >= public.terms_current()
+  ) then
+    raise exception 'Please agree to the Terms of Service first. Reload the page to see them.' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+
+create trigger require_terms before insert on public.submissions   for each row execute function public.require_terms();
+create trigger require_terms before insert on public.claims        for each row execute function public.require_terms();
+create trigger require_terms before insert on public.comments      for each row execute function public.require_terms();
+create trigger require_terms before insert on public.comment_likes for each row execute function public.require_terms();
+create trigger require_terms before insert on public.reports       for each row execute function public.require_terms();
