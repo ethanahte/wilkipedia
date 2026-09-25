@@ -107,6 +107,47 @@ export function setPref(name, v) {
   try { v === PREF_DEFAULTS[name] ? localStorage.removeItem('wilkipedia-' + name) : localStorage.setItem('wilkipedia-' + name, v); } catch { /* storage blocked */ }
   if (v === PREF_DEFAULTS[name]) delete d[name]; else d[name] = v;
 }
+// ── cookie settings ──
+// No ads, analytics or tracking cookies. What the site keeps in this browser is
+// in three groups; STORAGE_GATE in build.py sorts the keys (window.wkStoreCat)
+// and drops writes to a group that's switched off. 'need' can't be switched off.
+const COOKIES = 'wilkipedia-cookies';
+export function cookiePrefs() {
+  try { return { prefs: true, history: true, ...JSON.parse(localStorage.getItem(COOKIES)) }; }
+  catch { return { prefs: true, history: true }; }
+}
+export const storeGroup = (k) => (window.wkStoreCat ? window.wkStoreCat(k) : 'need');
+export const storedKeys = (group) => { try { return Object.keys(localStorage).filter((k) => !group || storeGroup(k) === group); } catch { return []; } };
+// Switching a group off also deletes what it had saved. Switching settings back
+// on saves what this page is using now, so nothing jumps on the next page.
+export function setCookiePrefs(patch) {
+  const was = cookiePrefs();
+  const next = { ...was, ...patch, seen: 1 };
+  try { localStorage.setItem(COOKIES, JSON.stringify(next)); } catch { return next; }
+  for (const g of ['prefs', 'history']) if (next[g] === false) storedKeys(g).forEach((k) => localStorage.removeItem(k));
+  if (next.prefs && !was.prefs) {
+    const d = document.documentElement.dataset;
+    if (d.theme) localStorage.setItem(THEME_KEY, d.theme);
+    for (const k of Object.keys(PREF_DEFAULTS)) if (d[k]) setPref(k, d[k]);
+  }
+  return next;
+}
+// A one-time note at the bottom of the page. Not a consent wall: there's
+// nothing to consent to, so it only says what's saved and where to change it.
+function paintCookieNotice() {
+  if (cookiePrefs().seen || $('#settings') || $('.cookie-note')) return;
+  try { localStorage.setItem('wilkipedia-cookies-test', '1'); localStorage.removeItem('wilkipedia-cookies-test'); }
+  catch { return; }                                  // storage blocked: nothing is saved anyway
+  const n = document.createElement('div');
+  n.className = 'cookie-note';
+  n.setAttribute('role', 'region');
+  n.setAttribute('aria-label', 'Cookies');
+  n.innerHTML = `<p><b>No tracking here.</b> Wilkipedia has no ads, analytics or tracking cookies. Your browser only keeps your settings, like night mode and text size, so they stick.</p>
+    <div class="acts"><a class="btn ghost small" href="${root}settings/#cookies">Cookie settings</a><button type="button" class="btn small">OK</button></div>`;
+  n.querySelector('button').onclick = () => { setCookiePrefs({}); n.remove(); };
+  document.body.append(n);
+}
+
 // Less motion: the reader's choice here, or else their device setting
 export const lessMotion = () => {
   const m = getPref('motion');
@@ -197,6 +238,7 @@ export async function initHeader() {
     b.innerHTML = `<b>Demo mode.</b> Supabase isn't connected yet, so claims, submissions and comments are saved only in this browser. <a href="${root}account/">Details</a>`;
     document.body.prepend(b);
   }
+  paintCookieNotice();
   // Language picker (Google Translate loads only once a language is chosen)
   import('./translate.js').then((m) => m.initTranslate());
 

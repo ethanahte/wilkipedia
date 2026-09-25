@@ -80,6 +80,23 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   THEME_BOOT. Use `lessMotion()` for anything animated. Adding a pref: default
   in PREF_DEFAULTS, the name in THEME_BOOT's list, CSS, a row on the page, and
   its key in the page's reset list.
+- **Cookie settings** (Settings → Cookies & storage, `#cookies`; footer link).
+  There are no ads, analytics or tracking cookies, and there must never be any: the
+  Privacy page and the one-time note both promise it. `STORAGE_GATE` in build.py
+  runs first in every page's <head>, the campus included. It wraps
+  `Storage.prototype.setItem`, sorts keys into groups with `window.wkStoreCat`, and
+  drops writes to a group the reader switched off (`wilkipedia-cookies` =
+  `{prefs, history, seen}`, absent = on):
+  - `need`: `sb-*`, `wilkipedia-cookies*` and `wilkipedia-demo-*`, plus anything
+    that isn't ours. Always on.
+  - `history`: `wilkipedia-recent-*` and `wilkipedia-draft:*`.
+  - `prefs`: every other `wilkipedia-*` / `wilcox-*` key.
+
+  So a new stored key needs no consent code. Its prefix picks its group, and it
+  gets a readable name in `NAMES` in `pages.settings`. `setCookiePrefs` (ui.js)
+  deletes a group's keys when it's switched off. The note (`paintCookieNotice`)
+  only informs and is not a consent wall. The only third party is the Google
+  Translate `googtrans` cookie, set only when someone picks a language.
 - **Interaction layer** (the "impressive but not AI" pass):
   - Home **pathways map** (`pathways.js`, data from `tools/pathways.py` →
     `data/pathways.json`): prerequisite chains drawn as a transit map. Every

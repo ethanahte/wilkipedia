@@ -3,7 +3,8 @@
 
 import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
-         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements } from './ui.js';
+         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements,
+         cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 
@@ -450,6 +451,26 @@ const pages = {
         row('Orrery: completed belt', 'Finished bounties as rocks between rings B and C.', tgl('set-o-belt', 'Orrery completed belt', o.belt)),
         row('Orrery: photo sky', 'The real Milky Way photo (1.2 MB). Off uses a drawn sky.', tgl('set-o-photo', 'Orrery photo sky', o.photo)),
       ].join('')]);
+      const cp = cookiePrefs();
+      const gt = currentLang() !== 'en';
+      const saved = [...storedKeys().filter((k) => /^(sb-|wilkipedia|wilcox)/.test(k)).map((k) => [keyLabel(k), storeGroup(k), k]),
+        ...(gt ? [['Google Translate language', 'google', 'googtrans (cookie)']] : [])];
+      sections.push(['cookies', 'Cookies & storage', [
+        row('Needed to work', 'Keeps you signed in and remembers the choices on this card. Wilkipedia has no ads, analytics or tracking cookies.',
+          '<span class="set-pill">Always on</span>'),
+        row('Remember my settings', 'Night mode, text size, class colour, closed announcements, the 3D campus view and the rest of this page. Off: changes last until you leave the page.',
+          tgl('set-c-prefs', 'Remember my settings', cp.prefs)),
+        row('Remember recent classes and drafts', 'Classes you opened lately come first in search, and forms or comments you start are kept until you send them.',
+          tgl('set-c-history', 'Remember recent classes and drafts', cp.history)),
+        row('Google Translate', gt ? 'On. Google translates the page’s text and keeps a cookie with your language. Google’s own cookie rules apply while it’s on.'
+          : 'Off. It only turns on when you pick a language, and then Google keeps a cookie with your choice.',
+          gt ? '<button type="button" class="btn ghost small" id="set-c-gt">Turn off</button>' : '<span class="set-pill off">Off</span>'),
+        row('What’s saved right now', saved.length ? `${saved.length} item${saved.length === 1 ? '' : 's'} in this browser.` : 'Nothing. This browser has no Wilkipedia data.',
+          saved.length ? `<details class="set-keys"><summary>Show the list</summary><ul>${saved.map(([label, g, k]) =>
+            `<li><span>${esc(label)}</span><code translate="no">${esc(k)}</code><em class="g-${g}">${GROUP[g] || 'Other'}</em></li>`).join('')}</ul></details>` : '', true),
+        row('Delete everything', 'Removes every setting, draft and choice this site saved in this browser, and turns translation off. You stay signed in.',
+          '<button type="button" class="btn ghost danger small" id="set-c-clear">Delete</button>'),
+      ].join(''), `Everything here stays in this browser. See the <a href="${root}privacy/">Privacy page</a>.`]);
       sections.push(['device', 'Saved on this device', [
         row('Unsent drafts', drafts_ ? `${drafts_} half-written form${drafts_ === 1 ? '' : 's'} or comment${drafts_ === 1 ? '' : 's'}, saved so you don’t lose them.` : 'Nothing saved. Forms and comments you start are kept here until you send them.',
           `<button type="button" class="btn ghost small" id="set-drafts" ${drafts_ ? '' : 'disabled'}>Delete drafts</button>`),
@@ -459,6 +480,7 @@ const pages = {
 
       $('#set-toc').innerHTML = sections.map(([id, title]) => `<a href="#${id}">${title}</a>`).join('');
       $('#settings').innerHTML = sections.map(([id, title, rows, note]) => sec(id, title, rows, note)).join('');
+      if (!cp.prefs) $('#settings').insertAdjacentHTML('afterbegin', '<p class="set-warn"><b>Remember my settings is off</b>, so changes here last only until you leave this page. <a href="#cookies">Change</a></p>');
       wireAppearance(s);
 
       const segWire = (id, fn) => { $('#' + id)?.addEventListener('click', (e) => {
@@ -478,6 +500,14 @@ const pages = {
       for (const k of ['motion', 'labels', 'belt', 'photo']) {
         $(`#set-o-${k}`)?.addEventListener('change', (e) => ls.set(ORR, JSON.stringify({ ...orrOpts(), [k]: e.target.checked })));
       }
+      $('#set-c-prefs').onchange = (e) => { setCookiePrefs({ prefs: e.target.checked }); draw(); };
+      $('#set-c-history').onchange = (e) => { setCookiePrefs({ history: e.target.checked }); draw(); };
+      $('#set-c-gt')?.addEventListener('click', () => setLanguage('en'));
+      $('#set-c-clear').onclick = () => {
+        if (!confirm('Delete everything Wilkipedia saved in this browser? You stay signed in.')) return;
+        storedKeys().filter((k) => storeGroup(k) !== 'need' || k === 'wilkipedia-cookies').forEach(ls.del);
+        if (gt) setLanguage('en'); else location.reload();
+      };
       $('#set-drafts').onclick = () => {
         if (!confirm('Delete every unsent draft saved in this browser?')) return;
         ls.keys().filter((k) => k.startsWith(DRAFT)).forEach(ls.del);
@@ -490,6 +520,18 @@ const pages = {
         if (currentLang() !== 'en') setLanguage('en'); else location.reload();
       };
     };
+    const GROUP = { need: 'Always', prefs: 'Settings', history: 'History', google: 'Google' };
+    const NAMES = {
+      'wilkipedia-cookies': 'Your cookie choices', 'wilkipedia-theme': 'Night mode', 'wilkipedia-class': 'Class colour',
+      'wilkipedia-class-applied': 'Class colour', 'wilkipedia-text': 'Text size', 'wilkipedia-motion': 'Motion',
+      'wilkipedia-bell': 'Bell schedule on the home page', 'wilkipedia-fab': 'Contribute button',
+      'wilkipedia-dismissed-announcements': 'Closed announcements', 'wilkipedia-bounty-view': 'Bounty board view',
+      'wilkipedia-orrery': 'Orrery display', 'wilkipedia-graph': 'Study-guide graph display',
+      'wilkipedia-recent-classes': 'Recently opened classes', 'wilcox-campus-quality': '3D campus quality',
+      'wilcox-campus-sky2': '3D campus time and weather', 'wilcox-campus-sky': '3D campus time and weather (old)', 'wilcox-campus-style': '3D campus style',
+    };
+    const keyLabel = (k) => (k.startsWith('sb-') ? 'Sign-in token' : k.startsWith(DRAFT) ? 'Unsent draft'
+      : k.startsWith('wilkipedia-demo') ? 'Demo-mode data' : NAMES[k] || k);
     const PREF_KEYS = { 'wilkipedia-text': 1, 'wilkipedia-motion': 1, 'wilkipedia-bell': 1, 'wilkipedia-fab': 1 };
     s.onAuth(draw);
     draw();

@@ -1078,6 +1078,24 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .tgl input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 640px) { .set-row { flex-wrap: wrap; } .set-c { flex-basis: 100%; } .set-c .seg { display: flex; } .set-c .seg button { flex: 1 1 auto; } }
 .btn:disabled { opacity: .45; cursor: default; pointer-events: none; }
+/* Cookies & storage (Settings) and the one-time note */
+.set-pill { display: inline-block; padding: 4px 11px; border-radius: 999px; background: var(--on-bg); color: var(--on-fg); font: 600 .8rem var(--sans); white-space: nowrap; }
+.set-pill.off { background: none; color: var(--muted); border: 1px solid var(--rule); }
+.set-warn { margin: 0 0 4px; padding: 10px 14px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); font-size: .92rem; }
+.set-warn a { color: inherit; }
+.set-keys summary { cursor: pointer; color: var(--accent); font-size: .92rem; width: max-content; }
+.set-keys ul { list-style: none; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--rule); }
+.set-keys li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 4px 14px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: .9rem; }
+.set-keys code { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.set-keys em { font: 600 .72rem var(--sans); font-style: normal; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.set-keys em.g-need { color: var(--ink); }
+@media (max-width: 640px) { .set-keys li { grid-template-columns: minmax(0, 1fr) auto; } .set-keys code { grid-column: 1 / -1; grid-row: 2; } }
+.cookie-note { position: fixed; left: 22px; bottom: 22px; z-index: 9; width: min(420px, calc(100vw - 44px)); padding: 14px 16px;
+  background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.18); font-size: .9rem; line-height: 1.45; }
+.cookie-note p { margin: 0; }
+.cookie-note .acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+@media (max-width: 760px) { .cookie-note { left: 12px; bottom: 12px; width: calc(100vw - 96px); } }
+@media print { .cookie-note { display: none; } }
 
 /* ── home: the pathways map (pathways.js) ──
    A transit map of prerequisite chains. Quiet until you point at something;

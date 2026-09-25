@@ -179,6 +179,19 @@ def asset_versions():
 
 VERSIONS = {}
 
+# Cookie settings (Settings → Cookies & storage). Runs first on every page,
+# the 3D campus included. It sorts each localStorage key into a group and quietly
+# drops writes to a group the reader has switched off, so no feature needs its
+# own check. "need" (sign-in token, these choices, demo data, anything not ours)
+# can't be switched off; "history" is recent classes and drafts; every other
+# wilkipedia-*/wilcox-* key is a remembered setting ("prefs").
+STORAGE_GATE = ("<script>try{(function(){var L=localStorage,S=Storage.prototype,set=S.setItem,get=S.getItem,"
+                "cat=function(k){k=String(k);if(/^(sb-|wilkipedia-(cookies|demo-))/.test(k))return'need';"
+                "if(/^wilkipedia-(recent-|draft:)/.test(k))return'history';"
+                "return/^(wilkipedia|wilcox)-/.test(k)?'prefs':'need'};window.wkStoreCat=cat;"
+                "S.setItem=function(k,v){if(this===L&&cat(k)!=='need'){var c;try{c=JSON.parse(get.call(L,'wilkipedia-cookies'))||{}}"
+                "catch(e){c={}}if(c[cat(k)]===false)return}return set.call(this,k,v)}})()}catch(e){}</script>")
+
 # Applies a saved night-mode choice before first paint, so pages never flash.
 THEME_BOOT = ("<script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),"
               "c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c;"
@@ -230,6 +243,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <link rel="preload" href="{r}assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{r}assets/style.css?v={v["style.css"]}">
 <meta name="data-version" content="{v["data"]}">
+{STORAGE_GATE}
 {THEME_BOOT}
 <script type="importmap">{importmap}</script>
 </head>
@@ -256,7 +270,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 <footer class="site">
   <div class="wrap">
     <p><b>Wilkipedia</b> is written by Wilcox students, for Wilcox students. It is an independent student project, not an official Wilcox High School or SCUSD site.</p>
-    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits &amp; thanks</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
+    <p><a href="{r}rules/">Community rules</a> · <a href="{r}privacy/">Privacy</a> · <a href="{r}settings/#cookies">Cookie settings</a> · <a href="{r}about/">About</a> · <a href="{r}submit/">Contribute</a> · <a href="{r}feedback/">Feedback &amp; bug reports</a> · <a href="{r}credits/">Credits &amp; thanks</a> · <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Official Wilcox High School website ↗</a></p>
     <p class="meta">Course descriptions: {e(CATALOG_SOURCE)}. Teacher lists: {e(DIRECTORY_SOURCE)}. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
@@ -631,6 +645,14 @@ def build_static():
 <p class="lede">Short version: reading needs no account. If you sign in, we store only what's needed to credit your work, and we never sell or share it.</p>
 <h2>Reading</h2>
 <p>You can read every page without signing in. We don't use ads, analytics or tracking cookies.</p>
+<h2>Cookies and saved settings</h2>
+<p>Wilkipedia has no ads, no analytics and no tracking cookies. Your browser keeps a few things so the site works the way you left it:</p>
+<ul>
+  <li><b>Always:</b> your sign-in token (only if you sign in) and your cookie choices.</li>
+  <li><b>Your settings:</b> night mode, text size, class colour, closed announcements, the 3D campus view and the like.</li>
+  <li><b>Recent classes and drafts:</b> classes you opened recently, and forms or comments you started but haven't sent.</li>
+</ul>
+<p>All of it stays in your browser and is never sent to us. You can switch the last two off, see exactly what's saved, or delete it all in <a href="../settings/#cookies">Cookie settings</a>.</p>
 <h2>Signing in</h2>
 <p>Sign-in uses Google. When you sign in, Google tells us your name and email address. We store them in our database (hosted by Supabase) so that your claims, submissions and comments belong to you.</p>
 <ul>
@@ -864,7 +886,7 @@ SEARCH_PAGES = [
     ("3D campus", "campus/", "Walk the school in 3D", "3d campus walk tour virtual quad cedar building gym stadium three.js anime"),
     ("By the numbers", "numbers/", "Wilcox in charts", "numbers charts graphs stats a-g ucsc requirements clubs meeting day grade classes semester calendar"),
     ("Study guides", "guides/", "Every shared study guide, as a graph", "study guides guide notes resources graph obsidian review"),
-    ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion"),
+    ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion cookies cookie storage"),
     ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),
     ("Cafeteria menu", "menu/", "Breakfast and lunch this week", "menu lunch breakfast food cafeteria eat today meal"),
     ("Clubs", "clubs/", "Every club at Wilcox", "clubs activities join"),
@@ -877,7 +899,7 @@ SEARCH_PAGES = [
     ("Teachers", "teachers/", "Every teacher", "teachers staff"),
     ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
-    ("Privacy", "privacy/", "What we store", "privacy data delete account"),
+    ("Privacy", "privacy/", "What we store", "privacy data delete account cookies tracking"),
     ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
     ("Credits", "credits/", "Everyone who helped build Wilkipedia", "credits thanks thank you contributors helpers founders team"),
     ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
@@ -958,6 +980,7 @@ def build_campus():
 <meta property="og:site_name" content="Wilkipedia">
 """ + canon + """
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+""" + STORAGE_GATE + """
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="campus.css?v=""" + css + """">
 <script type="importmap">""" + json.dumps({"imports": mods}) + """</script>
