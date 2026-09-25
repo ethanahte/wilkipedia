@@ -16,8 +16,14 @@ const COMPOSITE = `
 precision highp float;
 uniform sampler2D tColor, tND, tBloom;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night;
+uniform mat4 proj, projInv, viewInv;
+uniform vec3 viewUp;
 varying vec2 vUv;
+float h2(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h2(i), h2(i + vec2(1, 0)), f.x), mix(h2(i + vec2(0, 1)), h2(i + 1.0), f.x), f.y); }
+vec3 viewPos(vec2 uv, float d){ vec4 v = projInv * vec4(uv * 2.0 - 1.0, 0.5, 1.0); v.xyz /= v.w; return v.xyz * (d / -v.z); }
 vec4 ND(vec2 o){ return texture2D(tND, vUv + o * texel * inkW); }
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 vec3 toSRGB(vec3 c){ c = max(c, 0.0); return mix(c * 12.92, 1.055 * pow(c, vec3(1.0/2.4)) - 0.055, step(0.0031308, c)); }
@@ -39,6 +45,37 @@ void main(){
     edge = max(de, ne * (1.0 - smoothstep(farFade * 0.4, farFade, d0)));
     edge *= 1.0 - smoothstep(farFade, farFade * 2.2, d0);
   }
+  // wet ground: march the mirrored ray through the depth buffer and borrow the
+  // colour it hits (screen-space reflection). Strongest in puddles.
+  if (wet > 0.0 && ink > 0.0) {
+    vec4 c0 = ND(vec2(0.0));
+    vec3 n = c0.rgb * 2.0 - 1.0;
+    if (c0.a > 0.0 && c0.a < 220.0 && dot(n, viewUp) > 0.93) {
+      vec3 P = viewPos(vUv, c0.a);
+      vec3 V = normalize(P);
+      vec3 world = (viewInv * vec4(P, 1.0)).xyz;
+      float puddle = smoothstep(0.42, 0.62, vnoise(world.xz * 0.16) * 0.7 + vnoise(world.xz * 0.6) * 0.3);
+      vec3 Rd = reflect(V, viewUp);
+      float stepLen = max(0.25, c0.a * 0.02);
+      vec3 Q = P; vec3 hitCol = vec3(0.0); float hit = 0.0;
+      for (int i = 0; i < 48; i++) {
+        Q += Rd * stepLen; stepLen *= 1.06;
+        vec4 cl = proj * vec4(Q, 1.0); vec2 su = cl.xy / cl.w * 0.5 + 0.5;
+        if (su.x < 0.0 || su.x > 1.0 || su.y < 0.0 || su.y > 1.0) break;
+        float sd = abs(texture2D(tND, su).a), qd = -Q.z;
+        if (qd > sd && qd - sd < stepLen * 3.0 + 0.3) {
+          hitCol = texture2D(tColor, su).rgb;
+          vec2 e2 = abs(su - 0.5) * 2.0;
+          hit = 1.0 - smoothstep(0.75, 1.0, max(e2.x, e2.y));
+          break;
+        }
+      }
+      float fres = 0.3 + 0.7 * pow(1.0 - max(dot(-V, viewUp), 0.0), 4.0);
+      float k = wet * mix(0.35, 1.0, puddle) * (1.0 - smoothstep(120.0, 220.0, c0.a));
+      col *= 1.0 - 0.35 * k;                                // wet surfaces are darker
+      col += hitCol * hit * fres * k * 0.85;
+    }
+  }
   // ink is a darker, cooler shade of whatever it outlines, never pure black
   col = mix(col, col * vec3(0.34, 0.32, 0.42), edge * ink * 0.9);
   if (useBloom > 0.5) col += texture2D(tBloom, vUv).rgb * bloomK;
@@ -46,6 +83,7 @@ void main(){
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
   col = mix(vec3(lum), col, 1.14);
   col *= mix(vec3(0.9, 0.93, 1.1), vec3(1.02, 1.0, 0.97), smoothstep(0.08, 0.6, lum));
+  col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
   col *= 1.0 - dot(q, q) * 0.42;
   col = toSRGB(col);
@@ -54,8 +92,8 @@ void main(){
 }`;
 
 const BRIGHT = `
-uniform sampler2D tColor; varying vec2 vUv;
-void main(){ vec3 c = texture2D(tColor, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(0.85, 1.35, l), 1.0); }`;
+uniform sampler2D tColor; uniform float thresh; varying vec2 vUv;
+void main(){ vec3 c = texture2D(tColor, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(thresh, thresh + 0.5, l), 1.0); }`;
 
 const BLUR = `
 uniform sampler2D tSrc; uniform vec2 dir; varying vec2 vUv;
@@ -80,8 +118,10 @@ export class Post {
     this.comp = mk(COMPOSITE, {
       tColor: { value: null }, tND: { value: null }, tBloom: { value: null }, texel: { value: new THREE.Vector2() },
       ink: { value: 1 }, inkW: { value: 1 }, bloomK: { value: 0.45 }, useBloom: { value: 1 }, farFade: { value: 420 },
+      wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
+      viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
     });
-    this.bright = mk(BRIGHT, { tColor: { value: null } });
+    this.bright = mk(BRIGHT, { tColor: { value: null }, thresh: { value: 0.85 } });
     this.blur = mk(BLUR, { tSrc: { value: null }, dir: { value: new THREE.Vector2() } });
     this.floatOK = renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float');
   }
@@ -121,8 +161,17 @@ export class Post {
     this.r.render(this.scene, this.cam);
   }
 
-  render(scene, camera, farFade) {
+  // env: { wet, night } from the time-of-day settings
+  render(scene, camera, farFade, env = {}) {
     const r = this.r;
+    const u0 = this.comp.uniforms;
+    u0.wet.value = this.quality === 'low' ? 0 : env.wet || 0;
+    u0.night.value = env.night || 0;
+    u0.bloomK.value = env.night ? 0.95 : 0.45;
+    this.bright.uniforms.thresh.value = env.night ? 0.55 : 0.85;
+    u0.proj.value.copy(camera.projectionMatrix); u0.projInv.value.copy(camera.projectionMatrixInverse);
+    u0.viewInv.value.copy(camera.matrixWorld);
+    u0.viewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
     r.setRenderTarget(this.gbuf);
     r.render(scene, camera);
     const u = this.comp.uniforms;

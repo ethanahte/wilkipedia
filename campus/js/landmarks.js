@@ -11,6 +11,7 @@ import { color, rng } from './geo.js';
 import { canvasTex, decalMat } from './toon.js';
 import { FRONT, CARPORTS, BUILDINGS } from './layout.js';
 import { wallEdges } from './buildings.js';
+import { LIGHTS } from './lights.js';
 import { palm, flax, grassTuft, shrub, G } from './nature.js';
 
 const concrete = color('#cfcbc3'), soil = color('#5b4636'), steel = color('#6f747a'), fin = color('#f4efe4');
@@ -63,6 +64,7 @@ export function buildLandmarks(W, group, fontFamily) {
     W.slab('flat', e.x0 + dx, z - 0.08, e.x0 + dx + 1.35, z, 0, 2.5, steel);
     W.quad('glass', [e.x0 + dx + 1.25, 0.1, z - 0.1], [e.x0 + dx + 0.1, 0.1, z - 0.1], [e.x0 + dx + 0.1, 2.4, z - 0.1], [e.x0 + dx + 1.25, 2.4, z - 0.1], color('#fff'), 'auto');
   }
+  W.slab('glow', e.x0 + 1.5, z - 2.6, e.x0 + 2.3, z - 1.8, 3.36, 3.4, color('#ffe6bd')); LIGHTS.push([e.x0 + 1.9, z - 2.2, 3.4, 5]);
   // student entrance: a second door just south of the main one, on the east face
   W.slab('flat', -26.2, -67.5, -24.2, -64.5, 3.2, 3.45, fin);
   W.slab('flat', -26.26, -66.8, -26.2, -65.2, 0, 2.4, steel);
@@ -115,8 +117,12 @@ export function buildLandmarks(W, group, fontFamily) {
   W.quad('glass', [c0 + 0.16, 2.55, -29.1], [c0 + 0.16, 2.55, -33.1], [c0 + 0.16, 3.2, -33.1], [c0 + 0.16, 3.2, -29.1], color('#fff'), 'auto');
   W.tris('flat', [[c0 + 0.2, 2.9, -34.2], [c0 + 0.2, 2.9, -34.9], [c0 + 0.2, 3.25, -34.55]], [[1, 0, 0], [1, 0, 0], [1, 0, 0]], null, color('#6b5a4a'));
 
+  // downlights under B's canopy
+  for (let x = c0 + 3; x < c1; x += 6) { W.slab('glow', x - 0.35, -31.3, x + 0.35, -30.7, 3.5, 3.54, color('#ffe6bd')); LIGHTS.push([x, -31, 3.5, 4.5]); }
+
   // ── the cafeteria's covered walkway along the quad ──
   const wz0 = -30.4, wz1 = -27.0;
+  for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', -17.8, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', -17.8, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.1, wz1 - 0.3, x + 0.1, wz1 - 0.1, 0, 3.5, fin);

@@ -10,8 +10,8 @@
 <link rel="canonical" href="https://wilcoxwiki.org/campus/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="campus.css?v=5fbfe17248">
-<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=0a30b53042", "./js/collide.js": "./js/collide.js?v=75cbc713bf", "./js/controls.js": "./js/controls.js?v=b884fae10f", "./js/geo.js": "./js/geo.js?v=c0f8bdb193", "./js/ground.js": "./js/ground.js?v=f760980e36", "./js/hud.js": "./js/hud.js?v=1da29fa87c", "./js/landmarks.js": "./js/landmarks.js?v=f4ff422b65", "./js/layout.js": "./js/layout.js?v=0cc03029db", "./js/life.js": "./js/life.js?v=c71e2370db", "./js/main.js": "./js/main.js?v=effe6745bf", "./js/nature.js": "./js/nature.js?v=0feda81310", "./js/post.js": "./js/post.js?v=c4b91a33b0", "./js/props.js": "./js/props.js?v=b72790c30b", "./js/quad.js": "./js/quad.js?v=6ba216820b", "./js/rooms.js": "./js/rooms.js?v=3a3de8a433", "./js/toon.js": "./js/toon.js?v=3b1f43e44f", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
+<link rel="stylesheet" href="campus.css?v=17e0efa60e">
+<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=58b5bb408d", "./js/collide.js": "./js/collide.js?v=a5a568bcc5", "./js/controls.js": "./js/controls.js?v=2a07bb6685", "./js/geo.js": "./js/geo.js?v=c0f8bdb193", "./js/ground.js": "./js/ground.js?v=7d197a8acb", "./js/hud.js": "./js/hud.js?v=6b74b4eda9", "./js/landmarks.js": "./js/landmarks.js?v=1f47062dd4", "./js/layout.js": "./js/layout.js?v=ae8b1f0925", "./js/life.js": "./js/life.js?v=5bd57b9bf1", "./js/lights.js": "./js/lights.js?v=ec86d70c04", "./js/main.js": "./js/main.js?v=3760d29671", "./js/nature.js": "./js/nature.js?v=0feda81310", "./js/post.js": "./js/post.js?v=884a63df47", "./js/props.js": "./js/props.js?v=91e0361fba", "./js/quad.js": "./js/quad.js?v=522d10c9d8", "./js/rooms.js": "./js/rooms.js?v=3a3de8a433", "./js/toon.js": "./js/toon.js?v=fa2b3a2459", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
 </head>
 <body data-root="../" data-mode="walk">
 <canvas id="view" tabindex="0" aria-label="3D view of the Wilcox campus"></canvas>
@@ -30,6 +30,8 @@
   <a class="back" href="../" aria-label="Back to Wilkipedia">←<span class="long">&nbsp;Wilkipedia</span></a>
   <div class="title"><span class="w">W</span>Wilcox campus</div>
   <div class="tools">
+    <button type="button" id="btn-night" aria-pressed="true" title="Day or night (N)"><span>Night</span></button>
+    <button type="button" id="btn-rain" aria-pressed="true" title="Rain (R)"><span>Rain</span></button>
     <button type="button" id="btn-fly" aria-pressed="false"><span>Fly up</span></button>
     <button type="button" id="btn-map"><span>Map</span> <kbd>M</kbd></button>
     <button type="button" id="btn-quality" aria-haspopup="true"><span>High</span></button>
@@ -69,6 +71,7 @@
       <dt>Mouse</dt><dd>Click the view, then move the mouse to look. <kbd>Esc</kbd> gives the cursor back.</dd>
       <dt><kbd>Space</kbd></dt><dd>Jump.</dd>
       <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Jump to a viewpoint: the quad, the front, Building B, the gym, the stadium, the creek.</dd>
+      <dt><kbd>N</kbd> <kbd>R</kbd></dt><dd>Day or night, rain or dry.</dd>
       <dt><kbd>H</kbd></dt><dd>Hide everything but the view (for screenshots).</dd>
       <dt><kbd>F</kbd></dt><dd>Fly up for the aerial view, and back down. Up there: drag to turn, right-drag to slide, scroll to zoom, double-click the ground to land.</dd>
       <dt><kbd>M</kbd></dt><dd>The map: click anywhere to jump there, or type a room number.</dd>
@@ -80,6 +83,6 @@
 </div>
 
 <noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#faf8f2;font:18px Georgia,serif;margin:0">The 3D campus needs JavaScript. The <a href="../map/">campus map</a> works without it.</p></noscript>
-<script type="module" src="./js/main.js?v=effe6745bf"></script>
+<script type="module" src="./js/main.js?v=3760d29671"></script>
 </body>
 </html>

@@ -30,6 +30,7 @@ export class Controls {
     this.onModeChange = () => {};
     this.onPick = null;            // (x, z) in fly mode
     this.enabled = true;
+    this.autoRotate = false;       // the slow diorama turn, until you touch anything
     this.touch = matchMedia('(pointer: coarse)').matches;
     this._bind();
   }
@@ -55,7 +56,8 @@ export class Controls {
     d.addEventListener('wheel', (e) => {
       if (this.mode !== 'fly') return;
       e.preventDefault();
-      this.orbit.dist = THREE.MathUtils.clamp(this.orbit.dist * Math.exp(e.deltaY * 0.0012), 25, 760);
+      this.autoRotate = false;
+      this.orbit.dist = THREE.MathUtils.clamp(this.orbit.dist * Math.exp(e.deltaY * 0.0012), 25, 1100);
     }, { passive: false });
     d.addEventListener('dblclick', (e) => { if (this.mode === 'fly') this._pickLand(e.clientX, e.clientY); });
     this.pointers = new Map();
@@ -72,6 +74,7 @@ export class Controls {
   }
 
   _down(e) {
+    this.autoRotate = false;
     if (!this.enabled) return;
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() });
     if (this.mode === 'walk') {
@@ -107,7 +110,7 @@ export class Controls {
     } else if (this.mode === 'fly' && this.drag && p) {
       if (this.pointers.size >= 2 && this.pinch) {
         const s = this._pinchState();
-        this.orbit.dist = THREE.MathUtils.clamp(this.pinch.dist * (this.pinch.d / Math.max(20, s.d)), 25, 760);
+        this.orbit.dist = THREE.MathUtils.clamp(this.pinch.dist * (this.pinch.d / Math.max(20, s.d)), 25, 1100);
         this._pan(s.cx - this.pinch.cx, s.cy - this.pinch.cy);
         this.pinch.cx = s.cx; this.pinch.cy = s.cy;
         return;
@@ -229,10 +232,12 @@ export class Controls {
       const a = this.orbit.az;
       this.orbit.tx += (-Math.sin(a) * f + Math.cos(a) * s) * sp;
       this.orbit.tz += (-Math.cos(a) * f - Math.sin(a) * s) * sp;
+      if (k.size) this.autoRotate = false;
+      if (this.autoRotate) this.orbit.az += dt * 0.06;
       if (k.has('KeyQ')) this.orbit.az += dt * 1.2;
       if (k.has('KeyE')) this.orbit.az -= dt * 1.2;
-      this.orbit.tx = THREE.MathUtils.clamp(this.orbit.tx, -300, 420);
-      this.orbit.tz = THREE.MathUtils.clamp(this.orbit.tz, -250, 360);
+      this.orbit.tx = THREE.MathUtils.clamp(this.orbit.tx, -215, 365);
+      this.orbit.tz = THREE.MathUtils.clamp(this.orbit.tz, -150, 305);
       this._flyPose(cam);
       return;
     }

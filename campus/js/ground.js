@@ -178,6 +178,7 @@ export function buildGround(scene, q = 1) {
   scene.add(plane(S.x0, S.z0, S.x1, S.z1, 0.02, texFrom(sc), [S.x0, S.z0, S.x1, S.z1]));
 
   creek(scene);
+  plinth(scene);
   return { worldCanvas: wc };
 }
 
@@ -341,7 +342,8 @@ function diamond(p, F, o) {
 
 // The creek: a concrete trapezoid channel, water along the bottom.
 function creek(scene) {
-  const { x: xc, top, bottom, depth, z0, z1 } = CREEK;
+  const { x: xc, top, bottom, depth } = CREEK;
+  const z0 = Math.max(CREEK.z0, WORLD.z0), z1 = Math.min(CREEK.z1, WORLD.z1);
   const conc = new THREE.Color('#c9c5bb'), wet = new THREE.Color('#8f9a8c'), water = new THREE.Color('#3f6f86');
   const pos = [], nor = [], col = [], uv = [];
   const quad = (a, b, c, d, n, cl) => {
@@ -367,4 +369,31 @@ function creek(scene) {
     if (BRIDGES.some((b) => Math.abs(z - b.z) < b.w / 2)) return null;
     return 50;
   });
+}
+
+// The whole world sits on a thick slab, like a model on a table: layered
+// earth sides and a dark underside, so from the air it reads as a diorama.
+function plinth(scene) {
+  const { x0, z0, x1, z1 } = WORLD, D = 16;
+  const bands = [[0, 0.5, '#8a9a6a'], [0.5, 2.2, '#6d5a47'], [2.2, 7, '#5a4a3c'], [7, 11, '#4c3f35'], [11, D, '#3c332c']];
+  const pos = [], nor = [], col = [];
+  const c = new THREE.Color();
+  const quad = (a, b, cc, d, n) => { for (const v of [a, b, cc, a, cc, d]) { pos.push(...v); nor.push(...n); col.push(c.r, c.g, c.b); } };
+  for (const [ya, yb, hex] of bands) {
+    c.set(hex);
+    const y0 = -yb, y1 = -ya;
+    quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1]);
+    quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1]);
+    quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0]);
+    quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0]);
+  }
+  c.set('#2a2420');
+  quad([x0, -D, z0], [x1, -D, z0], [x1, -D, z1], [x0, -D, z1], [0, -1, 0]);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const m = new THREE.Mesh(g, gbuffer(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: TOON }), { paint: false }));
+  m.frustumCulled = false;
+  scene.add(m);
 }

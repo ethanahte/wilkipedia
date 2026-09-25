@@ -175,7 +175,15 @@ export class Hud {
   }
   closeBig() { $('#bigmap').hidden = true; this.big = false; }
 
-  bind({ onFly, onMap, onQuality, onHelp }) {
+  setEnv(env) {
+    const n = $('#btn-night'), r = $('#btn-rain');
+    if (n) { n.setAttribute('aria-pressed', env.night); n.querySelector('span').textContent = env.night ? 'Night' : 'Day'; }
+    if (r) r.setAttribute('aria-pressed', env.rain);
+  }
+
+  bind({ onFly, onMap, onQuality, onHelp, onNight, onRain }) {
+    $('#btn-night').onclick = onNight;
+    $('#btn-rain').onclick = onRain;
     $('#btn-fly').onclick = onFly;
     $('#btn-map').onclick = onMap;
     $('#minimap').onclick = onMap;

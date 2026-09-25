@@ -10,6 +10,7 @@ import { CREEK, BRIDGES, FIELDS, TRACK, CAMPUS, WORLD, MONROE_PTS, CALABAZAS_PTS
 import { STREETS } from './ground.js';
 import { shadeTree, conifer, youngTree, cards, SOLID_UV, G } from './nature.js';
 import { World } from './geo.js';
+import { LIGHTS } from './lights.js';
 import { addSegment, addCircle, addBox, addPoly } from './collide.js';
 
 const post = color('#8f959b'), rail = color('#a6abb0'), conc = color('#cfcbc3'), alu = color('#b9bec3'), black = color('#222326');
@@ -32,6 +33,16 @@ export function fence(W, pts, h = 1.8, { collide = true } = {}) {
 
 export function buildProps(W, scene, q, M) {
   const R = rng(77);
+  // ── street lights along Monroe, on the campus side: pole, arm, cobra head ──
+  for (let x = -176; x < 150; x += 42) {
+    const z = -98.6;
+    W.cyl('flat', x, 0, z, 0.12, 0.09, 8.2, 8, color('#8d9399'));
+    W.rod('flat', [x, 8.0, z], [x, 8.3, z - 2.4], 0.1, color('#8d9399'));
+    W.box('flat', x, 8.25, z - 2.7, 0.45, 0.18, 0.9, color('#7d8389'));
+    W.box('glow', x, 8.15, z - 2.7, 0.34, 0.02, 0.7, color('#ffe2b0'));
+    addCircle(x, z, 0.2);
+    LIGHTS.push([x, z - 2.7, 8.2, 9]);
+  }
   // ── creek: fences on both banks with gaps at the bridges and Monroe ──
   const gaps = [...BRIDGES.map((b) => [b.z - b.w / 2 - 0.2, b.z + b.w / 2 + 0.2]), [-120, -97]].sort((a, b) => a[0] - b[0]);
   for (const side of [-1, 1]) {

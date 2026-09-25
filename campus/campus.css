@@ -19,7 +19,7 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #cfe2ef; color: var(--ink); font-family: var(--sans); }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1322; color: var(--ink); font-family: var(--sans); }
 #view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; outline: none; }
 
 /* ── top bar ── */
@@ -115,7 +115,8 @@ body.hide-ui .bar, body.hide-ui #minimap, body.hide-ui #keys, body.hide-ui #plac
 @media (max-width: 640px) {
   .title { display: none; }
   .bar { gap: 6px; left: 8px; right: 8px; top: 8px; }
-  .back, .tools button { padding: 0 11px; font-size: 13px; height: 38px; }
+  .back, .tools button { padding: 0 9px; font-size: 12.5px; height: 36px; }
+  #btn-help { display: none; }
   .back .long, .tools kbd { display: none; }
   .tools { gap: 6px; }
   #minimap { width: 120px; height: 120px; left: 8px; bottom: 8px; }

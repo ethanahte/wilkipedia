@@ -43,11 +43,18 @@ function onWall(W, e, t, y, off, fn) {
   W.with(e.ax + e.dx * t + e.nx * off, y, e.az + e.dz * t + e.nz * off, e.rot, fn);
 }
 
+// About 60% of rooms have their lights on at night: those panes are pure white
+// (the glass shader only glows where the vertex colour is white); the rest are
+// a touch darker and stay dark.
+const WR = rng(99);
+const LIT = color('#ffffff'), DARK = color('#b9bec8');
+const pane = () => (WR() < 0.6 ? LIT : DARK);
+
 // A window: dark frame box and a glass pane just in front of it. (x,y) = centre.
 function windowAt(W, e, t, y, w, h, { frame = C.frame, depth = 0.12 } = {}) {
   onWall(W, e, t, y, 0.03, () => {
     W.box('flat', 0, 0, 0, w + 0.16, h + 0.16, depth, frame);
-    W.quad('glass', [-w / 2, -h / 2, depth / 2 + 0.01], [w / 2, -h / 2, depth / 2 + 0.01], [w / 2, h / 2, depth / 2 + 0.01], [-w / 2, h / 2, depth / 2 + 0.01], C.glassTint,
+    W.quad('glass', [-w / 2, -h / 2, depth / 2 + 0.01], [w / 2, -h / 2, depth / 2 + 0.01], [w / 2, h / 2, depth / 2 + 0.01], [-w / 2, h / 2, depth / 2 + 0.01], pane(),
       [[0, 0], [w, 0], [w, h], [0, h]]);
     // mullions: split wide windows into panes
     const panes = Math.max(1, Math.round(w / 1.3));
@@ -65,7 +72,7 @@ function doorAt(W, e, t, w, h, col, { glass = false, frameCol = C.frame } = {}) 
     } else {
       W.box('flat', 0, 0, 0.05, w, h, 0.04, col);
       // narrow vertical window, as on every American hallway door
-      W.quad('glass', [w * 0.12, 0.1, 0.075], [w * 0.28, 0.1, 0.075], [w * 0.28, h * 0.42, 0.075], [w * 0.12, h * 0.42, 0.075], C.glassTint, 'auto');
+      W.quad('glass', [w * 0.12, 0.1, 0.075], [w * 0.28, 0.1, 0.075], [w * 0.28, h * 0.42, 0.075], [w * 0.12, h * 0.42, 0.075], DARK, 'auto');
       W.box('flat', -w * 0.32, -0.05, 0.09, 0.05, 0.3, 0.05, color('#b9bcc0'));   // handle
     }
   });
@@ -301,7 +308,7 @@ function windowRow(W, len, y, z, back = false) {
   for (let i = 0; i < n; i++) {
     const x = -len / 2 + 1.1 + i * 2.2;
     const d = back ? -1 : 1;
-    W.quad('glass', [x - 0.9 * d, y - 0.3, z], [x + 0.9 * d, y - 0.3, z], [x + 0.9 * d, y + 0.3, z], [x - 0.9 * d, y + 0.3, z], C.glassTint, 'auto');
+    W.quad('glass', [x - 0.9 * d, y - 0.3, z], [x + 0.9 * d, y - 0.3, z], [x + 0.9 * d, y + 0.3, z], [x - 0.9 * d, y + 0.3, z], pane(), 'auto');
   }
 }
 
@@ -313,7 +320,7 @@ function lobbyGlass(W, b) {
   W.slab('flat', x0 + 0.2, z0 + 0.2, x1 - 0.2, z1 - 0.2, 0, h - 0.6, color('#33424d'));
   for (const e of edges(b.poly)) {
     for (let t = 1.2; t < e.len - 0.6; t += 2.4) {
-      onWall(W, e, t, (h - 0.6) / 2, -0.15, () => W.quad('glass', [-1.15, -(h - 0.6) / 2, 0], [1.15, -(h - 0.6) / 2, 0], [1.15, (h - 0.6) / 2, 0], [-1.15, (h - 0.6) / 2, 0], C.lobbyGlass,
+      onWall(W, e, t, (h - 0.6) / 2, -0.15, () => W.quad('glass', [-1.15, -(h - 0.6) / 2, 0], [1.15, -(h - 0.6) / 2, 0], [1.15, (h - 0.6) / 2, 0], [-1.15, (h - 0.6) / 2, 0], LIT,
         [[0, 0], [2.3, 0], [2.3, h], [0, h]]));
       onWall(W, e, t + 1.2, (h - 0.6) / 2, -0.1, () => W.box('flat', 0, 0, 0, 0.1, h - 0.6, 0.12, C.dark));
     }

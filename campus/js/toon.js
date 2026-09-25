@@ -58,14 +58,18 @@ function paintTex() {
 // ink: 'normal' | 'soft' (foliage: only its outline against what's behind it) |
 // 'none' (decals) | 'sky' (clouds: pretend to be sky, so no outline at all)
 const OUT = 'layout(location = 1) out highp vec4 gNormalDepth;\n';
-export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true } = {}) {
+// 'add' is for additive glows (rain, light pools): they write zero, which adds
+// nothing to the normal/depth target, so they never disturb the ink.
+// emissiveByColor: only vertices coloured pure white glow (lit windows at night).
+export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true, emissiveByColor = false } = {}) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (s, r) => {
     prev?.(s, r);
     const hasNormal = /normal_fragment_begin/.test(s.fragmentShader);
     const n = hasNormal && ink !== 'none' && ink !== 'sky' ? 'normalize(normal) * 0.5 + 0.5' : 'vec3(0.5, 0.5, 1.0)';
     const depth = ink === 'sky' ? '5000.0' : ink === 'soft' ? '-1.0 / gl_FragCoord.w' : '1.0 / gl_FragCoord.w';
-    let fs = OUT + s.fragmentShader.replace(/}\s*$/, `  gNormalDepth = vec4(${n}, ${depth});\n}`);
+    let fs = OUT + s.fragmentShader.replace(/}\s*$/, ink === 'add' ? '  gNormalDepth = vec4(0.0);\n}' : `  gNormalDepth = vec4(${n}, ${depth});\n}`);
+    if (emissiveByColor) fs = fs.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance *= smoothstep(0.9, 1.0, vColor.r);');
     if (paint && hasNormal && /#include <project_vertex>/.test(s.vertexShader) && /#include <beginnormal_vertex>/.test(s.vertexShader)) {
       s.uniforms.tPaint = { value: paintTex() };
       s.vertexShader = 'varying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + s.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
@@ -81,14 +85,14 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
     vec3 an = abs(normalize(vPaintNrm)) + 1e-3;
     float pz = texture2D(tPaint, vPaintPos.xz * 0.085).r * an.y + texture2D(tPaint, vPaintPos.xy * 0.085).r * an.z + texture2D(tPaint, vPaintPos.zy * 0.085).r * an.x;
     pz /= an.x + an.y + an.z;
-    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.26;
+    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.1;
     float wall = 1.0 - clamp(an.y, 0.0, 1.0);
     diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, vPaintPos.y)), wall);
   }`);
     }
     s.fragmentShader = fs;
   };
-  mat.customProgramCacheKey = () => `gbuf2|${ink}|${paint ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
+  mat.customProgramCacheKey = () => `gbuf3|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
   return mat;
 }
 
@@ -130,6 +134,16 @@ export function makeTextures() {
   }, { repeat: [2.5, 2.5] });
 
   // Glass: sky-bright at the top, dark below, and an anime glint across it.
+  // What a lit classroom looks like through the glass at night: a warm room,
+  // a bright band of ceiling lights near the top, darker toward the sill.
+  T.glassNight = canvasTex(128, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h);
+    gr.addColorStop(0, '#fff3cf'); gr.addColorStop(0.35, '#ffd28a'); gr.addColorStop(0.75, '#e79b4f'); gr.addColorStop(1, '#8a5530');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(255,255,240,0.9)'; g.fillRect(0, h * 0.08, w, 10);
+    g.fillStyle = 'rgba(70,40,25,0.35)'; for (let x = 6; x < w; x += 42) g.fillRect(x, h * 0.62, 26, h * 0.38);
+  }, { repeat: [1.6, 2.4] });
+
   T.glass = canvasTex(128, 256, (g, w, h) => {
     const gr = g.createLinearGradient(0, 0, 0, h);
     gr.addColorStop(0, '#9fc3dd'); gr.addColorStop(0.45, '#56738a'); gr.addColorStop(1, '#2f3f4d');
@@ -225,7 +239,10 @@ export function makeMaterials(T) {
   const M = {
     flat: toon(),
     stucco: toon({ map: T.stucco }),
-    glass: toon({ map: T.glass }),
+    glass: gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON, vertexColors: true, map: T.glass,
+      emissive: new THREE.Color('#ffc98a'), emissiveMap: T.glassNight, emissiveIntensity: 0 }), { emissiveByColor: true }),
+    // lamp heads and light fittings: unlit, and turned up at night so they bloom
+    glow: gbuffer(new THREE.MeshBasicMaterial({ vertexColors: true }), { ink: 'none', paint: false }),
     louver: toon({ map: T.louver }),
     roof: toon({ map: T.roof }),
     solar: toon({ map: T.solar }),

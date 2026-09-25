@@ -130,7 +130,8 @@ export const FIELDS = {
 // Everything inside this outline is campus; houses fill the rest of the world.
 export const CAMPUS = [[-176, -97], [160, -97], [240, -64], [292, -8], [332, 60], [372, 150], [230, 205], [30, 272],
   [-60, 296], [-118, 296], [-146, 120], [-168, 20]];
-export const WORLD = { x0: -380, z0: -290, x1: 480, z1: 420 };
+// The model's base: the campus plus a ring of the neighbourhood, like a diorama.
+export const WORLD = { x0: -215, z0: -150, x1: 365, z1: 305 };
 
 // Official-map room boxes → world, one transform per building (floor). The
 // campus map is not to scale (floors are drawn side by side as insets), so each

@@ -18,7 +18,8 @@ import { buildBuildings } from './buildings.js';
 import { buildLandmarks } from './landmarks.js';
 import { buildQuad } from './quad.js';
 import { buildProps } from './props.js';
-import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, SUN, HORIZON } from './life.js';
+import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, makeRain, makeRipples, makeLightPools, SUN, HORIZON } from './life.js';
+import { LIGHTS } from './lights.js';
 import { Controls } from './controls.js';
 import { loadRooms, rooms, byId, makeHighlight, placeHighlight, standFor } from './rooms.js';
 import { Post } from './post.js';
@@ -65,6 +66,8 @@ async function boot() {
   sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.06;
   const sc = sun.shadow.camera; sc.left = -75; sc.right = 75; sc.top = 75; sc.bottom = -75; sc.near = 1; sc.far = 400;
   scene.add(hemi, sun, sun.target);
+  // at night, the eight lamps nearest to where you're looking light up what's around them
+  const lamps = Array.from({ length: 8 }, () => { const l = new THREE.PointLight('#ffc98a', 0, 16, 2); scene.add(l); return l; });
 
   const post = new Post(renderer);
   const applyQuality = (q, { save = true } = {}) => {
@@ -101,13 +104,16 @@ async function boot() {
   steps.push(['Hanging the signs', () => buildLandmarks(W, decals, fontFamily)]);
   steps.push(['Planting the cedar', () => buildQuad(W)]);
   steps.push(['Filling in the neighbourhood', () => buildProps(W, scene, quality, M)]);
-  let sky, clouds, birds, flags, leaves;
+  let sky, clouds, birds, flags, leaves, rain, ripples, pools;
   steps.push(['Letting the clouds in', () => {
     sky = makeSky(); scene.add(sky);
     clouds = makeClouds(quality === 'low' ? 9 : 16); scene.add(clouds);
     birds = makeBirds(); scene.add(birds);
     flags = makeFlags(); scene.add(flags);
     leaves = makeLeaves(quality === 'low' ? 50 : 110); scene.add(leaves);
+    rain = makeRain(quality === 'low' ? 4000 : 9000); scene.add(rain);
+    ripples = makeRipples(); scene.add(ripples);
+    pools = makeLightPools(LIGHTS); scene.add(pools);
   }]);
   const roomsGroup = new THREE.Group(); scene.add(roomsGroup);
   steps.push(['Numbering the rooms', async () => { try { await loadRooms(`${ROOT}data/map.json`, roomsGroup); } catch (e) { console.warn('rooms', e); } }]);
@@ -126,16 +132,49 @@ async function boot() {
   const highlight = makeHighlight(); scene.add(highlight);
   hud.drawMap();
 
-  // start: the main entrance, under the flag, facing south toward the quad
+  // ── time of day and weather ──
+  // Night + rain is the showcase (the diorama look); day is one click away.
+  const TKEY = 'wilcox-campus-sky';
+  let env = { night: true, rain: true };
+  try { Object.assign(env, JSON.parse(localStorage.getItem(TKEY)) || {}); } catch { /* defaults */ }
+  const DAY = { hemi: ['#a9bdf0', '#d8c7a6', 1.85], sun: ['#fff0d4', 2.3], fog: '#dde8f3', density: 0.0021 };
+  const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
+  const applyEnv = () => {
+    const E = env.night ? NIGHT : DAY;
+    hemi.color.set(E.hemi[0]); hemi.groundColor.set(E.hemi[1]); hemi.intensity = E.hemi[2];
+    sun.color.set(E.sun[0]); sun.intensity = E.sun[1] * (env.rain ? 0.55 : 1);
+    if (env.rain && !env.night) { hemi.intensity *= 0.8; }
+    scene.fog.color.set(env.rain && !env.night ? '#c3ccd6' : E.fog);
+    renderer.setClearColor(scene.fog.color);
+    sky.material.uniforms.night.value = env.night ? 1 : 0;
+    sky.material.uniforms.overcast.value = env.rain ? 1 : 0;
+    clouds.visible = !env.rain;
+    M.glass.emissiveIntensity = env.night ? 2.2 : 0;
+    M.glow.color.setScalar(env.night ? 3 : 1);
+    pools.userData.set(env.night ? 1 : 0);
+    for (const g of groundMeshes) if (g.material.color) g.material.color.setScalar(env.rain ? 0.82 : 1);
+    document.body.dataset.night = env.night ? '1' : '0';
+    document.body.dataset.rain = env.rain ? '1' : '0';
+    hud.setEnv(env);
+    try { localStorage.setItem(TKEY, JSON.stringify(env)); } catch { /* ok */ }
+  };
+  const toggleNight = () => { env.night = !env.night; applyEnv(); };
+  const toggleRain = () => { env.rain = !env.rain; applyEnv(); };
+
+  // start: the campus as a diorama, turning slowly; ?room= or Walk takes you in
   const [fx, fz] = FRONT.flag;
   controls.setWalk(fx + 1.5, fz - 2.2, 0.35 + Math.PI, 0);
   controls.yaw = Math.PI - 0.25;
+  controls.mode = 'fly';
+  Object.assign(controls.orbit, { tx: 75, tz: 78, dist: 640, el: 0.62, az: 0.75 });
+  controls.autoRotate = true;
   controls.onModeChange = (m) => { hud.setMode(m); if (m !== 'walk') hud.tip(null); };
-  hud.setMode('walk');
+  hud.setMode('fly');
 
   // ── rooms: hover, click, ?room= ──
   const roomHref = (id) => `${ROOT}map/#${encodeURIComponent(id)}`;
   const api = window.WilcoxCampus = window.WilcoxCampus || {};
+  let booted = false;
   const selectRoom = (r) => {
     if (typeof api.onRoomSelect === 'function') { api.onRoomSelect(r.id, r); return; }
     hud.roomCard(r, roomHref(r.id));
@@ -145,7 +184,8 @@ async function boot() {
     if (!r) { hud.toast(`Couldn’t find room ${id} on the campus map.`); return false; }
     const s = standFor(r);
     controls.setWalk(s.x, s.z, s.yaw, s.pitch);
-    if (controls.mode !== 'walk') controls.landAt(controls.pos.x, controls.pos.z, s.yaw);
+    if (controls.mode === 'fly' && !booted) { controls.mode = 'walk'; controls.autoRotate = false; }
+    else if (controls.mode !== 'walk') controls.landAt(controls.pos.x, controls.pos.z, s.yaw);
     placeHighlight(highlight, r);
     hud.toast(r.floor > 1
       ? `${r.label}: floor ${r.floor} of ${r.buildingName}. Its plate is up on the wall; the inside comes in a later update.`
@@ -153,6 +193,8 @@ async function boot() {
     return true;
   };
   api.goToRoom = goToRoom;
+  api.setTime = (t) => { env.night = t === 'night'; applyEnv(); };
+  api.setRain = (on) => { env.rain = !!on; applyEnv(); };
   api.setQuality = applyQuality;
   api.rooms = () => rooms.map((r) => r.id);
 
@@ -176,6 +218,8 @@ async function boot() {
     if (e.target.closest?.('input, textarea')) { if (e.key === 'Escape') hud.closeBig(); return; }
     if (e.code === 'KeyF') toggleFly();
     else if (e.code === 'KeyH') document.body.classList.toggle('hide-ui');
+    else if (e.code === 'KeyN') toggleNight();
+    else if (e.code === 'KeyR') toggleRain();
     else if (e.code === 'Space' && controls.mode === 'walk') controls.jump();
     else if (/^Digit[1-6]$/.test(e.code)) goToSpot(+e.code.slice(5) - 1);
     else if (e.code === 'KeyM') toggleMap();
@@ -184,7 +228,10 @@ async function boot() {
   });
   const toggleFly = () => {
     if (controls.mode === 'walk') controls.flyUp();
-    else if (controls.mode === 'fly') controls.landAt(controls.orbit.tx, controls.orbit.tz);
+    else if (controls.mode === 'fly') {
+      const far = controls.orbit.dist > 450;
+      far ? controls.landAt(-24, -12, Math.atan2(24, 14)) : controls.landAt(controls.orbit.tx, controls.orbit.tz);
+    }
   };
   const toggleMap = () => {
     if (hud.big) { hud.closeBig(); return; }
@@ -199,6 +246,7 @@ async function boot() {
   hud.onRoomSearch = (id) => { if (goToRoom(id)) hud.closeBig(); };
   hud.bind({
     onFly: toggleFly, onMap: toggleMap, onQuality: (q) => applyQuality(q),
+    onNight: toggleNight, onRain: toggleRain,
     onHelp: () => { document.getElementById('help').hidden = false; document.exitPointerLock?.(); },
   });
 
@@ -228,7 +276,7 @@ async function boot() {
     else controls.landAt(s[1], s[2], Math.atan2(-(s[3] - s[1]), -(s[4] - s[2])));
   };
   document.getElementById('keys').innerHTML = [['WASD', 'Walk'], ['Shift', 'Run'], ['Space', 'Jump'], ['F', 'Fly'],
-    ...SPOTS.map((s, i) => [String(i + 1), s[0]]), ['M', 'Map'], ['H', 'Hide UI']]
+    ...SPOTS.map((s, i) => [String(i + 1), s[0]]), ['N', 'Day/Night'], ['R', 'Rain'], ['M', 'Map'], ['H', 'Hide UI']]
     .map(([k, v]) => `<span><kbd>${k}</kbd>${v}</span>`).join('');
   document.getElementById('keys').onclick = (e) => {
     const k = e.target.closest('span')?.querySelector('kbd')?.textContent;
@@ -260,8 +308,17 @@ async function boot() {
     t += dt;
     controls.update(dt);
     sky.userData.update(dt); clouds.userData.update(dt); birds.userData.update(dt, t); flags.userData.update(dt, t);
-    leaves.userData.update(dt, t, camera.position, controls.mode === 'walk');
-    scene.fog.density = controls.mode === 'walk' ? 0.0021 : 0.0008;
+    const walking = controls.mode === 'walk';
+    if (env.night) {
+      const f = walking ? controls.pos : { x: controls.orbit.tx, z: controls.orbit.tz };
+      const near = LIGHTS.map((L) => [L, (L[0] - f.x) ** 2 + (L[1] - f.z) ** 2]).sort((a, b) => a[1] - b[1]);
+      lamps.forEach((l, i) => { const L = near[i]?.[0]; if (!L) { l.intensity = 0; return; } l.position.set(L[0], L[2] - 0.4, L[1]); l.intensity = 22; l.distance = L[3] * 2; });
+    } else lamps.forEach((l) => { l.intensity = 0; });
+    leaves.userData.update(dt, t, camera.position, walking && !env.rain);
+    rain.userData.update(dt, camera.position, env.rain, !walking);
+    ripples.userData.update(dt, walking ? controls.pos : camera.position, env.rain && walking);
+    const dens = (env.night ? NIGHT : DAY).density * (env.rain ? 1.3 : 1);
+    scene.fog.density = walking ? dens : dens * 0.08;
     // the sun's shadow box follows what you're looking at, snapped to its texels so edges don't crawl
     const focus = controls.mode === 'fly' ? new THREE.Vector3(controls.orbit.tx, 0, controls.orbit.tz) : controls.pos.clone();
     if (controls.mode !== 'fly') focus.addScaledVector(new THREE.Vector3(-Math.sin(controls.yaw), 0, -Math.cos(controls.yaw)), 30);
@@ -289,7 +346,7 @@ async function boot() {
       if (nm !== placeName) { placeName = nm; hud.place(nm); }
     }
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * 2.4) : 420;
-    post.render(scene, camera, fade);
+    post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0 });
   }
   function loop() {
     const dt = Math.min(0.05, clock.getDelta());
@@ -309,8 +366,11 @@ async function boot() {
   window.__campus = { THREE, renderer, scene, camera, controls, post, frame, rooms, applyQuality };
 
   if (params.get('room')) goToRoom(params.get('room'));
-  if (params.get('view') === 'aerial') { controls.orbit.tx = 0; controls.orbit.tz = 20; controls.flyUp(); }
+  if (params.get('view') === 'walk' && !params.get('room')) { controls.mode = 'walk'; controls.autoRotate = false; hud.setMode('walk'); }
+  if (params.get('room')) { controls.autoRotate = false; hud.setMode('walk'); }
+  applyEnv();
   frame(0.016);
+  booted = true;
   hud.progress(1, 'Ready');
   hud.loaded();
   document.addEventListener('pointerlockchange', () => { document.body.dataset.locked = document.pointerLockElement === canvas ? '1' : '0'; });

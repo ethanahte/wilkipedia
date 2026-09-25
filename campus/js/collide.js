@@ -9,7 +9,7 @@ const CELL = 10;
 const grid = new Map();
 const heights = [];          // functions (x, z) => height | null
 export const STEP = 0.42;
-export const bounds = { x0: -300, z0: -250, x1: 420, z1: 360 };
+export const bounds = { x0: -213, z0: -148, x1: 363, z1: 303 };
 
 function cells(x0, z0, x1, z1, fn) {
   for (let i = Math.floor(x0 / CELL); i <= Math.floor(x1 / CELL); i++)

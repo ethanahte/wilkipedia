@@ -142,7 +142,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Testing: the Browser pane is often hidden (rAF stalls, screenshots go
     stale). `window.__campus.frame(dt)` renders one frame on demand; a boot
     that sees a 0×0 window must still size the camera (onResize guards it).
-  - Keys: WASD, Shift, Space jump, F fly, 1–6 viewpoints, M map, H hide UI.
+  - Default presentation (owner's second reference, a night-rain diorama): the
+    world is a slab (`plinth()` in ground.js, WORLD in layout.js is its size)
+    shown from the air, turning slowly, at night in the rain. Day/Night (N) and
+    Rain (R) are saved in localStorage `wilcox-campus-sky`. Night = lit windows
+    (glass panes whose vertex colour is pure white glow: `emissiveByColor`),
+    the 'glow' material, additive light pools under every entry in lights.js,
+    8 real PointLights moved to the lamps nearest you, a starry sky. Rain =
+    GPU streaks + ripples (ink mode 'add': they write zero to the G-buffer) and
+    screen-space reflections on wet ground in post.js (near ground only).
+  - Keys: WASD, Shift, Space jump, F fly, 1–6 viewpoints, N night, R rain, M map, H hide UI.
   - Phases: 1 = quad, front, landmarks, whole-campus massing (done). Next: B
     interiors (both floors, stairs), R, gyms/pool/stadium detail, west side.
 - **Announcement bar** (`#announce` under the header on every page,

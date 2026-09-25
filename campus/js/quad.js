@@ -10,6 +10,7 @@ import { color, rng } from './geo.js';
 import { STAGE, CEDAR, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
 import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, G } from './nature.js';
 import { addCircle, addOBB, addBox, addHeight } from './collide.js';
+import { LIGHTS } from './lights.js';
 
 const concrete = color('#d9d5cd'), concreteDark = color('#c4bfb6'), black = color('#26282b'),
   green = color('#3f7d4f'), greenDark = color('#2f5f3c'), galv = color('#a9aeb3'), lampLight = color('#fff4cf');
@@ -45,6 +46,7 @@ export function buildQuad(W) {
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
   for (const [x, z] of LAMPS) lamp(W, x, z);
+  for (const [x, z] of LAMPS) LIGHTS.push([x, z, 4.6, 6.5]);
   [[-24, -1], [-9, -4], [18, 12], [-29, 18], [5, -17], [-36, -8], [23, 26]].forEach(([x, z]) => trash(W, x, z, R));
 }
 
@@ -144,7 +146,7 @@ function lamp(W, x, z) {
   W.cyl('flat', x, 0, z, 0.3, 0.26, 0.55, 10, concrete);
   W.cyl('flat', x, 0.55, z, 0.075, 0.055, 4.1, 8, black);
   W.cyl('flat', x, 4.62, z, 0.42, 0.34, 0.14, 14, black);
-  W.cyl('flat', x, 4.6, z, 0.3, 0.3, 0.02, 14, lampLight, { top: false, bottom: true });
+  W.cyl('glow', x, 4.6, z, 0.3, 0.3, 0.02, 14, lampLight, { top: false, bottom: true });
   addCircle(x, z, 0.35);
 }
 
