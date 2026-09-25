@@ -219,7 +219,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 {THEME_BOOT}
 <script type="importmap">{importmap}</script>
 </head>
-<body data-root="{r}">
+<body data-root="{r}"{' class="home"' if path == "" else ""}>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site">
   <div class="wrap bar">
@@ -233,6 +233,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div id="auth" class="auth"></div>
   </div>
 </header>
+<div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
 <a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
 <main id="main" class="wrap">
@@ -575,7 +576,7 @@ def build_static():
 
     page("review/", "Review", """
 <h1>Review</h1>
-<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="published">Published</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button></div>
+<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="published">Published</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button><button class="chip" data-tab="announcements">Announcements</button></div>
 <div id="panel"></div>""", script="review.js")
 
     page("leaderboard/", "Leaderboard", """

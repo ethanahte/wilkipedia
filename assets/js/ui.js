@@ -179,6 +179,7 @@ export async function initHeader() {
 
   const s = await store();
   const tab = $('#bounty-tab');
+  paintAnnouncements(s);
 
   // Header search: live suggestions on every page (loaded on first focus)
   const hs = $('.hsearch input');
@@ -231,6 +232,41 @@ export async function initHeader() {
   paint(s.user());
   s.onAuth(paint);
   return s;
+}
+
+// ── announcement bar ──
+// Live announcements sit under the header on every page. Closing one hides it
+// in this browser only (a per-reader convenience); admins manage them on
+// Review → Announcements.
+const DISMISSED = 'wilkipedia-dismissed-announcements';
+const dismissed = () => { try { return JSON.parse(localStorage.getItem(DISMISSED)) || []; } catch { return []; } };
+export const ANNOUNCE_KINDS = { school: 'School news', site: 'Wilkipedia' };
+// A link is either a full http(s) URL or a path on this site ("/summer/")
+export const announceHref = (link) => (!link ? null : link.startsWith('/') ? root + link.replace(/^\/+/, '') : safeUrl(link));
+export async function paintAnnouncements(s) {
+  const bar = $('#announce');
+  if (!bar || !s.announcements) return;
+  let list = [];
+  try { list = await s.announcements(); } catch { return; }   // no table yet, or offline: no bar
+  const hidden = new Set(dismissed());
+  list = list.filter((a) => !hidden.has(String(a.id))).slice(0, 3);
+  bar.hidden = !list.length;
+  bar.innerHTML = list.map((a) => {
+    const href = announceHref(a.link);
+    const ext = href && /^https?:/.test(a.link);
+    return `<div class="ann ann-${a.kind}" data-ann="${a.id}"><div class="wrap ann-in">
+      <span class="ann-kind">${ANNOUNCE_KINDS[a.kind] || 'News'}</span>
+      <p class="ann-msg">${esc(a.message)}${href ? ` <a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>Learn more${ext ? ' ↗' : ' →'}</a>` : ''}</p>
+      <button type="button" class="ann-x" aria-label="Hide this announcement">✕</button></div></div>`;
+  }).join('');
+  bar.onclick = (e) => {
+    const x = e.target.closest('.ann-x');
+    if (!x) return;
+    const row = x.closest('[data-ann]');
+    try { localStorage.setItem(DISMISSED, JSON.stringify([...dismissed(), row.dataset.ann].slice(-50))); } catch { /* storage blocked */ }
+    row.remove();
+    bar.hidden = !bar.children.length;
+  };
 }
 
 // Resolves once a user exists, prompting sign-in if needed.

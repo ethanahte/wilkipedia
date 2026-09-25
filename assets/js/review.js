@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl } from './ui.js';
+import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -109,6 +109,38 @@ const tabs = {
           <button class="btn ghost danger small" data-fdel>Delete</button></div>
       </article>`).join('') : '<div class="empty">No feedback yet.</div>';
   },
+  async announcements() {
+    const isAdmin = s.user()?.role === 'admin';
+    if (!isAdmin) {
+      const live = await s.announcements();
+      return `<p class="meta">Only admins post announcements. These are showing on the site right now:</p>
+        <div class="ann-list">${live.map((a) => `<article class="card"><div><b>${ANNOUNCE_KINDS[a.kind]}</b> · ${esc(a.message)}</div></article>`).join('') || '<div class="empty">No announcements right now.</div>'}</div>`;
+    }
+    const list = await s.allAnnouncements();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const state = (a) => (!a.active ? 'Hidden' : a.ends_on && new Date(a.ends_on + 'T00:00') < today ? 'Ended' : 'Showing');
+    return `<form class="ann-form card" id="ann-form">
+        <h2 style="margin:0">Post an announcement</h2>
+        <p class="meta" style="margin:0">It shows in a bar under the header on every page, for everyone. Keep it short and only post what you can source.</p>
+        <div class="grid2">
+          <div class="field"><label for="an-kind">About</label><select id="an-kind" name="kind"><option value="school">School news (Wilcox)</option><option value="site">Wilkipedia news</option></select></div>
+          <div class="field"><label for="an-end">Stop showing after (optional)</label><input id="an-end" name="ends_on" type="date"></div>
+        </div>
+        <div class="field"><label for="an-msg">Message <span class="meta" id="an-count">0 / 280</span></label><textarea id="an-msg" name="message" rows="2" maxlength="280" required placeholder="e.g. AP exam registration closes Friday. See your counselor."></textarea></div>
+        <div class="field"><label for="an-link">Link (optional)</label><input id="an-link" name="link" placeholder="https://… or a page on this site like /summer/"></div>
+        <input type="hidden" name="id" value="">
+        <div class="r-actions"><button class="btn" id="an-save">Post announcement</button><button type="button" class="btn ghost" id="an-cancel" hidden>Cancel editing</button></div>
+      </form>
+      <h2 class="label-h">All announcements</h2>
+      <div class="ann-list">${list.map((a) => `<article class="card ${a.active ? '' : 'off'}" data-aid="${a.id}">
+          <div style="flex:1;min-width:240px"><div><span class="tag">${ANNOUNCE_KINDS[a.kind]}</span> <b>${state(a)}</b>
+            <span class="meta">· posted ${fmtDate(a.created_at)}${a.ends_on ? ` · until ${fmtDate(a.ends_on + 'T00:00')}` : ''}</span></div>
+            <p style="margin:6px 0 0">${esc(a.message)}${a.link ? ` <span class="meta">→ ${esc(a.link)}</span>` : ''}</p></div>
+          <div class="r-actions"><button class="btn ghost small" data-aedit>Edit</button>
+            <button class="btn ghost small" data-atoggle>${a.active ? 'Hide' : 'Show'}</button>
+            <button class="btn ghost danger small" data-adel>Delete</button></div>
+        </article>`).join('') || '<div class="empty">No announcements yet.</div>'}</div>`;
+  },
   async bounties() {
     const list = await s.bounties();
     const isAdmin = s.user()?.role === 'admin';
@@ -117,7 +149,7 @@ const tabs = {
           ${b.status === 'closed' ? ' <span class="tag">withdrawn</span>' : b.status === 'done' ? ' <span class="tag">completed</span>' : ''}</td>
         <td>${b.claims.map((c) => esc(c.name)).join(', ') || '<span class="meta">unclaimed</span>'}</td>
         <td>${isAdmin ? `<button class="linkish" data-editb="${esc(b.id)}">Edit</button> · <button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Repost'}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
-  },,
+  },
 };
 
 async function draw() {
@@ -128,15 +160,53 @@ async function draw() {
     return;
   }
   $('#panel').innerHTML = await guard(() => (tabs[tab] || tabs.submissions)()) || '';
+  wireAnnounceForm();
   $('#pub-q')?.addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
     document.querySelectorAll('.pub-row').forEach((r) => (r.hidden = q && !r.dataset.hay.includes(q)));
   });
 }
 
+let annList = [];
+function wireAnnounceForm() {
+  const f = $('#ann-form');
+  if (!f) return;
+  s.allAnnouncements().then((l) => { annList = l; }).catch(() => {});
+  const count = () => { $('#an-count').textContent = `${f.message.value.length} / 280`; };
+  f.message.addEventListener('input', count);
+  $('#an-cancel').addEventListener('click', () => draw());
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const link = f.link.value.trim();
+    if (link && !link.startsWith('/') && !safeUrl(link)) return alert('The link must start with https:// or with / for a page on this site.');
+    const fields = { kind: f.kind.value, message: f.message.value.trim(), link: link || null, ends_on: f.ends_on.value || null };
+    if (fields.message.length < 3) return alert('Write the announcement first.');
+    const ok = f.id.value
+      ? await guard(() => s.updateAnnouncement(Number(f.id.value), fields), 'Announcement saved.')
+      : await guard(() => s.postAnnouncement(fields), 'Announcement posted. It’s live now.');
+    if (ok) { await draw(); paintAnnouncements(s); }
+  });
+}
+
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('button');
   if (!t) return;
+  const ac = t.closest('[data-aid]');
+  if (ac) {
+    const aid = Number(ac.dataset.aid);
+    const a = annList.find((x) => x.id === aid) || (await s.allAnnouncements()).find((x) => x.id === aid);
+    if ('aedit' in t.dataset && a) {
+      const f = $('#ann-form');
+      f.kind.value = a.kind; f.message.value = a.message; f.link.value = a.link || ''; f.ends_on.value = a.ends_on || ''; f.id.value = a.id;
+      f.message.dispatchEvent(new Event('input'));
+      $('#an-save').textContent = 'Save changes'; $('#an-cancel').hidden = false;
+      f.scrollIntoView({ behavior: 'smooth' }); f.message.focus();
+      return;
+    }
+    if ('atoggle' in t.dataset && a) { await guard(() => s.updateAnnouncement(aid, { active: !a.active }), a.active ? 'Hidden from the site.' : 'Showing again.'); }
+    if ('adel' in t.dataset) { if (!confirm('Delete this announcement for good?')) return; await guard(() => s.deleteAnnouncement(aid), 'Deleted.'); }
+    await draw(); paintAnnouncements(s); return;
+  }
   if (t.dataset.tab) { tab = t.dataset.tab; history.replaceState(null, '', '#' + tab); return draw(); }
   const card = t.closest('[data-id]');
   if ('editpub' in t.dataset && card) { openEditor(s, pubList.find((x) => String(x.id) === card.dataset.id), draw); return; }

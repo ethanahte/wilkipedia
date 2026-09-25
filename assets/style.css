@@ -256,6 +256,9 @@ textarea { resize: vertical; }
 .hsearch .results-pop { width: min(460px, 90vw); left: auto; right: 0; }
 .big-search-field { position: relative; flex: 1; }
 .search-btn { display: none; text-decoration: none; }
+/* The home page has its own big search box, so the header one steps aside there. */
+body.home .hsearch, body.home .search-btn { display: none !important; }
+body.home .lang { margin-left: auto; }
 .results.page .result { border-bottom: 1px solid var(--rule); border-radius: 0; padding: 10px 4px; }
 .r-group { margin-bottom: 8px; }
 .r-group .label-h { margin: 1.6em 0 .4em; }
@@ -939,3 +942,21 @@ a.chip { text-decoration: none; }
 .res-filter { margin: 0 0 10px; }
 .admin-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
   background: var(--accent-soft); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+
+/* ── announcement bar: under the header on every page ── */
+.announce[hidden] { display: none; }
+.ann { background: var(--accent-soft); border-bottom: 1px solid var(--rule); }
+.ann-school { background: var(--gold); color: var(--gold-ink); border-bottom-color: transparent; }
+.ann-in { display: flex; align-items: center; gap: 12px; padding-top: 9px; padding-bottom: 9px; }
+.ann-kind { flex: none; font: 700 .64rem var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 3px 8px;
+  border-radius: 999px; background: var(--ink); color: var(--paper); }
+.ann-school .ann-kind { background: var(--gold-ink); color: var(--gold); }
+.ann-msg { flex: 1; margin: 0; font-size: .93rem; line-height: 1.4; }
+.ann-msg a { color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.ann-x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; opacity: .7; }
+.ann-x:hover { opacity: 1; background: rgba(0,0,0,.08); }
+@media (max-width: 560px) { .ann-in { flex-wrap: wrap; gap: 6px 10px; } .ann-msg { flex-basis: calc(100% - 42px); order: 3; } .ann-x { margin-left: auto; } }
+/* Review → Announcements */
+.ann-form { display: grid; gap: 10px; max-width: 640px; margin-bottom: 26px; }
+.ann-list .card { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.ann-list .off { opacity: .6; }

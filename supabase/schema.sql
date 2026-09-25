@@ -273,6 +273,27 @@ create policy "reviewers read reports" on public.reports for select using (publi
 create policy "signed-in users report" on public.reports for insert with check (auth.uid() is not null);
 create policy "reviewers resolve" on public.reports for update using (public.is_reviewer());
 
+-- ───────────────────────── announcements ─────────────────────────
+-- The bar under the header. Admins post; everyone sees the live ones
+-- (active and not past ends_on, in Wilcox's time zone).
+create table public.announcements (
+  id         bigint generated always as identity primary key,
+  kind       text not null default 'site' check (kind in ('school', 'site')),
+  message    text not null check (char_length(message) between 3 and 280),
+  link       text check (link is null or (char_length(link) <= 500 and link ~ '^(https?://|/)')),
+  ends_on    date,
+  active     boolean not null default true,
+  created_by uuid default auth.uid() references public.profiles on delete set null,
+  created_at timestamptz not null default now()
+);
+alter table public.announcements enable row level security;
+create policy "live announcements are public" on public.announcements for select
+  using ((active and (ends_on is null or ends_on >= (now() at time zone 'America/Los_Angeles')::date))
+         or public.is_admin());
+create policy "admins post announcements" on public.announcements for insert with check (public.is_admin());
+create policy "admins edit announcements" on public.announcements for update using (public.is_admin());
+create policy "admins delete announcements" on public.announcements for delete using (public.is_admin());
+
 -- ───────────────────────── feedback ─────────────────────────
 create table public.feedback (
   id         bigint generated always as identity primary key,

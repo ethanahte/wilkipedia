@@ -72,6 +72,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Announcement bar** (`#announce` under the header on every page,
+  `paintAnnouncements` in ui.js): admins post on Review → Announcements;
+  everyone reads live ones (active, not past `ends_on`), migration 010.
+  kind 'school' (gold) or 'site'. Closing one is remembered per browser only.
+  Never post school news you can't source.
+- The home page (`body.home`) hides the header search: its big hero search replaces it.
+- There is no node here, so check JS syntax with osascript (see git history of
+  this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
   `wilkipedia-theme`, restored by `THEME_BOOT` in <head>), falling back to the
   device setting. The dark palette lives in two blocks in style.css; edit both.

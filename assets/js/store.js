@@ -13,6 +13,7 @@
 //               you_get, done_means, due_on, status ('open' | 'done' | 'closed'), closed_at,
 //               created_at, claims: [{user_id, name, expires_at}]}
 //   Work       {bounty_id, user_id, author, reviewed_at}   approved submissions made for a bounty
+//   Announcement {id, kind ('school' | 'site'), message, link, ends_on, active, created_at}
 //   Submission {id, user_id, author, verified, avatar, color, bounty_id, course_slug, kind, teacher, payload,
 //               status, review_note, reviewed_at, created_at}
 //   Comment    {id, course_slug, user_id, author, verified, avatar, color, parent_id, prompt, body, status,
@@ -47,6 +48,8 @@ export function store() {
 }
 
 const now = () => new Date().toISOString();
+// Today as YYYY-MM-DD in the reader's time zone (announcement end dates are plain days)
+const localYMD = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const active = (c) => new Date(c.expires_at) > new Date();
 
 // ───────────────────────────── live ─────────────────────────────
@@ -124,6 +127,20 @@ async function live() {
         .map((r) => ({ bounty_id: r.bounty_id, user_id: r.user_id, reviewed_at: r.reviewed_at,
                        author: r.profiles?.display_name ?? FORMER }));
     },
+
+    // The announcement bar. Everyone reads the live ones; admins read and manage all.
+    async announcements() {
+      const today = localYMD();
+      return ok(await sb.from('announcements').select('id, kind, message, link, ends_on, active, created_at')
+        .eq('active', true).order('created_at', { ascending: false }).limit(6))
+        .filter((a) => !a.ends_on || a.ends_on >= today);
+    },
+    async allAnnouncements() {
+      return ok(await sb.from('announcements').select('*').order('created_at', { ascending: false }));
+    },
+    async postAnnouncement(a) { ok(await sb.from('announcements').insert(a)); },
+    async updateAnnouncement(id, fields) { ok(await sb.from('announcements').update(fields).eq('id', id)); },
+    async deleteAnnouncement(id) { ok(await sb.from('announcements').delete().eq('id', id)); },
 
     async submit(s) { ok(await sb.from('submissions').insert({ ...s, user_id: me.id })); },
     async mySubmissions() {
@@ -317,6 +334,14 @@ async function demo() {
       b.status = status; save();
     },
     async updateBounty(bid, fields) { admin(); Object.assign(db.bounties.find((b) => b.id === bid), fields); save(); },
+    async announcements() {
+      const today = localYMD();
+      return (db.announcements ?? []).filter((a) => a.active && (!a.ends_on || a.ends_on >= today)).slice(0, 6);
+    },
+    async allAnnouncements() { admin(); return db.announcements ?? []; },
+    async postAnnouncement(a) { admin(); (db.announcements ??= []).unshift({ id: id(), active: true, created_at: now(), ...a }); save(); },
+    async updateAnnouncement(aid, fields) { admin(); Object.assign(db.announcements.find((a) => a.id === aid), fields); save(); },
+    async deleteAnnouncement(aid) { admin(); db.announcements = db.announcements.filter((a) => a.id !== aid); save(); },
     async bountyWork() {
       return db.submissions.filter((x) => x.status === 'approved' && x.bounty_id)
         .map((x) => ({ bounty_id: x.bounty_id, user_id: x.user_id, reviewed_at: x.reviewed_at, author: name(x.user_id) }));
