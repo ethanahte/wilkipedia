@@ -80,6 +80,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   THEME_BOOT. Use `lessMotion()` for anything animated. Adding a pref: default
   in PREF_DEFAULTS, the name in THEME_BOOT's list, CSS, a row on the page, and
   its key in the page's reset list.
+- **Interaction layer** (the "impressive but not AI" pass):
+  - Home **pathways map** (`pathways.js`, data from `tools/pathways.py` →
+    `data/pathways.json`): prerequisite chains drawn as a transit map. Every
+    link comes from catalog wording via the ALIASES table; the map quotes it.
+    Never add a link by guessing. Alias ORDER matters (specific before general).
+  - **⌘K palette** (`palette.js`): the header search box and phone search
+    button open it; `/` too unless the page has an element with `data-slash`.
+  - **Hover previews** on class links (`peek.js`), fine pointers only.
+  - **Page transitions**: `@view-transition` in style.css; ui.js names the
+    clicked class name `class-title` in `pageswap` so it glides into the class
+    page's h1. The theme circle reveal is scoped to `html.theme-vt`.
+  - One signature moment only (the map). Don't add competing spectacle.
 - **Announcement bar** (`#announce` under the header on every page,
   `paintAnnouncements` in ui.js): admins post on Review → Announcements;
   everyone reads live ones (active, not past `ends_on`), migration 010.

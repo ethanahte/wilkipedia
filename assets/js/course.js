@@ -7,6 +7,7 @@ import { REVIEWER_ROLES } from './store.js';
 
 const page = JSON.parse($('#page-data').textContent);
 const s = await initHeader();
+import('./palette.js').then((m) => m.rememberClass(page.slug, page.name));   // for the palette's "Recently opened"
 const submitUrl = (kind, teacher) =>
   `${root}submit/?course=${page.slug}&kind=${kind}${teacher ? `&teacher=${encodeURIComponent(teacher)}` : ''}`;
 

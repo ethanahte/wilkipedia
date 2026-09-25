@@ -979,8 +979,25 @@ a.chip { text-decoration: none; }
 
 /* Night-mode switch: the new theme spreads out of the toggle in a circle
    (setThemePref in ui.js). Turn off the default cross-fade so only the circle moves. */
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-new(root) { z-index: 2; }
+html.theme-vt::view-transition-old(root), html.theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.theme-vt::view-transition-new(root) { z-index: 2; }
+
+/* Page-to-page transitions (Chrome/Edge; other browsers just navigate).
+   The page settles in from slightly below; a clicked class name glides into
+   the class page's title. Device "reduce motion" turns it off here, and the
+   site's own Motion setting is honoured in ui.js (pageswap/pagereveal). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+::view-transition-old(root) { animation: 180ms ease-in both vt-out; }
+::view-transition-new(root) { animation: 320ms cubic-bezier(.2, .8, .2, 1) 60ms both vt-in; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+.entry-title h1 { view-transition-name: class-title; }
+::view-transition-group(class-title) { animation-duration: 420ms; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+::view-transition-old(class-title), ::view-transition-new(class-title) { height: 100%; object-fit: contain; object-position: left; }
+header.site { view-transition-name: site-header; }   /* the black bar stays put */
+::view-transition-group(site-header) { animation: none; }
 
 /* ── reader settings (html[data-*], set by THEME_BOOT and the Settings page) ── */
 html[data-text="large"] { font-size: 112.5%; }
@@ -1019,3 +1036,96 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .tgl input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 640px) { .set-row { flex-wrap: wrap; } .set-c { flex-basis: 100%; } .set-c .seg { display: flex; } .set-c .seg button { flex: 1 1 auto; } }
 .btn:disabled { opacity: .45; cursor: default; pointer-events: none; }
+
+/* ── home: the pathways map (pathways.js) ──
+   A transit map of prerequisite chains. Quiet until you point at something;
+   then the path lights up and everything else steps back. */
+.pw-sec .sec-sub { max-width: none; }
+.pw-legend { white-space: nowrap; margin-left: 6px; }
+.pw-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); border: 1.5px solid var(--gold-ink);
+  vertical-align: -1px; margin-right: 4px; }
+.pw-scroll { overflow-x: auto; margin: 8px 0 0; scrollbar-width: thin; }
+.pw-svg { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--sans); overflow: visible; }
+.pw-lane line { stroke: var(--rule); stroke-width: 1; }
+.pw-lane text { font: 500 14px var(--serif); fill: var(--ink); }
+.pw-col { font-size: 10px; fill: var(--muted); letter-spacing: .02em; }
+.pw-edge { fill: none; stroke: var(--muted); stroke-opacity: .38; stroke-width: 1.2; transition: stroke .2s, stroke-opacity .2s, stroke-width .2s; }
+.pw-edge.far { stroke-opacity: .16; }   /* lines between subjects stay quiet until lit */
+.pw-node { cursor: pointer; outline: none; }
+.pw-node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; transition: r .2s, fill .2s; }
+.pw-node text { font-size: 10.5px; fill: var(--ink); transition: opacity .2s; }
+.pw-node.has circle { fill: var(--gold); stroke: var(--gold-ink); }
+.pw-node.has text { font-weight: 700; }
+.pw-node:hover circle, .pw-node.on circle, .pw-node:focus-visible circle { r: 8; }
+.pw-node:focus-visible text { text-decoration: underline; }
+/* focusing: the chosen path stays, the rest fades back */
+.pw-svg.focusing .pw-node:not(.on):not(.near) { opacity: .22; }
+.pw-svg.focusing .pw-edge:not(.lit) { stroke-opacity: .08; }
+.pw-edge.lit { stroke: var(--accent); stroke-opacity: 1; stroke-width: 2.6; }
+.pw-node.on circle { fill: var(--ink); stroke: var(--ink); }
+.pw-node.on.has circle { fill: var(--gold); stroke: var(--ink); stroke-width: 2.4; }
+.pw-node.on text { font-weight: 700; }
+.pw-svg .pw-node, .pw-svg .pw-edge { transition-property: opacity, stroke, stroke-opacity, stroke-width; transition-duration: .2s; }
+/* first sight: lines draw in step by step, stations appear after them */
+.pw-svg:not(.in) .pw-edge { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.pw-svg:not(.in) .pw-node { opacity: 0; }
+.pw-svg.in .pw-edge { stroke-dasharray: 1; animation: pw-draw .9s cubic-bezier(.6, 0, .2, 1) both; animation-delay: calc(var(--lv) * .18s); }
+.pw-svg.in .pw-node { animation: pw-pop .45s ease-out both; animation-delay: calc(var(--lv) * .18s + .1s); }
+@keyframes pw-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes pw-pop { from { opacity: 0; } }   /* opacity only: a CSS transform would override the SVG position */
+.pw-svg.flying .pw-lane, .pw-svg.flying .pw-col { opacity: 0; transition: opacity .3s; }
+.pw-info { min-height: 112px; margin-top: 10px; padding: 14px 0 0; border-top: 2px solid var(--ink); }
+.pw-hint { margin: 0; color: var(--muted); font: italic 1.02rem var(--serif); }
+.pw-card { display: grid; gap: 6px; max-width: 760px; }
+.pw-card p { margin: 0; font-size: .95rem; text-wrap: pretty; }
+.pw-name { font: 500 1.35rem var(--serif); color: var(--ink); text-decoration: none; }
+.pw-k { display: inline-block; min-width: 150px; color: var(--muted); font-size: .85rem; }
+@media (max-width: 760px) { .pw-k { display: block; } .pw-scroll { margin-right: -16px; } }
+
+/* ── search palette (palette.js, ⌘K) ── */
+.palette { position: fixed; inset: 0; z-index: 60; display: grid; justify-items: center; align-items: start; padding: 11vh 16px 16px;
+  background: rgba(10, 10, 8, .38); opacity: 0; transition: opacity .14s; }
+.palette.open { opacity: 1; }
+.pal-card { width: min(780px, 100%); max-height: 72vh; display: flex; flex-direction: column; overflow: hidden; background: var(--card); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 24px 60px rgba(0,0,0,.28);
+  transform: translateY(-6px) scale(.985); transition: transform .18s cubic-bezier(.2, .8, .2, 1); }
+.palette.open .pal-card { transform: none; }
+.palette.calm, .palette.calm .pal-card { transition: none; }
+.pal-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--rule); color: var(--muted); }
+.pal-top input { flex: 1; border: 0; outline: 0; background: none; color: var(--ink); font: 1.15rem var(--sans); padding: 2px 0; }
+.pal-top input:focus { outline: 0; }
+.palette kbd { font: .72rem var(--mono); color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; }
+.pal-body { display: grid; grid-template-columns: 1fr 260px; min-height: 0; flex: 1; }
+.pal-list { overflow-y: auto; padding: 6px; }
+.pal-h { padding: 10px 12px 4px; font-size: .78rem; color: var(--muted); }
+.pal-list .result { border-radius: 4px; }
+.pal-list .result.active { background: var(--on-bg); color: var(--on-fg); }
+.pal-list .result.active .meta, .pal-list .result.active .r-type { color: inherit; opacity: .8; }
+.pal-list .empty { padding: 18px 12px; }
+.pal-peek { border-left: 1px solid var(--rule); padding: 16px; overflow-y: auto; font-size: .88rem; }
+.pal-peek h3 { margin: 2px 0 10px; font-size: 1.25rem; }
+.pal-peek dl { margin: 0; }
+.pal-peek dl > div { padding: 6px 0; border-top: 1px solid var(--rule); }
+.pal-peek dt { color: var(--muted); font-size: .78rem; }
+.pal-peek dd { margin: 1px 0 0; }
+.pal-status { margin: 10px 0 0; color: var(--muted); font-size: .84rem; }
+.pal-status.yes { color: var(--ink); font-weight: 600; }
+.pal-status.yes::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-right: 6px; }
+.pal-peek-hint { color: var(--muted); font: italic .95rem var(--serif); margin: 0; }
+.pal-foot { display: flex; gap: 18px; padding: 8px 16px; border-top: 1px solid var(--rule); font-size: .78rem; color: var(--muted); }
+.pal-foot kbd { margin-right: 2px; }
+html.pal-open { overflow: hidden; }
+@media (max-width: 720px) { .pal-body { grid-template-columns: 1fr; } .pal-peek, .pal-foot { display: none; } .palette { padding-top: 8px; } .pal-card { max-height: 86vh; } }
+.hsearch input[readonly] { cursor: pointer; }
+
+/* ── hover previews on class links (peek.js) ── */
+.peek { position: fixed; z-index: 55; width: 300px; padding: 12px 14px; background: var(--card); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 6px; box-shadow: 0 14px 36px rgba(0,0,0,.18); font-size: .86rem; pointer-events: none;
+  opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .16s cubic-bezier(.2, .8, .2, 1); }
+.peek.on { opacity: 1; transform: none; }
+.peek b { display: block; margin: 3px 0 4px; font: 500 1.12rem/1.25 var(--serif); }
+.peek p { margin: 4px 0 0; }
+.peek-k { color: var(--muted); }
+.peek-status { font-size: .8rem; color: var(--muted); }
+.peek-status.yes { color: var(--ink); font-weight: 600; }
+.peek-status.yes::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-right: 6px; }

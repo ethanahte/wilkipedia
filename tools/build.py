@@ -22,6 +22,7 @@ Standard library only, so it runs on any Mac with no installs.
 import hashlib
 import html
 import json
+import pathways
 import re
 import shutil
 from pathlib import Path
@@ -307,6 +308,8 @@ HOME_COVERS = [
 def build_home(depts):
     grid = "".join(f"""<a class="subject" href="subjects/{e(d['slug'])}/"><b>{e(short_dept(d['name']))}</b>
       <span>{len(d['courses'])} classes</span></a>""" for d in depts)
+    pw = json.loads((DATA / "pathways.json").read_text())
+    pw_edges, pw_nodes = len(pw["edges"]), len(pw["nodes"])
     covers = "".join(f'<div><dt>{title}</dt><dd>{text}</dd></div>' for title, text in HOME_COVERS)
     page("", "Wilkipedia", f"""
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
@@ -319,6 +322,12 @@ def build_home(depts):
     <button class="btn">Search</button>
   </form>
   <p class="hero-trust">Written by Wilcox students. Checked by a reviewer before it goes live. Not an official Wilcox or SCUSD site.</p>
+</section>
+
+<section class="home-sec pw-sec" aria-labelledby="pw-h">
+  <h2 id="pw-h">How classes connect</h2>
+  <p class="sec-sub">{pw_edges} prerequisite links between {pw_nodes} classes, straight from the {e(CATALOG_SOURCE)}. <span class="pw-legend"><i class="has"></i> students have written about it</span></p>
+  <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div>
 </section>
 
 <section class="home-sec" aria-labelledby="covers-h">
@@ -480,7 +489,7 @@ def build_static():
     <button type="button" role="tab" data-view="ledger" aria-selected="false" title="Everything the team has finished (key 3)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 6.6h9.6M3.6 12h9.6M3.6 17.4h6.4"/><path d="M15.4 15.9l2.3 2.3 4.1-4.4"/></svg><span>Ledger</span></button>
     <button type="button" role="tab" data-view="orrery" aria-selected="false" title="The board as a solar system (key 4)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><ellipse cx="12" cy="12" rx="10.2" ry="4.3" transform="rotate(-24 12 12)"/></svg><span>Orrery</span></button>
   </nav>
-  <label class="bb-search"><span class="sr-only">Search bounties</span><input id="bb-q" type="search" placeholder="Search bounties" autocomplete="off"><kbd>/</kbd></label>
+  <label class="bb-search"><span class="sr-only">Search bounties</span><input id="bb-q" type="search" placeholder="Search bounties" autocomplete="off" data-slash><kbd>/</kbd></label>
 </div>
 <div class="bb-tools">
   <div class="chips" id="track-filter"></div>
@@ -783,6 +792,8 @@ def build_data(depts, courses, teachers):
     (DATA / "courses.json").write_text(json.dumps(
         {"departments": [{"slug": d["slug"], "name": short_dept(d["name"])} for d in depts], "courses": slim},
         ensure_ascii=False, separators=(",", ":")))
+    # Prerequisite links for the home page's pathways map (tools/pathways.py)
+    (DATA / "pathways.json").write_text(json.dumps(pathways.build(list(courses.values())), ensure_ascii=False, separators=(",", ":")))
     idx = build_search_index(depts, courses, teachers)
     (DATA / "search.json").write_text(json.dumps(idx, ensure_ascii=False, separators=(",", ":")))
 

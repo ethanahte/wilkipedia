@@ -134,6 +134,7 @@ const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.
 const pages = {
   async home() {
     mountBellStrip($('#bell'));
+    import('./pathways.js').then((m) => m.mount($('#pathways'), s));
     attach($('#home-q'), $('#home-results'));
     addLive(s);
     const [recent, data] = await Promise.all([s.recent(6), courses()]);

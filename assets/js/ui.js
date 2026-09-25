@@ -128,7 +128,9 @@ export function setThemePref(pref, from) {
   const r = from.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
   const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  document.documentElement.classList.add('theme-vt');
   const t = document.startViewTransition(apply);
+  t.finished.finally(() => document.documentElement.classList.remove('theme-vt'));
   t.ready.then(() => {
     document.documentElement.animate(
       { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
@@ -215,15 +217,19 @@ export async function initHeader() {
   const tab = $('#bounty-tab');
   paintAnnouncements(s);
 
-  // Header search: live suggestions on every page (loaded on first focus)
+  // Search palette (⌘K). The header box and the phone search button open it.
+  const pal = import('./palette.js').then((m) => { m.init(s); return m; });
   const hs = $('.hsearch input');
-  if (hs) hs.addEventListener('focus', () => {
-    import('./search.js').then(({ attach, addLive }) => {
-      attach(hs, $('.hsearch .results-pop'));
-      addLive(s);
-      hs.dispatchEvent(new Event('input'));
-    });
-  }, { once: true });
+  if (hs) {
+    hs.setAttribute('readonly', '');                 // typing happens in the palette
+    hs.placeholder = navigator.platform?.startsWith('Mac') ? 'Search…  ⌘K' : 'Search…  Ctrl K';
+    const go = (e) => { e.preventDefault(); hs.blur(); pal.then((m) => m.open()); };
+    hs.addEventListener('focus', go);
+    hs.addEventListener('mousedown', go);
+  }
+  $('.search-btn')?.addEventListener('click', (e) => { e.preventDefault(); pal.then((m) => m.open()); });
+  import('./peek.js').then((m) => m.init(s));
+  pageTransitions();
   // Any "Sign in" button outside the header (home panel, bounty gate…)
   document.addEventListener('click', (e) => {
     if (e.target.closest('.js-signin')) guard(() => s.signIn());
@@ -301,6 +307,27 @@ export async function paintAnnouncements(s) {
     row.remove();
     bar.hidden = !bar.children.length;
   };
+}
+
+// ── page transitions (cross-document View Transitions, Chrome/Edge) ──
+// Pages cross-fade instead of blinking, and a class name you click (in a list,
+// the palette or the pathways map) glides into that class page's title. The
+// CSS opts in with @view-transition; this names the clicked element just
+// before the old page is captured, and skips it all under Reduce motion.
+function pageTransitions() {
+  let clicked = null;
+  document.addEventListener('click', (e) => { clicked = e.target.closest?.('a[href]') || null; }, true);
+  addEventListener('pageswap', (e) => {
+    if (!e.viewTransition) return;
+    if (lessMotion()) { e.viewTransition.skipTransition(); return; }
+    const to = e.activation?.entry?.url || '';
+    if (clicked && /\/courses\/[^/]+\/?$/.test(new URL(to, location.href).pathname)) {
+      const name = clicked.querySelector('text, .c-name, .r-main b, b') || clicked;
+      name.style.viewTransitionName = 'class-title';
+    }
+  });
+  addEventListener('pagereveal', (e) => { if (e.viewTransition && lessMotion()) e.viewTransition.skipTransition(); });
+  addEventListener('pageshow', () => { document.querySelectorAll('[style*="view-transition-name"]').forEach((x) => { x.style.viewTransitionName = ''; }); });
 }
 
 // Resolves once a user exists, prompting sign-in if needed.
