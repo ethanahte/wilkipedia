@@ -1,6 +1,6 @@
 # Wilkipedia
 
-Every class at Wilcox High School, explained by students. A static website on
+The student guide to classes at Wilcox High School, written by Wilcox students. A static website on
 GitHub Pages with a Supabase database for accounts, bounties, submissions and
 comments.
 

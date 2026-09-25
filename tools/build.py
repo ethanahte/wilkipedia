@@ -177,7 +177,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     out = ROOT / path if path.endswith(".html") else ROOT / path / "index.html"
     depth = len(out.relative_to(ROOT).parts) - 1
     r = "../" * depth or "./"
-    full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: every class at Wilcox, explained by students"
+    full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: the student guide to Wilcox classes"
     canon = ""
     if SITE_URL:
         rel = "" if path in ("", "index.html") else path.rstrip("/") + ("/" if not path.endswith(".html") else "")
@@ -280,19 +280,46 @@ def course_row(c, r):
 
 # ─────────────────────────── pages ───────────────────────────
 
+# What a class page covers, in the order a student asks. Every item here is a
+# real field in forms.js (course_overview / teacher_section / resource / tip):
+# don't promise anything the forms don't collect.
+HOME_COVERS = [
+    ('<path d="M9 4h6v3H9z"/><path d="M9 5H6v16h12V5h-3"/><path d="m9 14 2 2 4-4"/>', "Tests &amp; retakes",
+     "What tests look like, how often they come, and whether you can retake them or do corrections."),
+    ('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', "Grading",
+     "How your grade is weighted, and what happens to late work."),
+    ('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', "Homework load",
+     "How much there is and how much time it takes outside class."),
+    ('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>', "Teacher by teacher",
+     "The same class can run differently with each teacher, so every teacher gets their own section."),
+    ('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>', "Study help",
+     "Study guides, resources and tips from students who’ve already taken it."),
+    ('<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>', "Is it right for you?",
+     "How hard it is, who should take it and how to prepare. Handy when you pick next year’s classes."),
+]
+
+
 def build_home(depts):
     grid = "".join(f"""<a class="subject" href="subjects/{e(d['slug'])}/"><b>{e(short_dept(d['name']))}</b>
       <span>{len(d['courses'])} classes</span></a>""" for d in depts)
+    covers = "".join(f'<div class="cover">{_I(icon)}<b>{title}</b><span>{text}</span></div>' for icon, title, text in HOME_COVERS)
     page("", "Wilkipedia", f"""
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
 <section class="hero">
-  <h1>Every class at Wilcox,<br>explained by students.</h1>
-  <p class="lede">Test style, grading, homework load, study guides, tips and summer homework, for any class, even ones you’re not taking.</p>
+  <p class="hero-kicker">The student guide to Wilcox classes</p>
+  <h1>Know a class before you take it.</h1>
+  <p class="lede">Wilkipedia is a free guide to academics at Wilcox, written by Wilcox students. Look up any class to see how it’s tested and graded, how much homework it really takes, and what students who took it wish they’d known.</p>
   <form class="big-search" action="search/" role="search">
-    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search anything: “apush”, “robotics club”, “B204”, “lunch”…" aria-label="Search" autocomplete="off">
+    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search a class or teacher: “APUSH”, “Calc BC”…" aria-label="Search classes, subjects and teachers" autocomplete="off">
     <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
     <button class="btn">Search</button>
   </form>
+  <p class="hero-trust"><span>Written by Wilcox students</span><span>Checked by a reviewer before it goes live</span><span>Not an official Wilcox or SCUSD site</span></p>
+</section>
+
+<section class="covers" aria-labelledby="covers-h">
+  <h2 class="label-h" id="covers-h">What each class page tells you</h2>
+  <div class="covers-grid">{covers}</div>
 </section>
 
 <section>
@@ -310,7 +337,7 @@ def build_home(depts):
 <section>
   <h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
 </section>
-""", desc="Student-written guides to every class at Wilcox High School in Santa Clara: test style, grading, homework, study guides, tips and summer homework.",
+""", desc="The student guide to classes at Wilcox High School in Santa Clara: how each class is tested and graded, homework load, study guides and tips, written by Wilcox students.",
          data={"page": "home"})
 
 
