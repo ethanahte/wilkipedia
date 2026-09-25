@@ -1011,7 +1011,8 @@ def build_campus():
 
 <div id="minimap" title="Open the map (M)"><canvas></canvas><span class="n">N</span></div>
 <div id="crosshair"></div>
-<div id="start">Click to look around · <b>WASD</b> to walk · <b>F</b> to fly up · <b>M</b> for the map</div>
+<div id="place" aria-live="polite"></div>
+<div id="keys" aria-label="Keyboard controls"></div>
 <div id="tip" hidden></div>
 <div id="toast" role="status"></div>
 <aside id="room-card" hidden aria-live="polite"></aside>
@@ -1033,6 +1034,9 @@ def build_campus():
     <dl>
       <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Walk (arrow keys work too). Hold <kbd>Shift</kbd> to run.</dd>
       <dt>Mouse</dt><dd>Click the view, then move the mouse to look. <kbd>Esc</kbd> gives the cursor back.</dd>
+      <dt><kbd>Space</kbd></dt><dd>Jump.</dd>
+      <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Jump to a viewpoint: the quad, the front, Building B, the gym, the stadium, the creek.</dd>
+      <dt><kbd>H</kbd></dt><dd>Hide everything but the view (for screenshots).</dd>
       <dt><kbd>F</kbd></dt><dd>Fly up for the aerial view, and back down. Up there: drag to turn, right-drag to slide, scroll to zoom, double-click the ground to land.</dd>
       <dt><kbd>M</kbd></dt><dd>The map: click anywhere to jump there, or type a room number.</dd>
       <dt>Room plates</dt><dd>Point at a room number on a wall and click (or press <kbd>E</kbd>) to open that room on Wilkipedia.</dd>

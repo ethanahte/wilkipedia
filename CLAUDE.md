@@ -122,11 +122,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Never invent what something looks like.** Every facade kit and landmark is
     from a photo the owner sent (listed in the file headers). Ask for a photo
     before adding a building's detail, interior, or a logo placement.
-  - Look: MeshToonMaterial (far side of the ramp = 0, so form and cast shadows
-    match), a one-pass G-buffer (every material is patched by `gbuffer()` in
-    toon.js to write normal+depth to a second target) and `post.js` for ink
-    outlines, bloom, grade, vignette, paper grain. Any new material must go
-    through `gbuffer()` or the ink pass reads garbage there.
+  - Look (modelled on the owner's reference, a painted anime town): toon
+    materials with the far side of the ramp = 0 (form and cast shadows match),
+    a lavender-blue sky light so every shadow is cool, warm sun, FogExp2 haze
+    into a pale horizon, a painted sky (cirrus noise + the real Santa Cruz
+    Mountains / Diablo Range on the horizon). `gbuffer()` in toon.js patches
+    every material: it writes normal+depth to a second target for the ink pass
+    and adds a world-space watercolour grain + contact darkening at wall bases.
+    Any new material must go through `gbuffer()`. ink modes: 'soft' (foliage:
+    depth stored negated, only its outline is inked), 'sky' (clouds), 'none'.
+  - Foliage = a darker solid core + many alpha-tested "leaf cards" (atlas in
+    `T.leaves`: leaves | needles | solid) with normals pointing out from the
+    crown centre (`cards()` in nature.js). Foliage buckets get a
+    customDepthMaterial so shadows are dappled. No people on campus (owner's call).
   - Static geometry is written into per-material, per-80 m-chunk buckets
     (`geo.js` World) and merged: ~235 draw calls for the whole campus.
   - Quality High/Medium/Low (localStorage `wilcox-campus-quality`); an automatic
@@ -134,6 +142,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Testing: the Browser pane is often hidden (rAF stalls, screenshots go
     stale). `window.__campus.frame(dt)` renders one frame on demand; a boot
     that sees a 0×0 window must still size the camera (onResize guards it).
+  - Keys: WASD, Shift, Space jump, F fly, 1–6 viewpoints, M map, H hide UI.
   - Phases: 1 = quad, front, landmarks, whole-campus massing (done). Next: B
     interiors (both floors, stairs), R, gyms/pool/stadium detail, west side.
 - **Announcement bar** (`#announce` under the header on every page,

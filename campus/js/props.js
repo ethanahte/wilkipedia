@@ -8,7 +8,8 @@ import { color, rng, inPoly } from './geo.js';
 import { gbuffer, TOON } from './toon.js';
 import { CREEK, BRIDGES, FIELDS, TRACK, CAMPUS, WORLD, MONROE_PTS, CALABAZAS_PTS, SANJUAN_PTS, BUILDINGS } from './layout.js';
 import { STREETS } from './ground.js';
-import { shadeTree, conifer, youngTree, G } from './nature.js';
+import { shadeTree, conifer, youngTree, cards, SOLID_UV, G } from './nature.js';
+import { World } from './geo.js';
 import { addSegment, addCircle, addBox, addPoly } from './collide.js';
 
 const post = color('#8f959b'), rail = color('#a6abb0'), conc = color('#cfcbc3'), alu = color('#b9bec3'), black = color('#222326');
@@ -29,7 +30,7 @@ export function fence(W, pts, h = 1.8, { collide = true } = {}) {
   }
 }
 
-export function buildProps(W, scene, q) {
+export function buildProps(W, scene, q, M) {
   const R = rng(77);
   // ── creek: fences on both banks with gaps at the bridges and Monroe ──
   const gaps = [...BRIDGES.map((b) => [b.z - b.w / 2 - 0.2, b.z + b.w / 2 + 0.2]), [-120, -97]].sort((a, b) => a[0] - b[0]);
@@ -86,7 +87,7 @@ export function buildProps(W, scene, q) {
   stadium(W, R);
   diamonds(W);
   tennis(W);
-  neighbourhood(scene, R, q);
+  neighbourhood(scene, R, q, M);
 }
 
 function pool(W) {
@@ -208,7 +209,7 @@ function distToPolyline(x, z, pts) {
   return best;
 }
 
-function neighbourhood(scene, R, q) {
+function neighbourhood(scene, R, q, M) {
   const houses = [], trees = [];
   const majors = [[MONROE_PTS, 9], [CALABAZAS_PTS, 8], [SANJUAN_PTS, 8]];
   const clear = (x, z, pad) => {
@@ -261,7 +262,8 @@ function neighbourhood(scene, R, q) {
   for (const im of [body, roof]) { im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere(); scene.add(im); }
 
   const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.25, 1, 5).translate(0, 0.5, 0), mat(), trees.length);
-  const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), mat(), trees.length);
+  const crown = new THREE.InstancedMesh(crownGeometry(R), M.foliage, trees.length);
+  crown.customDepthMaterial = M.foliage.userData.depthMat;
   trees.forEach((t, i) => {
     const h = 7 * t.s;
     m.compose(new THREE.Vector3(t.x, 0, t.z), qn.identity(), new THREE.Vector3(1, h * 0.45, 1));
@@ -270,4 +272,23 @@ function neighbourhood(scene, R, q) {
     crown.setMatrixAt(i, m); crown.setColorAt(i, G.dark[i % 3]);
   });
   for (const im of [trunk, crown]) { im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere(); scene.add(im); }
+}
+
+// One reusable crown for the street trees: a solid core wrapped in leaf cards.
+function crownGeometry(R) {
+  const W = new World();
+  cards(W, 0, 0, 0, 1, 0.85, 1, new THREE.Color(1, 1, 1), R, 70, 0.9);
+  const b = [...W.buckets.values()][0];
+  const core = new THREE.IcosahedronGeometry(0.66, 1);
+  const cp = core.attributes.position.array, cn = core.attributes.normal.array;
+  const P = [...b.p], N = [...b.n], U = [...b.u], C = [...b.c];
+  for (let i = 0; i < cp.length; i += 3) {
+    P.push(cp[i], cp[i + 1] * 0.85, cp[i + 2]); N.push(cn[i], cn[i + 1], cn[i + 2]); U.push(...SOLID_UV); C.push(0.6, 0.6, 0.6);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  return g;
 }

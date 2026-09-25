@@ -10,8 +10,8 @@
 <link rel="canonical" href="https://wilcoxwiki.org/campus/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="campus.css?v=0f00383fbb">
-<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=0a30b53042", "./js/collide.js": "./js/collide.js?v=75cbc713bf", "./js/controls.js": "./js/controls.js?v=210e3f5bbc", "./js/geo.js": "./js/geo.js?v=22dcd88070", "./js/ground.js": "./js/ground.js?v=f760980e36", "./js/hud.js": "./js/hud.js?v=efa1e78446", "./js/landmarks.js": "./js/landmarks.js?v=f4ff422b65", "./js/layout.js": "./js/layout.js?v=0cc03029db", "./js/life.js": "./js/life.js?v=29f40e3728", "./js/main.js": "./js/main.js?v=503d31cd39", "./js/nature.js": "./js/nature.js?v=bb852c699a", "./js/post.js": "./js/post.js?v=f525d272fb", "./js/props.js": "./js/props.js?v=93268d70af", "./js/quad.js": "./js/quad.js?v=6ba216820b", "./js/rooms.js": "./js/rooms.js?v=3a3de8a433", "./js/toon.js": "./js/toon.js?v=24a13e2fe1", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
+<link rel="stylesheet" href="campus.css?v=5fbfe17248">
+<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=0a30b53042", "./js/collide.js": "./js/collide.js?v=75cbc713bf", "./js/controls.js": "./js/controls.js?v=b884fae10f", "./js/geo.js": "./js/geo.js?v=c0f8bdb193", "./js/ground.js": "./js/ground.js?v=f760980e36", "./js/hud.js": "./js/hud.js?v=1da29fa87c", "./js/landmarks.js": "./js/landmarks.js?v=f4ff422b65", "./js/layout.js": "./js/layout.js?v=0cc03029db", "./js/life.js": "./js/life.js?v=c71e2370db", "./js/main.js": "./js/main.js?v=effe6745bf", "./js/nature.js": "./js/nature.js?v=0feda81310", "./js/post.js": "./js/post.js?v=c4b91a33b0", "./js/props.js": "./js/props.js?v=b72790c30b", "./js/quad.js": "./js/quad.js?v=6ba216820b", "./js/rooms.js": "./js/rooms.js?v=3a3de8a433", "./js/toon.js": "./js/toon.js?v=3b1f43e44f", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
 </head>
 <body data-root="../" data-mode="walk">
 <canvas id="view" tabindex="0" aria-label="3D view of the Wilcox campus"></canvas>
@@ -44,7 +44,8 @@
 
 <div id="minimap" title="Open the map (M)"><canvas></canvas><span class="n">N</span></div>
 <div id="crosshair"></div>
-<div id="start">Click to look around · <b>WASD</b> to walk · <b>F</b> to fly up · <b>M</b> for the map</div>
+<div id="place" aria-live="polite"></div>
+<div id="keys" aria-label="Keyboard controls"></div>
 <div id="tip" hidden></div>
 <div id="toast" role="status"></div>
 <aside id="room-card" hidden aria-live="polite"></aside>
@@ -66,6 +67,9 @@
     <dl>
       <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Walk (arrow keys work too). Hold <kbd>Shift</kbd> to run.</dd>
       <dt>Mouse</dt><dd>Click the view, then move the mouse to look. <kbd>Esc</kbd> gives the cursor back.</dd>
+      <dt><kbd>Space</kbd></dt><dd>Jump.</dd>
+      <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Jump to a viewpoint: the quad, the front, Building B, the gym, the stadium, the creek.</dd>
+      <dt><kbd>H</kbd></dt><dd>Hide everything but the view (for screenshots).</dd>
       <dt><kbd>F</kbd></dt><dd>Fly up for the aerial view, and back down. Up there: drag to turn, right-drag to slide, scroll to zoom, double-click the ground to land.</dd>
       <dt><kbd>M</kbd></dt><dd>The map: click anywhere to jump there, or type a room number.</dd>
       <dt>Room plates</dt><dd>Point at a room number on a wall and click (or press <kbd>E</kbd>) to open that room on Wilkipedia.</dd>
@@ -76,6 +80,6 @@
 </div>
 
 <noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#faf8f2;font:18px Georgia,serif;margin:0">The 3D campus needs JavaScript. The <a href="../map/">campus map</a> works without it.</p></noscript>
-<script type="module" src="./js/main.js?v=503d31cd39"></script>
+<script type="module" src="./js/main.js?v=effe6745bf"></script>
 </body>
 </html>

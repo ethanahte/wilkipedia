@@ -1,38 +1,68 @@
-// What moves: the sky and its drifting cumulus, a few birds, the flags on the
-// front flagpole, and students walking across the quad.
+// What moves, and the sky: a painted sky with streaks of cirrus and the real
+// mountains on the horizon, drifting cumulus, a few birds, the flags on the
+// front flagpole, and leaves and crape-myrtle petals drifting down near you.
 
 import * as THREE from 'three';
 import { World, color, rng } from './geo.js';
 import { gbuffer, SOFT, TOON, canvasTex } from './toon.js';
-import { FRONT, QUAD } from './layout.js';
-import { resolve, heightAt } from './collide.js';
+import { FRONT, STAGE } from './layout.js';
 
-export const SUN = new THREE.Vector3(-0.62, 0.52, 0.58).normalize();   // afternoon sun, low in the south-west
-export const HORIZON = new THREE.Color('#cfe2ef');
+export const SUN = new THREE.Vector3(-0.62, 0.55, 0.56).normalize();   // afternoon sun, low in the south-west
+export const HORIZON = new THREE.Color('#dde8f3');
 
 // ── sky dome ──
+// A vertical gradient painted like an anime background: deep blue overhead,
+// pale and hazy at the horizon, with streaks of cirrus drawn by noise, and
+// the ranges you really see from Wilcox: the Santa Cruz Mountains to the
+// south-west, the Diablo Range (Mt Hamilton) to the east, almost nothing
+// north over the bay. They sit in the haze as flat blue-violet shapes.
 export function makeSky() {
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false,
-    uniforms: { sun: { value: SUN } },
-    vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.); gl_Position = projectionMatrix * p; gl_Position.z = gl_Position.w; }`,
+    uniforms: { sun: { value: SUN }, time: { value: 0 } },
+    vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.); gl_Position = projectionMatrix * p; gl_Position.z = gl_Position.w * 0.99999; }`,
     fragmentShader: `layout(location = 1) out highp vec4 gNormalDepth;
-      uniform vec3 sun; varying vec3 vDir;
+      uniform vec3 sun; uniform float time; varying vec3 vDir;
       vec3 toLin(vec3 c){ return pow(c, vec3(2.2)); }
+      float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+      float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1,0)), f.x), mix(hash(i + vec2(0,1)), hash(i + 1.0), f.x), f.y); }
+      float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++){ v += a * noise(p); p = p * 2.03 + 17.1; a *= 0.5; } return v; }
+      float bump(float a, float c, float w){ float d = abs(mod(a - c + 3.14159, 6.28318) - 3.14159); return exp(-d * d / (w * w)); }
       void main(){
-        float h = clamp(vDir.y, -0.1, 1.0);
-        vec3 zen = toLin(vec3(0.20,0.50,0.86)), mid = toLin(vec3(0.45,0.70,0.93)), hor = toLin(vec3(0.83,0.90,0.95));
-        vec3 c = mix(hor, mid, smoothstep(0.0, 0.22, h));
-        c = mix(c, zen, smoothstep(0.22, 0.85, h));
-        float s = max(dot(normalize(vDir), sun), 0.0);
-        c += toLin(vec3(1.0,0.93,0.78)) * (pow(s, 12.0) * 0.35 + pow(s, 600.0) * 3.0);
+        vec3 d = normalize(vDir);
+        float h = clamp(d.y, -0.2, 1.0);
+        vec3 zen = toLin(vec3(0.22, 0.49, 0.88)), mid = toLin(vec3(0.53, 0.73, 0.95)), hor = toLin(vec3(0.87, 0.91, 0.95));
+        vec3 c = mix(hor, mid, smoothstep(0.0, 0.2, h));
+        c = mix(c, zen, smoothstep(0.2, 0.9, h));
+        // cirrus: long wisps, projected onto a high flat layer and stretched
+        vec2 uv = d.xz / max(d.y, 0.04);
+        uv = mat2(0.87, -0.5, 0.5, 0.87) * uv;
+        float w = fbm(vec2(uv.x * 0.9, uv.y * 3.6) + vec2(time * 0.004, 0.0));
+        w = smoothstep(0.52, 0.86, w) * smoothstep(0.02, 0.22, d.y) * (1.0 - smoothstep(0.55, 0.95, d.y));
+        c = mix(c, toLin(vec3(0.98, 0.99, 1.0)), w * 0.8);
+        // the sun: a soft warm glow and a small bright disc
+        float s = max(dot(d, sun), 0.0);
+        c += toLin(vec3(1.0, 0.94, 0.8)) * (pow(s, 10.0) * 0.28 + pow(s, 900.0) * 3.0);
+        // mountains
+        float az = atan(d.z, d.x);
+        float ridge = 0.042 * bump(az, 2.35, 0.75) + 0.028 * bump(az, 0.45, 0.8) + 0.018 * bump(az, -0.5, 0.5) + 0.004;
+        ridge *= 0.7 + fbm(vec2(az * 7.0, 1.3)) * 0.6;
+        ridge += (fbm(vec2(az * 28.0, 4.0)) - 0.5) * 0.004;
+        float e = asin(clamp(d.y, -1.0, 1.0));
+        if (e < ridge && e > -0.02) {
+          float t = clamp(e / max(ridge, 1e-3), 0.0, 1.0);
+          vec3 far = toLin(vec3(0.62, 0.69, 0.84)), near = toLin(vec3(0.78, 0.83, 0.91));
+          c = mix(near, far, t * 0.8 + 0.1);
+        }
         gl_FragColor = vec4(c, 1.0);
         gNormalDepth = vec4(0.5, 0.5, 1.0, 5000.0);
       }`,
   });
-  const m = new THREE.Mesh(new THREE.SphereGeometry(2500, 32, 16), mat);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(2500, 48, 24), mat);
   m.renderOrder = -10;
   m.frustumCulled = false;
+  m.userData.update = (dt) => { mat.uniforms.time.value += dt; };
   return m;
 }
 
@@ -40,8 +70,8 @@ export function makeSky() {
 export function makeClouds(n = 16) {
   const R = rng(5);
   const group = new THREE.Group();
-  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, vertexColors: true }));
-  const white = color('#ffffff'), shade = color('#dfe8f3');
+  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, vertexColors: true, fog: false }), { ink: 'sky', paint: false });
+  const white = color('#ffffff'), shade = color('#d9e1f2');
   for (let i = 0; i < n; i++) {
     const W = new World();
     const k = 14 + R() * 26;
@@ -169,82 +199,45 @@ export function makeFlags() {
   return group;
 }
 
-// ── students walking round the quad ──
-export function makeStudents(n = 18) {
-  const R = rng(31);
-  const group = new THREE.Group();
-  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON }));
-  const parts = {
-    legs: new THREE.BoxGeometry(0.15, 0.82, 0.17).translate(0, -0.41, 0),
-    torso: new THREE.BoxGeometry(0.44, 0.6, 0.26).translate(0, 0.3, 0),
-    head: new THREE.SphereGeometry(0.13, 10, 8),
-    hair: new THREE.SphereGeometry(0.14, 10, 6, 0, Math.PI * 2, 0, Math.PI / 1.8),
-    pack: new THREE.BoxGeometry(0.34, 0.42, 0.16),
+
+// ── drifting leaves (and pink crape-myrtle petals near the stage) ──
+export function makeLeaves(n = 80) {
+  let seed = 19; const R = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  // a small leaf shape (a pointed oval), not a square
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute([-0.045, 0, 0, 0, 0.022, 0, 0.045, 0, 0, -0.045, 0, 0, 0.045, 0, 0, 0, -0.022, 0], 3));
+  geo.computeVertexNormals();
+  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, side: THREE.DoubleSide }), { ink: 'none', paint: false });
+  const im = new THREE.InstancedMesh(geo, mat, n);
+  im.frustumCulled = false;
+  const leafCols = ['#8db84f', '#a9c35a', '#c9b562', '#6f9f45'].map(color), pinks = ['#f0a7c3', '#e889ae', '#f6c2d6'].map(color);
+  const P = [];
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), S = new THREE.Vector3(1, 1, 1), V = new THREE.Vector3();
+  const spawn = (p, cam, first) => {
+    const a = R() * Math.PI * 2, d = 2 + R() * 22;
+    p.x = cam.x + Math.cos(a) * d; p.z = cam.z + Math.sin(a) * d;
+    p.y = first ? cam.y - 1 + R() * 9 : cam.y + 4 + R() * 7;
+    p.vy = 0.5 + R() * 0.5; p.ph = R() * 6; p.spin = 1 + R() * 3;
+    const nearStage = Math.hypot(p.x - STAGE.x, p.z - STAGE.z) < 22;
+    im.setColorAt(p.i, nearStage && R() < 0.75 ? pinks[Math.floor(R() * 3)] : leafCols[Math.floor(R() * 4)]);
+    if (im.instanceColor) im.instanceColor.needsUpdate = true;
   };
-  const counts = { legs: n * 2, torso: n, head: n, hair: n, pack: n };
-  const im = {};
-  for (const k of Object.keys(parts)) {
-    im[k] = new THREE.InstancedMesh(parts[k], mat, counts[k]);
-    im[k].castShadow = true; im[k].frustumCulled = false;
-    group.add(im[k]);
-  }
-  const shirts = ['#e3b23c', '#2f3b52', '#f4f4f0', '#c9473d', '#3f7fb5', '#4f8a5b', '#8c5aa6', '#141414', '#e87f3a'].map(color);
-  const skins = ['#f1c9a5', '#d9a47a', '#a8744f', '#7a5236', '#e8b890'].map(color);
-  const hairs = ['#1c1a18', '#3b2a1d', '#5a3b24', '#111'].map(color);
-  const pants = ['#2c3446', '#4a4f57', '#1d2230', '#6d5c47', '#2f4c6e'].map(color);
-  const packs = ['#222', '#6b2f3a', '#2f5d8a', '#3f6d44', '#d2a236'].map(color);
-  const walkers = [];
-  const spot = () => {
-    for (let k = 0; k < 40; k++) {
-      const x = QUAD.x0 + 4 + R() * (QUAD.x1 - QUAD.x0 - 8), z = QUAD.z0 + 3 + R() * (QUAD.z1 - QUAD.z0 - 6);
-      const p = { x, z };
-      resolve(p, 0.4);
-      if (Math.hypot(p.x - x, p.z - z) < 0.01 && heightAt(x, z) < 0.1) return [x, z];
+  for (let i = 0; i < n; i++) P.push({ i });
+  let started = false;
+  im.userData.update = (dt, t, cam, show) => {
+    im.visible = show;
+    if (!show) return;
+    if (!started) { P.forEach((p) => spawn(p, cam, true)); started = true; }
+    for (const p of P) {
+      p.y -= p.vy * dt;
+      p.x += Math.sin(t * 1.3 + p.ph) * 0.35 * dt + 0.25 * dt;
+      p.z += Math.cos(t * 0.9 + p.ph) * 0.3 * dt;
+      if (p.y < 0.02 || Math.hypot(p.x - cam.x, p.z - cam.z) > 26) spawn(p, cam, false);
+      E.set(t * p.spin + p.ph, t * p.spin * 0.7, p.ph);
+      M.compose(V.set(p.x, p.y, p.z), Q.setFromEuler(E), S);
+      im.setMatrixAt(p.i, M);
     }
-    return [0, -12];
+    im.instanceMatrix.needsUpdate = true;
   };
-  for (let i = 0; i < n; i++) {
-    const [x, z] = spot(), [tx, tz] = spot();
-    walkers.push({ x, z, tx, tz, speed: 1.1 + R() * 0.5, phase: R() * 6, pause: 0, h: 0.92 + R() * 0.14 });
-    im.torso.setColorAt(i, shirts[i % shirts.length]);
-    im.head.setColorAt(i, skins[(i * 3) % skins.length]);
-    im.hair.setColorAt(i, hairs[i % hairs.length]);
-    im.pack.setColorAt(i, packs[(i * 2) % packs.length]);
-    im.legs.setColorAt(i * 2, pants[i % pants.length]); im.legs.setColorAt(i * 2 + 1, pants[i % pants.length]);
-  }
-  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), P = new THREE.Vector3(), E = new THREE.Euler();
-  const put = (mesh, idx, x, y, z, yaw, pitch = 0, s = 1) => {
-    E.set(pitch, yaw, 0, 'YXZ'); Q.setFromEuler(E); S.setScalar(s); P.set(x, y, z);
-    mesh.setMatrixAt(idx, M.compose(P, Q, S));
-  };
-  group.userData.update = (dt, t) => {
-    walkers.forEach((w, i) => {
-      let moving = false;
-      if (w.pause > 0) w.pause -= dt;
-      else {
-        const dx = w.tx - w.x, dz = w.tz - w.z, d = Math.hypot(dx, dz);
-        if (d < 0.6) { [w.tx, w.tz] = spot(); w.pause = R() < 0.4 ? 1 + R() * 4 : 0; }
-        else {
-          const ox = w.x, oz = w.z;
-          w.x += (dx / d) * w.speed * dt; w.z += (dz / d) * w.speed * dt;
-          resolve(w, 0.35);
-          // stuck against something: pick somewhere else
-          if (Math.hypot(w.x - ox, w.z - oz) < w.speed * dt * 0.3) [w.tx, w.tz] = spot();
-          w.yaw = Math.atan2(dx, dz);
-          moving = true;
-        }
-      }
-      const s = w.h, swing = moving ? Math.sin(t * 7.5 + w.phase) * 0.55 : 0, bob = moving ? Math.abs(Math.sin(t * 7.5 + w.phase)) * 0.04 : 0;
-      const yaw = w.yaw || 0, hip = 0.86 * s + bob;
-      const sx = Math.cos(yaw) * 0.1, sz = -Math.sin(yaw) * 0.1;
-      put(im.legs, i * 2, w.x + sx, hip, w.z + sz, yaw, swing, s);
-      put(im.legs, i * 2 + 1, w.x - sx, hip, w.z - sz, yaw, -swing, s);
-      put(im.torso, i, w.x, hip, w.z, yaw, 0, s);
-      put(im.head, i, w.x, hip + 0.78 * s, w.z, yaw, 0, s);
-      put(im.hair, i, w.x - Math.sin(yaw) * 0.02, hip + 0.8 * s, w.z - Math.cos(yaw) * 0.02, yaw, -0.2, s);
-      put(im.pack, i, w.x - Math.sin(yaw) * 0.22 * s, hip + 0.33 * s, w.z - Math.cos(yaw) * 0.22 * s, yaw, 0, s);
-    });
-    for (const k of Object.keys(im)) im[k].instanceMatrix.needsUpdate = true;
-  };
-  return group;
+  return im;
 }

@@ -159,6 +159,10 @@ export class Controls {
     this.yaw = yaw; this.pitch = pitch;
   }
 
+  jump() {
+    if (this.pos.y - heightAt(this.pos.x, this.pos.z) < 0.05) this.vy = 4.6;
+  }
+
   flyUp() {
     if (this.mode !== 'walk') return;
     document.exitPointerLock?.();
@@ -248,8 +252,8 @@ export class Controls {
     }
     // settle onto the ground (steps up instantly-ish, falls smoothly)
     const g = heightAt(this.pos.x, this.pos.z);
-    if (g > this.pos.y) this.pos.y = Math.min(g, this.pos.y + dt * 6);
-    else { this.vy -= 20 * dt; this.pos.y = Math.max(g, this.pos.y + this.vy * dt); if (this.pos.y === g) this.vy = 0; }
+    if (g > this.pos.y && this.vy <= 0) this.pos.y = Math.min(g, this.pos.y + dt * 6);
+    else { this.vy -= 14 * dt; this.pos.y = Math.max(g, this.pos.y + this.vy * dt); if (this.pos.y === g) this.vy = 0; }
     this._walkPose(cam);
   }
 
@@ -257,7 +261,7 @@ export class Controls {
     const try1 = (dx, dz) => {
       const p = { x: this.pos.x + dx, z: this.pos.z + dz };
       resolve(p, RADIUS);
-      if (heightAt(p.x, p.z) - this.pos.y > STEP) return false;
+      if (heightAt(p.x, p.z) - this.pos.y > STEP + Math.max(0, this.vy) * 0.05) return false;
       this.pos.x = p.x; this.pos.z = p.z;
       return true;
     };

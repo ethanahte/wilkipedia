@@ -225,6 +225,7 @@ export class World {
       const mesh = new THREE.Mesh(g, mat);
       mesh.matrixAutoUpdate = false;
       mesh.castShadow = shadows && !mat.userData.noCast;
+      if (mat.userData.depthMat) mesh.customDepthMaterial = mat.userData.depthMat;
       mesh.receiveShadow = shadows;
       mesh.name = key;
       parent.add(mesh);

@@ -27,18 +27,68 @@ function ramp(values) {
 export const TOON = ramp([0, 0, 0, 0, 140, 255, 255, 255]);
 export const SOFT = ramp([150, 150, 150, 190, 225, 255, 255, 255]);
 
+// ── the painted-surface patch ──
+// Every toon material gets a hand-painted grain: a watercolour noise texture
+// sampled in world space from three sides (so it never stretches), nudging the
+// colour a few percent lighter or darker. Walls also darken a little where they
+// meet the ground, like the contact shading a background painter adds.
+let PAINT = null;
+function paintTex() {
+  if (PAINT) return PAINT;
+  const W = 256, c = document.createElement('canvas'); c.width = c.height = W;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgb(128,128,128)'; g.fillRect(0, 0, W, W);
+  let sd = 3; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+  const blot = (x, y, rx, ry, a, v) => {
+    for (const ox of [-W, 0, W]) for (const oy of [-W, 0, W]) {   // wrap, so the texture tiles
+      const gr = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, Math.max(rx, ry));
+      gr.addColorStop(0, `rgba(${v},${v},${v},${a})`); gr.addColorStop(1, `rgba(${v},${v},${v},0)`);
+      g.fillStyle = gr; g.beginPath(); g.ellipse(x + ox, y + oy, rx, ry, 0, 0, Math.PI * 2); g.fill();
+    }
+  };
+  for (let i = 0; i < 260; i++) blot(r() * W, r() * W, 8 + r() * 40, 6 + r() * 30, 0.18 + r() * 0.2, r() < 0.5 ? 70 : 200);
+  for (let i = 0; i < 600; i++) blot(r() * W, r() * W, 1.5 + r() * 4, 1 + r() * 3, 0.25, r() < 0.5 ? 60 : 210);   // fine grain
+  PAINT = new THREE.CanvasTexture(c);
+  PAINT.wrapS = PAINT.wrapT = THREE.RepeatWrapping;
+  PAINT.colorSpace = THREE.NoColorSpace;
+  return PAINT;
+}
+
 // ── the G-buffer patch ──
+// ink: 'normal' | 'soft' (foliage: only its outline against what's behind it) |
+// 'none' (decals) | 'sky' (clouds: pretend to be sky, so no outline at all)
 const OUT = 'layout(location = 1) out highp vec4 gNormalDepth;\n';
-export function gbuffer(mat, { noInk = false } = {}) {
+export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true } = {}) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (s, r) => {
     prev?.(s, r);
     const hasNormal = /normal_fragment_begin/.test(s.fragmentShader);
-    const n = hasNormal && !noInk ? 'normalize(normal) * 0.5 + 0.5' : 'vec3(0.5, 0.5, 1.0)';
-    s.fragmentShader = OUT + s.fragmentShader.replace(/}\s*$/,
-      `  gNormalDepth = vec4(${n}, 1.0 / gl_FragCoord.w);\n}`);
+    const n = hasNormal && ink !== 'none' && ink !== 'sky' ? 'normalize(normal) * 0.5 + 0.5' : 'vec3(0.5, 0.5, 1.0)';
+    const depth = ink === 'sky' ? '5000.0' : ink === 'soft' ? '-1.0 / gl_FragCoord.w' : '1.0 / gl_FragCoord.w';
+    let fs = OUT + s.fragmentShader.replace(/}\s*$/, `  gNormalDepth = vec4(${n}, ${depth});\n}`);
+    if (paint && hasNormal && /#include <project_vertex>/.test(s.vertexShader) && /#include <beginnormal_vertex>/.test(s.vertexShader)) {
+      s.uniforms.tPaint = { value: paintTex() };
+      s.vertexShader = 'varying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + s.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
+  vec4 pw = vec4(transformed, 1.0);
+  vec3 pn = objectNormal;
+  #ifdef USE_INSTANCING
+    pw = instanceMatrix * pw; pn = mat3(instanceMatrix) * pn;
+  #endif
+  vPaintPos = (modelMatrix * pw).xyz;
+  vPaintNrm = mat3(modelMatrix) * pn;`);
+      fs = 'uniform sampler2D tPaint;\nvarying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + fs.replace('#include <color_fragment>', `#include <color_fragment>
+  {
+    vec3 an = abs(normalize(vPaintNrm)) + 1e-3;
+    float pz = texture2D(tPaint, vPaintPos.xz * 0.085).r * an.y + texture2D(tPaint, vPaintPos.xy * 0.085).r * an.z + texture2D(tPaint, vPaintPos.zy * 0.085).r * an.x;
+    pz /= an.x + an.y + an.z;
+    diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.26;
+    float wall = 1.0 - clamp(an.y, 0.0, 1.0);
+    diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, vPaintPos.y)), wall);
+  }`);
+    }
+    s.fragmentShader = fs;
   };
-  mat.customProgramCacheKey = () => `gbuf${noInk ? 'n' : ''}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
+  mat.customProgramCacheKey = () => `gbuf2|${ink}|${paint ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
   return mat;
 }
 
@@ -131,6 +181,32 @@ export function makeTextures() {
     g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w / 2, 0); g.lineTo(w, h / 2); g.lineTo(w / 2, h); g.closePath(); g.stroke();
   }, { repeat: [0.12, 0.12] });
 
+  // Foliage atlas, drawn in greys so each tree tints it: [leaf clump | needle clump | solid].
+  T.leaves = canvasTex(768, 256, (g) => {
+    let sd = 11; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    g.clearRect(0, 0, 768, 256);
+    // broad leaves: a round, ragged clump of many small leaves, lit from the top left
+    for (let i = 0; i < 320; i++) {
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 100, x = 128 + Math.cos(a) * d, y = 128 + Math.sin(a) * d;
+      const lit = 0.55 - (Math.cos(a) * d + Math.sin(a) * d) / 240 + (r() - 0.5) * 0.3;
+      const v = Math.round(140 + Math.max(0, Math.min(1, lit)) * 115);
+      g.save(); g.translate(x, y); g.rotate(r() * Math.PI * 2);
+      const w = 7 + r() * 7 - d * 0.02, h = w * 0.55;
+      g.beginPath(); g.moveTo(-w, 0); g.quadraticCurveTo(0, -h * 1.6, w, 0); g.quadraticCurveTo(0, h * 1.6, -w, 0);
+      g.fillStyle = `rgb(${v},${v},${v})`; g.fill();
+      if (r() < 0.55) { g.lineWidth = 1.1; g.strokeStyle = 'rgb(96,96,96)'; g.stroke(); }
+      g.restore();
+    }
+    // needles: drooping sprays of short strokes
+    for (let i = 0; i < 420; i++) {
+      const x = 384 + (r() - 0.5) * 170, y = 70 + r() * 120, L = 18 + r() * 30, a = Math.PI / 2 + (r() - 0.5) * 1.3;
+      const v = Math.round(140 + r() * 110 - (y - 70) * 0.35);
+      g.strokeStyle = `rgb(${v},${v},${v})`; g.lineWidth = 3.2; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * L * 0.6, y + Math.sin(a) * L * 0.3, x + Math.cos(a) * L, y + Math.sin(a) * L); g.stroke();
+    }
+    g.fillStyle = 'rgb(205,205,205)'; g.fillRect(560, 40, 176, 176);
+  }, { mips: true });
+
   T.mosaic = canvasTex(256, 256, (g, w, h) => {
     const cols = ['#8b7355', '#a89276', '#6f6252', '#c9b89c', '#5c5046', '#b7a58a', '#7d6d5c'];
     for (let y = 0; y < h; y += 8) for (let x = 0; x < w; x += 8) {
@@ -157,10 +233,13 @@ export function makeMaterials(T) {
     brick: toon({ map: T.brick }),
     mosaic: toon({ map: T.mosaic }),
     leaf: toon({ side: THREE.DoubleSide }),
+    foliage: gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON, vertexColors: true, map: T.leaves, alphaTest: 0.5, side: THREE.DoubleSide }), { ink: 'soft' }),
     fence: toon({ map: T.chain, alphaTest: 0.5, side: THREE.DoubleSide }),
     soft: gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, vertexColors: true })),
   };
   M.fence.userData.noCast = true;
+  // leaf cards cast dappled shadows only if the shadow pass also cuts out the clear parts
+  M.foliage.userData.depthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: T.leaves, alphaTest: 0.5, side: THREE.DoubleSide });
   return M;
 }
 

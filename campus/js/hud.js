@@ -40,6 +40,12 @@ export class Hud {
     if (msg) msg.innerHTML = `This browser couldn’t start the 3D campus (${String(err?.message || err).replace(/</g, '&lt;')}). Try the <a href="../map/">flat campus map</a> instead.`;
   }
 
+  place(name) {
+    const el = $('#place');
+    el.classList.remove('in'); void el.offsetWidth;
+    el.textContent = name; el.classList.add('in');
+  }
+
   toast(text, ms = 3200) {
     const t = $('#toast');
     t.textContent = text; t.classList.add('on');

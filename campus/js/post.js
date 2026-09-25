@@ -26,31 +26,36 @@ void main(){
   float edge = 0.0;
   if (ink > 0.0) {
     vec4 c = ND(vec2(0.0)), l = ND(vec2(-1.0, 0.0)), r = ND(vec2(1.0, 0.0)), u = ND(vec2(0.0, 1.0)), d = ND(vec2(0.0, -1.0));
-    float d0 = max(c.a, 0.05);
+    // foliage stores its depth negated: it only gets ink where it meets something far behind it
+    float soft = c.a < 0.0 ? 1.0 : 0.0;
+    float d0 = max(abs(c.a), 0.05);
     float i0 = 1.0 / d0;
-    float lap = abs(1.0/max(l.a,0.05) + 1.0/max(r.a,0.05) + 1.0/max(u.a,0.05) + 1.0/max(d.a,0.05) - 4.0 * i0) / i0;
-    float de = smoothstep(0.05, 0.16, lap);
+    float lap = abs(1.0/max(abs(l.a),0.05) + 1.0/max(abs(r.a),0.05) + 1.0/max(abs(u.a),0.05) + 1.0/max(abs(d.a),0.05) - 4.0 * i0) / i0;
+    float de = smoothstep(mix(0.05, 0.5, soft), mix(0.16, 0.9, soft), lap);
     vec3 n0 = c.rgb * 2.0 - 1.0;
     float nd = max(max(1.0 - dot(n0, l.rgb * 2.0 - 1.0), 1.0 - dot(n0, r.rgb * 2.0 - 1.0)),
                    max(1.0 - dot(n0, u.rgb * 2.0 - 1.0), 1.0 - dot(n0, d.rgb * 2.0 - 1.0)));
-    float ne = smoothstep(0.22, 0.45, nd);
-    edge = max(de, ne * (1.0 - smoothstep(farFade * 0.5, farFade, d0)));
+    float ne = smoothstep(0.24, 0.5, nd) * (1.0 - soft);
+    edge = max(de, ne * (1.0 - smoothstep(farFade * 0.4, farFade, d0)));
     edge *= 1.0 - smoothstep(farFade, farFade * 2.2, d0);
   }
-  col = mix(col, col * vec3(0.26, 0.23, 0.30), edge * ink);
+  // ink is a darker, cooler shade of whatever it outlines, never pure black
+  col = mix(col, col * vec3(0.34, 0.32, 0.42), edge * ink * 0.9);
   if (useBloom > 0.5) col += texture2D(tBloom, vUv).rgb * bloomK;
+  // grade: warm light, cool lavender-blue shadows, a touch more colour
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(lum), col, 1.1) * vec3(1.03, 1.0, 0.965);
+  col = mix(vec3(lum), col, 1.14);
+  col *= mix(vec3(0.9, 0.93, 1.1), vec3(1.02, 1.0, 0.97), smoothstep(0.08, 0.6, lum));
   vec2 q = vUv - 0.5;
-  col *= 1.0 - dot(q, q) * 0.5;
+  col *= 1.0 - dot(q, q) * 0.42;
   col = toSRGB(col);
-  col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.03;
+  col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
 const BRIGHT = `
 uniform sampler2D tColor; varying vec2 vUv;
-void main(){ vec3 c = texture2D(tColor, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(0.92, 1.4, l), 1.0); }`;
+void main(){ vec3 c = texture2D(tColor, vUv).rgb; float l = max(max(c.r, c.g), c.b); gl_FragColor = vec4(c * smoothstep(0.85, 1.35, l), 1.0); }`;
 
 const BLUR = `
 uniform sampler2D tSrc; uniform vec2 dir; varying vec2 vUv;
@@ -74,7 +79,7 @@ export class Post {
     const mk = (frag, uniforms) => new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: frag, uniforms, depthTest: false, depthWrite: false });
     this.comp = mk(COMPOSITE, {
       tColor: { value: null }, tND: { value: null }, tBloom: { value: null }, texel: { value: new THREE.Vector2() },
-      ink: { value: 1 }, inkW: { value: 1 }, bloomK: { value: 0.35 }, useBloom: { value: 1 }, farFade: { value: 420 },
+      ink: { value: 1 }, inkW: { value: 1 }, bloomK: { value: 0.45 }, useBloom: { value: 1 }, farFade: { value: 420 },
     });
     this.bright = mk(BRIGHT, { tColor: { value: null } });
     this.blur = mk(BLUR, { tSrc: { value: null }, dir: { value: new THREE.Vector2() } });
@@ -105,7 +110,7 @@ export class Post {
     const u = this.comp.uniforms;
     u.texel.value.set(1 / W, 1 / H);
     u.ink.value = ink ? 1 : 0;
-    u.inkW.value = Math.max(1, dpr * 0.8);
+    u.inkW.value = Math.max(1, dpr * 0.6);
     u.useBloom.value = this.quality === 'high' ? 1 : 0;
     this.bloomTexel = new THREE.Vector2(1 / bw, 1 / bh);
   }
