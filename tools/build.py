@@ -121,6 +121,7 @@ ICONS = {
     "globe": _I('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
     "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    "settings": _I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
@@ -138,7 +139,8 @@ MORE_GROUPS = [
     ("About Wilkipedia", [("teachers/", "Teachers", "teachers", "Every teacher and their classes"),
                           ("rules/", "Community rules", "rules", "What you can post"),
                           ("about/", "About", "about", "Who runs this and why"),
-                          ("credits/", "Credits & thanks", "heart", "Everyone who helped")]),
+                          ("credits/", "Credits & thanks", "heart", "Everyone who helped"),
+                          ("settings/", "Settings", "settings", "Theme, text size, language")]),
 ]
 MORE = [(href, label, icon) for _, items in MORE_GROUPS for href, label, icon, _ in items]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
@@ -169,7 +171,9 @@ VERSIONS = {}
 
 # Applies a saved night-mode choice before first paint, so pages never flash.
 THEME_BOOT = ("<script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),"
-              "c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c}catch(e){}</script>")
+              "c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c;"
+              "['text','motion','bell','fab'].forEach(function(k){var v=localStorage.getItem('wilkipedia-'+k);if(v)d.dataset[k]=v})"
+              "}catch(e){}</script>")
 
 
 def page(path, title, body, *, desc="", script=None, active=None, data=None):
@@ -747,6 +751,13 @@ def build_static():
 <div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
+    page("settings/", "Settings", """
+<h1>Settings</h1>
+<p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
+<nav class="set-toc" aria-label="Settings sections" id="set-toc"></nav>
+<div id="settings" class="settings"><div class="meta">Loading…</div></div>""", data={"page": "settings"},
+         desc="Theme, text size, motion, language and other Wilkipedia settings.")
+
     page("credits/", "Credits", """
 <h1>Credits &amp; thanks</h1>
 <p class="lede">Wilkipedia exists because students gave their time. Thank you to everyone below.</p>
@@ -792,6 +803,7 @@ def build_data(depts, courses, teachers):
 # Pages the search box should find, with the words people use for them.
 SEARCH_PAGES = [
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
+    ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion"),
     ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),
     ("Cafeteria menu", "menu/", "Breakfast and lunch this week", "menu lunch breakfast food cafeteria eat today meal"),
     ("Clubs", "clubs/", "Every club at Wilcox", "clubs activities join"),

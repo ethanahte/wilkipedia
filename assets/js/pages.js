@@ -3,11 +3,34 @@
 
 import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
-         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip } from './ui.js';
+         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
+
+// Theme and class-colour pickers, shared by the Account and Settings pages
+const themeSeg = () => `<div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">${[['system', 'Match my device'], ['light', 'Day'], ['dark', 'Night']]
+  .map(([v, l]) => `<button type="button" role="radio" aria-checked="${themePref() === v}" data-theme-pref="${v}">${l}</button>`).join('')}</div>`;
+const classSeg = (me) => `<div class="seg swatch-seg" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class (${CLASS_COLORS[classColorOf(me.grad_year)]})` : 'My class'], ['gold', 'Wilcox gold'],
+  ...Object.entries(CLASS_COLORS).map(([k, v]) => [k, v])]
+  .map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>`;
+const classNote = (me) => `${me?.grad_year ? `Class of ${me.grad_year}’s colour is ${CLASS_COLORS[classColorOf(me.grad_year)]}.` : 'Set your class year in your profile and “My class” uses your class colour.'}
+  It shows as a small accent (your picture’s ring and class chip). The site itself stays Wilcox gold.`;
+function wireAppearance(s) {
+  $('#class-seg').onclick = (e) => {
+    const b = e.target.closest('[data-class-pref]');
+    if (!b) return;
+    applyClassTheme(s.user(), b.dataset.classPref);
+    $$('#class-seg [data-class-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
+  };
+  $('#theme-seg').onclick = (e) => {
+    const b = e.target.closest('[data-theme-pref]');
+    if (!b) return;
+    setThemePref(b.dataset.themePref, b);
+    $$('#theme-seg [data-theme-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
+  };
+}
 const s = await initHeader();
 
 import { search, attach, addLive, groupedHtml } from './search.js';
@@ -272,16 +295,11 @@ const pages = {
           <label class="check"><input type="checkbox" id="demo-school" ${me.school ? 'checked' : ''}> Pretend this is a school account</label></p>` : ''}
         <p><button class="btn ghost danger" id="demo-reset">Erase demo data</button></p></section>` : '';
       const themeCard = `<section class="card"><h2>Appearance</h2>
-        <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">${[['system', 'Match my device'], ['light', 'Day'], ['dark', 'Night']]
-          .map(([v, l]) => `<button type="button" role="radio" aria-checked="${themePref() === v}" data-theme-pref="${v}">${l}</button>`).join('')}</div>
+        ${themeSeg()}
         <h3>Class colour</h3>
-        <div class="seg swatch-seg" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class (${CLASS_COLORS[classColorOf(me.grad_year)]})` : 'My class'], ['gold', 'Wilcox gold'],
-          ...Object.entries(CLASS_COLORS).map(([k, v]) => [k, v])]
-          .map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>
-        <p class="meta">${me?.grad_year ? `Class of ${me.grad_year}’s colour is ${CLASS_COLORS[classColorOf(me.grad_year)]}.` : 'Set your class year in your profile and “My class” uses your class colour.'}
-          It shows as a small accent (your picture’s ring and class chip). The site itself stays Wilcox gold.
-          Class colours: 2027 Blue · 2028 Green · 2029 Yellow · 2030 Purple.</p>
-        <p class="meta">Saved in this browser.</p></section>`;
+        ${classSeg(me)}
+        <p class="meta">${classNote(me)} Class colours: 2027 Blue · 2028 Green · 2029 Yellow · 2030 Purple.</p>
+        <p class="meta">Saved in this browser. <a href="${root}settings/">All settings →</a></p></section>`;
 
       if (!me) {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
@@ -364,18 +382,7 @@ const pages = {
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
-      $('#class-seg').onclick = (e) => {
-        const b = e.target.closest('[data-class-pref]');
-        if (!b) return;
-        applyClassTheme(s.user(), b.dataset.classPref);
-        $$('#class-seg [data-class-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
-      };
-      $('#theme-seg').onclick = (e) => {
-        const b = e.target.closest('[data-theme-pref]');
-        if (!b) return;
-        setThemePref(b.dataset.themePref, b);
-        $$('#theme-seg [data-theme-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
-      };
+      wireAppearance(s);
       $('#demo-reset')?.addEventListener('click', async () => {
         if (!confirm('Erase all demo claims, submissions and comments in this browser?')) return;
         await s.resetDemo(); location.reload();
@@ -383,6 +390,109 @@ const pages = {
     };
     s.onAuth(draw);
     draw();
+  },
+
+  // Every setting in one place. The originals stay where they are (header
+  // toggles, Account, the Orrery's Display menu); this page reads and writes the
+  // same stored values, so they always agree.
+  async settings() {
+    const { LANGS, currentLang, setLanguage } = await import('./translate.js');
+    const DRAFT = 'wilkipedia-draft:';
+    const ls = {
+      get(k, d = null) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } },
+      del(k) { try { localStorage.removeItem(k); } catch { /* ignore */ } },
+      keys() { try { return Object.keys(localStorage); } catch { return []; } },
+      json(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    };
+    const ORR = 'wilkipedia-orrery';
+    const orrOpts = () => ({ motion: !lessMotionNow(), labels: true, belt: true, photo: true, ...ls.json(ORR, {}) });
+    const lessMotionNow = () => getPref('motion') === 'reduce' || (getPref('motion') === 'system' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    const seg = (id, label, cur, opts) => `<div class="seg" id="${id}" role="radiogroup" aria-label="${label}">${opts.map(([v, l]) =>
+      `<button type="button" role="radio" aria-checked="${cur === v}" data-v="${v}">${l}</button>`).join('')}</div>`;
+    const tgl = (id, label, on) => `<span class="tgl"><input type="checkbox" id="${id}" aria-label="${esc(label)}" ${on ? 'checked' : ''}><span aria-hidden="true"></span></span>`;
+    const row = (title, hint, control, wide = false) => `<div class="set-row${wide ? ' wide' : ''}"><div class="set-l"><b>${title}</b>${hint ? `<small>${hint}</small>` : ''}</div><div class="set-c">${control}</div></div>`;
+    const sec = (id, title, rows, note = '') => `<section class="set-sec" id="${id}"><h2>${title}</h2><div class="set-card">${rows}</div>${note ? `<p class="meta">${note}</p>` : ''}</section>`;
+
+    const draw = () => {
+      const me = s.user();
+      const team = !!me && REVIEWER_ROLES.includes(me.role);
+      const drafts_ = ls.keys().filter((k) => k.startsWith(DRAFT)).length;
+      const closed = ls.json('wilkipedia-dismissed-announcements', []).length;
+      const o = orrOpts();
+      const sections = [
+        ['appearance', 'Appearance', [
+          row('Theme', 'Day, night, or follow your device. The moon button in the header does the same.', themeSeg()),
+          row('Class colour', classNote(me), classSeg(me), true),
+          row('Text size', 'Makes all text on the site bigger.', seg('set-text', 'Text size', getPref('text'), [['normal', 'Default'], ['large', 'Large'], ['larger', 'Larger']])),
+          row('Motion', 'Turn off animations like the night-mode circle and the moving planets.', seg('set-motion', 'Motion', getPref('motion'), [['system', 'Match my device'], ['reduce', 'Reduce'], ['full', 'Full']])),
+        ].join('')],
+        ['language', 'Language', row('Language', 'Menus and buttons use our own translations. Everything else is translated by Google.',
+          `<select id="set-lang" class="set-select">${LANGS.map(([code, native, english]) => `<option value="${code}" ${code === currentLang() ? 'selected' : ''}>${esc(native)}${native !== english ? ` · ${esc(english)}` : ''}</option>`).join('')}</select>`)],
+        ['pages', 'Pages', [
+          row('Bell schedule on the home page', 'Today’s periods at the top of the home page. The full schedule is always under More.', tgl('set-bell', 'Bell schedule on the home page', getPref('bell') === 'on')),
+          row('Contribute button', 'The round + button in the corner of every page. You can still contribute from the More menu or your account.', tgl('set-fab', 'Contribute button', getPref('fab') === 'on')),
+          row('Closed announcements', closed ? `You closed ${closed} announcement${closed === 1 ? '' : 's'}. Bring them back if they’re still running.` : 'Announcements you close with ✕ stay hidden in this browser.',
+            `<button type="button" class="btn ghost small" id="set-ann" ${closed ? '' : 'disabled'}>Show them again</button>`),
+        ].join('')],
+      ];
+      if (me) sections.push(['account', 'Your account', [
+        row('Show me on the leaderboard', 'Your name and points on the Leaderboard. Your work keeps your name either way.', tgl('set-lb', 'Show me on the leaderboard', me.show_on_leaderboard)),
+        row('Name, picture and class year', 'Edited on your account page.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
+        row('Notifications', 'When your work is published, sent back or edited by a reviewer.', `<a class="btn ghost small" href="${root}account/#notifications">See notifications</a>`),
+      ].join(''), 'Saved to your account, so it follows you to every device.']);
+      if (team) sections.push(['bounties', 'Bounty board', [
+        row('Open the board on', 'The view the bounty page starts with.', seg('set-bview', 'Bounty board view', ls.get('wilkipedia-bounty-view', 'board'), [['board', 'Board'], ['agenda', 'Agenda'], ['ledger', 'Ledger'], ['orrery', 'Orrery']])),
+        row('Orrery: motion', 'Planets orbit the sun.', tgl('set-o-motion', 'Orrery motion', o.motion)),
+        row('Orrery: labels', 'Bounty names under the planets.', tgl('set-o-labels', 'Orrery labels', o.labels)),
+        row('Orrery: completed belt', 'Finished bounties as rocks between rings B and C.', tgl('set-o-belt', 'Orrery completed belt', o.belt)),
+        row('Orrery: photo sky', 'The real Milky Way photo (1.2 MB). Off uses a drawn sky.', tgl('set-o-photo', 'Orrery photo sky', o.photo)),
+      ].join('')]);
+      sections.push(['device', 'Saved on this device', [
+        row('Unsent drafts', drafts_ ? `${drafts_} half-written form${drafts_ === 1 ? '' : 's'} or comment${drafts_ === 1 ? '' : 's'}, saved so you don’t lose them.` : 'Nothing saved. Forms and comments you start are kept here until you send them.',
+          `<button type="button" class="btn ghost small" id="set-drafts" ${drafts_ ? '' : 'disabled'}>Delete drafts</button>`),
+        row('Reset all settings', 'Theme, text size, motion, language, class colour and the rest go back to normal. Your account and drafts are kept.',
+          '<button type="button" class="btn ghost danger small" id="set-reset">Reset</button>'),
+      ].join('')]);
+
+      $('#set-toc').innerHTML = sections.map(([id, title]) => `<a href="#${id}">${title}</a>`).join('');
+      $('#settings').innerHTML = sections.map(([id, title, rows, note]) => sec(id, title, rows, note)).join('');
+      wireAppearance(s);
+
+      const segWire = (id, fn) => { $('#' + id)?.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-v]'); if (!b) return;
+        fn(b.dataset.v);
+        $$(`#${id} [data-v]`).forEach((x) => x.setAttribute('aria-checked', x === b));
+      }); };
+      segWire('set-text', (v) => setPref('text', v));
+      segWire('set-motion', (v) => setPref('motion', v));
+      segWire('set-bview', (v) => ls.set('wilkipedia-bounty-view', v));
+      $('#set-lang').onchange = (e) => setLanguage(e.target.value);
+      $('#set-bell').onchange = (e) => setPref('bell', e.target.checked ? 'on' : 'off');
+      $('#set-fab').onchange = (e) => setPref('fab', e.target.checked ? 'on' : 'off');
+      $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); draw(); };
+      $('#set-lb')?.addEventListener('change', (e) => guard(() => s.updateProfile({ show_on_leaderboard: e.target.checked }),
+        e.target.checked ? 'You’re on the leaderboard.' : 'You’re hidden from the leaderboard.'));
+      for (const k of ['motion', 'labels', 'belt', 'photo']) {
+        $(`#set-o-${k}`)?.addEventListener('change', (e) => ls.set(ORR, JSON.stringify({ ...orrOpts(), [k]: e.target.checked })));
+      }
+      $('#set-drafts').onclick = () => {
+        if (!confirm('Delete every unsent draft saved in this browser?')) return;
+        ls.keys().filter((k) => k.startsWith(DRAFT)).forEach(ls.del);
+        draw();
+      };
+      $('#set-reset').onclick = () => {
+        if (!confirm('Reset every setting in this browser back to normal?')) return;
+        ['wilkipedia-theme', 'wilkipedia-class', 'wilkipedia-class-applied', 'wilkipedia-dismissed-announcements',
+         'wilkipedia-orrery', 'wilkipedia-bounty-view', ...Object.keys(PREF_KEYS)].forEach(ls.del);
+        if (currentLang() !== 'en') setLanguage('en'); else location.reload();
+      };
+    };
+    const PREF_KEYS = { 'wilkipedia-text': 1, 'wilkipedia-motion': 1, 'wilkipedia-bell': 1, 'wilkipedia-fab': 1 };
+    s.onAuth(draw);
+    draw();
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
   },
 
   clubs() { return activities('club'); },

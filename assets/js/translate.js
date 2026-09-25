@@ -62,6 +62,13 @@ function loadWidget() {
   document.head.append(s);
 }
 
+// Switch language from anywhere (the Settings page uses this); reloads the page.
+export function setLanguage(code) {
+  if (code === currentLang()) return;
+  setCookie(code);
+  location.reload();
+}
+
 export function initTranslate() {
   const btn = $('#lang-btn');
   const sheet = $('#lang-menu');

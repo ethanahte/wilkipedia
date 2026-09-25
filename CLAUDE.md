@@ -72,6 +72,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Settings page** (`settings/`, `pages.settings` in pages.js) gathers every
+  setting; the originals stay where they are (header toggles, Account, the
+  Orrery's Display menu) and read/write the same stored values. Reader prefs
+  text / motion / bell / fab are `getPref`/`setPref` in ui.js: localStorage
+  `wilkipedia-<name>` mirrored on `html[data-<name>]`, applied before paint by
+  THEME_BOOT. Use `lessMotion()` for anything animated. Adding a pref: default
+  in PREF_DEFAULTS, the name in THEME_BOOT's list, CSS, a row on the page, and
+  its key in the page's reset list.
 - **Announcement bar** (`#announce` under the header on every page,
   `paintAnnouncements` in ui.js): admins post on Review → Announcements;
   everyone reads live ones (active, not past `ends_on`), migration 010.

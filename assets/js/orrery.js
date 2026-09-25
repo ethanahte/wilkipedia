@@ -23,7 +23,7 @@
 // Left out on purpose from the personal app: comets (bounties here don't
 // repeat) and the black hole (deleting is an admin decision made in the editor).
 
-import { esc, root } from './ui.js';
+import { esc, root, lessMotion } from './ui.js';
 
 const ORB = {
   ring: { S: 54, A: 88, B: 146, C: 300, D: 492 },
@@ -94,7 +94,7 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
   const q = (sel) => detail.querySelector(sel);
 
   let items = [];
-  let opts = { motion: !matchMedia('(prefers-reduced-motion: reduce)').matches, labels: true, belt: true, photo: true, lines: 'linked' };
+  let opts = { motion: !lessMotion(), labels: true, belt: true, photo: true, lines: 'linked' };
   try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
   const saveOpts = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 

@@ -94,6 +94,25 @@ const THEME_KEY = 'wilkipedia-theme';
 export function themePref() {
   try { return localStorage.getItem(THEME_KEY) || 'system'; } catch { return 'system'; }
 }
+// ── reader settings (saved in this browser; the Settings page controls them) ──
+// Each is stored as localStorage 'wilkipedia-<name>' and mirrored on
+// html[data-<name>] so CSS can react. THEME_BOOT in build.py applies them before
+// first paint. Defaults are stored as "nothing", so a reset is just removal.
+export const PREF_DEFAULTS = { text: 'normal', motion: 'system', bell: 'on', fab: 'on' };
+export function getPref(name) {
+  try { return localStorage.getItem('wilkipedia-' + name) || PREF_DEFAULTS[name]; } catch { return PREF_DEFAULTS[name]; }
+}
+export function setPref(name, v) {
+  const d = document.documentElement.dataset;
+  try { v === PREF_DEFAULTS[name] ? localStorage.removeItem('wilkipedia-' + name) : localStorage.setItem('wilkipedia-' + name, v); } catch { /* storage blocked */ }
+  if (v === PREF_DEFAULTS[name]) delete d[name]; else d[name] = v;
+}
+// Less motion: the reader's choice here, or else their device setting
+export const lessMotion = () => {
+  const m = getPref('motion');
+  return m === 'reduce' || (m === 'system' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+};
+
 // `from` (optional): the button that was clicked. The new theme then grows out
 // of it in a circle (View Transitions). Browsers without it, and readers who ask
 // for reduced motion, get the instant switch.
@@ -105,7 +124,7 @@ export function setThemePref(pref, from) {
     else document.documentElement.dataset.theme = pref;
     paintThemeToggle();
   };
-  if (!from || !document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
+  if (!from || !document.startViewTransition || lessMotion()) return apply();
   const r = from.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
   const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
