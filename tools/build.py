@@ -37,7 +37,7 @@ SITE_URL = "https://wilcoxwiki.org"
 CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
-GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides",
+GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides", "numbers",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
                   "menu", "clubs", "sports", "feedback", "credits", "bell"]
 
@@ -123,13 +123,15 @@ ICONS = {
     "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "settings": _I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
+    "chart": _I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
 # The "More" panel: grouped columns, each link with an icon and a short line
 MORE_GROUPS = [
-    ("School day", [("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
+    ("School day", [("numbers/", "By the numbers", "chart", "Classes, clubs and the semester in charts"),
+                    ("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
                     ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
                     ("school/", "School info", "school", "Counselors, passes, tech"),
                     ("summer/", "Summer homework", "summer", "What’s due before school starts")]),
@@ -755,6 +757,54 @@ def build_static():
 <div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
+    page("numbers/", "By the numbers", """
+<h1>Wilcox by the numbers</h1>
+<p class="lede">Five pictures of how Wilcox works, drawn from the course catalog, the club list, the bell schedule and what students have written here. Every dot, tick and rung is one real class, club or day: point at it to see which, click to go there.</p>
+<div class="nb-grid">
+  <article class="nb-card dark">
+    <h2 id="h-cascade">How much of Wilcox is written</h2>
+    <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects, smallest to largest</p>
+    <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
+    <p class="nb-src">DOT CASCADE · LIVE FROM WILKIPEDIA · CATALOG 2025–26</p>
+  </article>
+  <article class="nb-card">
+    <h2>Where each UC/CSU a–g requirement can be met</h2>
+    <p class="nb-sub">Bubble area = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g</p>
+    <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
+    <p class="nb-src">ARC MATRIX · SCUSD COURSE CATALOG 2025–26 · CHECK WITH YOUR COUNSELOR</p>
+  </article>
+  <article class="nb-card wide">
+    <h2 id="h-grades">More classes open up every year</h2>
+    <p class="nb-sub">One tick = one class your grade is allowed to take · <span class="nb-hero">gold</span> = AP · from each class’s grade range in the catalog</p>
+    <svg id="tickrows" viewBox="0 0 840 250" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes open to each grade"></svg>
+    <p class="nb-src">TICK ROWS · SCUSD COURSE CATALOG 2025–26</p>
+  </article>
+  <article class="nb-card">
+    <h2 id="h-clubs">When clubs meet</h2>
+    <p class="nb-sub">One rung = one club that names this day · darker = meets more often</p>
+    <svg id="rungs" viewBox="0 0 400 312" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Clubs by the weekday they meet"></svg>
+    <p class="nb-src" id="n-clubs"></p>
+    <p class="nb-src">RUNG BARS · WILCOX CLUB LIST</p>
+  </article>
+  <article class="nb-card nb-about">
+    <h2>Where these numbers come from</h2>
+    <ul>
+      <li><b>Classes, grades and a–g</b> are copied from the SCUSD High School Course Catalog 2025–26. A few classes list a–g loosely (“D/G”, “D for 3rd year or higher”); they count under each letter they name. Pending approvals don’t count yet.</li>
+      <li><b>Clubs</b> come from the Wilcox club list. Many describe their schedule in their own words, so the day and how often are read from that text.</li>
+      <li><b>The semester</b> uses the official bell schedule and the special dates the school published for fall 2026.</li>
+      <li><b>Gold dots</b> in the first chart update live as students write.</li>
+    </ul>
+    <p class="meta">Spot something wrong? <a href="../feedback/">Tell us</a>.</p>
+  </article>
+  <article class="nb-card wide">
+    <h2>The fall semester, day by day</h2>
+    <p class="nb-sub">One stick = one school day · taller = you’re at school longer · <span class="nb-hero">gold</span> = out before 2 pm · hollow = no school · dashed = adjusted day with no published times</p>
+    <svg id="barcode" viewBox="0 0 810 290" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Each school day from August 11 to December 18 and when it ends"></svg>
+    <p class="nb-src">BARCODE LOLLIPOP · WILCOX BELL SCHEDULE 2026–27 · AUG 11 – DEC 18</p>
+  </article>
+</div>""", data={"page": "numbers"}, script="numbers.js",
+         desc="Wilcox High School in charts: classes by subject and grade, UC/CSU a–g requirements, when clubs meet, and the fall semester day by day.")
+
     page("guides/", "Study guides", f"""
 <h1>Study guides</h1>
 <p class="lede">Every study guide students have shared, as a graph. Guides that cover the same topics are linked, each one hangs off its class, and classes connect along their prerequisites.</p>
@@ -827,6 +877,7 @@ def build_data(depts, courses, teachers):
 # Pages the search box should find, with the words people use for them.
 SEARCH_PAGES = [
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
+    ("By the numbers", "numbers/", "Wilcox in charts", "numbers charts graphs stats a-g ucsc requirements clubs meeting day grade classes semester calendar"),
     ("Study guides", "guides/", "Every shared study guide, as a graph", "study guides guide notes resources graph obsidian review"),
     ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion"),
     ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),

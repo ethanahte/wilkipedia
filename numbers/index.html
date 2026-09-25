@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contribute · Wilkipedia</title>
-<meta name="description" content="Student-written guides to every class at Wilcox High School: test style, grading, homework, study guides, tips and summer homework.">
-<meta property="og:title" content="Contribute · Wilkipedia">
+<title>By the numbers · Wilkipedia</title>
+<meta name="description" content="Wilcox High School in charts: classes by subject and grade, UC/CSU a–g requirements, when clubs meet, and the fall semester day by day.">
+<meta property="og:title" content="By the numbers · Wilkipedia">
 <meta property="og:site_name" content="Wilkipedia">
-<link rel="canonical" href="https://wilcoxwiki.org/submit/">
+<link rel="canonical" href="https://wilcoxwiki.org/numbers/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/style.css?v=d8c595235f">
@@ -34,32 +34,50 @@
 <a id="bounty-tab" class="bounty-fab" href="../bounties/" aria-label="Bounty board" hidden><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg><span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
 <main id="main" class="wrap">
 
-<h1>Contribute</h1>
-<p class="lede">Everything goes to a reviewer before it’s published. Write in your own words.</p>
-<div id="bounty-brief" class="note" hidden></div>
-<form id="submit-form" novalidate>
-  <fieldset><legend>1 · What are you adding?</legend><div id="kinds" class="kinds"></div></fieldset>
-  <div id="step2" hidden>
-    <fieldset><legend>2 · Where does it go?</legend>
-      <div class="field" id="course-row"><label for="course">Class <span class="req">*</span></label>
-        <input id="course" list="course-list" placeholder="Start typing a class name…" autocomplete="off"><datalist id="course-list"></datalist></div>
-      <div class="field" id="teacher-row" hidden><label for="teacher" id="teacher-label">Teacher</label>
-        <select id="teacher"></select><input id="teacher-other" placeholder="Teacher’s name" hidden></div>
-      <div class="field" id="bounty-row" hidden><label for="bounty">Bounty</label><select id="bounty"></select></div>
-    </fieldset>
-    <fieldset><legend>3 · The details</legend>
-      <p class="draft-note" id="draft-note" hidden>✓ We restored your unsaved draft. <button type="button" class="linkish" id="discard-draft">Start over</button></p>
-      <div id="fields"></div></fieldset>
-    <p class="meta">Your writing is saved in this browser as you type, so you can switch tabs or come back later.</p>
-    <label class="check"><input type="checkbox" id="rules-ok"> I didn’t include real test or quiz questions or answer keys, and nothing here is about a teacher as a person. <a href="../rules/" target="_blank">Rules</a></label>
-    <p id="form-error" class="error" role="alert" hidden></p>
-    <button class="btn big">Submit for review</button>
-  </div>
-</form>
-<div id="done" class="done" hidden>
-  <h2>Submitted. Thank you!</h2>
-  <p>A reviewer will look at it soon. You can track it on <a href="../account/">your account page</a>. If they ask for changes, their note shows up there.</p>
-  <p><button class="btn" id="again">Add something else</button> <span id="done-course"></span></p>
+<h1>Wilcox by the numbers</h1>
+<p class="lede">Five pictures of how Wilcox works, drawn from the course catalog, the club list, the bell schedule and what students have written here. Every dot, tick and rung is one real class, club or day: point at it to see which, click to go there.</p>
+<div class="nb-grid">
+  <article class="nb-card dark">
+    <h2 id="h-cascade">How much of Wilcox is written</h2>
+    <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects, smallest to largest</p>
+    <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
+    <p class="nb-src">DOT CASCADE · LIVE FROM WILKIPEDIA · CATALOG 2025–26</p>
+  </article>
+  <article class="nb-card">
+    <h2>Where each UC/CSU a–g requirement can be met</h2>
+    <p class="nb-sub">Bubble area = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g</p>
+    <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
+    <p class="nb-src">ARC MATRIX · SCUSD COURSE CATALOG 2025–26 · CHECK WITH YOUR COUNSELOR</p>
+  </article>
+  <article class="nb-card wide">
+    <h2 id="h-grades">More classes open up every year</h2>
+    <p class="nb-sub">One tick = one class your grade is allowed to take · <span class="nb-hero">gold</span> = AP · from each class’s grade range in the catalog</p>
+    <svg id="tickrows" viewBox="0 0 840 250" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes open to each grade"></svg>
+    <p class="nb-src">TICK ROWS · SCUSD COURSE CATALOG 2025–26</p>
+  </article>
+  <article class="nb-card">
+    <h2 id="h-clubs">When clubs meet</h2>
+    <p class="nb-sub">One rung = one club that names this day · darker = meets more often</p>
+    <svg id="rungs" viewBox="0 0 400 312" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Clubs by the weekday they meet"></svg>
+    <p class="nb-src" id="n-clubs"></p>
+    <p class="nb-src">RUNG BARS · WILCOX CLUB LIST</p>
+  </article>
+  <article class="nb-card nb-about">
+    <h2>Where these numbers come from</h2>
+    <ul>
+      <li><b>Classes, grades and a–g</b> are copied from the SCUSD High School Course Catalog 2025–26. A few classes list a–g loosely (“D/G”, “D for 3rd year or higher”); they count under each letter they name. Pending approvals don’t count yet.</li>
+      <li><b>Clubs</b> come from the Wilcox club list. Many describe their schedule in their own words, so the day and how often are read from that text.</li>
+      <li><b>The semester</b> uses the official bell schedule and the special dates the school published for fall 2026.</li>
+      <li><b>Gold dots</b> in the first chart update live as students write.</li>
+    </ul>
+    <p class="meta">Spot something wrong? <a href="../feedback/">Tell us</a>.</p>
+  </article>
+  <article class="nb-card wide">
+    <h2>The fall semester, day by day</h2>
+    <p class="nb-sub">One stick = one school day · taller = you’re at school longer · <span class="nb-hero">gold</span> = out before 2 pm · hollow = no school · dashed = adjusted day with no published times</p>
+    <svg id="barcode" viewBox="0 0 810 290" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Each school day from August 11 to December 18 and when it ends"></svg>
+    <p class="nb-src">BARCODE LOLLIPOP · WILCOX BELL SCHEDULE 2026–27 · AUG 11 – DEC 18</p>
+  </article>
 </div>
 </main>
 <footer class="site">
@@ -69,7 +87,7 @@
     <p class="meta">Course descriptions: SCUSD High School Course Catalog 2025–2026. Teacher lists: Wilcox High School staff directory, September 2026. Everything else is written by students and checked by reviewers. It may be out of date, so always confirm with your teacher.</p>
   </div>
 </footer>
-
-<script type="module" src="../assets/js/submit.js?v=eddebd1285"></script>
+<script type="application/json" id="page-data">{"page": "numbers"}</script>
+<script type="module" src="../assets/js/numbers.js?v=e8afc0d89c"></script>
 </body>
 </html>

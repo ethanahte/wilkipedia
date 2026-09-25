@@ -92,6 +92,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     clicked class name `class-title` in `pageswap` so it glides into the class
     page's h1. The theme circle reveal is scoped to `html.theme-vt`.
   - One signature moment only (the map). Don't add competing spectacle.
+- **By the numbers** (`numbers/`, `numbers.js`): five charts built from
+  lieflat-charts gallery templates (L2 Dot Cascade, L4 Arc Matrix, F5 Tick Rows,
+  F1 Rung Bars, L3 Barcode Lollipop), code skeleton kept, real data only.
+  Colours: Mono ladder `--ch1..--ch4` (flipped in both dark blocks) + one hero
+  (`--accent` / Wilcox gold). One dark card per page. Every mark is one real
+  class, club or day with a hover title. The semester chart covers only the
+  dates bell.json has; extend it when spring dates are added, never guess.
 - **Study guides graph** (`guides/`, `guides.js`): Obsidian-style graph view
   built from the lieflat-charts B2 "Force Graph, Dense" template (ECharts 5.5.1
   from jsdelivr, loaded only on that page; the list below it is the fallback).
