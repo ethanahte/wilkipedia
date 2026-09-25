@@ -1083,6 +1083,13 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .pw-card p { margin: 0; font-size: .95rem; text-wrap: pretty; }
 .pw-name { font: 500 1.35rem var(--serif); color: var(--ink); text-decoration: none; }
 .pw-k { display: inline-block; min-width: 150px; color: var(--muted); font-size: .85rem; }
+.pw-tip { position: fixed; z-index: 56; max-width: 290px; padding: 9px 12px; background: var(--card); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .14); font-size: .86rem; line-height: 1.4; pointer-events: none;
+  opacity: 0; transform: translateY(3px); transition: opacity .12s, transform .12s; text-wrap: pretty; }
+.pw-tip.on { opacity: 1; transform: none; }
+.pw-tip b { display: block; margin-bottom: 3px; font: 500 1.02rem/1.25 var(--serif); }
+.pw-tip-k { display: block; color: var(--muted); font-size: .74rem; letter-spacing: .02em; text-transform: uppercase; margin-bottom: 1px; }
+@media (prefers-reduced-motion: reduce) { .pw-tip { transition: none; transform: none; } }
 @media (max-width: 760px) { .pw-k { display: block; } .pw-scroll { margin-right: -16px; } }
 
 /* ── search palette (palette.js, ⌘K) ── */

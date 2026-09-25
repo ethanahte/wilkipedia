@@ -1,8 +1,9 @@
 // The home page's pathways map: every class that the course catalog links by a
 // prerequisite, laid out like a transit map. Rows are subjects, columns are how
 // far along a chain a class sits. Point at a class and its whole path lights
-// up (what leads to it, and what it leads to) with the catalog's own wording
-// underneath; click and the map flies into the class page.
+// up (what leads to it, and what it leads to), a tip beside it quotes its
+// prerequisite, and the catalog's own wording sits underneath; click and the
+// map flies into the class page.
 //
 // Data: data/pathways.json, built by tools/pathways.py from catalog.json.
 // Nothing here is inferred: the info bar always quotes the catalog.
@@ -103,6 +104,30 @@ export async function mount(el, s) {
     for (const a of root.querySelectorAll('.pw-node')) a.classList.toggle('has', has.has(a.dataset.slug));
   }).catch(() => {});
 
+  // The tip beside the class you're pointing at: its prerequisite, word for word.
+  // Fixed to the page (not inside the scrolling map) so it's never clipped.
+  const tip = document.createElement('div');
+  tip.className = 'pw-tip';
+  tip.setAttribute('aria-hidden', 'true');   // the info bar below already reads it out
+  document.body.append(tip);
+  function showTip(a) {
+    if (!a) { tip.classList.remove('on'); return; }
+    const n = bySlug[a.dataset.slug];
+    const none = !n.prereq || /^none\.?$/i.test(n.prereq.trim());   // the catalog sometimes just says "None"
+    tip.innerHTML = `<b>${esc(n.name)}</b>${none
+      ? `<span class="pw-tip-k">${n.prereq ? 'No prerequisite' : 'No prerequisite listed'}</span>`
+      : `<span class="pw-tip-k">Prerequisite</span>“${esc(n.prereq)}”`}`;
+    const r = a.querySelector('circle').getBoundingClientRect(), gap = 10;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let x = r.left - 12, y = r.top - th - gap;
+    if (y < 8) y = r.bottom + gap;                                   // no room above: go below
+    x = Math.max(8, Math.min(x, innerWidth - tw - 8));
+    tip.style.left = `${x}px`; tip.style.top = `${y}px`;
+    tip.classList.add('on');
+  }
+  addEventListener('scroll', () => showTip(null), { passive: true });
+  $('.pw-scroll', el).addEventListener('scroll', () => showTip(null), { passive: true });
+
   let pinned = null;
   const names = (list) => list.map((x) => `<a href="${courseUrl(x)}">${esc(bySlug[x].name)}</a>`).join(', ');
   function focus(slug) {
@@ -146,15 +171,18 @@ export async function mount(el, s) {
   }
 
   const touch = matchMedia('(hover: none)').matches;
-  root.addEventListener('pointerover', (e) => { const a = e.target.closest('.pw-node'); if (a && !touch) focus(a.dataset.slug); });
-  root.addEventListener('pointerleave', () => { if (!touch) focus(pinned); });
-  root.addEventListener('focusin', (e) => { const a = e.target.closest('.pw-node'); if (a) focus(a.dataset.slug); });
+  root.addEventListener('pointerover', (e) => { const a = e.target.closest('.pw-node'); if (a && !touch) { focus(a.dataset.slug); showTip(a); } });
+  root.addEventListener('pointerout', (e) => { if (!touch && e.target.closest('.pw-node') && !e.relatedTarget?.closest?.('.pw-node')) showTip(null); });
+  root.addEventListener('pointerleave', () => { if (!touch) { focus(pinned); showTip(null); } });
+  root.addEventListener('focusin', (e) => { const a = e.target.closest('.pw-node'); if (a) { focus(a.dataset.slug); showTip(a); } });
+  root.addEventListener('focusout', () => showTip(null));
   root.addEventListener('click', (e) => {
     const a = e.target.closest('.pw-node');
-    if (!a) { pinned = null; focus(null); return; }
+    if (!a) { pinned = null; focus(null); showTip(null); return; }
     if (e.metaKey || e.ctrlKey || e.shiftKey) return;                  // new tab: let the browser do it
     e.preventDefault();
-    if (touch && pinned !== a.dataset.slug) { pinned = a.dataset.slug; focus(pinned); return; }   // tap once to look, twice to go
+    if (touch && pinned !== a.dataset.slug) { pinned = a.dataset.slug; focus(pinned); showTip(a); return; }   // tap once to look, twice to go
+    showTip(null);
     fly(a);
   });
 
