@@ -435,6 +435,8 @@ const pages = {
         ['pages', 'Pages', [
           row('Bell schedule on the home page', 'Today’s periods at the top of the home page. The full schedule is always under More.', tgl('set-bell', 'Bell schedule on the home page', getPref('bell') === 'on')),
           row('Contribute button', 'The round + button in the corner of every page. You can still contribute from the More menu or your account.', tgl('set-fab', 'Contribute button', getPref('fab') === 'on')),
+          row('Tour of the site', 'The speech bubbles from your first sign-in that show where everything is.',
+            '<button type="button" class="btn ghost small" id="set-tour">Start the tour</button>'),
           row('Closed announcements', closed ? `You closed ${closed} announcement${closed === 1 ? '' : 's'}. Bring them back if they’re still running.` : 'Announcements you close with ✕ stay hidden in this browser.',
             `<button type="button" class="btn ghost small" id="set-ann" ${closed ? '' : 'disabled'}>Show them again</button>`),
         ].join('')],
@@ -494,6 +496,7 @@ const pages = {
       $('#set-lang').onchange = (e) => setLanguage(e.target.value);
       $('#set-bell').onchange = (e) => setPref('bell', e.target.checked ? 'on' : 'off');
       $('#set-fab').onchange = (e) => setPref('fab', e.target.checked ? 'on' : 'off');
+      $('#set-tour').onclick = () => { scrollTo(0, 0); import('./tour.js').then((m) => m.startTour(s.user()?.name)); };
       $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); draw(); };
       $('#set-lb')?.addEventListener('change', (e) => guard(() => s.updateProfile({ show_on_leaderboard: e.target.checked }),
         e.target.checked ? 'You’re on the leaderboard.' : 'You’re hidden from the leaderboard.'));

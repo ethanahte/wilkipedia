@@ -1360,3 +1360,28 @@ html.gated { overflow: hidden; }
 .tg-ok input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--on-bg); }
 .tg-acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
 .terms-gate .meta { margin: 12px 0 0; }
+/* Welcome tour (tour.js): a spotlight on one button and a speech bubble pointing at it */
+.tour { position: fixed; inset: 0; z-index: 80; }
+.tour.free { background: rgba(0,0,0,.55); }
+.tour-spot { position: fixed; border-radius: 10px; box-shadow: 0 0 0 3px var(--gold), 0 0 0 9999px rgba(0,0,0,.55); pointer-events: auto;
+  transition: left .3s cubic-bezier(.4,0,.2,1), top .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1), height .3s cubic-bezier(.4,0,.2,1); }
+.tour.free .tour-spot { display: none; }
+.tour-bubble { position: fixed; width: min(330px, calc(100vw - 24px)); padding: 16px 18px 14px; background: var(--card); color: var(--ink);
+  border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,.3); transition: left .3s cubic-bezier(.4,0,.2,1), top .3s cubic-bezier(.4,0,.2,1);
+  animation: tour-pop .25s ease-out; }
+.tour.free .tour-bubble { width: min(380px, calc(100vw - 24px)); border-top: 5px solid var(--gold); }
+.tour-arrow { position: absolute; width: 16px; height: 16px; background: var(--card); transform: translateX(-50%) rotate(45deg); border-radius: 3px; }
+.tour-arrow.up { top: -7px; }
+.tour-arrow.down { bottom: -7px; }
+.tour.free .tour-arrow { display: none; }
+.tour-n { margin: 0 0 2px; font: 600 .72rem var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tour-n:empty { display: none; }
+.tour-bubble h2 { margin: 0 0 6px; font-size: 1.2rem; }
+.tour-bubble #tour-x { margin: 0; line-height: 1.5; font-size: .95rem; }
+.tour-acts { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.tour-acts > span { flex: 1; }
+.tour-skip { background: none; border: 0; padding: 4px 0; color: var(--muted); font: .88rem var(--sans); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.tour-skip:hover { color: var(--ink); }
+.tour.still .tour-spot, .tour.still .tour-bubble { transition: none; animation: none; }
+@keyframes tour-pop { from { opacity: 0; transform: translateY(6px) scale(.97); } }
+@media print { .tour { display: none; } }

@@ -264,7 +264,8 @@ function termsGate(s, u) {
     e.preventDefault();
     if (!check.checked) return;
     agree.disabled = true;
-    if (!(await guard(() => s.acceptTerms(), 'Thanks! You’re all set.'))) agree.disabled = false;
+    if (!(await guard(() => s.acceptTerms()))) { agree.disabled = false; return; }
+    import('./tour.js').then((m) => m.startTour(u.name));   // first sign-in: show them around
   };
   document.body.append(wrap);
   document.documentElement.classList.add('gated');

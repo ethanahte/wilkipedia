@@ -92,6 +92,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   asked. **Changing the Terms in a way that matters:** bump `terms_current()` in
   SQL, `TERMS_VERSION` in store.js, and the "Version N" line on the page, all
   together. Everyone is then asked again.
+- **Welcome tour** (`tour.js`, `startTour(name)`): speech bubbles with a
+  spotlight that point at the header buttons one at a time. It starts when a
+  member clicks "Agree and continue" on the Terms screen, which is once per
+  person on their first sign-in, so it needs no stored flag and never repeats on
+  another device. Settings → Pages → "Start the tour" replays it. Each step's `sel`
+  is a list of selectors, and the first visible one wins (e.g. `.hsearch`, then
+  `.search-btn`, then the home page's big search). Steps with nothing on screen
+  are skipped, which covers phone layouts, a hidden Contribute button and
+  review-team-only links. A new header button gets a step in `STEPS`.
 - **Cookie settings** (Settings → Cookies & storage, `#cookies`; footer link).
   There are no ads, analytics or tracking cookies, and there must never be any: the
   Privacy page and the one-time note both promise it. `STORAGE_GATE` in build.py
