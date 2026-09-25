@@ -94,12 +94,27 @@ const THEME_KEY = 'wilkipedia-theme';
 export function themePref() {
   try { return localStorage.getItem(THEME_KEY) || 'system'; } catch { return 'system'; }
 }
-export function setThemePref(pref) {
+// `from` (optional): the button that was clicked. The new theme then grows out
+// of it in a circle (View Transitions). Browsers without it, and readers who ask
+// for reduced motion, get the instant switch.
+export function setThemePref(pref, from) {
   try { pref === 'system' ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, pref); }
   catch { /* storage blocked: still applies for this page */ }
-  if (pref === 'system') delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = pref;
-  paintThemeToggle();
+  const apply = () => {
+    if (pref === 'system') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = pref;
+    paintThemeToggle();
+  };
+  if (!from || !document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
+  const r = from.getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const t = document.startViewTransition(apply);
+  t.ready.then(() => {
+    document.documentElement.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+      { duration: 650, easing: 'cubic-bezier(.4, 0, .2, 1)', pseudoElement: '::view-transition-new(root)' });
+  }).catch(() => {});
 }
 const isDark = () => (document.documentElement.dataset.theme
   ? document.documentElement.dataset.theme === 'dark'
@@ -166,7 +181,7 @@ export async function initHeader() {
 
   // Night mode toggle
   paintThemeToggle();
-  $('#theme-toggle')?.addEventListener('click', () => setThemePref(isDark() ? 'light' : 'dark'));
+  $('#theme-toggle')?.addEventListener('click', (e) => setThemePref(isDark() ? 'light' : 'dark', e.currentTarget));
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintThemeToggle);
 
   // "More" menu: close it when clicking anywhere else or pressing Escape

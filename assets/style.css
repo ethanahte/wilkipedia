@@ -960,3 +960,8 @@ a.chip { text-decoration: none; }
 .ann-form { display: grid; gap: 10px; max-width: 640px; margin-bottom: 26px; }
 .ann-list .card { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
 .ann-list .off { opacity: .6; }
+
+/* Night-mode switch: the new theme spreads out of the toggle in a circle
+   (setThemePref in ui.js). Turn off the default cross-fade so only the circle moves. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }

@@ -373,7 +373,7 @@ const pages = {
       $('#theme-seg').onclick = (e) => {
         const b = e.target.closest('[data-theme-pref]');
         if (!b) return;
-        setThemePref(b.dataset.themePref);
+        setThemePref(b.dataset.themePref, b);
         $$('#theme-seg [data-theme-pref]').forEach((x) => x.setAttribute('aria-checked', x === b));
       };
       $('#demo-reset')?.addEventListener('click', async () => {
