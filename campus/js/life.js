@@ -19,10 +19,10 @@ export const HORIZON = new THREE.Color('#f6dccb');
 export function makeSky() {
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false,
-    uniforms: { sun: { value: SUN }, time: { value: 0 }, night: { value: 0 }, overcast: { value: 0 } },
+    uniforms: { sun: { value: SUN }, time: { value: 0 }, night: { value: 0 }, overcast: { value: 0 }, pixel: { value: 0 } },
     vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.); gl_Position = projectionMatrix * p; gl_Position.z = gl_Position.w * 0.99999; }`,
     fragmentShader: `layout(location = 1) out highp vec4 gNormalDepth;
-      uniform vec3 sun; uniform float time, night, overcast; varying vec3 vDir;
+      uniform vec3 sun; uniform float time, night, overcast, pixel; varying vec3 vDir;
       vec3 toLin(vec3 c){ return pow(c, vec3(2.2)); }
       float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
       float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -48,6 +48,15 @@ export function makeSky() {
         c = mix(c, mix(toLin(vec3(1.0, 0.96, 0.93)), toLin(vec3(1.0, 0.95, 0.88)), side), w * 0.55);
         // the sun: a wide warm halo, a tighter glow and a small white disc
         c += toLin(vec3(1.0, 0.9, 0.72)) * (pow(s, 6.0) * 0.2 + pow(s, 60.0) * 0.45 + pow(s, 1400.0) * 6.0);
+        // the pixel style's sky: a clear, deep summer blue (Summerhouse), white wisps
+        if (pixel > 0.0) {
+          vec3 bz = toLin(vec3(0.14, 0.33, 0.8)), bm = toLin(vec3(0.27, 0.52, 0.92)), bh = toLin(vec3(0.5, 0.7, 0.94));
+          vec3 blue = mix(bh, bm, smoothstep(0.0, 0.22, h));
+          blue = mix(blue, bz, smoothstep(0.22, 0.9, h));
+          blue = mix(blue, vec3(1.0), w * 0.9);
+          blue += toLin(vec3(1.0, 0.95, 0.8)) * (pow(s, 60.0) * 0.3 + pow(s, 1400.0) * 5.0);
+          c = mix(c, blue, pixel);
+        }
         float e = asin(clamp(d.y, -1.0, 1.0));
         // rain by day: a flat grey overcast
         c = mix(c, mix(toLin(vec3(0.72, 0.76, 0.8)), toLin(vec3(0.55, 0.6, 0.66)), smoothstep(0.0, 0.8, h)), overcast * (1.0 - night) * 0.85);

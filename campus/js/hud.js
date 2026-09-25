@@ -183,7 +183,13 @@ export class Hud {
     if (r) r.setAttribute('aria-pressed', env.rain);
   }
 
-  bind({ onFly, onMap, onQuality, onHelp, onNight, onRain }) {
+  setStyle(style) {
+    const b = $('#btn-style');
+    if (b) { b.setAttribute('aria-pressed', style === 'pixel'); b.querySelector('span').textContent = style === 'pixel' ? 'Pixel' : 'Diorama'; }
+  }
+
+  bind({ onFly, onMap, onQuality, onHelp, onNight, onRain, onStyle }) {
+    $('#btn-style').onclick = onStyle;
     $('#btn-night').onclick = onNight;
     $('#btn-rain').onclick = onRain;
     $('#btn-fly').onclick = onFly;

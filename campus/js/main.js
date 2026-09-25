@@ -12,7 +12,7 @@
 
 import * as THREE from 'three';
 import { World, distToLine, inPoly } from './geo.js';
-import { makeTextures, makeMaterials, setAniso, SUN_VIEW, DAY as DAYLIGHT } from './toon.js';
+import { makeTextures, makeMaterials, setAniso, setHardLight, SUN_VIEW, DAY as DAYLIGHT } from './toon.js';
 import { buildGround } from './ground.js';
 import { buildBuildings } from './buildings.js';
 import { buildLandmarks } from './landmarks.js';
@@ -143,8 +143,30 @@ async function boot() {
   // soft pastel daylight: a peachy-pink sky fill (every shadow goes warm mauve) and a gentle sun
   const DAY = { hemi: ['#f0cfc4', '#e3cdb0', 2.35], sun: ['#fff0dc', 2.05], fog: '#f6dccb', density: 0.0022 };
   const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
+  // the pixel style's daylight: a clear blue summer day, bright sun, hard shadows
+  const PIXEL_DAY = { hemi: ['#b8cdf5', '#d8c8a2', 1.8], sun: ['#fff6e2', 2.8], fog: '#86b1ea', density: 0.0015 };
+  // Two looks: 'diorama' (the soft peach miniature) and 'pixel' (pixel art, like
+  // Summerhouse). Remembered once the viewer picks one.
+  const SKEY = 'wilcox-campus-style';
+  let style = 'diorama';
+  try { if (localStorage.getItem(SKEY) === 'pixel') style = 'pixel'; } catch { /* default */ }
+  const CLOUD_TONES = {
+    diorama: ['#fff4ec', '#f0d0c8', '#dcb0b0'],
+    pixel: ['#ffffff', '#d9e5f8', '#a8bde4'],
+  };
+  const applyStyle = () => {
+    const px = style === 'pixel';
+    post.setPixel(px);
+    setHardLight(px);
+    sky.material.uniforms.pixel.value = px ? 1 : 0;
+    const [l, m, d] = CLOUD_TONES[style];
+    const cu = clouds.children[0]?.material.uniforms;
+    if (cu) { cu.lit.value.set(l); cu.mid.value.set(m); cu.deep.value.set(d); }
+    document.body.dataset.style = style;
+    hud.setStyle(style);
+  };
   const applyEnv = () => {
-    const E = env.night ? NIGHT : DAY;
+    const E = env.night ? NIGHT : style === 'pixel' ? PIXEL_DAY : DAY;
     hemi.color.set(E.hemi[0]); hemi.groundColor.set(E.hemi[1]); hemi.intensity = E.hemi[2];
     sun.color.set(E.sun[0]); sun.intensity = E.sun[1] * (env.rain ? 0.55 : 1);
     if (env.rain && !env.night) { hemi.intensity *= 0.8; }
@@ -166,6 +188,11 @@ async function boot() {
   const saveEnv = () => { try { localStorage.setItem(TKEY, JSON.stringify(env)); } catch { /* ok */ } };
   const toggleNight = () => { env.night = !env.night; applyEnv(); saveEnv(); };
   const toggleRain = () => { env.rain = !env.rain; applyEnv(); saveEnv(); };
+  const toggleStyle = () => {
+    style = style === 'pixel' ? 'diorama' : 'pixel';
+    try { localStorage.setItem(SKEY, style); } catch { /* ok */ }
+    applyStyle(); applyEnv();
+  };
 
   // start: the campus as a diorama, turning slowly; ?room= or Walk takes you in
   const [fx, fz] = FRONT.flag;
@@ -201,6 +228,7 @@ async function boot() {
   api.goToRoom = goToRoom;
   api.setTime = (t) => { env.night = t === 'night'; applyEnv(); saveEnv(); };
   api.setRain = (on) => { env.rain = !!on; applyEnv(); saveEnv(); };
+  api.setStyle = (s) => { if ((s === 'pixel') !== (style === 'pixel')) toggleStyle(); };
   api.setQuality = applyQuality;
   api.rooms = () => rooms.map((r) => r.id);
 
@@ -226,6 +254,7 @@ async function boot() {
     else if (e.code === 'KeyH') document.body.classList.toggle('hide-ui');
     else if (e.code === 'KeyN') toggleNight();
     else if (e.code === 'KeyR') toggleRain();
+    else if (e.code === 'KeyP') toggleStyle();
     else if (e.code === 'Space' && controls.mode === 'walk') controls.jump();
     else if (/^Digit[1-6]$/.test(e.code)) goToSpot(+e.code.slice(5) - 1);
     else if (e.code === 'KeyM') toggleMap();
@@ -252,7 +281,7 @@ async function boot() {
   hud.onRoomSearch = (id) => { if (goToRoom(id)) hud.closeBig(); };
   hud.bind({
     onFly: toggleFly, onMap: toggleMap, onQuality: (q) => applyQuality(q),
-    onNight: toggleNight, onRain: toggleRain,
+    onNight: toggleNight, onRain: toggleRain, onStyle: toggleStyle,
     onHelp: () => { document.getElementById('help').hidden = false; document.exitPointerLock?.(); },
   });
 
@@ -282,7 +311,7 @@ async function boot() {
     else controls.landAt(s[1], s[2], Math.atan2(-(s[3] - s[1]), -(s[4] - s[2])));
   };
   document.getElementById('keys').innerHTML = [['WASD', 'Walk'], ['Shift', 'Run'], ['Space', 'Jump'], ['F', 'Fly'],
-    ...SPOTS.map((s, i) => [String(i + 1), s[0]]), ['N', 'Day/Night'], ['R', 'Rain'], ['M', 'Map'], ['H', 'Hide UI']]
+    ...SPOTS.map((s, i) => [String(i + 1), s[0]]), ['P', 'Pixel/Diorama'], ['N', 'Day/Night'], ['R', 'Rain'], ['M', 'Map'], ['H', 'Hide UI']]
     .map(([k, v]) => `<span><kbd>${k}</kbd>${v}</span>`).join('');
   document.getElementById('keys').onclick = (e) => {
     const k = e.target.closest('span')?.querySelector('kbd')?.textContent;
@@ -390,6 +419,7 @@ async function boot() {
   if (params.get('room')) goToRoom(params.get('room'));
   if (params.get('view') === 'walk' && !params.get('room')) { controls.mode = 'walk'; controls.autoRotate = false; hud.setMode('walk'); }
   if (params.get('room')) { controls.autoRotate = false; hud.setMode('walk'); }
+  applyStyle();
   applyEnv();
   frame(0.016);
   booted = true;

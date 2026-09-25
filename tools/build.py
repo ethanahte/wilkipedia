@@ -976,6 +976,7 @@ def build_campus():
   <a class="back" href="../" aria-label="Back to Wilkipedia">←<span class="long">&nbsp;Wilkipedia</span></a>
   <div class="title"><span class="w">W</span>Wilcox campus</div>
   <div class="tools">
+    <button type="button" id="btn-style" aria-pressed="false" title="Switch style: soft diorama or pixel art (P)"><span>Diorama</span></button>
     <button type="button" id="btn-night" aria-pressed="true" title="Day or night (N)"><span>Night</span></button>
     <button type="button" id="btn-rain" aria-pressed="true" title="Rain (R)"><span>Rain</span></button>
     <button type="button" id="btn-fly" aria-pressed="false"><span>Fly up</span></button>
@@ -1018,6 +1019,7 @@ def build_campus():
       <dt>Mouse</dt><dd>Click the view, then move the mouse to look. <kbd>Esc</kbd> gives the cursor back.</dd>
       <dt><kbd>Space</kbd></dt><dd>Jump.</dd>
       <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Jump to a viewpoint: the quad, the front, Building B, the gym, the stadium, the creek.</dd>
+      <dt><kbd>P</kbd></dt><dd>Switch style: the soft peach diorama, or pixel art.</dd>
       <dt><kbd>N</kbd> <kbd>R</kbd></dt><dd>Day or night, rain or dry.</dd>
       <dt><kbd>H</kbd></dt><dd>Hide everything but the view (for screenshots).</dd>
       <dt><kbd>F</kbd></dt><dd>Fly up for the aerial view, and back down. Up there: drag to turn, right-drag to slide, scroll to zoom, double-click the ground to land.</dd>

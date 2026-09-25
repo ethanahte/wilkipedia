@@ -26,6 +26,10 @@ function ramp(values) {
 }
 export const TOON = ramp([46, 46, 52, 70, 150, 225, 255, 255]);
 export const SOFT = ramp([150, 150, 150, 190, 225, 255, 255, 255]);
+// The pixel style lights in hard steps (pixel art never shades smoothly).
+export function setHardLight(on) {
+  for (const t of [TOON, SOFT]) { t.minFilter = t.magFilter = on ? THREE.NearestFilter : THREE.LinearFilter; t.needsUpdate = true; }
+}
 
 // ── the painted-surface patch ──
 // Every toon material gets a hand-painted grain: a watercolour noise texture

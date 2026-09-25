@@ -157,6 +157,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     'none', 'add'. `SUN_VIEW`/`DAY` in toon.js are shared uniforms main.js
     updates each frame. Blur/bloom inputs are NaN-guarded (one bad pixel would
     otherwise smear into a block).
+  - **Two styles**, switched with the top-bar button / P key and saved in
+    localStorage `wilcox-campus-style`: 'diorama' (default, above) and 'pixel'
+    (the owner's reference: the game Summerhouse). Pixel = post.js draws the
+    scene at 1/3 CSS resolution with no MSAA and nearest filtering, a firm
+    one-art-pixel dark outline, a 12-step palette with a light 4×4 Bayer
+    dither, then blits it up with square pixels (`setPixel`); no tilt-shift or
+    sunbeams. `setHardLight` (toon.js) snaps the light ramps to hard steps; the
+    sky shader's `pixel` uniform paints a deep summer blue; clouds switch to
+    white/blue tones (`CLOUD_TONES` in main.js); `PIXEL_DAY` is its daylight.
   - Tyndall light: by day post.js draws sunbeams (open sky near the sun, i.e.
     depth > 4500, radially smeared toward the sun at quarter size), so shafts
     fall through tree crowns, past roofs and between clouds, plus warm haze on
