@@ -143,8 +143,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     is ~0.18, not black), barely-there warm outlines by day (crisper at night),
     a stronger hand-painted grain, a slightly muted grade that lifts toward the
     fog colour. Peach sky dome (follows the camera; no mountains, owner's call),
-    pastel cauliflower clouds by the horizon and a few low ones circling the
-    diorama at its own level. `gbuffer()` in toon.js patches every material: it
+    hand-painted clouds by the horizon and a few low ones circling the diorama
+    at its own level. Clouds (`makeClouds` in life.js) are their own shader:
+    lumpy low-frequency puffs of mixed sizes, stray bits and flat wisps, shaded
+    in three painted tones whose edges are broken by a brush-stroke texture
+    (`strokeTex`), with a moonlit palette at night. `gbuffer()` in toon.js patches every material: it
     writes normal+depth to a second target for the ink pass, adds the grain +
     contact darkening at wall bases, a soft warm rim on sunlit edges and (glass
     only) diagonal glints. Any new material must go through `gbuffer()`.

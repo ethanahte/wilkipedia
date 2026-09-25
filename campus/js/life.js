@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { World, color, rng } from './geo.js';
-import { gbuffer, SOFT, TOON, canvasTex } from './toon.js';
+import { gbuffer, SOFT, TOON, canvasTex, SUN_VIEW, DAY } from './toon.js';
 import { FRONT, STAGE } from './layout.js';
 
 export const SUN = new THREE.Vector3(-0.66, 0.37, 0.66).normalize();   // golden-afternoon sun, ~22° up in the south-west
@@ -73,47 +73,147 @@ export function makeSky() {
   return m;
 }
 
-// ── clouds: anime cumulus, drifting east ──
-// Two tones only, like cel animation: bright white where the sun hits and a
-// lavender shade underneath (a stepped ramp that never goes dark). Every few
-// clouds is a tall towering one. They count as far-away sky for the outlines,
-// but NOT as open sky for the sunbeams, so light shafts fall between them.
-const CLOUD_RAMP = (() => {
-  const t = new THREE.DataTexture(new Uint8Array([150, 150, 150, 170, 255, 255, 255, 255]), 8, 1, THREE.RedFormat);
-  t.minFilter = t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true;
-  return t;
-})();
+// ── clouds: hand-painted cumulus, drifting east ──
+// Drawn the way a background painter would: lumpy, a little messy (puffs of
+// every size, stray bits breaking off, flat wisps trailing from the base),
+// and shaded in three painted tones (sunlit, shade, a deeper underside) whose
+// edges are broken up by brush strokes instead of computed smoothly. They
+// count as far-away sky for the outlines, but NOT as open sky for the
+// sunbeams, so light shafts fall between them.
+let STROKES = null;
+function strokeTex() {
+  if (STROKES) return STROKES;
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgb(128,128,128)'; g.fillRect(0, 0, S, S);
+  let sd = 11; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+  g.lineCap = 'round';
+  for (let i = 0; i < 520; i++) {                 // short loaded-brush dabs, mostly on one slant
+    const x = r() * S, y = r() * S, len = 10 + r() * 46, w = 3 + r() * 10, a = -0.55 + (r() - 0.5) * 0.9;
+    const v = r() < 0.5 ? 55 + r() * 40 : 190 + r() * 50;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.12 + r() * 0.22})`; g.lineWidth = w;
+    for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {   // wrap, so it tiles
+      g.beginPath(); g.moveTo(x + ox, y + oy);
+      g.quadraticCurveTo(x + ox + Math.cos(a) * len * 0.5 + (r() - 0.5) * 6, y + oy + Math.sin(a) * len * 0.5 + (r() - 0.5) * 6,
+        x + ox + Math.cos(a) * len, y + oy + Math.sin(a) * len);
+      g.stroke();
+    }
+  }
+  STROKES = new THREE.CanvasTexture(c);
+  STROKES.wrapS = STROKES.wrapT = THREE.RepeatWrapping;
+  STROKES.colorSpace = THREE.NoColorSpace;
+  return STROKES;
+}
+
+// One lumpy puff: an icosphere pushed in and out by a few random waves.
+const PUFF = new THREE.IcosahedronGeometry(1, 2);
+function puff(P, N, H, I, R, cx, cy, cz, rx, ry, rz, base, top) {
+  const pos = PUFF.attributes.position, start = P.length / 3;
+  const f = [1.3 + R() * 0.9, 1.3 + R() * 0.9, 1.3 + R() * 0.9], ph = [R() * 6, R() * 6, R() * 6], amp = 0.08 + R() * 0.08;
+  const geo = new THREE.BufferGeometry();
+  const arr = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    // broad, rounded lobes (low frequencies), so it stays soft and puffy, never crumpled
+    const bump = 1 + amp * (Math.sin(x * f[0] + ph[0]) * Math.sin(y * f[1] + ph[1]) + 0.7 * Math.sin(z * f[2] + ph[2]) * Math.cos(x * f[1] + ph[0])
+      + 0.3 * Math.sin((x - y + z) * 2.6 + ph[1]));
+    arr.set([x * bump, y * bump, z * bump], i * 3);
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  geo.setIndex(PUFF.index ? PUFF.index.clone() : null);
+  geo.computeVertexNormals();
+  const n = geo.attributes.normal;
+  for (let i = 0; i < pos.count; i++) {
+    const px = cx + arr[i * 3] * rx, py = cy + arr[i * 3 + 1] * ry, pz = cz + arr[i * 3 + 2] * rz;
+    P.push(px, py, pz);
+    const nx = n.getX(i) / rx, ny = n.getY(i) / ry, nz = n.getZ(i) / rz, l = Math.hypot(nx, ny, nz) || 1;
+    N.push(nx / l, ny / l, nz / l);
+    H.push(THREE.MathUtils.clamp((py - base) / Math.max(1, top - base), 0, 1));
+  }
+  if (geo.index) for (const k of geo.index.array) I.push(start + k);
+  else for (let k = 0; k < pos.count; k++) I.push(start + k);
+}
+
+function cloudMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      tBrush: { value: strokeTex() }, uSunView: SUN_VIEW, uDay: DAY,
+      lit: { value: color('#fff4ec') }, mid: { value: color('#f0d0c8') }, deep: { value: color('#dcb0b0') },
+      nLit: { value: color('#474d7c') }, nMid: { value: color('#2d3259') }, nDeep: { value: color('#1f2344') },   // moonlit
+    },
+    vertexShader: `attribute float hgt; varying vec3 vN, vNW, vW, vV; varying float vH;
+      void main(){
+        vN = normalize(normalMatrix * normal); vNW = normalize(mat3(modelMatrix) * normal); vH = hgt;
+        vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz;
+        vec4 mv = viewMatrix * w; vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `layout(location = 1) out highp vec4 gNormalDepth;
+      uniform sampler2D tBrush; uniform vec3 uSunView, lit, mid, deep, nLit, nMid, nDeep; uniform float uDay;
+      varying vec3 vN, vNW, vW, vV; varying float vH;
+      void main(){
+        vec3 N = normalize(vN);
+        // brush strokes painted on from three sides, so they never stretch
+        vec3 an = abs(normalize(vNW)) + 1e-3;
+        float b = (texture2D(tBrush, vW.xy * 0.011).r * an.z + texture2D(tBrush, vW.zy * 0.011).r * an.x
+                 + texture2D(tBrush, vW.xz * 0.011).r * an.y) / (an.x + an.y + an.z);
+        float t = dot(N, uSunView) * 0.5 + 0.5 + (b - 0.5) * 0.6 + (vH - 0.45) * 0.45;
+        // three painted tones with ragged edges; the edge of a cloud catches the light
+        float a1 = smoothstep(0.40, 0.44, t), a2 = smoothstep(0.60, 0.64, t);
+        float day = clamp(uDay, 0.0, 1.0);
+        vec3 L = mix(nLit, lit, day), M = mix(nMid, mid, day), D = mix(nDeep, deep, day);
+        vec3 col = mix(mix(D, M, a1), L, a2);
+        col += L * pow(1.0 - abs(dot(N, normalize(vV))), 3.0) * 0.18;
+        col *= 1.0 + (b - 0.5) * 0.08;
+        gl_FragColor = vec4(col, 1.0);
+        gNormalDepth = vec4(0.5, 0.5, 1.0, 4000.0);
+      }`,
+  });
+}
+
 export function makeClouds(n = 16) {
   const R = rng(5);
   const group = new THREE.Group();
-  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: CLOUD_RAMP, vertexColors: true, fog: false }), { ink: 'cloud', paint: false });
-  // a touch cool, so the warm afternoon sun lights them white rather than yellow
-  // pastel: warm white tops, dusty rose undersides, like clouds in a peach sky
-  const white = color('#fff3ec'), shade = color('#f1d3cc'), base = color('#e6c0bb');
+  const mat = cloudMaterial();
   for (let i = 0; i < n; i++) {
-    const W = new World();
+    const P = [], N = [], H = [], I = [];
     const k = 38 + R() * 46;               // big: they sit a kilometre out
     const tall = i % 4 === 0;
-    // a cauliflower: puffs heaped on a dome, biggest in the middle, on a flat base
-    const puffs = 16 + Math.floor(R() * 10);
+    const top = k * (tall ? 4.2 : 1.9), bottom = -k * 0.2;
+    const add = (x, y, z, rx, ry, rz) => puff(P, N, H, I, R, x, y, z, rx, ry, rz, bottom, top);
+    // a cauliflower heaped on a dome: puffs of every size, loosely placed
+    const puffs = 26 + Math.floor(R() * 14);
     for (let j = 0; j < puffs; j++) {
       const u = R() * 2 - 1, v = R() * 2 - 1;
       const dome = Math.max(0, 1 - u * u);
-      const x = u * k * 1.7, z = v * k * 0.75;
-      const r = k * (0.32 + dome * 0.38 + R() * 0.12);
-      const y = dome * k * (tall ? 1.4 : 0.75) + R() * k * 0.2;
-      W.blob('c', x, y, z, r, r * 0.86, r * 0.92, j % 4 ? white : shade, 2);
+      const r = k * (0.14 + dome * 0.36 + R() * 0.22);
+      add(u * k * (1.5 + R() * 0.5), dome * k * (tall ? 1.4 : 0.75) + R() * k * 0.3, v * k * 0.8, r * (0.9 + R() * 0.3), r * (0.75 + R() * 0.2), r * (0.85 + R() * 0.2));
     }
-    if (tall) {                            // a towering one: puffs stacked up the middle
+    if (tall) {                            // a towering one: puffs stacked up the middle, drifting off-centre
       for (let j = 0; j < 6; j++) {
-        const r = k * (0.85 - j * 0.09);
-        W.blob('c', (R() - 0.5) * k * 0.5, k * (1.3 + j * 0.55), (R() - 0.5) * k * 0.4, r, r * 0.82, r * 0.88, white, 2);
+        const r = k * (0.85 - j * 0.09) * (0.85 + R() * 0.3);
+        add((R() - 0.5) * k * 0.7 + j * k * 0.06, k * (1.3 + j * 0.55), (R() - 0.5) * k * 0.5, r, r * 0.82, r * 0.88);
       }
     }
-    // flat base
-    W.blob('c', 0, k * 0.08, 0, k * 1.55, k * 0.36, k * 0.85, base, 2);
-    const g = new THREE.Group();
-    W.build({ c: mat }, g, { shadows: false });
+    // stray bits breaking away round the edges
+    for (let j = 0; j < 3 + Math.floor(R() * 4); j++) {
+      const a = R() * Math.PI * 2, r = k * (0.12 + R() * 0.16);
+      add(Math.cos(a) * k * (1.9 + R() * 0.6), k * (0.1 + R() * 0.9), Math.sin(a) * k * 0.9, r * 1.3, r * 0.8, r);
+    }
+    // a lumpy base, and flat wisps trailing off it sideways
+    add(0, k * 0.08, 0, k * 1.5, k * 0.34, k * 0.8);
+    for (let j = 0; j < 2 + Math.floor(R() * 2); j++) {
+      const s = R() < 0.5 ? -1 : 1;
+      add(s * k * (1.4 + R() * 0.8), k * (0.02 + R() * 0.15), (R() - 0.5) * k * 0.6, k * (0.7 + R() * 0.6), k * (0.1 + R() * 0.08), k * (0.3 + R() * 0.2));
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+    geo.setAttribute('hgt', new THREE.Float32BufferAttribute(H, 1));
+    geo.setIndex(I);
+    geo.computeBoundingSphere();
+    const g = new THREE.Mesh(geo, mat);
+    g.rotation.y = R() * Math.PI * 2;
     // most sit out by the horizon; a few drift low round the diorama's edge,
     // level with it, so the model floats among them (the diorama-game look)
     const low = i % 3 === 1;
