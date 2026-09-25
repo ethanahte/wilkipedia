@@ -11,7 +11,7 @@
 //   window.WilcoxCampus.goToRoom('R204')
 
 import * as THREE from 'three';
-import { World } from './geo.js';
+import { World, distToLine, inPoly } from './geo.js';
 import { makeTextures, makeMaterials, setAniso } from './toon.js';
 import { buildGround } from './ground.js';
 import { buildBuildings } from './buildings.js';
@@ -24,7 +24,7 @@ import { Controls } from './controls.js';
 import { loadRooms, rooms, byId, makeHighlight, placeHighlight, standFor } from './rooms.js';
 import { Post } from './post.js';
 import { Hud } from './hud.js';
-import { FRONT, BUILDINGS, QUAD, TRACK, FIELDS, CREEK } from './layout.js';
+import { FRONT, BUILDINGS, QUAD, TRACK, FIELDS, CREEK, ROADS, CAMPUS } from './layout.js';
 
 const ROOT = document.body.dataset.root || '../';
 const QKEY = 'wilcox-campus-quality';
@@ -284,7 +284,7 @@ async function boot() {
   };
   const where = (x, z) => {
     if (x > QUAD.x0 && x < QUAD.x1 && z > QUAD.z0 && z < QUAD.z1) return 'The quad';
-    let best = null, bd = 7;   // the nearest building within 7 m
+    let best = null, bd = 8;   // the nearest building within 8 m
     for (const bb of BUILDINGS) {
       if (!bb.name) continue;
       const xs = bb.poly.map((q) => q[0]), zs = bb.poly.map((q) => q[1]);
@@ -292,9 +292,10 @@ async function boot() {
       if (d < bd) { bd = d; best = bb; }
     }
     if (best) return best.name;
-    if (Math.abs(x - CREEK.x) < 14) return 'Calabazas Creek';
+    if (distToLine(x, z, CREEK.pts) < 14 && !(z > CREEK.culvert[0] && z < CREEK.culvert[1])) return 'Calabazas Creek';
     if (Math.abs(x - TRACK.x) < 50 && Math.abs(z - TRACK.z) < 92) return 'Stadium';
-    if (z < -97) return 'Monroe Street';
+    for (const r of ROADS) if (r.name && distToLine(x, z, r.pts) < r.w / 2 + 3) return r.name;
+    if (!inPoly(x, z, CAMPUS)) return 'Santa Clara';
     if (z > 84 && x > -12) return 'The fields';
     return 'Wilcox High School';
   };

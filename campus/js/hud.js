@@ -7,12 +7,13 @@
 // from, so the dot is always where you are. It is styled after the official
 // campus map: white buildings, black outlines, north up.
 
-import { BUILDINGS, LOTS, FIELDS, TRACK, CREEK, CAMPUS, MONROE_PTS, CALABAZAS_PTS, SANJUAN_PTS, LAWN_E, LAWN_W, STAGE, WORLD } from './layout.js';
+import { BUILDINGS, LOTS, FIELDS, TRACK, CREEK, CAMPUS, ROADS, LAWN_E, LAWN_W, STAGE, WORLD } from './layout.js';
+import { OSM_HOUSES } from './osm.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const LABELS = [
-  ['B', -68, -25], ['R', 44, 1], ['Cafeteria', 22, -42], ['Library', -36, 45], ['P', 8, 59], ['Aux gym', 62, 48],
-  ['Main gym', 118, -2], ['Pool', 78, 0], ['S', -50, 108], ['M', -125, 75], ['N', -138, 27], ['Theatre', -136, -26],
+  ['B', -68, -25], ['R', 44, 1], ['Cafeteria', 22, -42], ['Library', -36, 45], ['P', 8, 59], ['Small gym', 62, 48],
+  ['Main gym', 118, -2], ['Pool', 78, 0], ['S', -50, 108], ['M', -125, 75], ['N', -138, 27], ['Theatre', -158, -30],
   ['Front office', -36, -65], ['Stadium', 240, 87], ['P108', 178, -33], ['P111', 179, -2], ['P115', 157, -2], ['P117', 174, 30],
 ];
 
@@ -99,8 +100,9 @@ export class Hud {
     const line = (pts, w, col) => { g.beginPath(); pts.forEach(([x, z], i) => g[i ? 'lineTo' : 'moveTo'](...P(x, z))); g.lineWidth = w * S; g.strokeStyle = col; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke(); };
     g.fillStyle = '#eceae3'; g.fillRect(0, 0, W, H);
     poly(CAMPUS, '#f8f7f3');
-    for (const pts of [MONROE_PTS, CALABAZAS_PTS, SANJUAN_PTS]) line(pts, 16, '#d6d3cb');
-    line([[CREEK.x, WORLD.z0], [CREEK.x, WORLD.z1]], 9, '#b9d4e3');
+    for (const r of ROADS) line(r.pts, r.w, '#d6d3cb');
+    for (const [, f] of OSM_HOUSES) { const pts = []; for (let i = 0; i < f.length; i += 2) pts.push([f[i], f[i + 1]]); poly(pts, '#e0ddd5'); }
+    line(CREEK.pts, 9, '#b9d4e3');
     for (const L of LOTS) { const [x0, z0, x1, z1] = L.r; poly([[x0, z0], [x1, z0], [x1, z1], [x0, z1]], '#e2e0da'); }
     for (const f of [FIELDS.soccer, FIELDS.practice]) poly(f, '#cfe3c0');
     poly(LAWN_E, '#cfe3c0'); const [a, b, cc, d] = LAWN_W.box; poly([[a, b], [cc, b], [cc, d], [a, d]], '#cfe3c0');

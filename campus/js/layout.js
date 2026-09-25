@@ -8,6 +8,8 @@
 // If something here disagrees with the real campus, fix the number here: every
 // wall, collider, minimap shape and room label is generated from this file.
 
+import { OSM_ROADS } from './osm.js';
+
 export const K = 0.4675;   // metres per satellite pixel (kept for re-measuring)
 
 // ── buildings ──
@@ -30,12 +32,15 @@ export const BUILDINGS = [
   // The P building: two wings of classrooms with a covered corridor between them.
   { id: 'P-w', name: 'P building', style: 'p', h: 4.2, poly: rect(-11.7, 41.1, 2.3, 77.6) },
   { id: 'P-e', name: 'P building', style: 'p', h: 4.2, poly: rect(14, 41.1, 28, 77.6) },
-  { id: 'AUXGYM', name: 'Auxiliary Gym', style: 'gym', h: 9, poly: rect(44.4, 36, 79.5, 61.2) },
+  { id: 'AUXGYM', name: 'Small gym (Auxiliary Gym)', style: 'gym', h: 9, poly: rect(44.4, 36, 79.5, 61.2) },
   // Gym complex
   { id: 'GYM-n', name: 'Wrestling, weight and locker rooms', style: 'gym', h: 5.5, poly: rect(74.8, -47.7, 115.4, -31.4) },
-  { id: 'GYM-lobby', name: 'Main Gym lobby', style: 'gymlobby', h: 5.5, poly: rect(74.8, -31.4, 132.3, -20.6) },
+  // the low bar in front of the main gym: boys' locker room (west half), lobby (east half)
+  { id: 'GYM-boys', name: 'Boys’ locker room', style: 'gym', h: 5.5, poly: rect(74.8, -31.4, 102.9, -20.6) },
+  { id: 'GYM-lobby', name: 'Main Gym lobby', style: 'gymlobby', h: 5.5, poly: rect(102.9, -31.4, 132.3, -20.6) },
   { id: 'MAINGYM', name: 'Main Gym', style: 'gym', h: 10.5, poly: rect(102.9, -20.6, 133.2, 16.8) },
-  { id: 'GYM-s', name: 'Girls’ locker room and dance room', style: 'gym', h: 5.2, poly: rect(88.8, 16.8, 138.9, 43.5) },
+  { id: 'GYM-girls', name: 'Girls’ locker room', style: 'gym', h: 5.2, poly: rect(88.8, 16.8, 113.9, 43.5) },
+  { id: 'GYM-dance', name: 'Dance room', style: 'gym', h: 5.2, poly: rect(113.9, 16.8, 138.9, 43.5) },
   // East clusters
   { id: 'P108', name: 'P108–P110', style: 'p', h: 4, poly: rect(168.3, -40.7, 188.4, -25.2) },
   { id: 'P115', name: 'P115 Wellness Center and P116 Maker Space', style: 'p', h: 4.2, poly: rect(149.6, -17.3, 165, 13.6) },
@@ -44,14 +49,23 @@ export const BUILDINGS = [
   { id: 'P117', name: 'P117–P118', style: 'p', h: 4, poly: rect(155.7, 20.6, 174.4, 38.8) },
   { id: 'P119', name: 'P119–P120', style: 'p', h: 4, poly: rect(174.4, 20.6, 193.1, 38.8) },
   // West of the creek
-  { id: 'T-lobby', name: 'Mission City Center for Performing Arts', style: 'theatre-lobby', h: 7.5, poly: rect(-152, -53, -128, -45) },
-  { id: 'T-gable', name: 'Theatre', style: 'theatre', h: 6, poly: rect(-159, -45, -140, -20), gable: 3.4 },
-  { id: 'T-main', name: 'Theatre', style: 'theatre', h: 12, poly: rect(-140, -45, -113, -6.5) },
-  { id: 'T-fly', name: 'Theatre stage house', style: 'theatre', h: 22, poly: rect(-131, -40, -113, -14) },
-  { id: 'T-back', name: 'Theatre', style: 'theatre', h: 7, poly: rect(-159, -20, -140, -6.5) },
+  // Theatre (Mission City Center for Performing Arts): outline from OpenStreetMap,
+  // split into masses off the satellite view — the glass lobby on the Monroe
+  // side, a wing angled along Calabazas, the metal-roofed house, the white fly
+  // tower (three smoke hatches on its roof), and the low stage/shop blocks.
+  { id: 'T-lobby', name: 'Mission City Center for Performing Arts', style: 'theatre-lobby', h: 7.5, poly: rect(-177, -50.2, -157.5, -36) },
+  { id: 'T-nw', name: 'Theatre', style: 'theatre', h: 8, poly: [[-189.1, -49.6], [-177, -50.2], [-177, -31], [-181.5, -28]] },
+  { id: 'T-wing', name: 'Theatre', style: 'theatre', h: 7, poly: [[-181.5, -28], [-170, -31.5], [-163.5, -11.6], [-176.1, -7.3]] },
+  { id: 'T-svc', name: 'Theatre', style: 'plain', h: 6, poly: rect(-177, -36, -157.5, -27) },
+  { id: 'T-svc2', name: 'Theatre', style: 'theatre', h: 6, poly: [[-170, -27], [-161, -27], [-161, -16.4], [-165.2, -16.4]] },
+  { id: 'T-house', name: 'Theatre', style: 'theatre', h: 10, poly: rect(-157.5, -50.2, -133, -27), gable: 3.4 },
+  { id: 'T-fly', name: 'Theatre stage house', style: 'theatre', h: 20, poly: rect(-161, -27, -131, -16.4) },
+  { id: 'T-back', name: 'Theatre', style: 'theatre', h: 7, poly: rect(-161, -16.4, -131, -7.4) },
+  { id: 'T-east', name: 'Theatre', style: 'theatre', h: 8, poly: rect(-133, -36.7, -121.2, -7.4) },
   { id: 'N', name: 'N building', style: 'mn', h: 4.2, poly: [[-153, 16.8], [-118, 16.8], [-118, 37], [-159, 37], [-159, 24]] },
-  { id: 'M100', name: 'M building', style: 'mn', h: 4.4, poly: rect(-146, 45, -118, 57.5) },
-  { id: 'M', name: 'M building', style: 'mn', h: 4.2, poly: rect(-132, 57.5, -118, 96.3) },
+  { id: 'M100', name: 'M building', style: 'mn', h: 4.4, poly: rect(-147.7, 45, -117, 57.4) },
+  { id: 'M', name: 'M building', style: 'mn', h: 4.2, poly: rect(-131.8, 57.4, -117, 109.5) },
+  { id: 'M-bump', name: 'M building', style: 'plain', h: 3.6, poly: rect(-137, 79.4, -131.8, 87.8) },
   // Science
   { id: 'S-top', name: 'Science building', style: 's', h: 5.2, poly: rect(-70, 87, -28, 96.3), barrel: 'x' },
   { id: 'S-west', name: 'Science building', style: 's', h: 5.2, poly: rect(-84, 87, -65.5, 133.7), barrel: 'z' },
@@ -61,20 +75,43 @@ export const BUILDINGS = [
 ];
 
 // ── ground ──
-export const CREEK = { x: -102.9, top: 8, bottom: 2.6, depth: 3.1, z0: -330, z1: 400 };
+// The creek runs due south past campus, goes underground at the Georgetown
+// Place corner (culvert: z range), and comes out bending south-east between
+// Calabazas Boulevard's two carriageways (course from OpenStreetMap, checked
+// on the satellite view). x is the straight reach.
+// South of the culvert the channel is a narrow one (south: its size there).
+export const CREEK = {
+  x: -102.9, top: 8, bottom: 2.6, depth: 3.1, culvert: [175, 231],
+  south: { top: 4, bottom: 1.4, depth: 2.4 },
+  pts: [[-102.9, -400], [-102.9, 238], [-74.3, 313.7], [-40, 400]],
+};
+// The channel's size at z (the north reach's north of the culvert, else the south's).
+export const creekAt = (z) => (z < CREEK.culvert[0] ? CREEK : CREEK.south);
 export const BRIDGES = [{ z: -55.6, w: 4 }, { z: 54, w: 4 }];
 
-export const MONROE = { z: -108.5, w: 18, bendX: 150 };
-// Monroe Street bends south-east past the track; these are its centre-line points.
-export const MONROE_PTS = [[-420, -108.5], [150, -108.5], [215, -95], [262, -55], [300, 5], [345, 80], [440, 210], [520, 330]];
-export const CALABAZAS_PTS = [[-196, -420], [-187, -108.5], [-160, 40], [-138, 160], [-112, 330], [-96, 420]];
-export const SANJUAN_PTS = [[-160, 360], [23, 297], [220, 226], [402, 157], [560, 100]];
+// Streets are OpenStreetMap's centre lines (osm.js, made by tools/osm_campus.py).
+// w: curb-to-curb width in metres; center: paint a yellow centre line.
+const osmRoad = (name) => OSM_ROADS.filter((r) => r.name === name).map((r) => r.pts);
+const longest = (lines) => lines.reduce((a, b) => (b.length > a.length ? b : a), []);
+// Monroe runs westward and Calabazas southward, so the campus is always on the
+// same side (left of travel: negative offsets in geo.js offsetLine).
+const orient = (pts, key) => (key(pts[0]) > key(pts[pts.length - 1]) ? pts : pts.slice().reverse());
+export const MONROE_PTS = orient(longest(osmRoad('Monroe Street')), (p) => p[0]);
+export const CALABAZAS_PTS = orient(longest(osmRoad('Calabazas Boulevard')), (p) => -p[1]);
+export const SANJUAN_PTS = longest(osmRoad('San Juan Avenue'));
+export const ROADS = OSM_ROADS.map((r) => ({
+  name: r.name, pts: r.pts,
+  // Calabazas splits into two one-way carriageways south of the school; the
+  // shorter OSM line is the east one
+  w: r.kind === 'secondary' ? 18 : r.kind === 'tertiary' ? (r.pts === longest(osmRoad(r.name)) ? 15 : 9) : 10,
+  center: r.kind === 'secondary' || (r.kind === 'tertiary' && r.pts === longest(osmRoad(r.name))),
+}));
 
 // Asphalt lots: rect + which way the stall rows run ('x' = rows along x).
 export const LOTS = [
   { r: [-75, -92, -18, -80], rows: 'x', name: 'Visitor parking', front: true },
-  { r: [-18, -92, 108, -56], rows: 'x', name: 'Faculty parking' },
-  { r: [108, -92, 205, -49], rows: 'x', name: 'Student parking' },
+  { r: [-18, -90, 108, -56], rows: 'x', name: 'Faculty parking' },
+  { r: [112, -66, 190, -49], rows: 'x', name: 'Student parking' },
   { r: [-192, -92, -112, -56], rows: 'x', name: 'Student parking' },
   { r: [-159, -6.5, -112, 15.5], rows: 'x', name: 'Faculty parking' },
   { r: [30, 62, 196, 84], rows: 'x', name: 'Parking' },
@@ -128,8 +165,9 @@ export const FIELDS = {
 };
 
 // Everything inside this outline is campus; houses fill the rest of the world.
-export const CAMPUS = [[-176, -97], [160, -97], [240, -64], [292, -8], [332, 60], [372, 150], [230, 205], [30, 272],
-  [-60, 296], [-118, 296], [-146, 120], [-168, 20]];
+// OpenStreetMap's school grounds, plus the theatre corner west of the creek.
+export const CAMPUS = [[-219, -96], [39.4, -95.8], [60.3, -94.5], [100.8, -88.6], [114.2, -85.5], [185.6, -61.2],
+  [192.7, -57.4], [213.1, -46.3], [237.3, -31], [305.9, 27.9], [340.6, 76.2], [367.6, 131.3], [-54.2, 305.2], [-173.1, 17.6]];
 // The model's base: the campus plus a ring of the neighbourhood, like a diorama.
 export const WORLD = { x0: -215, z0: -150, x1: 365, z1: 305 };
 
@@ -143,7 +181,7 @@ export const ROOM_XFORM = {
   'R2': { map: [1244, 724, 1320, 852], world: [33.2, -22.9, 54.7, 25.2] },
   'R3': { map: [1140, 723, 1216, 852], world: [33.2, -22.9, 54.7, 25.2] },
   'S1': { map: [483, 745, 749, 955], world: [-84, 83.7, -9.4, 133.7] },
-  'M1': { map: [184, 571, 286, 788], world: [-146, 45, -118, 96.3] },
+  'M1': { map: [184, 571, 286, 788], world: [-147.7, 45, -117, 109.5] },
   'N1': { map: [135, 476, 277, 541], world: [-159, 16.8, -118, 37] },
   'C1': { map: [777, 208, 1070, 287], world: [-17.8, -52.8, 62.6, -30.4] },
 };
@@ -158,7 +196,7 @@ export const P_XFORM = [
 // Places that are a whole building, not a box on the plan.
 export const PLACES = {
   POOL: [77.9, 0], MAINGYM: [118, -1.9], AUXGYM: [62, 48.6], WRESTLING: [88, -39.5], WEIGHT: [104, -39.5],
-  BOYSLOCKER: [95, -26], GIRLSLOCKER: [104, 30], DANCE: [130, 30], THEATRE: [-140, -49], 'BLDG-R': [44, 1.1],
+  BOYSLOCKER: [95, -26], GIRLSLOCKER: [104, 30], DANCE: [130, 30], THEATRE: [-167, -52], 'BLDG-R': [44, 1.1],
 };
 
 export function rect(x0, z0, x1, z1) { return [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]; }

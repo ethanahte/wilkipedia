@@ -8,16 +8,16 @@
 // Plus the creek: a concrete channel with sloped banks and water at the bottom.
 
 import * as THREE from 'three';
-import { color } from './geo.js';
+import { color, distToLine, offsetLine, clipLineZ, bankLine } from './geo.js';
 import { gbuffer, TOON, maxAniso } from './toon.js';
 import {
-  WORLD, CAMPUS, LOTS, MONROE_PTS, CALABAZAS_PTS, SANJUAN_PTS, BUILDINGS, FIELDS, TRACK, QUAD, STAGE,
-  LAWN_W, LAWN_E, CEDAR, CREEK, LAWN_TREES, BRIDGES,
+  WORLD, CAMPUS, LOTS, ROADS, BUILDINGS, FIELDS, TRACK, QUAD, STAGE,
+  LAWN_W, LAWN_E, CEDAR, CREEK, creekAt, LAWN_TREES, BRIDGES,
 } from './layout.js';
 import { treeSpots } from './quad.js';
 import { addHeight } from './collide.js';
 
-export const STREETS = [];     // residential streets, filled by planStreets(); houses line them
+export const STREETS = [];     // every street in the world ({ name, pts, w, center }), filled by planStreets()
 
 function painter(g, x0, z0, x1, z1, W, H) {
   const sx = W / (x1 - x0), sz = H / (z1 - z0);
@@ -81,17 +81,34 @@ function plane(x0, z0, x1, z1, y, tex, t0) {
   return m;
 }
 
-// Residential streets outside campus, so the neighbourhood reads as a neighbourhood.
+// The streets round the school, as OpenStreetMap has them (layout.js ROADS).
 export function planStreets() {
   STREETS.length = 0;
-  for (const z of [-172, -236]) STREETS.push([[-380, z], [480, z]]);
-  for (const x of [-320, -250, -60, 60, 180, 300, 420]) STREETS.push([[x, -290], [x, -118]]);
-  for (const z of [-30, 70, 170, 270]) STREETS.push([[-380, z], [-200, z]]);
-  STREETS.push([[-300, -118], [-300, 420]]);
-  // parallel to San Juan, south of it
-  for (const off of [70, 140]) STREETS.push(SANJUAN_PTS.map(([x, z]) => [x + 0.34 * off, z + 0.94 * off]));
-  // east of Monroe's bend
-  STREETS.push([[330, -60], [480, 30]], [[380, 60], [480, 110]]);
+  STREETS.push(...ROADS);
+}
+
+// Flat ground over a polygon, textured by world position like plane().
+function groundPoly(poly, y, tex, t0) {
+  const [tx0, tz0, tx1, tz1] = t0;
+  const tris = THREE.ShapeUtils.triangulateShape(poly.map(([x, z]) => new THREE.Vector2(x, z)), []);
+  const pos = [], uv = [], nor = [];
+  for (const t of tris) {
+    // wind each triangle so its face points up
+    const [a, b, c] = t.map((k) => poly[k]);
+    const upward = (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]) > 0;
+    for (const k of upward ? t : [t[0], t[2], t[1]]) {
+      const [x, z] = poly[k];
+      pos.push(x, y, z); nor.push(0, 1, 0); uv.push((x - tx0) / (tx1 - tx0), 1 - (z - tz0) / (tz1 - tz0));
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  const m = new THREE.Mesh(g, gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON })));
+  m.receiveShadow = true;
+  m.matrixAutoUpdate = false;
+  return m;
 }
 
 export function buildGround(scene, q = 1) {
@@ -108,13 +125,17 @@ export function buildGround(scene, q = 1) {
     p.line(pts, w + side * 2, '#d8d4ca'); p.line(pts, w, '#676b70');
     if (center) p.line(pts, 0.35, '#e8c341');
   };
-  for (const s of STREETS) road(s, 9, 1.6);
 
   // campus paving and planting
   p.poly(CAMPUS, '#d6d2c9');
   // grass and dry grass along the creek banks
-  p.rect(CREEK.x - 15, WORLD.z0, CREEK.x + 15, WORLD.z1, '#b7ae80');
-  p.rect(CREEK.x - 12, WORLD.z0, CREEK.x + 12, WORLD.z1, '#a9a574');
+  // (only where it's open: nothing shows over the culvert)
+  const [c0, c1] = CREEK.culvert;
+  p.line(clipLineZ(CREEK.pts, WORLD.z0 - 20, c0), 30, '#b7ae80', { cap: 'butt' });
+  p.line(clipLineZ(CREEK.pts, WORLD.z0 - 20, c0), 24, '#a9a574', { cap: 'butt' });
+  p.line(clipLineZ(CREEK.pts, c1, WORLD.z1 + 20), CREEK.south.top * 2 + 3, '#a9a574', { cap: 'butt' });
+  // residential streets (after the creek's banks: south of the culvert they run right beside it)
+  for (const s of STREETS) if (!s.center) road(s.pts, s.w, 1.6);
   // lawns and beds between buildings (from the satellite)
   p.rect(-176, -50, -160, 110, '#98b865');           // west edge by Calabazas
   p.rect(-93, -78, -88, 68, '#8fb35c');              // strip along B's west side
@@ -138,9 +159,7 @@ export function buildGround(scene, q = 1) {
   for (const x of [125, 150, 175]) arrow(p, x, -55, Math.PI, '#f4f4f0');
 
   // Monroe, Calabazas, San Juan
-  road(MONROE_PTS, 18, 3, true);
-  road(CALABAZAS_PTS, 16, 2.5, true);
-  road(SANJUAN_PTS, 16, 2.5, true);
+  for (const s of STREETS) if (s.center) road(s.pts, s.w, s.w > 16 ? 3 : 2.5, true);
   // school crosswalk in front of the office (yellow ladder)
   for (let i = 0; i < 9; i++) p.rect(-26 + (i % 2) * 0.1, -117.5 + i * 2, -18, -116.5 + i * 2, '#e8c341');
   p.rect(-26, -117.5, -25.5, -99.5, '#e8c341'); p.rect(-18.5, -117.5, -18, -99.5, '#e8c341');
@@ -158,9 +177,13 @@ export function buildGround(scene, q = 1) {
 
   const worldTex = texFrom(wc);
   const WB = [WORLD.x0, WORLD.z0, WORLD.x1, WORLD.z1];
-  const cw = CREEK.x - CREEK.top, ce = CREEK.x + CREEK.top;
-  scene.add(plane(WORLD.x0, WORLD.z0, cw, WORLD.z1, 0, worldTex, WB));
-  scene.add(plane(ce, WORLD.z0, WORLD.x1, WORLD.z1, 0, worldTex, WB));
+  // two pieces of ground, west and east of the creek's channel (narrower south of the culvert)
+  const bank = (s) => bankLine(CREEK.pts, s * CREEK.top, s * CREEK.south.top, c0, WORLD.z0, WORLD.z1);
+  scene.add(groundPoly([[WORLD.x0, WORLD.z0], ...bank(1), [WORLD.x0, WORLD.z1]], 0, worldTex, WB));
+  scene.add(groundPoly([...bank(-1), [WORLD.x1, WORLD.z1], [WORLD.x1, WORLD.z0]], 0, worldTex, WB));
+  // and the strip over the culvert
+  const ws = CREEK.south.top;
+  scene.add(groundPoly([...clipLineZ(offsetLine(CREEK.pts, ws), c0, c1), ...clipLineZ(offsetLine(CREEK.pts, -ws), c0, c1).reverse()], 0, worldTex, WB));
 
   // ── quad detail ──
   const Q = { x0: -56, z0: -31, x1: 36.5, z1: 38 };
@@ -342,19 +365,30 @@ function diamond(p, F, o) {
 
 // The creek: a concrete trapezoid channel, water along the bottom.
 function creek(scene) {
-  const { x: xc, top, bottom, depth } = CREEK;
-  const z0 = Math.max(CREEK.z0, WORLD.z0), z1 = Math.min(CREEK.z1, WORLD.z1);
   const conc = new THREE.Color('#c9c5bb'), wet = new THREE.Color('#8f9a8c'), water = new THREE.Color('#3f6f86');
   const pos = [], nor = [], col = [], uv = [];
-  const quad = (a, b, c, d, n, cl) => {
-    for (const v of [a, b, c, a, c, d]) { pos.push(...v); nor.push(...n); col.push(cl.r, cl.g, cl.b); uv.push(v[0] * 0.5, v[2] * 0.5); }
+  // the open reaches: north of the culvert, and south of it to the world's edge
+  const [c0, c1] = CREEK.culvert;
+  // one strip between two offsets of the centre line: [offset, y] at each edge
+  const strip = (z0, z1, [da, ya], [db, yb], cl) => {
+    const A = clipLineZ(offsetLine(CREEK.pts, da), z0, z1), B = clipLineZ(offsetLine(CREEK.pts, db), z0, z1);
+    for (let i = 0; i < Math.min(A.length, B.length) - 1; i++) {
+      const a = [A[i][0], ya, A[i][1]], b = [B[i][0], yb, B[i][1]], c = [B[i + 1][0], yb, B[i + 1][1]], d = [A[i + 1][0], ya, A[i + 1][1]];
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+      let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      const l = Math.hypot(...n) || 1; n = n.map((k) => k / l);
+      const up = n[1] < 0;   // keep every face pointing up, out of the channel
+      const quad = up ? [a, d, c, a, c, b] : [a, b, c, a, c, d];
+      if (up) n = n.map((k) => -k);
+      for (const p of quad) { pos.push(...p); nor.push(...n); col.push(cl.r, cl.g, cl.b); uv.push(p[0] * 0.5, p[2] * 0.5); }
+    }
   };
-  const bankN = (s) => { const dx = top - bottom, l = Math.hypot(dx, depth); return [(-s * depth) / l, dx / l, 0]; };
-  // west bank (faces east), bottom, east bank (faces west)
-  quad([xc - top, 0, z1], [xc - bottom, -depth, z1], [xc - bottom, -depth, z0], [xc - top, 0, z0], bankN(-1), conc);
-  quad([xc - bottom, -depth, z1], [xc + bottom, -depth, z1], [xc + bottom, -depth, z0], [xc - bottom, -depth, z0], [0, 1, 0], wet);
-  quad([xc + bottom, -depth, z1], [xc + top, 0, z1], [xc + top, 0, z0], [xc + bottom, -depth, z0], bankN(1), conc);
-  quad([xc - bottom - 0.35, -depth + 0.28, z1], [xc + bottom + 0.35, -depth + 0.28, z1], [xc + bottom + 0.35, -depth + 0.28, z0], [xc - bottom - 0.35, -depth + 0.28, z0], [0, 1, 0], water);
+  for (const [z0, z1, { top, bottom, depth }] of [[WORLD.z0, c0, CREEK], [c1, WORLD.z1, CREEK.south]]) {
+    strip(z0, z1, [top, 0], [bottom, -depth], conc);                    // west bank
+    strip(z0, z1, [bottom, -depth], [-bottom, -depth], wet);            // bottom
+    strip(z0, z1, [-bottom, -depth], [-top, 0], conc);                  // east bank
+    strip(z0, z1, [bottom + 0.35, -depth + 0.28], [-bottom - 0.35, -depth + 0.28], water);
+  }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
@@ -363,9 +397,25 @@ function creek(scene) {
   const m = new THREE.Mesh(g, gbuffer(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: TOON })));
   m.receiveShadow = true;
   scene.add(m);
+  // concrete headwalls where it dives under the Georgetown Place corner, each with a dark mouth
+  for (const [z, s, { top, bottom, depth }] of [[c0, 1, CREEK], [c1, -1, CREEK.south]]) {
+    const W = clipLineZ(offsetLine(CREEK.pts, top), z - 0.01, z + 0.01)[0], E = clipLineZ(offsetLine(CREEK.pts, -top), z - 0.01, z + 0.01)[0];
+    const hw = new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(E[0] - W[0], E[1] - W[1]), depth + 0.6, 0.6),
+      gbuffer(new THREE.MeshToonMaterial({ color: conc, gradientMap: TOON })));
+    hw.position.set((W[0] + E[0]) / 2, -depth / 2 + 0.3, z + s * 0.3);
+    hw.rotation.y = -Math.atan2(E[1] - W[1], E[0] - W[0]);
+    const mouth = new THREE.Mesh(new THREE.PlaneGeometry(bottom * 2, depth - 0.6), gbuffer(new THREE.MeshToonMaterial({ color: '#1d2226', gradientMap: TOON })));
+    mouth.position.set(0, -0.2, -s * 0.31);
+    mouth.rotation.y = s > 0 ? Math.PI : 0;                   // face the open channel
+    hw.add(mouth);
+    hw.receiveShadow = hw.castShadow = true;
+    scene.add(hw);
+  }
   // you can't walk into it (the fences stop you anyway), except over the bridges
   addHeight((x, z) => {
-    if (Math.abs(x - xc) >= top) return null;
+    if (Math.abs(x - CREEK.x) > 50) return null;              // cheap reject: the creek never strays far east or west
+    if (z > c0 && z < c1) return null;                         // over the culvert
+    if (distToLine(x, z, CREEK.pts) >= creekAt(z).top) return null;
     if (BRIDGES.some((b) => Math.abs(z - b.z) < b.w / 2)) return null;
     return 50;
   });

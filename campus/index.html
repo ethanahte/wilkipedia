@@ -10,8 +10,8 @@
 <link rel="canonical" href="https://wilcoxwiki.org/campus/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="campus.css?v=17e0efa60e">
-<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=58b5bb408d", "./js/collide.js": "./js/collide.js?v=a5a568bcc5", "./js/controls.js": "./js/controls.js?v=2a07bb6685", "./js/geo.js": "./js/geo.js?v=c0f8bdb193", "./js/ground.js": "./js/ground.js?v=7d197a8acb", "./js/hud.js": "./js/hud.js?v=6b74b4eda9", "./js/landmarks.js": "./js/landmarks.js?v=1f47062dd4", "./js/layout.js": "./js/layout.js?v=ae8b1f0925", "./js/life.js": "./js/life.js?v=5bd57b9bf1", "./js/lights.js": "./js/lights.js?v=ec86d70c04", "./js/main.js": "./js/main.js?v=3760d29671", "./js/nature.js": "./js/nature.js?v=0feda81310", "./js/post.js": "./js/post.js?v=884a63df47", "./js/props.js": "./js/props.js?v=91e0361fba", "./js/quad.js": "./js/quad.js?v=522d10c9d8", "./js/rooms.js": "./js/rooms.js?v=3a3de8a433", "./js/toon.js": "./js/toon.js?v=fa2b3a2459", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
+<link rel="stylesheet" href="campus.css?v=19d666b343">
+<script type="importmap">{"imports": {"./js/buildings.js": "./js/buildings.js?v=58b5bb408d", "./js/collide.js": "./js/collide.js?v=a5a568bcc5", "./js/controls.js": "./js/controls.js?v=2a07bb6685", "./js/geo.js": "./js/geo.js?v=93e2735832", "./js/ground.js": "./js/ground.js?v=2798b32a71", "./js/hud.js": "./js/hud.js?v=e683164f52", "./js/landmarks.js": "./js/landmarks.js?v=1f47062dd4", "./js/layout.js": "./js/layout.js?v=7a14bb6a23", "./js/life.js": "./js/life.js?v=5bd57b9bf1", "./js/lights.js": "./js/lights.js?v=ec86d70c04", "./js/main.js": "./js/main.js?v=3e01a40470", "./js/nature.js": "./js/nature.js?v=0feda81310", "./js/osm.js": "./js/osm.js?v=6269c7af62", "./js/post.js": "./js/post.js?v=884a63df47", "./js/props.js": "./js/props.js?v=5d4995bcda", "./js/quad.js": "./js/quad.js?v=522d10c9d8", "./js/rooms.js": "./js/rooms.js?v=81049e917e", "./js/toon.js": "./js/toon.js?v=fa2b3a2459", "three": "./vendor/three.module.min.js?v=002ea1ddda"}}</script>
 </head>
 <body data-root="../" data-mode="walk">
 <canvas id="view" tabindex="0" aria-label="3D view of the Wilcox campus"></canvas>
@@ -48,6 +48,7 @@
 <div id="crosshair"></div>
 <div id="place" aria-live="polite"></div>
 <div id="keys" aria-label="Keyboard controls"></div>
+<a id="credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">Streets and houses © OpenStreetMap contributors</a>
 <div id="tip" hidden></div>
 <div id="toast" role="status"></div>
 <aside id="room-card" hidden aria-live="polite"></aside>
@@ -78,11 +79,11 @@
       <dt>Room plates</dt><dd>Point at a room number on a wall and click (or press <kbd>E</kbd>) to open that room on Wilkipedia.</dd>
       <dt>On a phone</dt><dd>Left thumb walks, right thumb looks. Double-tap the ground from the air to land.</dd>
     </dl>
-    <p class="meta">Built from the official campus map and satellite measurements. Room interiors come building by building.</p>
+    <p class="meta">Built from the official campus map and satellite measurements. The streets, houses and creek around the school come from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (© OpenStreetMap contributors, ODbL). Room interiors come building by building.</p>
   </div>
 </div>
 
 <noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#faf8f2;font:18px Georgia,serif;margin:0">The 3D campus needs JavaScript. The <a href="../map/">campus map</a> works without it.</p></noscript>
-<script type="module" src="./js/main.js?v=3760d29671"></script>
+<script type="module" src="./js/main.js?v=3e01a40470"></script>
 </body>
 </html>

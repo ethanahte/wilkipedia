@@ -114,6 +114,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     cedar's trunk, +x east, +z south. Measured off the Apple Maps satellite
     view (0.4675 m/px) and matched to the official campus map. Fix a building by
     fixing its numbers there; walls, colliders, the minimap and room plates follow.
+  - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
+    (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
+    `campus/js/osm.js` (generated, don't hand-edit): every house footprint
+    (drawn as hipped-roof houses), the streets (Monroe, Calabazas, San Juan and
+    the residential ones → `ROADS`/`MONROE_PTS`… in layout.js) and the creek's
+    course. Its `FIT` ties lat/lon to campus metres (fitted on the school
+    buildings, ~1.5 m mean gap); re-fit if layout.js is re-measured. OSM also
+    fixed the theatre (it sits west, along Calabazas) and the M building's
+    length. ODbL: keep the "© OpenStreetMap contributors" credit (`#credit` and
+    the help sheet). The creek goes into a culvert at the Georgetown Place
+    corner (`CREEK.culvert`) and is narrower south of it (`CREEK.south`).
   - **Rooms come from `data/map.json`** (the same data as the Map page), carried
     into 3D through per-building map→world boxes (`ROOM_XFORM`, `P_XFORM`,
     `PLACES`), because the official map isn't to scale. Never type rooms into
@@ -136,7 +147,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     crown centre (`cards()` in nature.js). Foliage buckets get a
     customDepthMaterial so shadows are dappled. No people on campus (owner's call).
   - Static geometry is written into per-material, per-80 m-chunk buckets
-    (`geo.js` World) and merged: ~235 draw calls for the whole campus.
+    (`geo.js` World) and merged. The houses go in one unchunked World
+    (`new World({ chunk: 1e5 })`) so they don't multiply draw calls.
   - Quality High/Medium/Low (localStorage `wilcox-campus-quality`); an automatic
     step-down for slow frames is never saved as the user's choice.
   - Testing: the Browser pane is often hidden (rAF stalls, screenshots go

@@ -1015,6 +1015,7 @@ def build_campus():
 <div id="crosshair"></div>
 <div id="place" aria-live="polite"></div>
 <div id="keys" aria-label="Keyboard controls"></div>
+<a id="credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">Streets and houses © OpenStreetMap contributors</a>
 <div id="tip" hidden></div>
 <div id="toast" role="status"></div>
 <aside id="room-card" hidden aria-live="polite"></aside>
@@ -1045,7 +1046,7 @@ def build_campus():
       <dt>Room plates</dt><dd>Point at a room number on a wall and click (or press <kbd>E</kbd>) to open that room on Wilkipedia.</dd>
       <dt>On a phone</dt><dd>Left thumb walks, right thumb looks. Double-tap the ground from the air to land.</dd>
     </dl>
-    <p class="meta">Built from the official campus map and satellite measurements. Room interiors come building by building.</p>
+    <p class="meta">Built from the official campus map and satellite measurements. The streets, houses and creek around the school come from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (© OpenStreetMap contributors, ODbL). Room interiors come building by building.</p>
   </div>
 </div>
 

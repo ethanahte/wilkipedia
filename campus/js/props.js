@@ -1,12 +1,14 @@
 // Everything else outside the quad: the creek's fences and footbridges, trees
 // around campus, the pool deck, the stadium (bleachers, press box, lights,
 // scoreboard, goal posts), backstops and dugouts, tennis fences, and the
-// neighbourhood around the school (instanced houses and street trees).
+// neighbourhood around the school (every house as OpenStreetMap traced it,
+// with a hipped roof and windows; street and yard trees).
 
 import * as THREE from 'three';
-import { color, rng, inPoly } from './geo.js';
+import { color, rng, inPoly, ensureCCW, distToLine, offsetLine, clipLineZ, bankLine } from './geo.js';
 import { gbuffer, TOON } from './toon.js';
-import { CREEK, BRIDGES, FIELDS, TRACK, CAMPUS, WORLD, MONROE_PTS, CALABAZAS_PTS, SANJUAN_PTS, BUILDINGS } from './layout.js';
+import { CREEK, creekAt, BRIDGES, FIELDS, TRACK, CAMPUS, WORLD, MONROE_PTS, CALABAZAS_PTS, BUILDINGS } from './layout.js';
+import { OSM_HOUSES } from './osm.js';
 import { STREETS } from './ground.js';
 import { shadeTree, conifer, youngTree, cards, SOLID_UV, G } from './nature.js';
 import { World } from './geo.js';
@@ -34,26 +36,26 @@ export function fence(W, pts, h = 1.8, { collide = true } = {}) {
 export function buildProps(W, scene, q, M) {
   const R = rng(77);
   // ── street lights along Monroe, on the campus side: pole, arm, cobra head ──
-  for (let x = -176; x < 150; x += 42) {
-    const z = -98.6;
+  for (const { x, z, nx, nz } of alongLine(MONROE_PTS, -9.9, 42, (x, z) => x > -190 && x < 250)) {
+    const hx = x + nx * 2.7, hz = z + nz * 2.7, rot = Math.atan2(nx, nz);
     W.cyl('flat', x, 0, z, 0.12, 0.09, 8.2, 8, color('#8d9399'));
-    W.rod('flat', [x, 8.0, z], [x, 8.3, z - 2.4], 0.1, color('#8d9399'));
-    W.box('flat', x, 8.25, z - 2.7, 0.45, 0.18, 0.9, color('#7d8389'));
-    W.box('glow', x, 8.15, z - 2.7, 0.34, 0.02, 0.7, color('#ffe2b0'));
+    W.rod('flat', [x, 8.0, z], [x + nx * 2.4, 8.3, z + nz * 2.4], 0.1, color('#8d9399'));
+    W.box('flat', hx, 8.25, hz, 0.45, 0.18, 0.9, color('#7d8389'), rot);
+    W.box('glow', hx, 8.15, hz, 0.34, 0.02, 0.7, color('#ffe2b0'), rot);
     addCircle(x, z, 0.2);
-    LIGHTS.push([x, z - 2.7, 8.2, 9]);
+    LIGHTS.push([hx, hz, 8.2, 9]);
   }
   // ── creek: fences on both banks with gaps at the bridges and Monroe ──
-  const gaps = [...BRIDGES.map((b) => [b.z - b.w / 2 - 0.2, b.z + b.w / 2 + 0.2]), [-120, -97]].sort((a, b) => a[0] - b[0]);
+  const gaps = [...BRIDGES.map((b) => [b.z - b.w / 2 - 0.2, b.z + b.w / 2 + 0.2]), [-120, -97], CREEK.culvert].sort((a, b) => a[0] - b[0]);
   for (const side of [-1, 1]) {
-    const x = CREEK.x + side * (CREEK.top + 0.5);
+    const bank = bankLine(CREEK.pts, side * (CREEK.top + 0.5), side * (CREEK.south.top + 0.5), CREEK.culvert[0], -1e4, 1e4);
     let z = -97;
     for (const [g0, g1] of gaps) {
       if (g1 <= z) continue;
-      if (g0 > z) fence(W, [[x, z], [x, g0]]);
+      if (g0 > z) fence(W, clipLineZ(bank, z, g0));
       z = g1;
     }
-    fence(W, [[x, z], [x, 290]]);
+    fence(W, clipLineZ(bank, z, WORLD.z1 - 1));
   }
   // footbridges: flat concrete decks with pipe railings
   for (const b of BRIDGES) {
@@ -67,11 +69,11 @@ export function buildProps(W, scene, q, M) {
     }
   }
   // road decks where streets cross the channel
-  for (const z of [-108.5, -172, -236]) W.slab('flat', CREEK.x - CREEK.top - 0.2, z - 12, CREEK.x + CREEK.top + 0.2, z + 12, -0.5, 0.01, color('#6a6e73'));
+  W.slab('flat', CREEK.x - CREEK.top - 0.2, -108.5 - 12, CREEK.x + CREEK.top + 0.2, -108.5 + 12, -0.5, 0.01, color('#6a6e73'));   // Monroe
 
   // ── trees round campus ──
   for (const side of [-1, 1]) {
-    for (let z = -92; z < 285; z += 8 + R() * 5) {
+    for (let z = -92; z < CREEK.culvert[0] - 4; z += 8 + R() * 5) {
       if (BRIDGES.some((b) => Math.abs(z - b.z) < 5)) continue;
       const x = CREEK.x + side * (CREEK.top + 3 + R() * 3);
       if (BUILDINGS.some((b) => inPoly(x, z, b.poly))) continue;
@@ -81,16 +83,19 @@ export function buildProps(W, scene, q, M) {
   }
   // tall conifers south of the science building and west of the theatre
   for (let x = -84; x < -14; x += 8.5) { conifer(W, x + R() * 2, 142 + R() * 3, R, { h: 14 + R() * 6 }); }
-  for (let z = -60; z < 10; z += 9) { conifer(W, -167 + R() * 2, z, R, { h: 15 + R() * 6 }); }
+  // (the row along Calabazas, between the sidewalk and the theatre)
+  for (const { x, z } of alongLine(CALABAZAS_PTS, -12.5, 9, (x, z) => z > -95 && z < 12 && x > WORLD.x0 + 3)) {
+    if (BUILDINGS.some((b) => inPoly(x, z, b.poly))) continue;
+    conifer(W, x, z, R, { h: 15 + R() * 6 });
+  }
   // street trees along Monroe on the campus side
-  for (let x = -170; x < 150; x += 16 + R() * 6) {
-    if (x > -30 && x < -14) continue;   // keep the view of the front office clear
-    youngTree(W, x, -96.4, R, { h: 6 + R() * 1.5, stake: false });
-    addCircle(x, -96.4, 0.3);
+  for (const { x, z } of alongLine(MONROE_PTS, -12.4, 19, (x, z) => x > -170 && x < 200 && !(x > -30 && x < -14))) {
+    youngTree(W, x, z, R, { h: 6 + R() * 1.5, stake: false });   // (a gap keeps the view of the front office clear)
+    addCircle(x, z, 0.3);
   }
   // round the fields
   for (let x = -40; x < 60; x += 11) shadeTree(W, x, 265 - x * 0.3, R, { h: 9 + R() * 3 });
-  for (const [x, z] of [[-150, 60], [-150, 85], [-100, 120], [-30, 150], [140, 60], [150, 205], [200, 190], [60, 214]]) {
+  for (const [x, z] of [[-150, 60], [-150, 85], [-30, 150], [140, 60], [150, 205], [200, 190], [60, 214]]) {
     shadeTree(W, x, z, R, { h: 8 + R() * 4 }); addCircle(x, z, 0.4);
   }
 
@@ -98,7 +103,7 @@ export function buildProps(W, scene, q, M) {
   stadium(W, R);
   diamonds(W);
   tennis(W);
-  neighbourhood(scene, R, q, M);
+  neighbourhood(W, scene, R, q, M);
 }
 
 function pool(W) {
@@ -209,69 +214,134 @@ function tennis(W) {
   }
 }
 
-// ── the neighbourhood: instanced houses and street trees ──
-function distToPolyline(x, z, pts) {
-  let best = Infinity;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const [ax, az] = pts[i], [bx, bz] = pts[i + 1], dx = bx - ax, dz = bz - az, l2 = dx * dx + dz * dz;
-    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2));
-    best = Math.min(best, Math.hypot(x - ax - dx * t, z - az - dz * t));
+// Points every `step` metres along a line, `off` metres to its side (positive =
+// right of travel), with the unit vector back toward the line.
+function alongLine(pts, off, step, keep = () => true) {
+  const out = [], side = offsetLine(pts, off);
+  let s = step / 2, run = 0;
+  for (let i = 0; i < side.length - 1; i++) {
+    const [ax, az] = side[i], [bx, bz] = side[i + 1], len = Math.hypot(bx - ax, bz - az);
+    const [cx, cz] = pts[i], [dx, dz] = pts[i + 1];
+    for (; s < run + len; s += step) {
+      const k = (s - run) / len, x = ax + (bx - ax) * k, z = az + (bz - az) * k;
+      const lx = cx + (dx - cx) * k - x, lz = cz + (dz - cz) * k - z, l = Math.hypot(lx, lz) || 1;
+      if (keep(x, z)) out.push({ x, z, nx: lx / l, nz: lz / l });
+    }
+    run += len;
   }
-  return best;
+  return out;
 }
 
-function neighbourhood(scene, R, q, M) {
-  const houses = [], trees = [];
-  const majors = [[MONROE_PTS, 9], [CALABAZAS_PTS, 8], [SANJUAN_PTS, 8]];
-  const clear = (x, z, pad) => {
-    if (x < WORLD.x0 + 6 || x > WORLD.x1 - 6 || z < WORLD.z0 + 6 || z > WORLD.z1 - 6) return false;
-    if (inPoly(x, z, CAMPUS) || Math.abs(x - CREEK.x) < 18) return false;
-    // stay off Monroe's campus side entirely
-    if (z > -100 && z < 0 && x > -200 && x < 170) return false;
-    for (const [pts, w] of majors) if (distToPolyline(x, z, pts) < w + pad) return false;
-    for (const s of STREETS) if (distToPolyline(x, z, s) < 4.5 + pad) return false;
-    for (const h of houses) if (Math.hypot(h.x - x, h.z - z) < 15) return false;
+// ── the neighbourhood: every house OpenStreetMap has, and trees ──
+// A polygon (counter-clockwise from above) moved inward by d, corners mitred.
+function inset(P, d) {
+  const n = P.length, N = [];
+  for (let i = 0; i < n; i++) {
+    const [ax, az] = P[i], [bx, bz] = P[(i + 1) % n], l = Math.hypot(bx - ax, bz - az) || 1;
+    N.push([(bz - az) / l, -(bx - ax) / l]);      // inward normal
+  }
+  return P.map(([x, z], i) => {
+    const a = N[(i + n - 1) % n], b = N[i], k = Math.max(0.2, 1 + a[0] * b[0] + a[1] * b[1]);
+    return [x + ((a[0] + b[0]) / k) * d, z + ((a[1] + b[1]) / k) * d];
+  });
+}
+// How far a hipped roof can climb before its edges would cross: the largest
+// inset that keeps every edge pointing the same way and inside the walls.
+function hipDepth(P) {
+  const ok = (d) => {
+    const Q = inset(P, d);
+    for (let i = 0; i < P.length; i++) {
+      const j = (i + 1) % P.length;
+      if ((Q[j][0] - Q[i][0]) * (P[j][0] - P[i][0]) + (Q[j][1] - Q[i][1]) * (P[j][1] - P[i][1]) < -1e-6) return false;
+      if (!inPoly(Q[i][0], Q[i][1], P)) return false;
+    }
     return true;
   };
-  const along = (pts, off, step) => {
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [ax, az] = pts[i], [bx, bz] = pts[i + 1], len = Math.hypot(bx - ax, bz - az);
-      const dx = (bx - ax) / len, dz = (bz - az) / len;
-      for (let t = step / 2; t < len; t += step) {
-        for (const s of [-1, 1]) {
-          const x = ax + dx * t - dz * off * s, z = az + dz * t + dx * off * s;
-          if (clear(x, z, 7)) houses.push({ x, z, rot: Math.atan2(dx, dz) + (s > 0 ? 0 : Math.PI), w: 11 + R() * 5, d: 12 + R() * 4 });
-          const tx = x + dx * 8 - dz * -5 * s, tz = z + dz * 8 + dx * -5 * s;
-          if (R() < 0.6 && clear(tx, tz, 2)) trees.push({ x: tx, z: tz, s: 0.8 + R() * 0.7 });
-        }
+  let lo = 0, hi = 9;
+  for (let k = 0; k < 16; k++) { const m = (lo + hi) / 2; if (ok(m)) lo = m; else hi = m; }
+  return lo;
+}
+function hull(P) {
+  const pts = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (const p of pts.reverse()) { while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  return lo.slice(0, -1).concat(up.slice(0, -1));
+}
+
+const HOUSE_WALLS = ['#efe6d6', '#e8dcc6', '#dfe3e6', '#f1ecde', '#e4d3bc', '#d9dfd7', '#e9e1cf', '#d7d0c4'].map(color);
+const HOUSE_ROOFS = ['#6f6c69', '#7a7f86', '#5f625f', '#8e5a45', '#9b6b4f', '#b46a4c', '#6d6a66', '#846f5c'].map(color);
+const H_LIT = color('#ffffff'), H_DARK = color('#b9bec8');
+
+function house(W, R, levels, flat) {
+  const pts = [];
+  for (let i = 0; i < flat.length; i += 2) pts.push([flat[i], flat[i + 1]]);
+  const P = ensureCCW(pts);
+  const wall = HOUSE_WALLS[Math.floor(R() * HOUSE_WALLS.length)], roofCol = HOUSE_ROOFS[Math.floor(R() * HOUSE_ROOFS.length)];
+  const H = 2.9 * levels + 0.3;
+  W.prism('stucco', P, 0, H, wall, { top: false });
+  // windows: a few panes on every wall long enough, some lit
+  for (let i = 0; i < P.length; i++) {
+    const [ax, az] = P[i], [bx, bz] = P[(i + 1) % P.length], len = Math.hypot(bx - ax, bz - az);
+    if (len < 4) continue;
+    const ux = (bx - ax) / len, uz = (bz - az) / len, ox = uz * 0.04, oz = -ux * 0.04;   // just proud of the wall
+    const count = Math.floor(len / 4.5);
+    for (let f = 0; f < levels; f++) {
+      for (let k = 0; k < count; k++) {
+        if (R() < 0.3) continue;
+        const t = (len * (k + 0.5)) / count, w = 0.7, y0 = 1.0 + f * 2.9, y1 = y0 + 1.25;
+        const x0 = ax + ux * (t - w) + ox, z0 = az + uz * (t - w) + oz, x1 = ax + ux * (t + w) + ox, z1 = az + uz * (t + w) + oz;
+        W.quad('glass', [x0, y0, z0], [x1, y0, z1], [x1, y1, z1], [x0, y1, z0], R() < 0.45 ? H_LIT : H_DARK, 'auto');
       }
     }
+  }
+  // hipped roof: eaves 0.35 m out, sides climbing at ~27° to the ridge
+  const O = inset(P, -0.35), d = hipDepth(P), Q = inset(P, d * 0.999), top = H + Math.min(d * 0.5, 3.2) + 0.18;
+  for (let i = 0; i < P.length; i++) {
+    const j = (i + 1) % P.length;
+    W.quad('flat', [O[i][0], H, O[i][1]], [O[j][0], H, O[j][1]], [Q[j][0], top, Q[j][1]], [Q[i][0], top, Q[i][1]], roofCol, 'auto');
+  }
+  W.cap('flat', Q, top, roofCol, true);                // a flat crown where the hips can't meet
+  addPoly(ensureCCW(hull(P)));
+}
+
+function neighbourhood(W, scene, R, q, M) {
+  // the houses go in one batch per material: they ring the whole world, so
+  // chunking them would only multiply draw calls
+  const HW = new World({ chunk: 1e5 });
+  const homes = OSM_HOUSES.map(([levels, flat]) => {
+    house(HW, R, levels, flat);
+    const xs = flat.filter((_, i) => i % 2 === 0), zs = flat.filter((_, i) => i % 2 === 1);
+    return { x0: Math.min(...xs), z0: Math.min(...zs), x1: Math.max(...xs), z1: Math.max(...zs) };
+  });
+  const hg = new THREE.Group();
+  HW.build(M, hg);
+  scene.add(hg);
+
+  // trees: along the streets, then scattered through the yards
+  const trees = [];
+  const clear = (x, z, pad) => {
+    if (x < WORLD.x0 + 3 || x > WORLD.x1 - 3 || z < WORLD.z0 + 3 || z > WORLD.z1 - 3) return false;
+    if (inPoly(x, z, CAMPUS)) return false;
+    if (distToLine(x, z, CREEK.pts) < creekAt(z).top + 3) return false;
+    for (const s of STREETS) if (distToLine(x, z, s.pts) < s.w / 2 + 1.2 + pad) return false;
+    for (const h of homes) if (x > h.x0 - pad - 1 && x < h.x1 + pad + 1 && z > h.z0 - pad - 1 && z < h.z1 + pad + 1) return false;
+    for (const t of trees) if (Math.hypot(t.x - x, t.z - z) < 5) return false;
+    return true;
   };
-  for (const [pts, w] of majors) along(pts, w + 16, 21);
-  for (const s of STREETS) { along(s, 16, 20); along(s, 40, 22); }
-  // fill the leftover gaps with yard trees
-  for (let i = 0; i < 1400; i++) {
+  for (const s of STREETS) {
+    for (const off of [-(s.w / 2 + 2.2), s.w / 2 + 2.2]) {
+      for (const p of alongLine(s.pts, off, 13)) if (R() < 0.55 && clear(p.x, p.z, 0)) trees.push({ x: p.x, z: p.z, s: 0.7 + R() * 0.6 });
+    }
+  }
+  for (let i = 0; i < 2500; i++) {
     const x = WORLD.x0 + R() * (WORLD.x1 - WORLD.x0), z = WORLD.z0 + R() * (WORLD.z1 - WORLD.z0);
-    if (clear(x, z, 3)) trees.push({ x, z, s: 0.7 + R() * 0.8 });
+    if (clear(x, z, 1.5)) trees.push({ x, z, s: 0.7 + R() * 0.8 });
   }
 
   const mat = () => gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON }));
-  const body = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0), mat(), houses.length);
-  const roofGeo = new THREE.ConeGeometry(0.74, 1, 4, 1).rotateY(Math.PI / 4).translate(0, 0.5, 0);
-  const roof = new THREE.InstancedMesh(roofGeo, mat(), houses.length);
-  const walls = ['#efe6d6', '#e8dcc6', '#dfe3e6', '#f1ecde', '#e4d3bc', '#d9dfd7'].map(color);
-  const roofs = ['#b46a4c', '#8e5a45', '#7a7f86', '#9b6b4f', '#6d6a66', '#c07a55'].map(color);
   const m = new THREE.Matrix4(), qn = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0);
-  houses.forEach((h, i) => {
-    const hh = 3.6 + R() * 1.4;
-    qn.setFromAxisAngle(up, h.rot);
-    m.compose(new THREE.Vector3(h.x, 0, h.z), qn, new THREE.Vector3(h.w, hh, h.d));
-    body.setMatrixAt(i, m); body.setColorAt(i, walls[i % walls.length]);
-    m.compose(new THREE.Vector3(h.x, hh, h.z), qn, new THREE.Vector3(h.w * 1.08, 2.2 + R() * 1.2, h.d * 1.08));
-    roof.setMatrixAt(i, m); roof.setColorAt(i, roofs[(i * 7) % roofs.length]);
-  });
-  for (const im of [body, roof]) { im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere(); scene.add(im); }
-
   const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.25, 1, 5).translate(0, 0.5, 0), mat(), trees.length);
   const crown = new THREE.InstancedMesh(crownGeometry(R), M.foliage, trees.length);
   crown.customDepthMaterial = M.foliage.userData.depthMat;
@@ -281,6 +351,7 @@ function neighbourhood(scene, R, q, M) {
     trunk.setMatrixAt(i, m); trunk.setColorAt(i, G.barkDark);
     m.compose(new THREE.Vector3(t.x, h * 0.62, t.z), qn.setFromAxisAngle(up, R() * 6), new THREE.Vector3(h * 0.36, h * 0.32, h * 0.36));
     crown.setMatrixAt(i, m); crown.setColorAt(i, G.dark[i % 3]);
+    addCircle(t.x, t.z, 0.3);
   });
   for (const im of [trunk, crown]) { im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere(); scene.add(im); }
 }

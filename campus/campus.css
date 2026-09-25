@@ -65,6 +65,8 @@ body[data-mode="fly"] #keys span:nth-child(2), body[data-mode="fly"] #keys span:
 #place:empty { display: none; }
 #place.in { animation: placeIn .5s ease-out; }
 @keyframes placeIn { from { opacity: 0; transform: translateY(-4px); } }
+#credit { position: fixed; right: 10px; bottom: 6px; font: 10px var(--sans); color: rgba(255, 255, 255, 0.55); text-decoration: none; }
+#credit:hover { color: #fff; text-decoration: underline; }
 body.hide-ui .bar, body.hide-ui #minimap, body.hide-ui #keys, body.hide-ui #place, body.hide-ui #tip, body.hide-ui #toast, body.hide-ui #crosshair { display: none !important; }
 #tip { position: fixed; left: 50%; top: calc(50% + 26px); transform: translateX(-50%); background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--shadow); padding: 7px 12px; font: 14px var(--sans); z-index: 3; pointer-events: none; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
 #tip b { font: 600 17px var(--serif); }

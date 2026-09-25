@@ -38,12 +38,14 @@ class Bucket {
 }
 
 export class World {
-  constructor() {
+  // chunk: size of the squares geometry is batched in (bigger = fewer draw calls, coarser culling)
+  constructor({ chunk = CHUNK } = {}) {
     this.buckets = new Map();   // "material|cx|cz" -> Bucket
     this.matrix = null;         // optional transform applied to every vertex written
+    this.chunk = chunk;
   }
   bucket(mat, x, z) {
-    const cx = Math.floor(x / CHUNK), cz = Math.floor(z / CHUNK);
+    const cx = Math.floor(x / this.chunk), cz = Math.floor(z / this.chunk);
     const key = `${mat}|${cx}|${cz}`;
     let b = this.buckets.get(key);
     if (!b) { b = new Bucket(); this.buckets.set(key, b); }
@@ -271,3 +273,42 @@ export function inPoly(x, z, P) {
 }
 
 export const rectPoly = (x0, z0, x1, z1) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
+
+// ── polylines ([[x,z]...]): streets, the creek ──
+export function distToLine(x, z, pts) {
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, az] = pts[i], [bx, bz] = pts[i + 1], dx = bx - ax, dz = bz - az, l2 = dx * dx + dz * dz || 1e-9;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2));
+    best = Math.min(best, Math.hypot(x - ax - dx * t, z - az - dz * t));
+  }
+  return best;
+}
+// The line shifted sideways by d (positive = to the right of travel, i.e. west
+// for a line running south), with mitred corners.
+export function offsetLine(pts, d) {
+  const nrm = (i) => { const [ax, az] = pts[i], [bx, bz] = pts[i + 1], l = Math.hypot(bx - ax, bz - az) || 1; return [-(bz - az) / l, (bx - ax) / l]; };
+  return pts.map(([x, z], i) => {
+    const a = nrm(Math.max(0, i - 1)), b = nrm(Math.min(pts.length - 2, i));
+    const mx = a[0] + b[0], mz = a[1] + b[1], k = (mx * b[0] + mz * b[1]) || 1;
+    return [x + (mx / k) * d, z + (mz / k) * d];
+  });
+}
+// The part of a line that runs south (z increasing) between z0 and z1.
+export function clipLineZ(pts, z0, z1) {
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+    const lo = Math.max(z0, az), hi = Math.min(z1, bz);
+    if (hi <= lo) continue;
+    const at = (z) => [ax + ((bx - ax) * (z - az)) / (bz - az), z];
+    if (!out.length) out.push(at(lo));
+    out.push(at(hi));
+  }
+  return out;
+}
+// One side of a channel whose width changes at z = zs: offset dN north of it,
+// dS south of it, both clipped to z0..z1.
+export function bankLine(pts, dN, dS, zs, z0, z1) {
+  return [...clipLineZ(offsetLine(pts, dN), z0, zs), ...clipLineZ(offsetLine(pts, dS), zs, z1)];
+}
