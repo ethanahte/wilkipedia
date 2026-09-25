@@ -137,7 +137,7 @@ const pages = {
     import('./pathways.js').then((m) => m.mount($('#pathways'), s));
     attach($('#home-q'), $('#home-results'));
     addLive(s);
-    const [recent, data] = await Promise.all([s.recent(6), courses()]);
+    const [recent, data] = await Promise.all([s.recent(4), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name); return `<a href="${href}">
       ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(where)}</b>

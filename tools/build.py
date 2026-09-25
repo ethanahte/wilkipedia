@@ -127,6 +127,9 @@ ICONS = {
     "cube": _I('<path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+    "book": _I('<path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM4 19a2 2 0 0 0 2 2h14"/><path d="M9 7h7"/>'),
+    "notes": _I('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>'),
+    "pin": _I('<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
 # The "More" panel: grouped columns, each link with an icon and a short line
@@ -186,7 +189,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     out = ROOT / path if path.endswith(".html") else ROOT / path / "index.html"
     depth = len(out.relative_to(ROOT).parts) - 1
     r = "../" * depth or "./"
-    full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: the student guide to Wilcox classes"
+    full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: everything about Wilcox High School"
     canon = ""
     if SITE_URL:
         rel = "" if path in ("", "index.html") else path.rstrip("/") + ("/" if not path.endswith(".html") else "")
@@ -290,71 +293,47 @@ def course_row(c, r):
 
 # ─────────────────────────── pages ───────────────────────────
 
-# What a class page covers, in the order a student asks. Every item here is a
-# real field in forms.js (course_overview / teacher_section / resource / tip):
-# don't promise anything the forms don't collect.
-HOME_COVERS = [
-    ("Tests &amp; retakes",
-     "What tests look like, how often they come, and whether you can retake them or do corrections."),
-    ("Grading",
-     "How your grade is weighted, and what happens to late work."),
-    ("Homework load",
-     "How much there is and how much time it takes outside class."),
-    ("Teacher by teacher",
-     "The same class can run differently with each teacher, so every teacher gets their own section."),
-    ("Study help",
-     "Study guides, resources and tips from students who’ve already taken it."),
-    ("Is it right for you?",
-     "How hard it is, who should take it and how to prepare. Handy when you pick next year’s classes."),
+# The home page's grid of ways in: (href, icon, label, short line).
+HOME_TILES = [
+    ("subjects/", "book", "Classes", "What every class is really like"),
+    ("teachers/", "teachers", "Teachers", "Every teacher and their classes"),
+    ("guides/", "notes", "Study guides", "Notes and tips from students"),
+    ("map/", "pin", "Campus map", "Find any room"),
+    ("bell/", "bell", "Bell schedule", "Period times, block days, finals"),
+    ("clubs/", "clubs", "Clubs", "Every club and how to join"),
+    ("sports/", "sports", "Sports", "Chargers teams by season"),
+    ("campus/", "cube", "3D campus", "Walk the whole school"),
 ]
 
 
 def build_home(depts):
-    grid = "".join(f"""<a class="subject" href="subjects/{e(d['slug'])}/"><b>{e(short_dept(d['name']))}</b>
-      <span>{len(d['courses'])} classes</span></a>""" for d in depts)
-    pw = json.loads((DATA / "pathways.json").read_text())
-    pw_edges, pw_nodes = len(pw["edges"]), len(pw["nodes"])
-    covers = "".join(f'<div><dt>{title}</dt><dd>{text}</dd></div>' for title, text in HOME_COVERS)
+    tiles = "".join(f'<a class="tile" href="{href}">{ICONS[icon]}<b>{e(label)}</b><span>{e(sub)}</span></a>'
+                    for href, icon, label, sub in HOME_TILES)
     page("", "Wilkipedia", f"""
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
 <section class="hero">
-  <h1>Know a class before you take it.</h1>
-  <p class="lede">Wilkipedia is a free guide to academics at Wilcox, written by Wilcox students. Look up any class to see how it’s tested and graded, how much homework it really takes, and what students who took it wish they’d known.</p>
+  <h1>Everything Wilcox, in one place.</h1>
+  <p class="lede">Classes, teachers, rooms, the bell schedule, clubs and sports, written by Wilcox students for Wilcox students.</p>
   <form class="big-search" action="search/" role="search">
-    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search a class or teacher: “APUSH”, “Calc BC”…" aria-label="Search classes, subjects and teachers" autocomplete="off">
+    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
     <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
     <button class="btn">Search</button>
   </form>
-  <p class="hero-trust">Written by Wilcox students. Checked by a reviewer before it goes live. Not an official Wilcox or SCUSD site.</p>
+  <p class="hero-trust">Checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
 </section>
+
+<nav class="tiles" aria-label="Explore Wilkipedia">{tiles}</nav>
 
 <section class="home-sec pw-sec" aria-labelledby="pw-h">
   <h2 id="pw-h">How classes connect</h2>
-  <p class="sec-sub">{pw_edges} prerequisite links between {pw_nodes} classes, straight from the {e(CATALOG_SOURCE)}. <span class="pw-legend"><i class="has"></i> students have written about it</span></p>
+  <p class="sec-sub">Every prerequisite in the {e(CATALOG_SOURCE)}. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span></p>
   <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div>
-</section>
-
-<section class="home-sec" aria-labelledby="covers-h">
-  <h2 id="covers-h">What each class page tells you</h2>
-  <dl class="covers">{covers}</dl>
-</section>
-
-<section class="home-sec">
-  <h2>Browse by subject</h2>
-  <div class="subjects">{grid}</div>
-</section>
-
-<section class="home-links">
-  <a href="map/"><b>Campus map</b><span>Find a classroom and who teaches there, by room instead of by class.</span></a>
-  <a href="summer/"><b>Summer homework</b><span>Every class’s summer work in one place, collected each May and June.</span></a>
-  <a class="members-only hl" href="submit/"><b>Help build it</b><span>Add class info, a tip or a study guide, and get credit on the leaderboard.</span></a>
-  <button type="button" class="guests-only hl js-signin"><b>Help build it</b><span>Sign in to write pages and earn credit. Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
 <section class="home-sec">
   <h2>Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
 </section>
-""", desc="The student guide to classes at Wilcox High School in Santa Clara: how each class is tested and graded, homework load, study guides and tips, written by Wilcox students.",
+""", desc="Everything about Wilcox High School in Santa Clara in one place: classes and teachers, the campus map, bell schedule, clubs and sports, written by Wilcox students.",
          data={"page": "home"})
 
 
