@@ -364,6 +364,7 @@ async function boot() {
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * controls.lensK * 1.5) : 420;
     // tilt-shift (the miniature look) only from the air
     tilt += ((controls.mode === 'fly' ? 1 : 0) - tilt) * Math.min(1, dt * 3);
+    camera.updateMatrixWorld();                            // (this frame's view, not last frame's)
     SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);
     const focusZ = camera.position.distanceTo(_focus.set(controls.orbit.tx, 0, controls.orbit.tz));   // where the lens is sharp
     post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value,

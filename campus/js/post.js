@@ -256,6 +256,11 @@ export class Post {
     u0.night.value = env.night || 0;
     u0.bloomK.value = env.night ? 0.95 : 0.55;
     this.bright.uniforms.thresh.value = env.night ? 0.55 : 0.8;
+    // this frame's camera, not last frame's: the renderer only refreshes the
+    // matrices inside render(), and anything rebuilt from depth (the mist
+    // under the model, the haze, reflections) must use the same camera the
+    // picture was drawn with, or a fast drag fogs the ground for a frame
+    camera.updateMatrixWorld();
     u0.proj.value.copy(camera.projectionMatrix); u0.projInv.value.copy(camera.projectionMatrixInverse);
     u0.viewInv.value.copy(camera.matrixWorld);
     u0.viewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
