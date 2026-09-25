@@ -1,21 +1,21 @@
-// What moves, and the sky: a painted sky with streaks of cirrus and the real
-// mountains on the horizon, drifting cumulus, a few birds, the flags on the
-// front flagpole, and leaves and crape-myrtle petals drifting down near you.
+// What moves, and the sky: a painted anime sky with streaks of cirrus and a
+// warm glow toward the sun, drifting two-tone cumulus, a few birds, the flags on
+// the front flagpole, leaves and crape-myrtle petals drifting down near you,
+// and at night the lamps' light cones hanging in the air.
 
 import * as THREE from 'three';
 import { World, color, rng } from './geo.js';
 import { gbuffer, SOFT, TOON, canvasTex } from './toon.js';
 import { FRONT, STAGE } from './layout.js';
 
-export const SUN = new THREE.Vector3(-0.62, 0.55, 0.56).normalize();   // afternoon sun, low in the south-west
+export const SUN = new THREE.Vector3(-0.66, 0.37, 0.66).normalize();   // golden-afternoon sun, ~22° up in the south-west
 export const HORIZON = new THREE.Color('#dde8f3');
 
 // ── sky dome ──
-// A vertical gradient painted like an anime background: deep blue overhead,
-// pale and hazy at the horizon, with streaks of cirrus drawn by noise, and
-// the ranges you really see from Wilcox: the Santa Cruz Mountains to the
-// south-west, the Diablo Range (Mt Hamilton) to the east, almost nothing
-// north over the bay. They sit in the haze as flat blue-violet shapes.
+// A vertical gradient painted like an anime background: deep saturated blue
+// overhead, pale at the horizon and warm gold on the sun's side, with streaks
+// of cirrus drawn by noise and a big soft halo round the sun. (No mountains:
+// the owner asked for an open horizon.)
 export function makeSky() {
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false,
@@ -28,36 +28,29 @@ export function makeSky() {
       float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
         return mix(mix(hash(i), hash(i + vec2(1,0)), f.x), mix(hash(i + vec2(0,1)), hash(i + 1.0), f.x), f.y); }
       float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++){ v += a * noise(p); p = p * 2.03 + 17.1; a *= 0.5; } return v; }
-      float bump(float a, float c, float w){ float d = abs(mod(a - c + 3.14159, 6.28318) - 3.14159); return exp(-d * d / (w * w)); }
       void main(){
         vec3 d = normalize(vDir);
         float h = clamp(d.y, -0.2, 1.0);
-        vec3 zen = toLin(vec3(0.22, 0.49, 0.88)), mid = toLin(vec3(0.53, 0.73, 0.95)), hor = toLin(vec3(0.87, 0.91, 0.95));
-        vec3 c = mix(hor, mid, smoothstep(0.0, 0.2, h));
-        c = mix(c, zen, smoothstep(0.2, 0.9, h));
+        vec3 zen = toLin(vec3(0.13, 0.40, 0.86)), mid = toLin(vec3(0.40, 0.67, 0.97)), hor = toLin(vec3(0.84, 0.91, 0.98));
+        vec3 c = mix(hor, mid, smoothstep(0.0, 0.24, h));
+        c = mix(c, zen, smoothstep(0.24, 0.95, h));
+        // the sun's side of the sky is warmer and brighter low down
+        float s = max(dot(d, sun), 0.0);
+        vec2 dh = normalize(d.xz + 1e-4), sh = normalize(sun.xz);
+        float side = pow(max(dot(dh, sh), 0.0), 2.5) * (1.0 - smoothstep(0.0, 0.45, h));
+        c = mix(c, toLin(vec3(1.0, 0.86, 0.64)), side * 0.6);
         // cirrus: long wisps, projected onto a high flat layer and stretched
         vec2 uv = d.xz / max(d.y, 0.04);
         uv = mat2(0.87, -0.5, 0.5, 0.87) * uv;
         float w = fbm(vec2(uv.x * 0.9, uv.y * 3.6) + vec2(time * 0.004, 0.0));
         w = smoothstep(0.52, 0.86, w) * smoothstep(0.02, 0.22, d.y) * (1.0 - smoothstep(0.55, 0.95, d.y));
-        c = mix(c, toLin(vec3(0.98, 0.99, 1.0)), w * 0.8);
-        // the sun: a soft warm glow and a small bright disc
-        float s = max(dot(d, sun), 0.0);
-        c += toLin(vec3(1.0, 0.94, 0.8)) * (pow(s, 10.0) * 0.28 + pow(s, 900.0) * 3.0);
-        // mountains
-        float az = atan(d.z, d.x);
-        float ridge = 0.042 * bump(az, 2.35, 0.75) + 0.028 * bump(az, 0.45, 0.8) + 0.018 * bump(az, -0.5, 0.5) + 0.004;
-        ridge *= 0.7 + fbm(vec2(az * 7.0, 1.3)) * 0.6;
-        ridge += (fbm(vec2(az * 28.0, 4.0)) - 0.5) * 0.004;
+        c = mix(c, mix(toLin(vec3(0.98, 0.99, 1.0)), toLin(vec3(1.0, 0.9, 0.74)), side), w * 0.8);
+        // the sun: a wide warm halo, a tighter glow and a small white disc
+        c += toLin(vec3(1.0, 0.9, 0.72)) * (pow(s, 6.0) * 0.2 + pow(s, 60.0) * 0.45 + pow(s, 1400.0) * 6.0);
         float e = asin(clamp(d.y, -1.0, 1.0));
-        if (e < ridge && e > -0.02) {
-          float t = clamp(e / max(ridge, 1e-3), 0.0, 1.0);
-          vec3 far = toLin(vec3(0.62, 0.69, 0.84)), near = toLin(vec3(0.78, 0.83, 0.91));
-          c = mix(near, far, t * 0.8 + 0.1);
-        }
-        // rain by day: a flat grey overcast, the mountains lost in it
+        // rain by day: a flat grey overcast
         c = mix(c, mix(toLin(vec3(0.72, 0.76, 0.8)), toLin(vec3(0.55, 0.6, 0.66)), smoothstep(0.0, 0.8, h)), overcast * (1.0 - night) * 0.85);
-        // night: deep navy, stars, the ranges as black silhouettes, a moon glow
+        // night: deep navy, stars, a moon glow
         if (night > 0.0) {
           vec3 nz = toLin(vec3(0.02, 0.035, 0.09)), nh = toLin(vec3(0.09, 0.12, 0.2));
           vec3 nc = mix(nh, nz, smoothstep(0.0, 0.5, h));
@@ -66,7 +59,6 @@ export function makeSky() {
           nc += vec3(0.9, 0.92, 1.0) * st * (0.5 + 0.5 * sin(time * 2.0 + hash(sg + 3.0) * 30.0));
           nc += toLin(vec3(0.55, 0.62, 0.8)) * pow(max(dot(d, normalize(vec3(0.5, 0.6, -0.4))), 0.0), 60.0) * 0.5 * (1.0 - overcast);
           nc = mix(nc, toLin(vec3(0.07, 0.08, 0.12)), overcast * 0.85);
-          if (e < ridge && e > -0.02) nc = toLin(vec3(0.03, 0.04, 0.07)) + nh * 0.25 * (1.0 - clamp(e / max(ridge, 1e-3), 0.0, 1.0));
           c = mix(c, nc, night);
         }
         gl_FragColor = vec4(c, 1.0);
@@ -80,33 +72,55 @@ export function makeSky() {
   return m;
 }
 
-// ── clouds: flat-shaded cumulus, drifting east ──
+// ── clouds: anime cumulus, drifting east ──
+// Two tones only, like cel animation: bright white where the sun hits and a
+// lavender shade underneath (a stepped ramp that never goes dark). Every few
+// clouds is a tall towering one. They count as far-away sky for the outlines,
+// but NOT as open sky for the sunbeams, so light shafts fall between them.
+const CLOUD_RAMP = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([150, 150, 150, 170, 255, 255, 255, 255]), 8, 1, THREE.RedFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true;
+  return t;
+})();
 export function makeClouds(n = 16) {
   const R = rng(5);
   const group = new THREE.Group();
-  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: SOFT, vertexColors: true, fog: false }), { ink: 'sky', paint: false });
-  const white = color('#ffffff'), shade = color('#d9e1f2');
+  const mat = gbuffer(new THREE.MeshToonMaterial({ gradientMap: CLOUD_RAMP, vertexColors: true, fog: false }), { ink: 'cloud', paint: false });
+  // a touch cool, so the warm afternoon sun lights them white rather than yellow
+  const white = color('#eef2ff'), shade = color('#d4dbf5'), base = color('#bcc5e8');
   for (let i = 0; i < n; i++) {
     const W = new World();
-    const k = 14 + R() * 26;
-    const parts = 6 + Math.floor(R() * 7);
-    for (let j = 0; j < parts; j++) {
-      const t = j / parts, x = (t - 0.5) * k * 2.4 + (R() - 0.5) * k * 0.4, r = k * (0.55 + Math.sin(t * Math.PI) * 0.6 + R() * 0.2);
-      W.blob('c', x, r * 0.35, (R() - 0.5) * k * 0.6, r, r * 0.72, r * 0.8, j % 3 ? white : shade, 2);
+    const k = 38 + R() * 46;               // big: they sit a kilometre out
+    const tall = i % 4 === 0;
+    // a cauliflower: puffs heaped on a dome, biggest in the middle, on a flat base
+    const puffs = 16 + Math.floor(R() * 10);
+    for (let j = 0; j < puffs; j++) {
+      const u = R() * 2 - 1, v = R() * 2 - 1;
+      const dome = Math.max(0, 1 - u * u);
+      const x = u * k * 1.7, z = v * k * 0.75;
+      const r = k * (0.32 + dome * 0.38 + R() * 0.12);
+      const y = dome * k * (tall ? 1.4 : 0.75) + R() * k * 0.2;
+      W.blob('c', x, y, z, r, r * 0.86, r * 0.92, j % 4 ? white : shade, 2);
+    }
+    if (tall) {                            // a towering one: puffs stacked up the middle
+      for (let j = 0; j < 6; j++) {
+        const r = k * (0.85 - j * 0.09);
+        W.blob('c', (R() - 0.5) * k * 0.5, k * (1.3 + j * 0.55), (R() - 0.5) * k * 0.4, r, r * 0.82, r * 0.88, white, 2);
+      }
     }
     // flat base
-    W.blob('c', 0, 0, 0, k * 1.8, k * 0.25, k * 0.9, shade, 1);
+    W.blob('c', 0, 0, 0, k * 1.9, k * 0.22, k * 0.95, base, 1);
     const g = new THREE.Group();
     W.build({ c: mat }, g, { shadows: false });
-    const a = R() * Math.PI * 2, d = 350 + R() * 900;
-    g.position.set(Math.cos(a) * d, 170 + R() * 160, Math.sin(a) * d);
+    const a = R() * Math.PI * 2, d = 760 + R() * 700;    // out by the horizon, clear of the aerial view
+    g.position.set(Math.cos(a) * d, 150 + R() * 150, Math.sin(a) * d);
     g.userData.speed = 1.2 + R() * 1.6;
     group.add(g);
   }
   group.userData.update = (dt) => {
     for (const c of group.children) {
       c.position.x += c.userData.speed * dt;
-      if (c.position.x > 1300) c.position.x = -1300;
+      if (c.position.x > 1500) c.position.x = -1500;
     }
   };
   return group;
@@ -359,6 +373,44 @@ export function makeLightPools(lights) {
   });
   const m = new THREE.Mesh(ig, mat);
   m.frustumCulled = false;
+  m.userData.set = (k) => { mat.uniforms.strength.value = k; m.visible = k > 0; };
+  m.userData.set(0);
+  return m;
+}
+
+// ── the lamps' light cones at night (the Tyndall effect in misty, rainy air) ──
+// One soft cone of light under every lamp in lights.js, brightest along its
+// axis and near the lamp, fading to nothing at the ground and at its edges.
+export function makeLightCones(lights) {
+  const g = new THREE.CylinderGeometry(0.18, 1, 1, 24, 1, true).translate(0, -0.5, 0);   // top at the lamp, unit height and radius
+  const ig = new THREE.InstancedBufferGeometry().copy(g);
+  ig.instanceCount = lights.length;
+  const data = new Float32Array(lights.length * 4);
+  lights.forEach(([x, z, h, r], i) => data.set([x, z, h - 0.35, r * 0.42], i * 4));
+  ig.setAttribute('light', new THREE.InstancedBufferAttribute(data, 4));
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms: { strength: { value: 0 } },
+    vertexShader: `attribute vec4 light; varying float vT; varying vec3 vN, vV;
+      void main(){
+        vec3 w = vec3(light.x, light.z, light.y) + vec3(position.x * light.w, position.y * light.z, position.z * light.w);
+        vT = -position.y;                                   // 0 at the lamp, 1 at the ground
+        vN = normalize(mat3(viewMatrix) * normalize(vec3(position.x, 0.35, position.z)));
+        vec4 mv = viewMatrix * vec4(w, 1.0);
+        vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: ADD_OUT + `uniform float strength; varying float vT; varying vec3 vN, vV;
+      void main(){
+        float face = pow(abs(dot(normalize(vN), normalize(vV))), 3.0);   // thicker through the middle, soft at the edges
+        float a = face * pow(1.0 - vT, 2.2) * smoothstep(0.0, 0.08, vT);
+        gl_FragColor = vec4(vec3(1.0, 0.78, 0.5) * a * strength, 1.0);
+        gNormalDepth = vec4(0.0);
+      }`,
+  });
+  const m = new THREE.Mesh(ig, mat);
+  m.frustumCulled = false;
+  m.renderOrder = 5;
   m.userData.set = (k) => { mat.uniforms.strength.value = k; m.visible = k > 0; };
   m.userData.set(0);
   return m;

@@ -54,20 +54,30 @@ function paintTex() {
   return PAINT;
 }
 
+// ── light shared by every material, updated each frame by main.js ──
+// SUN_VIEW: direction to the sun in view space. DAY: 1 by day, 0 at night
+// (the rim light and the window streaks are sunlight things).
+export const SUN_VIEW = { value: new THREE.Vector3(0, 1, 0) };
+export const DAY = { value: 1 };
+
 // ── the G-buffer patch ──
 // ink: 'normal' | 'soft' (foliage: only its outline against what's behind it) |
-// 'none' (decals) | 'sky' (clouds: pretend to be sky, so no outline at all)
+// 'none' (decals) | 'sky' (pretend to be sky, so no outline at all) |
+// 'cloud' (like sky for the outlines, but it blocks the sunbeams: depth 4000)
 const OUT = 'layout(location = 1) out highp vec4 gNormalDepth;\n';
 // 'add' is for additive glows (rain, light pools): they write zero, which adds
 // nothing to the normal/depth target, so they never disturb the ink.
 // emissiveByColor: only vertices coloured pure white glow (lit windows at night).
-export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true, emissiveByColor = false } = {}) {
+// rim: a warm edge of sunlight where a sunlit surface turns away from you, the
+// cel-animation highlight. streaks: the diagonal white glints anime draws on glass.
+export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true, emissiveByColor = false,
+  rim = ink === 'normal' || ink === 'soft', streaks = false } = {}) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (s, r) => {
     prev?.(s, r);
     const hasNormal = /normal_fragment_begin/.test(s.fragmentShader);
-    const n = hasNormal && ink !== 'none' && ink !== 'sky' ? 'normalize(normal) * 0.5 + 0.5' : 'vec3(0.5, 0.5, 1.0)';
-    const depth = ink === 'sky' ? '5000.0' : ink === 'soft' ? '-1.0 / gl_FragCoord.w' : '1.0 / gl_FragCoord.w';
+    const n = hasNormal && ink !== 'none' && ink !== 'sky' && ink !== 'cloud' ? 'normalize(normal) * 0.5 + 0.5' : 'vec3(0.5, 0.5, 1.0)';
+    const depth = ink === 'sky' ? '5000.0' : ink === 'cloud' ? '4000.0' : ink === 'soft' ? '-1.0 / gl_FragCoord.w' : '1.0 / gl_FragCoord.w';
     let fs = OUT + s.fragmentShader.replace(/}\s*$/, ink === 'add' ? '  gNormalDepth = vec4(0.0);\n}' : `  gNormalDepth = vec4(${n}, ${depth});\n}`);
     if (emissiveByColor) fs = fs.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance *= smoothstep(0.9, 1.0, vColor.r);');
     if (paint && hasNormal && /#include <project_vertex>/.test(s.vertexShader) && /#include <beginnormal_vertex>/.test(s.vertexShader)) {
@@ -90,9 +100,25 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
     diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, vPaintPos.y)), wall);
   }`);
     }
+    const toon = /#include <opaque_fragment>/.test(fs) && /vViewPosition/.test(fs) && hasNormal;
+    if (toon && (rim || streaks)) {
+      s.uniforms.uSunView = SUN_VIEW;
+      s.uniforms.uDay = DAY;
+      fs = 'uniform vec3 uSunView;\nuniform float uDay;\n' + fs.replace('#include <opaque_fragment>', `${rim ? `{
+    vec3 Vv = normalize(vViewPosition);
+    float ndv = clamp(dot(normal, Vv), 0.0, 1.0);
+    float lit = smoothstep(0.02, 0.3, dot(normal, uSunView));
+    outgoingLight += diffuseColor.rgb * vec3(1.0, 0.84, 0.6) * pow(1.0 - ndv, 3.0) * lit * 0.6 * uDay;
+  }` : ''}${streaks && /vPaintPos/.test(fs) ? `{
+    float st = fract(dot(vPaintPos, vec3(0.45, 0.9, 0.45)) * 0.42);
+    float band = smoothstep(0.0, 0.03, st) * (1.0 - smoothstep(0.12, 0.15, st)) + smoothstep(0.22, 0.24, st) * (1.0 - smoothstep(0.27, 0.29, st));
+    outgoingLight = mix(outgoingLight, vec3(1.0), band * 0.5 * uDay);
+  }` : ''}
+  #include <opaque_fragment>`);
+    }
     s.fragmentShader = fs;
   };
-  mat.customProgramCacheKey = () => `gbuf3|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
+  mat.customProgramCacheKey = () => `gbuf4|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${rim ? 1 : 0}|${streaks ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
   return mat;
 }
 
@@ -240,7 +266,7 @@ export function makeMaterials(T) {
     flat: toon(),
     stucco: toon({ map: T.stucco }),
     glass: gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON, vertexColors: true, map: T.glass,
-      emissive: new THREE.Color('#ffc98a'), emissiveMap: T.glassNight, emissiveIntensity: 0 }), { emissiveByColor: true }),
+      emissive: new THREE.Color('#ffc98a'), emissiveMap: T.glassNight, emissiveIntensity: 0 }), { emissiveByColor: true, streaks: true }),
     // lamp heads and light fittings: unlit, and turned up at night so they bloom
     glow: gbuffer(new THREE.MeshBasicMaterial({ vertexColors: true }), { ink: 'none', paint: false }),
     louver: toon({ map: T.louver }),

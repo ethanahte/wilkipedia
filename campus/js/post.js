@@ -6,7 +6,11 @@
 //   ink:     where neighbouring pixels jump in distance (silhouettes) or fold
 //            sharply (a wall meeting a roof), darken toward a warm ink colour.
 //            Lines fade out far away so the aerial view doesn't turn to noise.
-//   quality: high = ink + bloom + 4× MSAA; medium = ink; low = colour only.
+//   rays:    Tyndall light shafts: open sky near the sun, smeared toward the
+//            sun on the screen, so beams fall between clouds, through the
+//            gaps in tree crowns and past the rooflines (a quarter-size pass).
+//   haze:    the air on the sun's side glows warm with distance.
+//   quality: high = ink + bloom + rays + 4× MSAA; medium = ink + rays; low = colour only.
 
 import * as THREE from 'three';
 
@@ -14,11 +18,11 @@ const VERT = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(positi
 
 const COMPOSITE = `
 precision highp float;
-uniform sampler2D tColor, tND, tBloom;
+uniform sampler2D tColor, tND, tBloom, tRays;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade, wet, night;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK;
 uniform mat4 proj, projInv, viewInv;
-uniform vec3 viewUp;
+uniform vec3 viewUp, sunDir;
 varying vec2 vUv;
 float h2(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -44,6 +48,16 @@ void main(){
     float ne = smoothstep(0.24, 0.5, nd) * (1.0 - soft);
     edge = max(de, ne * (1.0 - smoothstep(farFade * 0.4, farFade, d0)));
     edge *= 1.0 - smoothstep(farFade, farFade * 2.2, d0);
+    edge *= step(d0, 3000.0);                              // sky and clouds are never outlined
+  }
+  // warm air on the sun's side, thicker with distance (aerial perspective)
+  if (hazeK > 0.0 && ink > 0.0) {
+    float dz = abs(texture2D(tND, vUv).a);
+    vec3 P = viewPos(vUv, min(dz, 3000.0));
+    vec3 dirW = normalize(mat3(viewInv) * P);
+    float toward = pow(max(dot(dirW, sunDir), 0.0), 5.0);
+    float thick = dz > 3000.0 ? 0.0 : 1.0 - exp(-dz * 0.0035);
+    col += vec3(1.0, 0.78, 0.5) * toward * thick * hazeK * 0.35;
   }
   // wet ground: march the mirrored ray through the depth buffer and borrow the
   // colour it hits (screen-space reflection). Strongest in puddles.
@@ -77,18 +91,46 @@ void main(){
     }
   }
   // ink is a darker, cooler shade of whatever it outlines, never pure black
-  col = mix(col, col * vec3(0.34, 0.32, 0.42), edge * ink * 0.9);
+  col = mix(col, col * vec3(0.26, 0.24, 0.36), edge * ink);
   if (useBloom > 0.5) col += texture2D(tBloom, vUv).rgb * bloomK;
-  // grade: warm light, cool lavender-blue shadows, a touch more colour
+  // the light shafts, golden where they're thick
+  if (raysK > 0.0) { float r = texture2D(tRays, vUv).r; r = r / (1.0 + r); col += mix(vec3(1.0, 0.84, 0.6), vec3(1.0, 0.95, 0.85), r) * r * raysK; }
+  // grade (the anime background look): richer colour, lavender-blue shadows, warm golden light
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(lum), col, 1.14);
-  col *= mix(vec3(0.9, 0.93, 1.1), vec3(1.02, 1.0, 0.97), smoothstep(0.08, 0.6, lum));
+  col = mix(vec3(lum), col, mix(1.24, 1.14, night));
+  col *= mix(vec3(0.86, 0.9, 1.14), vec3(1.04, 1.0, 0.94), smoothstep(0.08, 0.6, lum));
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
   col *= 1.0 - dot(q, q) * 0.42;
   col = toSRGB(col);
   col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
   gl_FragColor = vec4(col, 1.0);
+}`;
+
+// Sunbeams, step 1: which pixels are open sky near the sun (clouds, trees and
+// buildings block it; the gaps in leaf cards let it through).
+const RAYMASK = `
+uniform sampler2D tND, tColor; uniform vec2 sunUV; uniform float aspect; varying vec2 vUv;
+void main(){
+  float a = texture2D(tND, vUv).a;
+  float open = step(4500.0, a);
+  vec2 q = (vUv - sunUV) * vec2(aspect, 1.0);
+  float near = 1.0 - smoothstep(0.0, 0.85, length(q));
+  float lum = dot(texture2D(tColor, vUv).rgb, vec3(0.3, 0.59, 0.11));
+  gl_FragColor = vec4(vec3(open * near * near * (0.5 + lum)), 1.0);
+}`;
+// Sunbeams, step 2: smear the mask toward the sun (run twice, second time finer).
+const RAYBLUR = `
+uniform sampler2D tSrc; uniform vec2 sunUV; uniform float span; varying vec2 vUv;
+void main(){
+  vec2 delta = (vUv - sunUV) * span / 40.0;
+  vec2 uv = vUv; float acc = 0.0, w = 1.0;
+  for (int i = 0; i < 40; i++) {
+    uv -= delta;
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) break;
+    acc += texture2D(tSrc, uv).r * w; w *= 0.955;
+  }
+  gl_FragColor = vec4(vec3(acc / 24.0), 1.0);
 }`;
 
 const BRIGHT = `
@@ -120,7 +162,11 @@ export class Post {
       ink: { value: 1 }, inkW: { value: 1 }, bloomK: { value: 0.45 }, useBloom: { value: 1 }, farFade: { value: 420 },
       wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
+      tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
     });
+    this.rayMask = mk(RAYMASK, { tND: { value: null }, tColor: { value: null }, sunUV: { value: new THREE.Vector2() }, aspect: { value: 1 } });
+    this.rayBlur = mk(RAYBLUR, { tSrc: { value: null }, sunUV: { value: new THREE.Vector2() }, span: { value: 1 } });
+    this._sun = new THREE.Vector3(); this._fwd = new THREE.Vector3();
     this.bright = mk(BRIGHT, { tColor: { value: null }, thresh: { value: 0.85 } });
     this.blur = mk(BLUR, { tSrc: { value: null }, dir: { value: new THREE.Vector2() } });
     this.floatOK = renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float');
@@ -129,7 +175,7 @@ export class Post {
   setQuality(q) { this.quality = q; this.dispose(); if (this.w) this.setSize(this.w, this.h, this.dpr); }
 
   dispose() {
-    for (const k of ['gbuf', 'bA', 'bB']) { this[k]?.dispose(); this[k] = null; }
+    for (const k of ['gbuf', 'bA', 'bB', 'rA', 'rB']) { this[k]?.dispose(); this[k] = null; }
   }
 
   setSize(w, h, dpr) {
@@ -147,10 +193,14 @@ export class Post {
     const bw = Math.max(1, W >> 2), bh = Math.max(1, H >> 2);
     this.bA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
     this.bB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
+    this.rA = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
+    this.rB = new THREE.WebGLRenderTarget(bw, bh, { type, depthBuffer: false });
+    this.rayMask.uniforms.aspect.value = W / H;
+    this.inkOn = ink;
     const u = this.comp.uniforms;
     u.texel.value.set(1 / W, 1 / H);
     u.ink.value = ink ? 1 : 0;
-    u.inkW.value = Math.max(1, dpr * 0.6);
+    u.inkW.value = Math.max(1.15, dpr * 0.72);   // a clear, confident line
     u.useBloom.value = this.quality === 'high' ? 1 : 0;
     this.bloomTexel = new THREE.Vector2(1 / bw, 1 / bh);
   }
@@ -161,14 +211,14 @@ export class Post {
     this.r.render(this.scene, this.cam);
   }
 
-  // env: { wet, night } from the time-of-day settings
+  // env: { wet, night, sun (world direction to the sun), day (0-1 sunlight) }
   render(scene, camera, farFade, env = {}) {
     const r = this.r;
     const u0 = this.comp.uniforms;
     u0.wet.value = this.quality === 'low' ? 0 : env.wet || 0;
     u0.night.value = env.night || 0;
-    u0.bloomK.value = env.night ? 0.95 : 0.45;
-    this.bright.uniforms.thresh.value = env.night ? 0.55 : 0.85;
+    u0.bloomK.value = env.night ? 0.95 : 0.55;
+    this.bright.uniforms.thresh.value = env.night ? 0.55 : 0.8;
     u0.proj.value.copy(camera.projectionMatrix); u0.projInv.value.copy(camera.projectionMatrixInverse);
     u0.viewInv.value.copy(camera.matrixWorld);
     u0.viewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
@@ -178,6 +228,26 @@ export class Post {
     u.tColor.value = this.gbuf.textures[0];
     u.tND.value = this.gbuf.textures[1] || this.gbuf.textures[0];
     u.farFade.value = farFade;
+    // sunbeams: where the sun is on screen, and how much it faces us
+    u.raysK.value = 0; u.hazeK.value = 0;
+    if (this.inkOn && env.sun && env.day > 0) {
+      u.sunDir.value.copy(env.sun);
+      camera.getWorldDirection(this._fwd);
+      const facing = this._fwd.dot(env.sun);
+      u.hazeK.value = env.day;
+      const k = env.day * THREE.MathUtils.smoothstep(facing, -0.15, 0.55);
+      if (k > 0.01) {
+        this._sun.copy(camera.position).addScaledVector(env.sun, 2000).project(camera);
+        const su = this.rayMask.uniforms.sunUV.value.set(this._sun.x * 0.5 + 0.5, this._sun.y * 0.5 + 0.5);
+        this.rayBlur.uniforms.sunUV.value.copy(su);
+        this.rayMask.uniforms.tND.value = u.tND.value; this.rayMask.uniforms.tColor.value = u.tColor.value;
+        this.pass(this.rayMask, this.rA);
+        this.rayBlur.uniforms.tSrc.value = this.rA.texture; this.rayBlur.uniforms.span.value = 0.9; this.pass(this.rayBlur, this.rB);
+        this.rayBlur.uniforms.tSrc.value = this.rB.texture; this.rayBlur.uniforms.span.value = 0.35; this.pass(this.rayBlur, this.rA);
+        u.tRays.value = this.rA.texture;
+        u.raysK.value = k * 0.5;
+      }
+    }
     if (u.useBloom.value > 0.5) {
       this.bright.uniforms.tColor.value = this.gbuf.textures[0];
       this.pass(this.bright, this.bA);

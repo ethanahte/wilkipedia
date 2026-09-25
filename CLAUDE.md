@@ -133,15 +133,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Never invent what something looks like.** Every facade kit and landmark is
     from a photo the owner sent (listed in the file headers). Ask for a photo
     before adding a building's detail, interior, or a logo placement.
-  - Look (modelled on the owner's reference, a painted anime town): toon
-    materials with the far side of the ramp = 0 (form and cast shadows match),
-    a lavender-blue sky light so every shadow is cool, warm sun, FogExp2 haze
-    into a pale horizon, a painted sky (cirrus noise + the real Santa Cruz
-    Mountains / Diablo Range on the horizon). `gbuffer()` in toon.js patches
-    every material: it writes normal+depth to a second target for the ink pass
-    and adds a world-space watercolour grain + contact darkening at wall bases.
-    Any new material must go through `gbuffer()`. ink modes: 'soft' (foliage:
-    depth stored negated, only its outline is inked), 'sky' (clouds), 'none'.
+  - Look (三渲二, Japanese anime slice-of-life): toon materials with the far
+    side of the ramp = 0 (form and cast shadows match), a lavender-blue sky
+    light so every shadow is cool, a warm golden-afternoon sun (~22° up, SW),
+    FogExp2 haze, a painted sky (deep blue, warm on the sun's side, cirrus; no
+    mountains, owner's call) and two-tone cauliflower cumulus out by the horizon.
+    `gbuffer()` in toon.js patches every material: it writes normal+depth to a
+    second target for the ink pass, adds a world-space watercolour grain +
+    contact darkening at wall bases, a warm rim light on sunlit edges, and (glass
+    only) anime diagonal glints. Any new material must go through `gbuffer()`.
+    ink modes: 'soft' (foliage: depth stored negated, only its outline is inked),
+    'sky' (depth 5000), 'cloud' (depth 4000: no ink, but blocks sunbeams),
+    'none', 'add'. `SUN_VIEW`/`DAY` in toon.js are shared uniforms main.js
+    updates each frame.
+  - Tyndall light: by day post.js draws sunbeams (open sky near the sun, i.e.
+    depth > 4500, radially smeared toward the sun at quarter size), so shafts
+    fall through tree crowns, past roofs and between clouds, plus warm haze on
+    the sun's side. At night `makeLightCones` (life.js) hangs a soft additive
+    cone under every entry in lights.js, stronger in rain.
   - Foliage = a darker solid core + many alpha-tested "leaf cards" (atlas in
     `T.leaves`: leaves | needles | solid) with normals pointing out from the
     crown centre (`cards()` in nature.js). Foliage buckets get a
@@ -154,10 +163,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Testing: the Browser pane is often hidden (rAF stalls, screenshots go
     stale). `window.__campus.frame(dt)` renders one frame on demand; a boot
     that sees a 0×0 window must still size the camera (onResize guards it).
-  - Default presentation (owner's second reference, a night-rain diorama): the
-    world is a slab (`plinth()` in ground.js, WORLD in layout.js is its size)
-    shown from the air, turning slowly, at night in the rain. Day/Night (N) and
-    Rain (R) are saved in localStorage `wilcox-campus-sky`. Night = lit windows
+  - Default presentation: the world is a slab (`plinth()` in ground.js, WORLD
+    in layout.js is its size) shown from the air, turning slowly, on a golden
+    afternoon. Night and rain (the owner's earlier night-rain diorama) are one
+    key away: Day/Night (N) and Rain (R), saved in localStorage
+    `wilcox-campus-sky2` only when the viewer picks them. Night = lit windows
     (glass panes whose vertex colour is pure white glow: `emissiveByColor`),
     the 'glow' material, additive light pools under every entry in lights.js,
     8 real PointLights moved to the lamps nearest you, a starry sky. Rain =

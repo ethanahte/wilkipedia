@@ -12,13 +12,13 @@
 
 import * as THREE from 'three';
 import { World, distToLine, inPoly } from './geo.js';
-import { makeTextures, makeMaterials, setAniso } from './toon.js';
+import { makeTextures, makeMaterials, setAniso, SUN_VIEW, DAY as DAYLIGHT } from './toon.js';
 import { buildGround } from './ground.js';
 import { buildBuildings } from './buildings.js';
 import { buildLandmarks } from './landmarks.js';
 import { buildQuad } from './quad.js';
 import { buildProps } from './props.js';
-import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, makeRain, makeRipples, makeLightPools, SUN, HORIZON } from './life.js';
+import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, makeRain, makeRipples, makeLightPools, makeLightCones, SUN, HORIZON } from './life.js';
 import { LIGHTS } from './lights.js';
 import { Controls } from './controls.js';
 import { loadRooms, rooms, byId, makeHighlight, placeHighlight, standFor } from './rooms.js';
@@ -104,7 +104,7 @@ async function boot() {
   steps.push(['Hanging the signs', () => buildLandmarks(W, decals, fontFamily)]);
   steps.push(['Planting the cedar', () => buildQuad(W)]);
   steps.push(['Filling in the neighbourhood', () => buildProps(W, scene, quality, M)]);
-  let sky, clouds, birds, flags, leaves, rain, ripples, pools;
+  let sky, clouds, birds, flags, leaves, rain, ripples, pools, cones;
   steps.push(['Letting the clouds in', () => {
     sky = makeSky(); scene.add(sky);
     clouds = makeClouds(quality === 'low' ? 9 : 16); scene.add(clouds);
@@ -114,6 +114,7 @@ async function boot() {
     rain = makeRain(quality === 'low' ? 4000 : 9000); scene.add(rain);
     ripples = makeRipples(); scene.add(ripples);
     pools = makeLightPools(LIGHTS); scene.add(pools);
+    cones = makeLightCones(LIGHTS); scene.add(cones);
   }]);
   const roomsGroup = new THREE.Group(); scene.add(roomsGroup);
   steps.push(['Numbering the rooms', async () => { try { await loadRooms(`${ROOT}data/map.json`, roomsGroup); } catch (e) { console.warn('rooms', e); } }]);
@@ -133,11 +134,13 @@ async function boot() {
   hud.drawMap();
 
   // ── time of day and weather ──
-  // Night + rain is the showcase (the diorama look); day is one click away.
-  const TKEY = 'wilcox-campus-sky';
-  let env = { night: true, rain: true };
+  // A golden after-school afternoon is the showcase (the anime slice-of-life
+  // look, with sunbeams); night and rain are one key away. Only a choice the
+  // viewer makes is saved (key v2: the old key saved every boot's default).
+  const TKEY = 'wilcox-campus-sky2';
+  let env = { night: false, rain: false };
   try { Object.assign(env, JSON.parse(localStorage.getItem(TKEY)) || {}); } catch { /* defaults */ }
-  const DAY = { hemi: ['#a9bdf0', '#d8c7a6', 1.85], sun: ['#fff0d4', 2.3], fog: '#dde8f3', density: 0.0021 };
+  const DAY = { hemi: ['#a4b9f0', '#dcc6a2', 1.7], sun: ['#ffe4b8', 2.75], fog: '#e3e8ef', density: 0.0019 };
   const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
   const applyEnv = () => {
     const E = env.night ? NIGHT : DAY;
@@ -152,14 +155,16 @@ async function boot() {
     M.glass.emissiveIntensity = env.night ? 2.2 : 0;
     M.glow.color.setScalar(env.night ? 3 : 1);
     pools.userData.set(env.night ? 1 : 0);
+    cones.userData.set(env.night ? (env.rain ? 0.26 : 0.12) : 0);
+    DAYLIGHT.value = env.night ? 0 : env.rain ? 0.25 : 1;
     for (const g of groundMeshes) if (g.material.color) g.material.color.setScalar(env.rain ? 0.82 : 1);
     document.body.dataset.night = env.night ? '1' : '0';
     document.body.dataset.rain = env.rain ? '1' : '0';
     hud.setEnv(env);
-    try { localStorage.setItem(TKEY, JSON.stringify(env)); } catch { /* ok */ }
   };
-  const toggleNight = () => { env.night = !env.night; applyEnv(); };
-  const toggleRain = () => { env.rain = !env.rain; applyEnv(); };
+  const saveEnv = () => { try { localStorage.setItem(TKEY, JSON.stringify(env)); } catch { /* ok */ } };
+  const toggleNight = () => { env.night = !env.night; applyEnv(); saveEnv(); };
+  const toggleRain = () => { env.rain = !env.rain; applyEnv(); saveEnv(); };
 
   // start: the campus as a diorama, turning slowly; ?room= or Walk takes you in
   const [fx, fz] = FRONT.flag;
@@ -193,8 +198,8 @@ async function boot() {
     return true;
   };
   api.goToRoom = goToRoom;
-  api.setTime = (t) => { env.night = t === 'night'; applyEnv(); };
-  api.setRain = (on) => { env.rain = !!on; applyEnv(); };
+  api.setTime = (t) => { env.night = t === 'night'; applyEnv(); saveEnv(); };
+  api.setRain = (on) => { env.rain = !!on; applyEnv(); saveEnv(); };
   api.setQuality = applyQuality;
   api.rooms = () => rooms.map((r) => r.id);
 
@@ -354,7 +359,8 @@ async function boot() {
     const nearWant = Math.min(40, Math.max(0.15, (camera.position.y - 35) * 0.5));
     if (Math.abs(camera.near - nearWant) > 0.05) { camera.near = nearWant; camera.updateProjectionMatrix(); }
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * 2.4) : 420;
-    post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0 });
+    SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);
+    post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value });
   }
   function loop() {
     const dt = Math.min(0.05, clock.getDelta());
