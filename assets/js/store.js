@@ -142,6 +142,17 @@ async function live() {
     async updateAnnouncement(id, fields) { ok(await sb.from('announcements').update(fields).eq('id', id)); },
     async deleteAnnouncement(id) { ok(await sb.from('announcements').delete().eq('id', id)); },
 
+    // Calendar edits: admins' changes on top of the calendar files (migration 011).
+    async calendarEdits() { return ok(await sb.from('calendar_events').select('*')); },
+    async saveCalendarEvent(row) {
+      const fields = { ...row, updated_at: new Date().toISOString() };
+      delete fields.id;
+      if (row.id) return ok(await sb.from('calendar_events').update(fields).eq('id', row.id));
+      if (row.replaces) return ok(await sb.from('calendar_events').upsert(fields, { onConflict: 'replaces' }));
+      return ok(await sb.from('calendar_events').insert(fields));
+    },
+    async deleteCalendarEvent(id) { ok(await sb.from('calendar_events').delete().eq('id', id)); },
+
     async submit(s) { ok(await sb.from('submissions').insert({ ...s, user_id: me.id })); },
     async mySubmissions() {
       return ok(await sb.from('submissions').select(SUB).eq('user_id', me.id)
@@ -342,6 +353,16 @@ async function demo() {
     async postAnnouncement(a) { admin(); (db.announcements ??= []).unshift({ id: id(), active: true, created_at: now(), ...a }); save(); },
     async updateAnnouncement(aid, fields) { admin(); Object.assign(db.announcements.find((a) => a.id === aid), fields); save(); },
     async deleteAnnouncement(aid) { admin(); db.announcements = db.announcements.filter((a) => a.id !== aid); save(); },
+    async calendarEdits() { return db.calendar ?? []; },
+    async saveCalendarEvent(row) {
+      admin();
+      const list = (db.calendar ??= []);
+      const cur = row.id ? list.find((x) => x.id === row.id) : row.replaces ? list.find((x) => x.replaces === row.replaces) : null;
+      if (cur) Object.assign(cur, row, { id: cur.id, updated_at: now() });
+      else list.push({ hidden: false, ...row, id: id(), updated_at: now() });
+      save();
+    },
+    async deleteCalendarEvent(cid) { admin(); db.calendar = (db.calendar ?? []).filter((x) => x.id !== cid); save(); },
     async bountyWork() {
       return db.submissions.filter((x) => x.status === 'approved' && x.bounty_id)
         .map((x) => ({ bounty_id: x.bounty_id, user_id: x.user_id, reviewed_at: x.reviewed_at, author: name(x.user_id) }));

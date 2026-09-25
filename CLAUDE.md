@@ -113,8 +113,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   event from its own wording, Zoom links dropped (reposting them invites
   zoom-bombing). Re-run it when the school updates the sheet. The page is a
   month view + "Coming up" + filters, the whole list in the HTML for no-JS,
-  and a generated `.ics` to add everything to a phone calendar. The spring
-  no-school days and June finals in bell.json came from the same sheet.
+  and a `.ics` to add everything to a phone calendar (built in the browser from
+  what's shown, so it includes admin edits). The spring no-school days and June
+  finals in bell.json came from the same sheet.
+  - Other groups' own calendars go in `data/calendar-extra.json` (hand-kept,
+    each event tagged with a `src` listed in `sources`, e.g. `c2027` = the
+    Class of 2027's @wilcox_2027 homecoming schedule). Skip events that repeat
+    the official calendar.
+  - **Admins edit the calendar on the page** (migration 011, `calendar_events`):
+    a row with `replaces` null is a new event; with `replaces` = a file event's
+    `id` it edits or hides that event, so re-imports keep the edits. Public
+    read, admin-only write. Before 011 is run the page still works (files only).
 - **3D campus** (`campus/`): a walkable, toon-shaded (三渲二) three.js model of
   the whole school. Its own app, NOT generated: `campus/js/*.js`,
   `campus/campus.css`, three.js r169 vendored at `campus/vendor/`. build.py only

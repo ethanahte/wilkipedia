@@ -21,7 +21,8 @@
    "title": "Freshman Orientation",
    "time": "8:30 am - 12:30 pm",
    "where": "Main Gym",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-08-03-freshman-orientation"
   },
   {
    "start": "2026-08-03",
@@ -29,7 +30,8 @@
    "title": "Freshman Parent Meeting",
    "time": "9:00 am",
    "where": "Theater",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-08-03-freshman-parent-meeting"
   },
   {
    "start": "2026-08-07",
@@ -37,7 +39,8 @@
    "title": "First Official Day of Fall Athletic Season",
    "time": "",
    "where": "",
-   "cat": "sports"
+   "cat": "sports",
+   "id": "w-2026-08-07-first-official-day-of-fall-athletic-seas"
   },
   {
    "start": "2026-08-10",
@@ -45,7 +48,8 @@
    "title": "First Day of School",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2026-08-10-first-day-of-school"
   },
   {
    "start": "2026-08-18",
@@ -53,7 +57,8 @@
    "title": "Picture Day",
    "time": "Period 3",
    "where": "Small Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-08-18-picture-day"
   },
   {
    "start": "2026-08-26",
@@ -61,7 +66,8 @@
    "title": "Club Training",
    "time": "Lunch",
    "where": "Science Lecture Hall",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-08-26-club-training"
   },
   {
    "start": "2026-08-27",
@@ -69,7 +75,8 @@
    "title": "Club Training",
    "time": "Lunch",
    "where": "Science Lecture Hall",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-08-27-club-training"
   },
   {
    "start": "2026-09-03",
@@ -77,7 +84,8 @@
    "title": "Club Fair - STEM, Service, Leadership",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-09-03-club-fair-stem-service-leadership"
   },
   {
    "start": "2026-09-04",
@@ -85,7 +93,8 @@
    "title": "Club Fair - Culture, Arts, Community",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-09-04-club-fair-culture-arts-community"
   },
   {
    "start": "2026-09-07",
@@ -93,7 +102,8 @@
    "title": "Labor Day - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-09-07-labor-day-no-school"
   },
   {
    "start": "2026-09-08",
@@ -101,7 +111,8 @@
    "title": "Professional Development Day - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-09-08-professional-development-day-no-school"
   },
   {
    "start": "2026-09-09",
@@ -109,7 +120,8 @@
    "title": "Adjusted Bell Schedule",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "schedule"
+   "cat": "schedule",
+   "id": "w-2026-09-09-adjusted-bell-schedule"
   },
   {
    "start": "2026-09-09",
@@ -117,7 +129,8 @@
    "title": "Back to School Night",
    "time": "6 pm",
    "where": "",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-09-09-back-to-school-night"
   },
   {
    "start": "2026-09-16",
@@ -125,7 +138,8 @@
    "title": "Junior/Senior Parent Night",
    "time": "7 - 8:30 pm",
    "where": "On Zoom",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-09-16-junior-senior-parent-night"
   },
   {
    "start": "2026-09-18",
@@ -133,7 +147,8 @@
    "title": "Fall Spirit Rally",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-09-18-fall-spirit-rally"
   },
   {
    "start": "2026-09-23",
@@ -141,7 +156,8 @@
    "title": "College Financial Aid Planning Night (presented by DGM)",
    "time": "7 pm",
    "where": "Zoom (link to come)",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-09-23-college-financial-aid-planning-night-pre"
   },
   {
    "start": "2026-09-23",
@@ -149,7 +165,8 @@
    "title": "ELAC Meeting",
    "time": "5:30 - 7 pm",
    "where": "Staff Lounge",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-09-23-elac-meeting"
   },
   {
    "start": "2026-09-23",
@@ -157,7 +174,8 @@
    "title": "Picture Retake Day",
    "time": "10 am - 2 pm",
    "where": "Theater Lobby",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-09-23-picture-retake-day"
   },
   {
    "start": "2026-09-30",
@@ -165,7 +183,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-09-30-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2026-10-05",
@@ -173,7 +192,8 @@
    "title": "Homecoming Week *Special Schedule on 10/9",
    "time": "",
    "where": "",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-05-homecoming-week-special-schedule-on-10-9"
   },
   {
    "start": "2026-10-07",
@@ -181,7 +201,8 @@
    "title": "Skit Night",
    "time": "6 - 8 pm",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-07-skit-night"
   },
   {
    "start": "2026-10-08",
@@ -189,7 +210,8 @@
    "title": "Homecoming Float Building Night",
    "time": "4 - 10 pm",
    "where": "Quad, Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-08-homecoming-float-building-night"
   },
   {
    "start": "2026-10-09",
@@ -197,7 +219,8 @@
    "title": "8th Grade Rally",
    "time": "10:15 am",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-09-8th-grade-rally"
   },
   {
    "start": "2026-10-09",
@@ -205,7 +228,8 @@
    "title": "End of Quarter 1",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2026-10-09-end-of-quarter-1"
   },
   {
    "start": "2026-10-09",
@@ -213,7 +237,8 @@
    "title": "Homecoming Football Game",
    "time": "7 pm",
    "where": "Stadium Field",
-   "cat": "sports"
+   "cat": "sports",
+   "id": "w-2026-10-09-homecoming-football-game"
   },
   {
    "start": "2026-10-09",
@@ -221,7 +246,8 @@
    "title": "Homecoming Parade",
    "time": "8:45 - 9:45 am",
    "where": "",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-09-homecoming-parade"
   },
   {
    "start": "2026-10-10",
@@ -229,7 +255,8 @@
    "title": "Homecoming Dance",
    "time": "7 - 10 pm",
    "where": "Cafeteria",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-10-homecoming-dance"
   },
   {
    "start": "2026-10-10",
@@ -237,7 +264,8 @@
    "title": "Homecoming Float Clean-Up",
    "time": "10 am - 12 pm",
    "where": "",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2026-10-10-homecoming-float-clean-up"
   },
   {
    "start": "2026-10-12",
@@ -245,7 +273,8 @@
    "title": "Holiday - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-10-12-holiday-no-school"
   },
   {
    "start": "2026-10-13",
@@ -253,7 +282,8 @@
    "title": "Holiday - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-10-13-holiday-no-school"
   },
   {
    "start": "2026-10-14",
@@ -261,7 +291,8 @@
    "title": "Adjusted Bell Schedule",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "schedule"
+   "cat": "schedule",
+   "id": "w-2026-10-14-adjusted-bell-schedule"
   },
   {
    "start": "2026-10-14",
@@ -269,7 +300,8 @@
    "title": "UCLA Night",
    "time": "6 - 8 pm",
    "where": "Theater",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-10-14-ucla-night"
   },
   {
    "start": "2026-10-14",
@@ -277,7 +309,8 @@
    "title": "Wilcox-Peterson Orchestra Exchange",
    "time": "10 am - 1:30 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2026-10-14-wilcox-peterson-orchestra-exchange"
   },
   {
    "start": "2026-10-15",
@@ -285,7 +318,8 @@
    "title": "Great California ShakeOut",
    "time": "10:30 am",
    "where": "",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-10-15-great-california-shakeout"
   },
   {
    "start": "2026-10-17",
@@ -293,7 +327,8 @@
    "title": "West Valley Performance",
    "time": "6 - 8 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2026-10-17-west-valley-performance"
   },
   {
    "start": "2026-10-20",
@@ -301,7 +336,8 @@
    "title": "PSAT Testing",
    "time": "8 am - 12 pm",
    "where": "Main Gym / Small Gym",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-10-20-psat-testing"
   },
   {
    "start": "2026-10-21",
@@ -309,7 +345,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-10-21-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2026-10-21",
@@ -317,7 +354,8 @@
    "title": "Fall Music Concert",
    "time": "7 - 9:30 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2026-10-21-fall-music-concert"
   },
   {
    "start": "2026-10-22",
@@ -325,7 +363,8 @@
    "title": "Fall Blood Drive",
    "time": "8 am - 4 pm",
    "where": "Small Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-10-22-fall-blood-drive"
   },
   {
    "start": "2026-10-27",
@@ -333,7 +372,8 @@
    "title": "College Fair",
    "time": "6 - 8 pm",
    "where": "Main Gym",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-10-27-college-fair"
   },
   {
    "start": "2026-10-27",
@@ -341,7 +381,8 @@
    "title": "PSAT Make-Up Testing",
    "time": "8 am - 12 pm",
    "where": "SLH",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-10-27-psat-make-up-testing"
   },
   {
    "start": "2026-11-02",
@@ -349,7 +390,8 @@
    "title": "First Official Day of Winter Athletic Season",
    "time": "",
    "where": "",
-   "cat": "sports"
+   "cat": "sports",
+   "id": "w-2026-11-02-first-official-day-of-winter-athletic-se"
   },
   {
    "start": "2026-11-02",
@@ -357,7 +399,8 @@
    "title": "Start of ASB Clothing Drive",
    "time": "",
    "where": "",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-02-start-of-asb-clothing-drive"
   },
   {
    "start": "2026-11-03",
@@ -365,7 +408,8 @@
    "title": "Teen Read Week: Mystery, Mayhem & Magic (Tues - Fri)",
    "time": "",
    "where": "Library",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-03-teen-read-week-mystery-mayhem-magic-tues"
   },
   {
    "start": "2026-11-04",
@@ -373,7 +417,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-11-04-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2026-11-04",
@@ -381,7 +426,8 @@
    "title": "Sophomore Parent Night",
    "time": "7 - 8:30 pm",
    "where": "On Zoom",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-11-04-sophomore-parent-night"
   },
   {
    "start": "2026-11-06",
@@ -389,7 +435,8 @@
    "title": "Senior Panorama Picture",
    "time": "Tutorial",
    "where": "Stadium Field",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-06-senior-panorama-picture"
   },
   {
    "start": "2026-11-06",
@@ -397,7 +444,8 @@
    "title": "Staff Picture",
    "time": "8:15 am",
    "where": "Main Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-06-staff-picture"
   },
   {
    "start": "2026-11-09",
@@ -405,7 +453,8 @@
    "title": "Seniors Order Caps, Gowns, Announcements",
    "time": "All Periods",
    "where": "Science Lecture Hall",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-09-seniors-order-caps-gowns-announcements"
   },
   {
    "start": "2026-11-10",
@@ -413,7 +462,8 @@
    "title": "Adjusted Bell Schedule",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "schedule"
+   "cat": "schedule",
+   "id": "w-2026-11-10-adjusted-bell-schedule"
   },
   {
    "start": "2026-11-11",
@@ -421,7 +471,8 @@
    "title": "Veteran's Day - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-11-11-veteran-s-day-no-school"
   },
   {
    "start": "2026-11-18",
@@ -429,7 +480,8 @@
    "title": "Club Photo Day",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-18-club-photo-day"
   },
   {
    "start": "2026-11-18",
@@ -437,7 +489,8 @@
    "title": "Open House",
    "time": "6 pm",
    "where": "Theater, various locations",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-11-18-open-house"
   },
   {
    "start": "2026-11-20",
@@ -445,7 +498,8 @@
    "title": "Club Photo Day",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-11-20-club-photo-day"
   },
   {
    "start": "2026-11-23",
@@ -453,7 +507,8 @@
    "title": "Thanksgiving Break - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-11-23-thanksgiving-break-no-school"
   },
   {
    "start": "2026-12-02",
@@ -461,7 +516,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-12-02-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2026-12-02",
@@ -469,7 +525,8 @@
    "title": "Junior Parent Night",
    "time": "7 - 8:30 pm",
    "where": "On Zoom",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-12-02-junior-parent-night"
   },
   {
    "start": "2026-12-03",
@@ -477,7 +534,8 @@
    "title": "Theatre - Fall Production",
    "time": "6:30 - 10 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2026-12-03-theatre-fall-production"
   },
   {
    "start": "2026-12-09",
@@ -485,7 +543,8 @@
    "title": "ELAC Meeting",
    "time": "5:30 - 7 pm",
    "where": "Staff Lounge",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2026-12-09-elac-meeting"
   },
   {
    "start": "2026-12-09",
@@ -493,7 +552,8 @@
    "title": "Winter Music Concert",
    "time": "7pm - 9:30 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2026-12-09-winter-music-concert"
   },
   {
    "start": "2026-12-11",
@@ -501,7 +561,8 @@
    "title": "Ambassador Program End of Year Awards & Celebration",
    "time": "Lunch",
    "where": "Science Lecture Hall",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2026-12-11-ambassador-program-end-of-year-awards-ce"
   },
   {
    "start": "2026-12-15",
@@ -509,7 +570,8 @@
    "title": "Finals Week: Periods 1-7",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-12-15-finals-week-periods-1-7"
   },
   {
    "start": "2026-12-16",
@@ -517,7 +579,8 @@
    "title": "Final Exams: Periods 1, 2, 7",
    "time": "Periods 1, 2, 7",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-12-16-final-exams-periods-1-2-7"
   },
   {
    "start": "2026-12-17",
@@ -525,7 +588,8 @@
    "title": "Final Exams: Periods 3, 4",
    "time": "Periods 3, 4",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-12-17-final-exams-periods-3-4"
   },
   {
    "start": "2026-12-18",
@@ -533,7 +597,8 @@
    "title": "End of Semester 1",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2026-12-18-end-of-semester-1"
   },
   {
    "start": "2026-12-18",
@@ -541,7 +606,8 @@
    "title": "Final Exams: Periods 5, 6",
    "time": "Periods 5, 6",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2026-12-18-final-exams-periods-5-6"
   },
   {
    "start": "2026-12-21",
@@ -549,7 +615,8 @@
    "title": "First Day of Winter Break",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2026-12-21-first-day-of-winter-break"
   },
   {
    "start": "2027-01-04",
@@ -557,7 +624,8 @@
    "title": "Professional Development Day - Student Holiday",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-01-04-professional-development-day-student-hol"
   },
   {
    "start": "2027-01-05",
@@ -565,7 +633,8 @@
    "title": "First Day of Semester 2: Periods 1-7",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2027-01-05-first-day-of-semester-2-periods-1-7"
   },
   {
    "start": "2027-01-06",
@@ -573,7 +642,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-01-06-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2027-01-06",
@@ -581,7 +651,8 @@
    "title": "Second Day of Semester 2: Periods 1-7",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-01-06-second-day-of-semester-2-periods-1-7"
   },
   {
    "start": "2027-01-13",
@@ -589,7 +660,8 @@
    "title": "Elective Information Night",
    "time": "6 - 8 pm",
    "where": "Theater, various locations",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-01-13-elective-information-night"
   },
   {
    "start": "2027-01-15",
@@ -597,7 +669,8 @@
    "title": "Winter Spirit Rally",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-01-15-winter-spirit-rally"
   },
   {
    "start": "2027-01-18",
@@ -605,7 +678,8 @@
    "title": "MLK, Jr. Holiday - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-01-18-mlk-jr-holiday-no-school"
   },
   {
    "start": "2027-01-20",
@@ -613,7 +687,8 @@
    "title": "ASB Council Election Meeting",
    "time": "Lunch",
    "where": "ASB Office",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-01-20-asb-council-election-meeting"
   },
   {
    "start": "2027-01-20",
@@ -621,7 +696,8 @@
    "title": "Freshman Parent Night",
    "time": "7 - 8:30 pm",
    "where": "On Zoom",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-01-20-freshman-parent-night"
   },
   {
    "start": "2027-01-30",
@@ -629,7 +705,8 @@
    "title": "Winter Ball",
    "time": "7 - 11 pm",
    "where": "Santa Clara Convention Center",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-01-30-winter-ball"
   },
   {
    "start": "2027-02-01",
@@ -637,7 +714,8 @@
    "title": "First Official Day of Spring Athletic Season",
    "time": "",
    "where": "",
-   "cat": "sports"
+   "cat": "sports",
+   "id": "w-2027-02-01-first-official-day-of-spring-athletic-se"
   },
   {
    "start": "2027-02-03",
@@ -645,7 +723,8 @@
    "title": "Begin ASB Campaigning",
    "time": "",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-02-03-begin-asb-campaigning"
   },
   {
    "start": "2027-02-03",
@@ -653,7 +732,8 @@
    "title": "Community College Presentation & Fair",
    "time": "Tutorial & Lunch",
    "where": "Theater & Small Gym",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-02-03-community-college-presentation-fair"
   },
   {
    "start": "2027-02-03",
@@ -661,7 +741,8 @@
    "title": "ELAC Meeting",
    "time": "5 - 6:30 pm",
    "where": "Staff Lounge",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-02-03-elac-meeting"
   },
   {
    "start": "2027-02-10",
@@ -669,7 +750,8 @@
    "title": "ASB Council Election",
    "time": "Tutorial",
    "where": "Main Gym / classrooms",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-02-10-asb-council-election"
   },
   {
    "start": "2027-02-10",
@@ -677,7 +759,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-02-10-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2027-02-12",
@@ -685,7 +768,8 @@
    "title": "Best Buddies Valentine's Dance",
    "time": "9:30 - 11:30 am",
    "where": "Small Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-02-12-best-buddies-valentine-s-dance"
   },
   {
    "start": "2027-02-15",
@@ -693,7 +777,8 @@
    "title": "February Break - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-02-15-february-break-no-school"
   },
   {
    "start": "2027-02-26",
@@ -701,7 +786,8 @@
    "title": "Spring Spirit Rally",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-02-26-spring-spirit-rally"
   },
   {
    "start": "2027-03-01",
@@ -709,7 +795,8 @@
    "title": "Fantastics Week",
    "time": "",
    "where": "",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-03-01-fantastics-week"
   },
   {
    "start": "2027-03-04",
@@ -717,7 +804,8 @@
    "title": "Incoming 9th Grade Summit",
    "time": "6 - 8 pm",
    "where": "Theater, Cafeteria, etc.",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-03-04-incoming-9th-grade-summit"
   },
   {
    "start": "2027-03-04",
@@ -725,7 +813,8 @@
    "title": "Quad Night",
    "time": "4 - 10 pm",
    "where": "Quad, Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-03-04-quad-night"
   },
   {
    "start": "2027-03-05",
@@ -733,7 +822,8 @@
    "title": "Fantastics Night",
    "time": "6 - 9 pm",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-03-05-fantastics-night"
   },
   {
    "start": "2027-03-09",
@@ -741,7 +831,8 @@
    "title": "SAT",
    "time": "8 am - 12 pm",
    "where": "Small Gym",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-03-09-sat"
   },
   {
    "start": "2027-03-10",
@@ -749,7 +840,8 @@
    "title": "8th Grade Parent Night",
    "time": "7 - 8:30 pm",
    "where": "On Zoom",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-03-10-8th-grade-parent-night"
   },
   {
    "start": "2027-03-10",
@@ -757,7 +849,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-03-10-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2027-03-17",
@@ -765,7 +858,8 @@
    "title": "End of Quarter 3",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2027-03-17-end-of-quarter-3"
   },
   {
    "start": "2027-03-17",
@@ -773,7 +867,8 @@
    "title": "Music Concert - March Orchestra Festival",
    "time": "6 - 9 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-03-17-music-concert-march-orchestra-festival"
   },
   {
    "start": "2027-03-18",
@@ -781,7 +876,8 @@
    "title": "Professional Development Day - Student Holiday",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-03-18-professional-development-day-student-hol"
   },
   {
    "start": "2027-03-19",
@@ -789,7 +885,8 @@
    "title": "Professional Development Day - Student Holiday",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-03-19-professional-development-day-student-hol"
   },
   {
    "start": "2027-03-22",
@@ -797,7 +894,8 @@
    "title": "Freshman Class Council Applications Due",
    "time": "4 pm",
    "where": "",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-03-22-freshman-class-council-applications-due"
   },
   {
    "start": "2027-03-23",
@@ -805,7 +903,8 @@
    "title": "CAASPP Testing Week 1: Tuesday - Friday (ELA)",
    "time": "",
    "where": "SLH",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-03-23-caaspp-testing-week-1-tuesday-friday-ela"
   },
   {
    "start": "2027-03-24",
@@ -813,7 +912,8 @@
    "title": "Class Council Election Meeting",
    "time": "Lunch",
    "where": "ASB Office",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-03-24-class-council-election-meeting"
   },
   {
    "start": "2027-03-24",
@@ -821,7 +921,8 @@
    "title": "Music Concert - March Band Festival",
    "time": "6 - 8:30 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-03-24-music-concert-march-band-festival"
   },
   {
    "start": "2027-03-29",
@@ -829,7 +930,8 @@
    "title": "Freshman Class Council Interviews",
    "time": "3 - 5 pm",
    "where": "A-130",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-03-29-freshman-class-council-interviews"
   },
   {
    "start": "2027-03-30",
@@ -837,7 +939,8 @@
    "title": "CAASPP Testing Week 2: Tuesday - Friday (Math)",
    "time": "",
    "where": "SLH",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-03-30-caaspp-testing-week-2-tuesday-friday-mat"
   },
   {
    "start": "2027-03-30",
@@ -845,7 +948,8 @@
    "title": "Freshman Class Council Interviews",
    "time": "3 - 5 pm",
    "where": "A-130",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-03-30-freshman-class-council-interviews"
   },
   {
    "start": "2027-04-01",
@@ -853,7 +957,8 @@
    "title": "BOTS Quad Night",
    "time": "3 - 9 pm",
    "where": "Quad, Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-01-bots-quad-night"
   },
   {
    "start": "2027-04-02",
@@ -861,7 +966,8 @@
    "title": "Battle of the Schools (BOTS)",
    "time": "6 - 8 pm",
    "where": "TBD",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-02-battle-of-the-schools-bots"
   },
   {
    "start": "2027-04-02",
@@ -869,7 +975,8 @@
    "title": "CMEA Concert",
    "time": "5 - 7 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-04-02-cmea-concert"
   },
   {
    "start": "2027-04-03",
@@ -877,7 +984,8 @@
    "title": "CMEA Concert",
    "time": "5 - 7 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-04-03-cmea-concert"
   },
   {
    "start": "2027-04-06",
@@ -885,7 +993,8 @@
    "title": "CAASPP Testing Week 3: Tuesday - Friday (CAST)",
    "time": "",
    "where": "SLH",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-04-06-caaspp-testing-week-3-tuesday-friday-cas"
   },
   {
    "start": "2027-04-07",
@@ -893,7 +1002,8 @@
    "title": "Class Council Elections",
    "time": "Tutorial",
    "where": "Classrooms",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-04-07-class-council-elections"
   },
   {
    "start": "2027-04-08",
@@ -901,7 +1011,8 @@
    "title": "Spring Blood Drive",
    "time": "8 am - 4 pm",
    "where": "Small Gym",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-04-08-spring-blood-drive"
   },
   {
    "start": "2027-04-09",
@@ -909,7 +1020,8 @@
    "title": "Senior Meeting",
    "time": "Tutorial",
    "where": "Theater",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-04-09-senior-meeting"
   },
   {
    "start": "2027-04-12",
@@ -917,7 +1029,8 @@
    "title": "Spring Break - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-04-12-spring-break-no-school"
   },
   {
    "start": "2027-04-21",
@@ -925,7 +1038,8 @@
    "title": "Attendance Matters: A Family Support Session",
    "time": "5:30 - 7 pm",
    "where": "Science Lecture Hall",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-04-21-attendance-matters-a-family-support-sess"
   },
   {
    "start": "2027-04-26",
@@ -933,7 +1047,8 @@
    "title": "Multicultural Week Begins",
    "time": "",
    "where": "",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-26-multicultural-week-begins"
   },
   {
    "start": "2027-04-28",
@@ -941,7 +1056,8 @@
    "title": "Multicultural Lunch Market",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-28-multicultural-lunch-market"
   },
   {
    "start": "2027-04-28",
@@ -949,7 +1065,8 @@
    "title": "Theatre - Spring Production (Student Performance)",
    "time": "8 am - 1 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-04-28-theatre-spring-production-student-perfor"
   },
   {
    "start": "2027-04-29",
@@ -957,7 +1074,8 @@
    "title": "Multicultural Night Rally",
    "time": "7 - 8 pm",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-29-multicultural-night-rally"
   },
   {
    "start": "2027-04-30",
@@ -965,7 +1083,8 @@
    "title": "Multicultural School Day Rally",
    "time": "Tutorial",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-04-30-multicultural-school-day-rally"
   },
   {
    "start": "2027-04-30",
@@ -973,7 +1092,8 @@
    "title": "Theatre - Spring Production",
    "time": "7 - 10 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-04-30-theatre-spring-production"
   },
   {
    "start": "2027-05-01",
@@ -981,7 +1101,8 @@
    "title": "Theatre - Spring Production",
    "time": "7 - 10 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-01-theatre-spring-production"
   },
   {
    "start": "2027-05-03",
@@ -989,7 +1110,8 @@
    "title": "AP Testing",
    "time": "",
    "where": "Various",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-05-03-ap-testing"
   },
   {
    "start": "2027-05-08",
@@ -997,7 +1119,8 @@
    "title": "Dance Team Showcase",
    "time": "7 - 9 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-08-dance-team-showcase"
   },
   {
    "start": "2027-05-10",
@@ -1005,7 +1128,8 @@
    "title": "AP Testing",
    "time": "",
    "where": "Various",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-05-10-ap-testing"
   },
   {
    "start": "2027-05-12",
@@ -1013,7 +1137,8 @@
    "title": "Art Expo",
    "time": "3 - 7 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-12-art-expo"
   },
   {
    "start": "2027-05-12",
@@ -1021,7 +1146,8 @@
    "title": "ELAC Meeting",
    "time": "5:30 - 7 pm",
    "where": "Staff Lounge",
-   "cat": "family"
+   "cat": "family",
+   "id": "w-2027-05-12-elac-meeting"
   },
   {
    "start": "2027-05-14",
@@ -1029,7 +1155,8 @@
    "title": "Film Festival",
    "time": "6 - 9 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-14-film-festival"
   },
   {
    "start": "2027-05-17",
@@ -1037,7 +1164,8 @@
    "title": "AP Late Testing",
    "time": "",
    "where": "Various",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-05-17-ap-late-testing"
   },
   {
    "start": "2027-05-17",
@@ -1045,7 +1173,8 @@
    "title": "Fashion Show Dress Rehearsal",
    "time": "4 - 9 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-17-fashion-show-dress-rehearsal"
   },
   {
    "start": "2027-05-19",
@@ -1053,7 +1182,8 @@
    "title": "Pops Music Concert",
    "time": "7 - 9:30 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-19-pops-music-concert"
   },
   {
    "start": "2027-05-19",
@@ -1061,7 +1191,8 @@
    "title": "Yearbook Distribution",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-19-yearbook-distribution"
   },
   {
    "start": "2027-05-20",
@@ -1069,7 +1200,8 @@
    "title": "Yearbook Distribution",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-20-yearbook-distribution"
   },
   {
    "start": "2027-05-21",
@@ -1077,7 +1209,8 @@
    "title": "Ambassador Program End of Year Awards & Celebration",
    "time": "Lunch",
    "where": "Science Lecture Hall",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-21-ambassador-program-end-of-year-awards-ce"
   },
   {
    "start": "2027-05-21",
@@ -1085,7 +1218,8 @@
    "title": "Fashion Show",
    "time": "7 - 9 pm",
    "where": "Theater",
-   "cat": "arts"
+   "cat": "arts",
+   "id": "w-2027-05-21-fashion-show"
   },
   {
    "start": "2027-05-21",
@@ -1093,7 +1227,8 @@
    "title": "Yearbook Distribution",
    "time": "Lunch",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-21-yearbook-distribution"
   },
   {
    "start": "2027-05-22",
@@ -1101,7 +1236,8 @@
    "title": "Prom",
    "time": "7 - 11 pm",
    "where": "Glass House",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-05-22-prom"
   },
   {
    "start": "2027-05-26",
@@ -1109,7 +1245,8 @@
    "title": "Awards Night",
    "time": "4:30 - 8 pm",
    "where": "Quad",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-26-awards-night"
   },
   {
    "start": "2027-05-28",
@@ -1117,7 +1254,8 @@
    "title": "Chicano Commencement",
    "time": "5:30 - 9 pm",
    "where": "Theater",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-05-28-chicano-commencement"
   },
   {
    "start": "2027-05-28",
@@ -1125,7 +1263,8 @@
    "title": "Goodbye Rally",
    "time": "Special Schedule",
    "where": "Main Gym",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-05-28-goodbye-rally"
   },
   {
    "start": "2027-05-31",
@@ -1133,7 +1272,8 @@
    "title": "Memorial Day - No School",
    "time": "",
    "where": "",
-   "cat": "off"
+   "cat": "off",
+   "id": "w-2027-05-31-memorial-day-no-school"
   },
   {
    "start": "2027-06-01",
@@ -1141,7 +1281,8 @@
    "title": "Finals Week: Periods 1-7",
    "time": "Periods 1-7",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-06-01-finals-week-periods-1-7"
   },
   {
    "start": "2027-06-01",
@@ -1149,7 +1290,8 @@
    "title": "Senior Breakfast & Check-Out / Gown Pickup",
    "time": "9 am - 1 pm",
    "where": "Cafeteria / ASB Office",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-06-01-senior-breakfast-check-out-gown-pickup"
   },
   {
    "start": "2027-06-01",
@@ -1157,7 +1299,8 @@
    "title": "Seniors' Last Day",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2027-06-01-seniors-last-day"
   },
   {
    "start": "2027-06-02",
@@ -1165,7 +1308,8 @@
    "title": "Final Exams: Periods 1, 2, 7",
    "time": "Periods 1, 2, 7",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-06-02-final-exams-periods-1-2-7"
   },
   {
    "start": "2027-06-02",
@@ -1173,7 +1317,8 @@
    "title": "Graduation Practice",
    "time": "8:30 am",
    "where": "Main Gym / Stadium Field",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-06-02-graduation-practice"
   },
   {
    "start": "2027-06-03",
@@ -1181,7 +1326,8 @@
    "title": "Final Exams: Periods 3, 4",
    "time": "Periods 3, 4",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-06-03-final-exams-periods-3-4"
   },
   {
    "start": "2027-06-03",
@@ -1189,7 +1335,8 @@
    "title": "Graduation Practice",
    "time": "8:30 am",
    "where": "Main Gym / Stadium Field",
-   "cat": "school"
+   "cat": "school",
+   "id": "w-2027-06-03-graduation-practice"
   },
   {
    "start": "2027-06-04",
@@ -1197,7 +1344,8 @@
    "title": "End of Semester 2",
    "time": "",
    "where": "",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2027-06-04-end-of-semester-2"
   },
   {
    "start": "2027-06-04",
@@ -1205,7 +1353,8 @@
    "title": "Final Exams: Periods 5, 6",
    "time": "Periods 5, 6",
    "where": "",
-   "cat": "tests"
+   "cat": "tests",
+   "id": "w-2027-06-04-final-exams-periods-5-6"
   },
   {
    "start": "2027-06-04",
@@ -1213,7 +1362,8 @@
    "title": "Graduation",
    "time": "6:15 - 7:15 pm",
    "where": "Stadium Field",
-   "cat": "milestone"
+   "cat": "milestone",
+   "id": "w-2027-06-04-graduation"
   },
   {
    "start": "2027-06-05",
@@ -1221,7 +1371,8 @@
    "title": "Senior Send-Off",
    "time": "7pm - 12am",
    "where": "Quad",
-   "cat": "spirit"
+   "cat": "spirit",
+   "id": "w-2027-06-05-senior-send-off"
   }
  ]
 }

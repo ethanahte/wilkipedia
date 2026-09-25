@@ -1054,7 +1054,9 @@ def build_calendar():
     and a .ics file for adding it all to a phone or Google Calendar."""
     from datetime import date, timedelta
     cal = json.loads((DATA / "calendar.json").read_text())
-    labels, events = cal["labels"], cal["events"]
+    extra = json.loads((DATA / "calendar-extra.json").read_text())      # other groups' own calendars
+    labels, sources = cal["labels"], extra["sources"]
+    events = sorted(cal["events"] + extra["events"], key=lambda ev: (ev["start"], ev["cat"] != "off"))
     months, cur = [], None
     for ev in events:
         d0 = date.fromisoformat(ev["start"])
@@ -1064,17 +1066,19 @@ def build_calendar():
             cur = key
         d1 = date.fromisoformat(ev["end"])
         when = d0.strftime("%a %b ") + str(d0.day) + (f" – {d1.strftime('%a %b ')}{d1.day}" if d1 != d0 else "")
-        extra = " · ".join(x for x in (ev["time"], ev["where"]) if x)
+        detail = " · ".join(x for x in (ev["time"], ev["where"]) if x)
+        src = sources.get(ev.get("src", ""))
+        badge = f' <span class="cal-src-tag">{e(src["label"])}</span>' if src else ""
         months[-1][1].append(f'<li class="cal-row c-{e(ev["cat"])}"><span class="cal-when">{e(when)}</span>'
-                             f'<span class="cal-what">{e(ev["title"])}{f"<small>{e(extra)}</small>" if extra else ""}</span></li>')
+                             f'<span class="cal-what">{e(ev["title"])}{badge}{f"<small>{e(detail)}</small>" if detail else ""}</span></li>')
     listing = "".join(f'<section class="cal-month-list"><h2>{e(m)}</h2><ul class="cal-rows">{"".join(rows)}</ul></section>'
                       for m, rows in months)
     ics_name = "wilcox-" + cal["year"].replace("–", "-") + ".ics"
     page("calendar/", "Calendar", f"""
 <h1>Calendar</h1>
 <p class="lede">Important dates for the {e(cal["year"])} school year: breaks and no-school days, finals and testing, rallies, dances, shows and family nights.</p>
-<p class="cal-src meta">From Wilcox’s <a href="{e(cal["source"])}" target="_blank" rel="noopener">official activities calendar</a>, linked from the <a href="{e(cal["sourcePage"])}" target="_blank" rel="noopener">bell schedule page</a>. Dates can change: the school’s calendar is the final word.
-  <a class="btn ghost small" href="{ics_name}" download>Add to my calendar (.ics)</a></p>
+<p class="cal-src meta">From Wilcox’s <a href="{e(cal["source"])}" target="_blank" rel="noopener">official activities calendar</a>, linked from the <a href="{e(cal["sourcePage"])}" target="_blank" rel="noopener">bell schedule page</a>. Events tagged with a group (like “Class of 2027”) are from that group’s own posts. Dates can change: the school’s calendar is the final word.
+  <a class="btn ghost small cal-ics" href="{ics_name}" download="{ics_name}">Add to my calendar (.ics)</a></p>
 <div id="cal-app" class="cal-app"></div>
 <div id="cal-list">{listing}</div>""", active="calendar/", script="calendar.js", data={"page": "calendar"},
          desc=f"Wilcox High School calendar {cal['year']}: no-school days, breaks, finals, PSAT/SAT/AP testing, rallies, dances, concerts and family nights.")
@@ -1084,10 +1088,11 @@ def build_calendar():
              f"X-WR-CALNAME:Wilcox {cal['year']} (Wilkipedia)"]
     for i, ev in enumerate(events):
         d0 = date.fromisoformat(ev["start"]); d1 = date.fromisoformat(ev["end"]) + timedelta(days=1)
-        note = " · ".join(x for x in (ev["time"], ev["where"], labels.get(ev["cat"], "")) if x)
-        lines += ["BEGIN:VEVENT", f"UID:wilcox-{ev['start']}-{i}@wilcoxwiki.org", f"DTSTAMP:{stamp}",
+        src = sources.get(ev.get("src", ""), {}).get("from", "Wilcox’s official activities calendar")
+        note = " · ".join(x for x in (ev["time"], ev["where"], labels.get(ev["cat"], ""), src) if x)
+        lines += ["BEGIN:VEVENT", f"UID:{ev['id']}@wilcoxwiki.org", f"DTSTAMP:{stamp}",
                   f"DTSTART;VALUE=DATE:{d0.strftime('%Y%m%d')}", f"DTEND;VALUE=DATE:{d1.strftime('%Y%m%d')}",
-                  f"SUMMARY:{ics_text(ev['title'])}", f"DESCRIPTION:{ics_text(note + ' (from Wilcox’s official activities calendar)')}",
+                  f"SUMMARY:{ics_text(ev['title'])}", f"DESCRIPTION:{ics_text(note)}",
                   "END:VEVENT"]
     lines.append("END:VCALENDAR")
     (ROOT / "calendar" / ics_name).write_text("\r\n".join(lines) + "\r\n")

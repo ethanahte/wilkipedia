@@ -1,0 +1,163 @@
+{
+ "_about": "Calendars from other Wilcox groups, kept by hand. Each event names its source; only add what the group itself posted. Events that repeat the official calendar (e.g. Skit Night, Float Night, the parade) are left out.",
+ "sources": {
+  "c2027": {
+   "label": "Class of 2027",
+   "from": "@wilcox_2027 on Instagram: HOCO schedule 2026",
+   "url": "https://www.instagram.com/wilcox_2027/",
+   "note": "The class posts updates on its Instagram stories."
+  }
+ },
+ "events": [
+  {
+   "id": "c27-2026-09-26-dance-practice",
+   "start": "2026-09-26",
+   "end": "2026-09-26",
+   "title": "Dance practice",
+   "time": "11:30 am – 2:30 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-09-26-float-banner",
+   "start": "2026-09-26",
+   "end": "2026-09-26",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-09-27-dance-practice",
+   "start": "2026-09-27",
+   "end": "2026-09-27",
+   "title": "Dance practice",
+   "time": "11:30 am – 2:30 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-09-27-float-banner",
+   "start": "2026-09-27",
+   "end": "2026-09-27",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-09-30-float-banner",
+   "start": "2026-09-30",
+   "end": "2026-09-30",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-01-float-banner",
+   "start": "2026-10-01",
+   "end": "2026-10-01",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-02-float-banner",
+   "start": "2026-10-02",
+   "end": "2026-10-02",
+   "title": "Float + banner",
+   "time": "3 – 10 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-03-float-banner",
+   "start": "2026-10-03",
+   "end": "2026-10-03",
+   "title": "Float + banner",
+   "time": "11 am – 5:30 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-03-gym-time",
+   "start": "2026-10-03",
+   "end": "2026-10-03",
+   "title": "Gym time",
+   "time": "6 – 8:30 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-04-float-banner",
+   "start": "2026-10-04",
+   "end": "2026-10-04",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-05-prom-king-queen-voting",
+   "start": "2026-10-05",
+   "end": "2026-10-05",
+   "title": "Prom king & queen voting",
+   "time": "",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-05-float-banner",
+   "start": "2026-10-05",
+   "end": "2026-10-05",
+   "title": "Float + banner",
+   "time": "3 – 8 pm",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-06-sister-class-yells",
+   "start": "2026-10-06",
+   "end": "2026-10-06",
+   "title": "Sister class yells",
+   "time": "",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-06-float-banner",
+   "start": "2026-10-06",
+   "end": "2026-10-06",
+   "title": "Float + banner",
+   "time": "3 pm – TBD",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  },
+  {
+   "id": "c27-2026-10-07-class-yells",
+   "start": "2026-10-07",
+   "end": "2026-10-07",
+   "title": "Class yells",
+   "time": "",
+   "where": "",
+   "cat": "spirit",
+   "src": "c2027"
+  }
+ ]
+}
