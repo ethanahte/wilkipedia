@@ -37,7 +37,7 @@ SITE_URL = "https://wilcoxwiki.org"
 CATALOG_SOURCE = "SCUSD High School Course Catalog 2025–2026"
 DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
-GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review",
+GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "map",
                   "menu", "clubs", "sports", "feedback", "credits", "bell"]
 
@@ -103,7 +103,7 @@ def load():
 # The header shows two ways in (the map and the class list); everything else
 # lives in the "More" menu. The bounty board is not here: it is a side tab that
 # only signed-in members see (see initHeader in assets/js/ui.js).
-NAV = [("map/", "Map"), ("subjects/", "Classes")]
+NAV = [("map/", "Map"), ("subjects/", "Classes"), ("guides/", "Study guides")]
 _I = lambda d: f'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
 ICONS = {
     "menu": _I('<path d="M4 7h16M4 12h16M4 17h16"/>'),
@@ -755,6 +755,24 @@ def build_static():
 <div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
+    page("guides/", "Study guides", f"""
+<h1>Study guides</h1>
+<p class="lede">Every study guide students have shared, as a graph. Guides that cover the same topics are linked, each one hangs off its class, and classes connect along their prerequisites.</p>
+<div class="gv" translate="no">
+  <div class="gv-bar">
+    <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>
+    <span class="gv-count" id="gv-count"></span>
+    <button type="button" class="gv-gear" id="gv-gear" aria-expanded="false" aria-label="Graph settings" title="Graph settings">{ICONS["settings"]}</button>
+  </div>
+  <div id="gv-chart" class="gv-chart" role="img" aria-label="Graph of study guides and classes. The list below has every guide."></div>
+  <div class="gv-panel" id="gv-panel" hidden></div>
+  <aside class="gv-info" id="gv-info" hidden></aside>
+  <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
+</div>
+<section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
+  <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",
+         desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
+
     page("settings/", "Settings", """
 <h1>Settings</h1>
 <p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
@@ -809,6 +827,7 @@ def build_data(depts, courses, teachers):
 # Pages the search box should find, with the words people use for them.
 SEARCH_PAGES = [
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
+    ("Study guides", "guides/", "Every shared study guide, as a graph", "study guides guide notes resources graph obsidian review"),
     ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion"),
     ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),
     ("Cafeteria menu", "menu/", "Breakfast and lunch this week", "menu lunch breakfast food cafeteria eat today meal"),

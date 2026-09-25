@@ -92,6 +92,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     clicked class name `class-title` in `pageswap` so it glides into the class
     page's h1. The theme circle reveal is scoped to `html.theme-vt`.
   - One signature moment only (the map). Don't add competing spectacle.
+- **Study guides graph** (`guides/`, `guides.js`): Obsidian-style graph view
+  built from the lieflat-charts B2 "Force Graph, Dense" template (ECharts 5.5.1
+  from jsdelivr, loaded only on that page; the list below it is the fallback).
+  Links: guide→class hub, guide↔guide by shared title/note keywords (STOP list
+  filters study filler; "unit/ch N" only links inside one class), class↔class
+  by pathways.json prerequisites. ECharts links by `name`, so node name = id.
 - **Announcement bar** (`#announce` under the header on every page,
   `paintAnnouncements` in ui.js): admins post on Review → Announcements;
   everyone reads live ones (active, not past `ends_on`), migration 010.
