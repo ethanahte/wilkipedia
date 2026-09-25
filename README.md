@@ -114,6 +114,10 @@ supabase/seed.sql      GENERATED starting bounties
 tools/build.py         the site generator (Python standard library only)
 tools/parse_catalog.py rebuilds data/catalog.json from next year's catalog PDF
 docs/                  the team handbook
+campus/                the 3D campus (three.js app, hand-written; only index.html is generated)
+  js/layout.js         where everything is, in metres (edit this to fix a building)
+  js/main.js           boot, render loop, ?room= and window.WilcoxCampus hooks
+  vendor/              three.js r169
 ```
 
 ## Security, briefly

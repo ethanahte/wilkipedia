@@ -105,6 +105,37 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   Links: guide→class hub, guide↔guide by shared title/note keywords (STOP list
   filters study filler; "unit/ch N" only links inside one class), class↔class
   by pathways.json prerequisites. ECharts links by `name`, so node name = id.
+- **3D campus** (`campus/`): a walkable, toon-shaded (三渲二) three.js model of
+  the whole school. Its own app, NOT generated: `campus/js/*.js`,
+  `campus/campus.css`, three.js r169 vendored at `campus/vendor/`. build.py only
+  writes `campus/index.html` (import map with `?v=` hashes), so `campus/` is not
+  in GENERATED_DIRS. No npm/Vite (no node here); plain ES modules.
+  - **All geometry comes from `campus/js/layout.js`**: metres, origin at the
+    cedar's trunk, +x east, +z south. Measured off the Apple Maps satellite
+    view (0.4675 m/px) and matched to the official campus map. Fix a building by
+    fixing its numbers there; walls, colliders, the minimap and room plates follow.
+  - **Rooms come from `data/map.json`** (the same data as the Map page), carried
+    into 3D through per-building map→world boxes (`ROOM_XFORM`, `P_XFORM`,
+    `PLACES`), because the official map isn't to scale. Never type rooms into
+    the campus code. `?room=B107` lands at a room's plate; plates link to
+    `map/#ID`; `window.WilcoxCampus.onRoomSelect` overrides the default card.
+  - **Never invent what something looks like.** Every facade kit and landmark is
+    from a photo the owner sent (listed in the file headers). Ask for a photo
+    before adding a building's detail, interior, or a logo placement.
+  - Look: MeshToonMaterial (far side of the ramp = 0, so form and cast shadows
+    match), a one-pass G-buffer (every material is patched by `gbuffer()` in
+    toon.js to write normal+depth to a second target) and `post.js` for ink
+    outlines, bloom, grade, vignette, paper grain. Any new material must go
+    through `gbuffer()` or the ink pass reads garbage there.
+  - Static geometry is written into per-material, per-80 m-chunk buckets
+    (`geo.js` World) and merged: ~235 draw calls for the whole campus.
+  - Quality High/Medium/Low (localStorage `wilcox-campus-quality`); an automatic
+    step-down for slow frames is never saved as the user's choice.
+  - Testing: the Browser pane is often hidden (rAF stalls, screenshots go
+    stale). `window.__campus.frame(dt)` renders one frame on demand; a boot
+    that sees a 0×0 window must still size the camera (onResize guards it).
+  - Phases: 1 = quad, front, landmarks, whole-campus massing (done). Next: B
+    interiors (both floors, stairs), R, gyms/pool/stadium detail, west side.
 - **Announcement bar** (`#announce` under the header on every page,
   `paintAnnouncements` in ui.js): admins post on Review → Announcements;
   everyone reads live ones (active, not past `ends_on`), migration 010.

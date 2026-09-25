@@ -124,13 +124,15 @@ ICONS = {
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "settings": _I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
     "chart": _I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+    "cube": _I('<path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
     "external": _I('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
     "bounty": '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>',
 }
 # The "More" panel: grouped columns, each link with an icon and a short line
 MORE_GROUPS = [
-    ("School day", [("numbers/", "By the numbers", "chart", "Classes, clubs and the semester in charts"),
+    ("School day", [("campus/", "3D campus", "cube", "Walk the whole school, drawn like an anime"),
+                    ("numbers/", "By the numbers", "chart", "Classes, clubs and the semester in charts"),
                     ("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
                     ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
                     ("school/", "School info", "school", "Counselors, passes, tech"),
@@ -669,7 +671,7 @@ def build_static():
 
     page("map/", "Campus map", """
 <h1>Campus map</h1>
-<p class="lede">Tap a room to zoom in and see who teaches there, what they teach and when.</p>
+<p class="lede">Tap a room to zoom in and see who teaches there, what they teach and when. Or <a href="../campus/">walk the campus in 3D →</a></p>
 <div class="map-app" id="map-app">
   <div class="map-toolbar">
     <form id="room-find" class="room-find" role="search"><input id="room-q" list="room-ids" placeholder="Find a room, e.g. B204" aria-label="Find a room" autocomplete="off"><datalist id="room-ids"></datalist></form>
@@ -877,6 +879,7 @@ def build_data(depts, courses, teachers):
 # Pages the search box should find, with the words people use for them.
 SEARCH_PAGES = [
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
+    ("3D campus", "campus/", "Walk the school in 3D", "3d campus walk tour virtual quad cedar building gym stadium three.js anime"),
     ("By the numbers", "numbers/", "Wilcox in charts", "numbers charts graphs stats a-g ucsc requirements clubs meeting day grade classes semester calendar"),
     ("Study guides", "guides/", "Every shared study guide, as a graph", "study guides guide notes resources graph obsidian review"),
     ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion"),
@@ -942,11 +945,108 @@ def build_seo(courses, teachers, depts):
             (ROOT / f).unlink(missing_ok=True)
         return
     base = SITE_URL.rstrip("/")
-    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/"]
+    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "map/", "campus/"]
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")
     (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /review/\nDisallow: /account/\nDisallow: /submit/\nSitemap: {base}/sitemap.xml\n")
+
+
+CAMPUS = ROOT / "campus"
+
+
+def build_campus():
+    """campus/ is a hand-written three.js app (campus/js, campus/vendor). Only its
+    index.html is generated, so every module URL carries ?v=<hash> like the rest
+    of the site and a deploy never mixes old and new files."""
+    if not (CAMPUS / "js" / "main.js").exists():
+        return
+    mods = {f"./js/{f.name}": f"./js/{f.name}?v={_version(f)}" for f in sorted((CAMPUS / "js").glob("*.js"))}
+    mods["three"] = f"./vendor/three.module.min.js?v={_version(CAMPUS / 'vendor' / 'three.module.min.js')}"
+    css = _version(CAMPUS / "campus.css")
+    canon = f'<link rel="canonical" href="{e(SITE_URL.rstrip("/") + "/campus/")}">' if SITE_URL else ""
+    (CAMPUS / "index.html").write_text("""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wilcox campus in 3D · Wilkipedia</title>
+<meta name="description" content="Walk around Wilcox High School in 3D, drawn like an anime: the quad and its cedar, Building B, Building R, the gyms, the stadium. Every room links to its Wilkipedia page.">
+<meta property="og:title" content="Wilcox campus in 3D · Wilkipedia">
+<meta property="og:site_name" content="Wilkipedia">
+""" + canon + """
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="campus.css?v=""" + css + """">
+<script type="importmap">""" + json.dumps({"imports": mods}) + """</script>
+</head>
+<body data-root="../" data-mode="walk">
+<canvas id="view" tabindex="0" aria-label="3D view of the Wilcox campus"></canvas>
+
+<div id="loader" role="status">
+  <div class="load-in">
+    <p class="kicker">WILKIPEDIA · 3D CAMPUS</p>
+    <h1>Wilcox, drawn by hand</h1>
+    <p>The whole school to walk around: the quad and its cedar, Building B, Building R, the gyms and the stadium. Every room on the official map is labelled.</p>
+    <div class="track"><div id="load-bar"></div></div>
+    <div id="load-msg">Starting…</div>
+  </div>
+</div>
+
+<header class="bar">
+  <a class="back" href="../" aria-label="Back to Wilkipedia">←<span class="long">&nbsp;Wilkipedia</span></a>
+  <div class="title"><span class="w">W</span>Wilcox campus</div>
+  <div class="tools">
+    <button type="button" id="btn-fly" aria-pressed="false"><span>Fly up</span></button>
+    <button type="button" id="btn-map"><span>Map</span> <kbd>M</kbd></button>
+    <button type="button" id="btn-quality" aria-haspopup="true"><span>High</span></button>
+    <button type="button" id="btn-help" aria-label="Controls">?</button>
+    <div id="qmenu" hidden>
+      <button type="button" data-q="high">High<small>Ink outlines, soft shadows, bloom</small></button>
+      <button type="button" data-q="medium">Medium<small>Ink outlines and shadows</small></button>
+      <button type="button" data-q="low">Low<small>No outlines or shadows: for older phones</small></button>
+    </div>
+  </div>
+</header>
+
+<div id="minimap" title="Open the map (M)"><canvas></canvas><span class="n">N</span></div>
+<div id="crosshair"></div>
+<div id="start">Click to look around · <b>WASD</b> to walk · <b>F</b> to fly up · <b>M</b> for the map</div>
+<div id="tip" hidden></div>
+<div id="toast" role="status"></div>
+<aside id="room-card" hidden aria-live="polite"></aside>
+
+<div id="bigmap" hidden>
+  <div class="sheet">
+    <button type="button" class="x" aria-label="Close">×</button>
+    <h2>Campus map</h2>
+    <p class="meta">Click anywhere to go there, or type a room number.</p>
+    <form id="room-form"><input id="room-q" placeholder="Room, e.g. B107" aria-label="Room number" autocomplete="off"><button>Go</button></form>
+    <canvas></canvas>
+  </div>
+</div>
+
+<div id="help" hidden>
+  <div class="sheet">
+    <button type="button" class="x" aria-label="Close">×</button>
+    <h2>Getting around</h2>
+    <dl>
+      <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Walk (arrow keys work too). Hold <kbd>Shift</kbd> to run.</dd>
+      <dt>Mouse</dt><dd>Click the view, then move the mouse to look. <kbd>Esc</kbd> gives the cursor back.</dd>
+      <dt><kbd>F</kbd></dt><dd>Fly up for the aerial view, and back down. Up there: drag to turn, right-drag to slide, scroll to zoom, double-click the ground to land.</dd>
+      <dt><kbd>M</kbd></dt><dd>The map: click anywhere to jump there, or type a room number.</dd>
+      <dt>Room plates</dt><dd>Point at a room number on a wall and click (or press <kbd>E</kbd>) to open that room on Wilkipedia.</dd>
+      <dt>On a phone</dt><dd>Left thumb walks, right thumb looks. Double-tap the ground from the air to land.</dd>
+    </dl>
+    <p class="meta">Built from the official campus map and satellite measurements. Room interiors come building by building.</p>
+  </div>
+</div>
+
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;background:#faf8f2;font:18px Georgia,serif;margin:0">The 3D campus needs JavaScript. The <a href="../map/">campus map</a> works without it.</p></noscript>
+<script type="module" src=\"""" + mods["./js/main.js"] + """\"></script>
+</body>
+</html>
+""")
 
 
 def main():
@@ -961,6 +1061,7 @@ def main():
     build_teachers(teachers, courses)
     build_static()
     build_seo(courses, teachers, depts)
+    build_campus()
     linked = sum(1 for c in courses.values() if c["teachers"])
     print(f"Built {len(courses)} course pages ({linked} with teachers), {len(teachers)} teacher pages, {len(depts)} subjects.")
 
