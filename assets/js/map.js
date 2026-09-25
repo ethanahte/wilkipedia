@@ -2,8 +2,10 @@
 // flies in to frame it on the left while a panel slides in on the right with
 // who teaches there, what, and when. Esc, ✕ or "Whole campus" flies back out.
 //
-// The camera IS the SVG viewBox, so the room outlines stay crisp at any zoom.
-// Room boxes come from data/map.json (traced off the school's campus map);
+// The camera IS the SVG viewBox, and the plan itself is vector (walls, fills,
+// icons and words from data/map-plan.json, traced off the school's campus map
+// by tools/trace_map.py), so everything stays crisp at any zoom.
+// Room boxes come from data/map.json (traced off the same map);
 // `mode` is always 'plan' now (an aerial photo view was tried and removed).
 // room contents come from approved teacher sections whose "room" field matches.
 
@@ -12,13 +14,15 @@ import { todaysLunch, sortedCats, itemHtml } from './menu.js';
 
 const s = await initHeader();
 const svg = $('#map-svg');
-const img = $('#map-img');
+const planEl = $('#plan');
+const labelsEl = $('#map-labels');
 const spots = $('#hotspots');
 const stage = $('#map-stage');
 const panel = $('#map-panel');
 
-const [map, data, index] = await Promise.all([
+const [map, plan, data, index] = await Promise.all([
   fetch(dataUrl('data/map.json')).then((r) => r.json()),
+  fetch(dataUrl('data/map-plan.json')).then((r) => r.json()),
   courses(),
   fetch(dataUrl('data/search.json')).then((r) => r.json()),
 ]);
@@ -106,6 +110,59 @@ function frame(box, zoom = 3.2) {
 }
 
 // ── drawing ──
+// The plan: building fills, the creek, thin room walls, thick outside walls,
+// then the official map's symbols and words. Room names come from map.json.
+const SYMBOLS = `<defs>
+  <pattern id="mp-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" class="mp-dot"/></pattern>
+  <symbol id="mp-restroom" viewBox="-12 -12 24 24"><rect x="-11" y="-11" width="22" height="22" rx="5" style="fill:var(--gold)"/>
+    <g style="fill:#111;stroke:#111;stroke-width:1.3;stroke-linecap:round"><circle cx="-4.6" cy="-6" r="1.9"/><path d="M-4.6 -3.2l3 7.2h-6z"/>
+    <path d="M-5.9 4v4M-3.3 4v4"/><circle cx="4.6" cy="-6" r="1.9"/><path d="M2.7 -3.2h3.8v6.4h-3.8zM3.6 3.2v4.8M5.6 3.2v4.8"/></g>
+    <path d="M0 -8v16" style="stroke:rgba(0,0,0,.35);stroke-width:.8"/></symbol>
+  <symbol id="mp-stairs" viewBox="-12 -12 24 24"><path d="M-9 8h5v-5h5v-5h5v-5h4" style="fill:none;stroke:var(--mp-thick);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"/></symbol>
+  <symbol id="mp-elevator" viewBox="-12 -12 24 24"><rect x="-8" y="-9" width="16" height="18" rx="2.5" style="fill:none;stroke:var(--mp-thick);stroke-width:1.8"/>
+    <path d="M-2.5 -1.5l2.5-3.5 2.5 3.5zM-2.5 1.5l2.5 3.5 2.5-3.5z" style="fill:var(--mp-thick)"/></symbol>
+</defs>`;   // (inline styles: page CSS doesn't reach inside <use> copies, but custom properties do)
+function drawPlan() {
+  const icon = (id, list, size) => list.map(([x, y]) => `<use href="#mp-${id}" x="${x - size / 2}" y="${y - size / 2}" width="${size}" height="${size}"/>`).join('');
+  planEl.innerHTML = `${SYMBOLS}
+    <rect x="-2000" y="-2000" width="${dims.width + 4000}" height="${dims.height + 4000}" fill="url(#mp-dots)"/>
+    <path class="mp-water" d="${plan.water}"/>
+    <path class="mp-fill" d="${plan.fill}"/>
+    <path class="mp-thin" d="${plan.thin}"/>
+    <path class="mp-thick" d="${plan.thick}"/>
+    <path class="mp-slant" d="${plan.slants}"/>
+    ${icon('restroom', plan.icons.restroom, 15)}${icon('stairs', plan.icons.stairs, 15)}${icon('elevator', plan.icons.elevator, 13)}
+    <g class="mp-north" transform="translate(235 112)"><path d="M0 -44L9 18L0 10L-9 18Z"/><text y="-54">N</text></g>`;
+  // words the official map prints outside any room box
+  const inRoom = (x, y) => map.rooms.some((r) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h);
+  const words = plan.labels.filter((l) => !inRoom(l.x, l.y)).map((l) => l.s === 'creek'
+    ? `<text class="pl pl-creek" transform="translate(${l.x} ${l.y}) rotate(-90)">${esc(l.t)}</text>`
+    : `<text class="pl pl-${l.s}" x="${l.x}" y="${l.y}">${esc(l.t)}</text>`).join('');
+  labelsEl.innerHTML = words + map.rooms.map(roomLabel).join('');
+}
+// A room's name, sized to its box; tall narrow boxes read sideways, like the official map.
+function roomLabel(r) {
+  const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+  const t = r.kind === 'building' ? r.label.replace(/^Classroom /, '') : r.label;
+  const big = r.kind === 'place' || r.kind === 'building';
+  const side = r.kind === 'classroom' && r.h > r.w * 1.5 && r.w < 34;
+  const [len, room] = side ? [r.h, r.w] : [r.w, r.h];
+  const words = t.split(' ');
+  // one line if it fits, else two (split at the middle word)
+  const one = Math.min(big ? 13 : 10.5, (len - 5) / (t.length * 0.58), room * 0.46);
+  let lines = [t], fs = one;
+  if (words.length > 1 && one < (big ? 9 : 7)) {
+    const k = Math.ceil(words.length / 2);
+    const two = [words.slice(0, k).join(' '), words.slice(k).join(' ')];
+    const f2 = Math.min(big ? 13 : 10.5, (len - 5) / (Math.max(...two.map((x) => x.length)) * 0.58), room * 0.3);
+    if (f2 > one) { lines = two; fs = f2; }
+  }
+  fs = Math.max(4.5, fs);
+  const tr = side ? ` transform="rotate(-90 ${cx} ${cy})"` : '';
+  const y0 = cy - ((lines.length - 1) * fs * 1.1) / 2;
+  return `<text class="rl${big ? ' rl-big' : ''} k-${r.kind}" x="${cx}" y="${y0}" font-size="${fs.toFixed(1)}"${tr}>${lines
+    .map((l, i) => `<tspan x="${cx}" dy="${i ? fs * 1.1 : 0}">${esc(l)}</tspan>`).join('')}</text>`;
+}
 function drawSpots() {
   spots.innerHTML = mode !== 'plan' ? '' : map.rooms.map((r) => {
     const has = !!byRoom[r.id] || !!clubsByRoom[r.id] || r.id === 'CAFETERIA';
@@ -117,10 +174,7 @@ function drawSpots() {
 function setMode(m) {
   mode = m;
   dims = map[m];
-  img.setAttribute('href', root + dims.image);
-  img.setAttribute('width', dims.width);
-  img.setAttribute('height', dims.height);
-  img.setAttribute('class', m);
+  drawPlan();
   $('#map-credit').textContent = dims.credit;
   closePanel(false);
   cam = fitCam();

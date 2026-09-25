@@ -657,7 +657,7 @@ def build_static():
     <div class="zoom"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button><button type="button" id="z-reset">Whole campus</button></div>
   </div>
   <div class="map-stage" id="map-stage">
-    <svg id="map-svg" role="group" aria-label="Wilcox High School campus map"><image id="map-img"/><g id="hotspots"></g></svg>
+    <svg id="map-svg" role="group" aria-label="Wilcox High School campus map"><g id="plan" aria-hidden="true"></g><g id="hotspots"></g><g id="map-labels" aria-hidden="true"></g></svg>
     <aside class="map-panel" id="map-panel" aria-live="polite" hidden></aside>
     <div class="map-hint" id="map-hint">Drag to move · scroll or pinch to zoom · tap a room</div>
   </div>

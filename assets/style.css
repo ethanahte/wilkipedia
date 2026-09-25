@@ -657,10 +657,33 @@ button.panel { font: inherit; text-align: left; cursor: pointer; width: 100%; }
   background: var(--card); color: var(--ink); border-radius: 6px; cursor: pointer; }
 .zoom button:hover { border-color: var(--ink); }
 .map-stage { position: relative; height: min(72vh, 680px); min-height: 420px; border: 1px solid var(--rule);
-  border-radius: 10px; overflow: hidden; background: #ffffff; touch-action: none; }
+  border-radius: 10px; overflow: hidden; background: var(--mp-bg); touch-action: none;
+  --mp-bg: #fbfaf6; --mp-dot: rgba(20, 20, 20, .10); --mp-bldg: #efebe1; --mp-water: #dbe9f1; --mp-water-ink: #5b8aa6;
+  --mp-thin: #a29e94; --mp-thick: #161616; --mp-word: #6f6b62; --mp-room: #262626; }
+/* The plan (vector, from data/map-plan.json): a light architectural drawing */
+#plan .mp-dot { fill: var(--mp-dot); }
+#plan .mp-fill { fill: var(--mp-bldg); }
+#plan .mp-water { fill: var(--mp-water); }
+#plan .mp-thin { fill: none; stroke: var(--mp-thin); stroke-width: 1; }
+#plan .mp-thick { fill: none; stroke: var(--mp-thick); stroke-width: 2.4; stroke-linecap: square; }
+#plan .mp-slant { fill: none; stroke: var(--mp-thick); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#plan .mp-north path { fill: var(--mp-thick); }
+#plan .mp-north text { font: 600 17px var(--serif); fill: var(--mp-thick); text-anchor: middle; }
+#map-labels { pointer-events: none; }
+#map-labels text { text-anchor: middle; dominant-baseline: central; }
+#map-labels .rl { font-family: var(--sans); font-weight: 600; fill: var(--mp-room); letter-spacing: .01em; }
+#map-labels .rl.k-office { font-weight: 500; fill: var(--mp-word); }
+#map-labels .rl-big { font-family: var(--serif); font-weight: 500; letter-spacing: .02em; }
+#map-labels .pl { font-family: var(--sans); fill: var(--mp-word); }
+#map-labels .pl-area { font-size: 9.5px; font-weight: 600; letter-spacing: .16em; }
+#map-labels .pl-small { font-size: 7.5px; font-weight: 600; letter-spacing: .12em; }
+#map-labels .pl-sub { font-size: 8.5px; font-weight: 600; }
+#map-labels .pl-tiny { font-size: 5.6px; }
+#map-labels .pl-creek { font: italic 500 9.5px var(--serif); fill: var(--mp-water-ink); letter-spacing: .04em; }
+#map-labels .pl-title { font: 600 23px var(--serif); fill: var(--mp-thick); text-anchor: start; letter-spacing: .01em; }
+#map-labels .pl-addr { font-size: 7.4px; font-weight: 600; letter-spacing: .14em; text-anchor: start; }
 .map-stage svg { width: 100%; height: 100%; display: block; cursor: grab; user-select: none; -webkit-user-select: none; }
 .map-stage.dragging svg { cursor: grabbing; }
-.map-stage image.aerial { image-rendering: auto; }
 .room { fill: transparent; stroke: transparent; stroke-width: 2; cursor: pointer; transition: fill .15s, stroke .15s;
   vector-effect: non-scaling-stroke; outline: none; }
 .room.has { fill: color-mix(in srgb, var(--gold) 28%, transparent); stroke: color-mix(in srgb, var(--gold) 70%, #000); }
@@ -693,13 +716,13 @@ button.panel { font: inherit; text-align: left; cursor: pointer; width: 100%; }
   .map-panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 48%; transform: translateY(24px); }
   .zoom { margin-left: 0; }
 }
-/* Night mode: the campus map is a black-on-white drawing, so invert it */
-:root[data-theme="dark"] .map-stage { background: #0d0d0d; }
-:root[data-theme="dark"] .map-stage image.plan { filter: invert(1) hue-rotate(180deg) brightness(.92); }
+/* Night mode: the plan swaps to light lines on dark */
+:root[data-theme="dark"] .map-stage { --mp-bg: #0e0e0e; --mp-dot: rgba(255, 255, 255, .07); --mp-bldg: #1c1c1a; --mp-water: #13232b;
+  --mp-water-ink: #7fb0cb; --mp-thin: #57554f; --mp-thick: #ecebe5; --mp-word: #9c9a92; --mp-room: #e6e5df; }
 :root[data-theme="dark"] .room.on, :root[data-theme="dark"] .room:hover { stroke: var(--gold); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .map-stage { background: #0d0d0d; }
-  :root:not([data-theme="light"]) .map-stage image.plan { filter: invert(1) hue-rotate(180deg) brightness(.92); }
+  :root:not([data-theme="light"]) .map-stage { --mp-bg: #0e0e0e; --mp-dot: rgba(255, 255, 255, .07); --mp-bldg: #1c1c1a; --mp-water: #13232b;
+    --mp-water-ink: #7fb0cb; --mp-thin: #57554f; --mp-thick: #ecebe5; --mp-word: #9c9a92; --mp-room: #e6e5df; }
   :root:not([data-theme="light"]) .room.on, :root:not([data-theme="light"]) .room:hover { stroke: var(--gold); }
 }
 

@@ -185,6 +185,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   aerial photo view was tried and removed at Ethan's request.) The camera is the SVG viewBox. A room's
   contents come from approved teacher sections whose `room` matches its id
   (normalised: "room b-204" = B204). Only add rooms that are on the real map.
+  The plan itself is vector, not the PNG: `tools/trace_map.py` (stdlib, has its
+  own PNG decoder) traces the official map into `data/map-plan.json` — walls as
+  straight strokes at their own weight (thick = outside, thin = dividers),
+  building fills = areas the map encloses, the creek as water. Its symbols
+  (restrooms, stairs, elevators), curves and the words outside room boxes are
+  listed in the script at their positions on the official map; room names are
+  drawn from map.json. Styling is CSS (`--mp-*` on `.map-stage`, own dark set).
+  Symbols use inline styles: page CSS doesn't reach inside `<use>` copies.
 - **Colours:** Wilcox black/gold/white. `--gold` is the brand fill and always
   carries black text; `--accent` is gold that reads as text. Never put
   `--gold` text on white.
