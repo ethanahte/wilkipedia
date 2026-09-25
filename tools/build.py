@@ -479,6 +479,7 @@ def build_static():
           <div class="om-row" data-t="motion"><span class="om-k hud-l">Motion</span><span class="om-sw"><i></i></span></div>
           <div class="om-row" data-t="labels"><span class="om-k hud-l">Labels</span><span class="om-sw"><i></i></span></div>
           <div class="om-row" data-t="belt"><span class="om-k hud-l">Completed belt</span><span class="om-sw"><i></i></span></div>
+          <div class="om-row" data-t="photo" hidden><span class="om-k hud-l">Photo sky</span><span class="om-sw"><i></i></span></div>
           <div class="om-sep"></div>
           <div class="om-row om-static"><span class="om-k hud-l">Track links</span>
             <span class="om-seg"><button type="button" data-l="off" title="Draw no lines">Off</button><button type="button" data-l="linked" title="Point at a bounty to see the others in its track">Related</button><button type="button" data-l="all" title="Join every bounty in the same track">All</button></span></div>
@@ -487,6 +488,7 @@ def build_static():
       <button type="button" class="orr-toggle" data-orr="home">⟲ Reset</button>
     </div>
     <div class="orr-hint" id="orr-hint"></div>
+    <div class="orr-credit" hidden>Sky: ESO/S. Brunier</div>
     <div class="orr-tip" hidden></div>
     <aside class="orr-detail" hidden></aside>
   </div>
@@ -735,6 +737,7 @@ def build_static():
   <li>Cafeteria menu: Santa Clara Unified Nutrition Services (live)</li>
   <li>Class colours: Wikipedia, “Adrian C. Wilcox High School”</li>
   <li>Typeface: Newsreader (SIL Open Font License)</li>
+  <li>Orrery sky: Milky Way panorama, <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier ↗</a></li>
 </ul></section>""", data={"page": "credits"}, desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
 
     page("404.html", "Page not found", """

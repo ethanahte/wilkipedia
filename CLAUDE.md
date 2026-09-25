@@ -67,8 +67,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   claimers, belt = completed; admins drag to re-rank). Rank S–D is the existing
   `priority` column (5 = S … 1 = D, `RANKS`/`rankOf` in ui.js). Status is
   open / done (completed) / closed (withdrawn); `closed_at` is stamped by the
-  `on_bounty_status` trigger (migration 009). Left out on purpose: comets, the
-  black hole and the photo sky. Unlike the personal app, bounties here pay
+  `on_bounty_status` trigger (migration 009). Left out on purpose: comets and the
+  black hole. The photo sky (`assets/img/sky.jpg`, ESO/S. Brunier, 3072 px) loads
+  only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
+  Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
   `wilkipedia-theme`, restored by `THEME_BOOT` in <head>), falling back to the

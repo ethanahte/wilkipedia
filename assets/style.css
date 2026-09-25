@@ -457,6 +457,11 @@ details:not(.more)[open] > summary::after { content: ' −'; }
 .orr-hint { position: absolute; left: 16px; bottom: 15px; z-index: 4; max-width: min(460px, 62%); pointer-events: none;
   color: var(--pane-dim); font: .66rem/1.6 var(--mono); letter-spacing: .04em; }
 .orr-wrap.locked .orr-hint { display: none; }
+/* ESO's licence requires this credit to be visible whenever the photo sky shows. Keep it. */
+.orr-credit { position: absolute; right: 16px; bottom: 15px; z-index: 4; pointer-events: none; color: var(--pane-dim);
+  font: .62rem/1 var(--mono); letter-spacing: .08em; }
+.orr-credit[hidden], .om-row[hidden] { display: none; }
+.orr-wrap.locked .orr-credit { right: 356px; }
 .orr-tip { position: absolute; z-index: 5; pointer-events: none; padding: 7px 10px; border-radius: 3px; background: var(--pane);
   border: 1px solid var(--pane-line); color: var(--pane-ink); font: 500 .85rem/1.3 var(--serif); transform: translate(-50%, -150%);
   white-space: nowrap; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
@@ -528,6 +533,7 @@ details:not(.more)[open] > summary::after { content: ' −'; }
   .bc-right { flex-direction: row; align-items: center; gap: 14px; }
   .orr-canvas { height: 62vh; }
   .orr-hint { display: none; }
+  .orr-wrap.locked .orr-credit { right: 16px; bottom: auto; top: 52px; }
   .orr-detail { width: 100%; max-width: 100%; top: auto; height: 62%; border-left: 0; border-top: 1px solid var(--pane-line); }
   .orr-detail[hidden] { transform: translateY(104%); }
   .lrow { flex-wrap: wrap; }

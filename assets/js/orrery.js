@@ -13,11 +13,17 @@
 // the right with the brief and the actions. Admins can also drag a body onto
 // another ring to re-rank it. Always dark, whatever the site theme: it is space.
 //
+// The backdrop is a real photograph: ESO's 360° Milky Way panorama
+// (assets/img/sky.jpg), sampled by view direction and rotated to the galactic
+// pole. ESO require the credit "ESO/S. Brunier" to be visible whenever it is
+// shown, so the Orrery shows it in the lower right. Do not remove it. The image
+// is only fetched once someone opens the Orrery; until it arrives (or if it
+// fails, or Photo sky is off) the drawn sky below stands in.
+//
 // Left out on purpose from the personal app: comets (bounties here don't
-// repeat), the black hole (deleting is an admin decision made in the editor)
-// and the photo sky (a 2 MB image with an attribution requirement).
+// repeat) and the black hole (deleting is an admin decision made in the editor).
 
-import { esc } from './ui.js';
+import { esc, root } from './ui.js';
 
 const ORB = {
   ring: { S: 54, A: 88, B: 146, C: 300, D: 492 },
@@ -83,11 +89,12 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
   const ctx = cv.getContext('2d');
   const detail = wrap.querySelector('.orr-detail');
   const tip = wrap.querySelector('.orr-tip');
+  const credit = wrap.querySelector('.orr-credit');
   detail.innerHTML = DETAIL;
   const q = (sel) => detail.querySelector(sel);
 
   let items = [];
-  let opts = { motion: !matchMedia('(prefers-reduced-motion: reduce)').matches, labels: true, belt: true, lines: 'linked' };
+  let opts = { motion: !matchMedia('(prefers-reduced-motion: reduce)').matches, labels: true, belt: true, photo: true, lines: 'linked' };
   try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
   const saveOpts = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 
@@ -167,6 +174,7 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
     const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
     const N = nrm([0.30, 0.90, 0.31]);
     const U = nrm(cross([0, 1, 0], N)), V = cross(N, U);
+    orr.gal = { N, U, V };                      // the photo is sampled in this frame
     const onBand = (th, beta) => {
       const cb = Math.cos(beta), sb = Math.sin(beta);
       return { x: SKY_R * (cb * Math.cos(th) * U[0] + cb * Math.sin(th) * V[0] + sb * N[0]),
@@ -207,11 +215,51 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
       orr.dust.push(p);
     }
   }
-  const skyKey = () => `${orr.w}|${orr.h}|${cam.yaw}|${cam.pitch}|${cam.dist}|${cam.tx}|${cam.ty}|${cam.tz}|${cam.ox}|${cam.oy}`;
+  // ── the photographic backdrop ──
+  // Work out where the camera looks in galactic coordinates, cut that window out
+  // of the equirectangular panorama, and rotate it by the roll of the galactic
+  // pole on screen. Moves correctly as you fly, with no WebGL.
+  const skyImg = new Image();
+  let skyReady = false;
+  function loadPhoto() {
+    if (skyImg.src) return;
+    skyImg.onload = () => { skyReady = true; orr.bgKey = null; paintMenu(); dirty(); };
+    skyImg.onerror = () => { skyReady = false; };
+    skyImg.src = root + 'assets/img/sky.jpg';
+  }
+  const usePhoto = () => skyReady && opts.photo;
+  function drawWrapped(c, img, sx, sy, ss, dx, dy, ds) {
+    const W = img.width, x = ((sx % W) + W) % W;
+    if (x + ss <= W) { c.drawImage(img, x, sy, ss, ss, dx, dy, ds, ds); return; }
+    const first = W - x, f = first / ss;
+    c.drawImage(img, x, sy, first, ss, dx, dy, ds * f, ds);
+    c.drawImage(img, 0, sy, ss - first, ss, dx + ds * f, dy, ds * (1 - f), ds);
+  }
+  function drawPhoto(c) {
+    const W = skyImg.width, H = skyImg.height;
+    const { N, U, V } = orr.gal, f = CAMB.f, r = CAMB.r, u = CAMB.u;
+    const dot = (a, b) => a[0] * b.x + a[1] * b.y + a[2] * b.z;
+    const beta = Math.asin(clamp(dot(N, f), -1, 1));            // galactic latitude
+    const lam = Math.atan2(dot(V, f), dot(U, f));               // galactic longitude
+    const roll = Math.atan2(dot(N, r), dot(N, u));              // pole's tilt on screen
+    const D = Math.hypot(orr.w, orr.h) * 1.06;                  // covers the rotation
+    const ss = (D / CAMB.focal) * (H / Math.PI);                // isotropic for a 2:1 map
+    const cx = (lam / TAU + 0.5) * W;
+    const cy = clamp((0.5 - beta / Math.PI) * H, ss / 2, H - ss / 2);
+    c.save(); c.translate(orr.w / 2, orr.h / 2); c.rotate(roll);
+    drawWrapped(c, skyImg, cx - ss / 2, cy - ss / 2, ss, -D / 2, -D / 2, D);
+    c.restore();
+    c.fillStyle = 'rgba(4,7,13,.52)';                           // hold it back so bodies and labels read
+    c.fillRect(0, 0, orr.w, orr.h);
+  }
+
+  const skyKey = () => `${orr.w}|${orr.h}|${cam.yaw}|${cam.pitch}|${cam.dist}|${cam.tx}|${cam.ty}|${cam.tz}|${cam.ox}|${cam.oy}|${usePhoto()}`;
   function drawSky() {
     const c = orr.bgc;
     c.setTransform(orr.dpr, 0, 0, orr.dpr, 0, 0);
     c.fillStyle = orr.theme.void; c.fillRect(0, 0, orr.w, orr.h);
+    credit.hidden = !usePhoto();                                // ESO require a visible credit
+    if (usePhoto()) { drawPhoto(c); orr.bgKey = skyKey(); return; }
     const n1 = c.createRadialGradient(orr.w * 0.2, orr.h * 0.16, 0, orr.w * 0.2, orr.h * 0.16, orr.w * 0.72);
     n1.addColorStop(0, 'rgba(38,78,132,.15)'); n1.addColorStop(1, 'rgba(38,78,132,0)');
     c.fillStyle = n1; c.fillRect(0, 0, orr.w, orr.h);
@@ -687,6 +735,7 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
   const menu = wrap.querySelector('.orr-menu'), menuBtn = wrap.querySelector('[data-orr="menu"]');
   function paintMenu() {
     menu.querySelectorAll('.om-row[data-t]').forEach((row) => row.classList.toggle('on', !!opts[row.dataset.t]));
+    menu.querySelector('[data-t="photo"]').hidden = !skyReady;   // no image, no option
     menu.querySelectorAll('[data-l]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.l === opts.lines)));
   }
   const closeMenu = () => { if (!menu.hidden) { menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); return true; } return false; };
@@ -705,6 +754,7 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
     else {
       const row = e.target.closest('.om-row[data-t]'); if (!row) return;
       opts[row.dataset.t] = !opts[row.dataset.t];
+      if (row.dataset.t === 'photo') orr.bgKey = null;
       if (row.dataset.t === 'belt' && !opts.belt && byId(orr.focus)?.status === 'done') focus(null);
     }
     saveOpts(); paintMenu(); dirty();
@@ -731,7 +781,7 @@ export function createOrrery({ wrap, actions, onAction, canDrag, onRerank }) {
       dirty();
     },
     show() {
-      orr.running = true; resize(); paintMenu();
+      orr.running = true; loadPhoto(); resize(); paintMenu();
       if (orr.w) { layout(); draw(); }            // paint now, even before the first animation frame
       dirty(); start();
     },
