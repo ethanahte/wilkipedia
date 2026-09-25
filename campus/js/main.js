@@ -280,11 +280,6 @@ async function boot() {
     else controls.landAt(x, z);
   };
   hud.onRoomSearch = (id) => { if (goToRoom(id)) hud.closeBig(); };
-  hud.bind({
-    onFly: toggleFly, onMap: toggleMap, onQuality: (q) => applyQuality(q),
-    onNight: toggleNight, onRain: toggleRain, onStyle: toggleStyle,
-    onHelp: () => { document.getElementById('help').hidden = false; document.exitPointerLock?.(); },
-  });
 
   // Size everything from the window; a tab that opened in the background can
   // report 0×0 at first, so never divide by zero.
@@ -311,13 +306,16 @@ async function boot() {
     if (controls.mode === 'walk') { controls.setWalk(s[1], s[2], Math.atan2(-(s[3] - s[1]), -(s[4] - s[2])), 0.04); }
     else controls.landAt(s[1], s[2], Math.atan2(-(s[3] - s[1]), -(s[4] - s[2])));
   };
-  document.getElementById('keys').innerHTML = [['WASD', 'Walk'], ['Shift', 'Run'], ['Space', 'Jump'], ['F', 'Fly'],
-    ...SPOTS.map((s, i) => [String(i + 1), s[0]]), ['P', 'Pixel/Diorama'], ['N', 'Day/Night'], ['R', 'Rain'], ['M', 'Map'], ['H', 'Hide UI']]
+  // the key bar: just the essentials (everything else is in View and the ? sheet)
+  document.getElementById('keys').innerHTML = [['WASD', 'Walk'], ['Shift', 'Run'], ['F', 'Fly'], ['M', 'Map'], ['1–6', 'Places'], ['H', 'Hide UI']]
     .map(([k, v]) => `<span><kbd>${k}</kbd>${v}</span>`).join('');
-  document.getElementById('keys').onclick = (e) => {
-    const k = e.target.closest('span')?.querySelector('kbd')?.textContent;
-    if (/^[1-6]$/.test(k || '')) goToSpot(+k - 1);
-  };
+  hud.bind({
+    onFly: toggleFly, onMap: toggleMap, onQuality: (q) => applyQuality(q),
+    onStyle: (s) => api.setStyle(s), onTime: (t) => api.setTime(t), onRain: (on) => api.setRain(on),
+    spots: SPOTS.map((s) => s[0]), onGo: (i) => goToSpot(i),
+    onHelp: () => { document.getElementById('help').hidden = false; document.exitPointerLock?.(); },
+  });
+
   const where = (x, z) => {
     if (x > QUAD.x0 && x < QUAD.x1 && z > QUAD.z0 && z < QUAD.z1) return 'The quad';
     let best = null, bd = 8;   // the nearest building within 8 m

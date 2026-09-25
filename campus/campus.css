@@ -23,7 +23,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1322; col
 #view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; outline: none; }
 
 /* ── top bar ── */
-.bar { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; align-items: center; gap: 10px; pointer-events: none; z-index: 5; }
+.bar { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; align-items: center; gap: 10px; pointer-events: none; z-index: 7; }   /* above hints (3, 6), below the map/help overlays (8) and loader (20) */
 .bar > * { pointer-events: auto; }
 .back, .title, .tools button {
   background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--shadow);
@@ -37,11 +37,26 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1322; col
 .tools button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
 .tools kbd { font: 600 11px var(--sans); color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; }
 .tools button[aria-pressed="true"] kbd { color: #bbb; border-color: #444; }
-#qmenu { position: absolute; top: 46px; right: 50px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--shadow); padding: 6px; display: grid; min-width: 220px; }
-#qmenu button { all: unset; cursor: pointer; padding: 8px 10px; border-radius: 6px; font: 14px var(--sans); }
-#qmenu button small { display: block; color: var(--muted); font-size: 12px; }
-#qmenu button:hover { background: #f3f1ea; }
-#qmenu button[aria-pressed="true"] { background: #fff4c7; }
+/* the main action, and the View panel */
+.tools button.primary { background: var(--gold); border-color: #d9ad00; font-weight: 600; }
+.tools button.primary:hover { border-color: #b08c00; }
+#btn-view[aria-expanded="true"] { border-color: var(--ink); }
+#btn-view svg { margin-right: 1px; }
+#vmenu { position: absolute; top: 48px; right: 0; width: 318px; background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 12px 14px 14px; display: grid; gap: 11px; z-index: 30; }
+.vrow { display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 10px; }
+.vk { font: 600 12px var(--sans); color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.vk kbd, #vgo kbd { font: 600 10px var(--sans); color: var(--muted); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+.seg { display: flex; background: #f1efe8; border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button { all: unset; flex: 1; text-align: center; cursor: pointer; padding: 6px 4px; border-radius: 6px; font: 500 13px var(--sans); color: #44443f; }
+.seg button:hover { color: var(--ink); background: rgba(255,255,255,.6); }
+.seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px rgba(0,0,0,.04); }
+.seg button:focus-visible, #vgo button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.vrow.go { align-items: start; padding-top: 10px; border-top: 1px solid var(--rule); }
+.vrow.go .vk { padding-top: 5px; }
+#vgo { display: flex; flex-wrap: wrap; gap: 5px; }
+#vgo button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 999px; font: 12.5px var(--sans); color: #33332f; }
+#vgo button:hover { border-color: var(--ink); }
 
 /* ── minimap ── */
 #minimap { position: fixed; left: 12px; bottom: 12px; width: 190px; height: 190px; border-radius: 50%; overflow: hidden;
@@ -57,9 +72,8 @@ body[data-locked="1"] #crosshair { display: block; }
   background: rgba(255,255,255,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(0,0,0,.06);
   border-radius: 10px; padding: 6px 12px; font: 12px var(--sans); color: #3b3b38; z-index: 3; max-width: calc(100vw - 440px); }
 #keys span { white-space: nowrap; cursor: default; }
-#keys span:has(kbd:not(:empty)) { cursor: pointer; }
 #keys kbd { font: 600 11px var(--sans); background: #fff; border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; margin-right: 5px; color: var(--ink); }
-body[data-mode="fly"] #keys span:nth-child(2), body[data-mode="fly"] #keys span:nth-child(3) { display: none; }
+body[data-mode="fly"] #keys span:nth-child(2) { display: none; }
 #place { position: fixed; top: 62px; left: 12px; background: rgba(255,255,255,.86); border: 1px solid rgba(0,0,0,.06); border-radius: 8px;
   padding: 5px 11px; font: 500 15px var(--serif); z-index: 3; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
 #place:empty { display: none; }
@@ -122,7 +136,8 @@ body.hide-ui .bar, body.hide-ui #minimap, body.hide-ui #keys, body.hide-ui #plac
   .back .long, .tools kbd { display: none; }
   .tools { gap: 6px; }
   #minimap { width: 120px; height: 120px; left: 8px; bottom: 8px; }
-  #qmenu { right: 0; }
+  #vmenu { position: fixed; top: 52px; left: 8px; right: 8px; width: auto; }
+  #btn-view span { display: none; }
   #room-card { bottom: 12px; }
   #keys { display: none; }
   #place { top: 54px; left: 8px; font-size: 14px; }

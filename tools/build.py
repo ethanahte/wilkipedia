@@ -976,17 +976,17 @@ def build_campus():
   <a class="back" href="../" aria-label="Back to Wilkipedia">←<span class="long">&nbsp;Wilkipedia</span></a>
   <div class="title"><span class="w">W</span>Wilcox campus</div>
   <div class="tools">
-    <button type="button" id="btn-style" aria-pressed="false" title="Switch style: soft diorama or pixel art (P)"><span>Diorama</span></button>
-    <button type="button" id="btn-night" aria-pressed="true" title="Day or night (N)"><span>Night</span></button>
-    <button type="button" id="btn-rain" aria-pressed="true" title="Rain (R)"><span>Rain</span></button>
-    <button type="button" id="btn-fly" aria-pressed="false"><span>Fly up</span></button>
+    <button type="button" id="btn-fly" class="primary"><span>Fly up</span></button>
     <button type="button" id="btn-map"><span>Map</span> <kbd>M</kbd></button>
-    <button type="button" id="btn-quality" aria-haspopup="true"><span>High</span></button>
+    <button type="button" id="btn-view" aria-haspopup="true" aria-expanded="false" title="Style, time, weather, quality">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>View</span></button>
     <button type="button" id="btn-help" aria-label="Controls">?</button>
-    <div id="qmenu" hidden>
-      <button type="button" data-q="high">High<small>Ink outlines, soft shadows, bloom</small></button>
-      <button type="button" data-q="medium">Medium<small>Ink outlines and shadows</small></button>
-      <button type="button" data-q="low">Low<small>No outlines or shadows: for older phones</small></button>
+    <div id="vmenu" role="dialog" aria-label="View settings" hidden>
+      <div class="vrow"><span class="vk">Style <kbd>P</kbd></span><div class="seg" data-set="style"><button type="button" data-v="diorama">Diorama</button><button type="button" data-v="pixel">Pixel</button></div></div>
+      <div class="vrow"><span class="vk">Time <kbd>N</kbd></span><div class="seg" data-set="time"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button></div></div>
+      <div class="vrow"><span class="vk">Weather <kbd>R</kbd></span><div class="seg" data-set="rain"><button type="button" data-v="clear">Clear</button><button type="button" data-v="rain">Rain</button></div></div>
+      <div class="vrow"><span class="vk">Quality</span><div class="seg" data-set="q"><button type="button" data-q="high" title="Outlines, soft shadows, bloom">High</button><button type="button" data-q="medium" title="Outlines and shadows">Medium</button><button type="button" data-q="low" title="No outlines or shadows: for older phones">Low</button></div></div>
+      <div class="vrow go"><span class="vk">Go to</span><div class="vgo" id="vgo"></div></div>
     </div>
   </div>
 </header>

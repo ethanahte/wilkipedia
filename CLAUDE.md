@@ -198,7 +198,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     8 real PointLights moved to the lamps nearest you, a starry sky. Rain =
     GPU streaks + ripples (ink mode 'add': they write zero to the G-buffer) and
     screen-space reflections on wet ground in post.js (near ground only).
-  - Keys: WASD, Shift, Space jump, F fly, 1–6 viewpoints, N night, R rain, M map, H hide UI.
+  - Keys: WASD, Shift, Space jump, F fly, 1–6 viewpoints, P style, N night, R rain, M map, H hide UI.
+  - Top bar = Fly/Walk (gold, the main action), Map, View, ?. Everything else
+    lives in the View panel (`#vmenu`, built in build.py, wired in hud.bind):
+    segmented toggles for Style / Time / Weather / Quality and "Go to" chips
+    for the six viewpoints. Keep new settings in there, not as more bar
+    buttons. The bottom key bar lists only the essentials.
   - Phases: 1 = quad, front, landmarks, whole-campus massing (done). Next: B
     interiors (both floors, stairs), R, gyms/pool/stadium detail, west side.
 - **Announcement bar** (`#announce` under the header on every page,

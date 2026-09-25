@@ -75,15 +75,12 @@ export class Hud {
 
   setMode(mode) {
     document.body.dataset.mode = mode;
-    const b = $('#btn-fly');
-    b.innerHTML = mode === 'fly' ? '<span>Walk</span>' : '<span>Fly up</span>';
-    b.setAttribute('aria-pressed', mode === 'fly');
+    $('#btn-fly').innerHTML = mode === 'fly' ? '<span>Walk</span>' : '<span>Fly up</span>';
   }
 
-  setQuality(q) {
-    for (const b of document.querySelectorAll('[data-q]')) b.setAttribute('aria-pressed', b.dataset.q === q);
-    $('#btn-quality span').textContent = { high: 'High', medium: 'Medium', low: 'Low' }[q];
-  }
+  // the View panel's toggles show what's on
+  _seg(set, v) { for (const b of document.querySelectorAll(`.seg[data-set="${set}"] button`)) b.setAttribute('aria-pressed', (b.dataset.v ?? b.dataset.q) === v); }
+  setQuality(q) { this._seg('q', q); }
 
   // ── the map, drawn once, then cropped for the minimap ──
   drawMap() {
@@ -177,27 +174,31 @@ export class Hud {
   }
   closeBig() { $('#bigmap').hidden = true; this.big = false; }
 
-  setEnv(env) {
-    const n = $('#btn-night'), r = $('#btn-rain');
-    if (n) { n.setAttribute('aria-pressed', env.night); n.querySelector('span').textContent = env.night ? 'Night' : 'Day'; }
-    if (r) r.setAttribute('aria-pressed', env.rain);
-  }
+  setEnv(env) { this._seg('time', env.night ? 'night' : 'day'); this._seg('rain', env.rain ? 'rain' : 'clear'); }
 
-  setStyle(style) {
-    const b = $('#btn-style');
-    if (b) { b.setAttribute('aria-pressed', style === 'pixel'); b.querySelector('span').textContent = style === 'pixel' ? 'Pixel' : 'Diorama'; }
-  }
+  setStyle(style) { this._seg('style', style); }
 
-  bind({ onFly, onMap, onQuality, onHelp, onNight, onRain, onStyle }) {
-    $('#btn-style').onclick = onStyle;
-    $('#btn-night').onclick = onNight;
-    $('#btn-rain').onclick = onRain;
+  bind({ onFly, onMap, onQuality, onHelp, onStyle, onTime, onRain, spots = [], onGo }) {
     $('#btn-fly').onclick = onFly;
     $('#btn-map').onclick = onMap;
     $('#minimap').onclick = onMap;
-    for (const b of document.querySelectorAll('[data-q]')) b.onclick = () => { onQuality(b.dataset.q); $('#qmenu').hidden = true; };
-    $('#btn-quality').onclick = (e) => { e.stopPropagation(); $('#qmenu').hidden = !$('#qmenu').hidden; };
-    addEventListener('click', (e) => { if (!e.target.closest('#qmenu, #btn-quality')) $('#qmenu').hidden = true; });
+    // the View panel: one button in the bar, everything else inside it
+    const menu = $('#vmenu'), vb = $('#btn-view');
+    const show = (on) => { menu.hidden = !on; vb.setAttribute('aria-expanded', on); };
+    vb.onclick = (e) => { e.stopPropagation(); show(menu.hidden); };
+    addEventListener('click', (e) => { if (!e.target.closest('#vmenu, #btn-view')) show(false); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') show(false); });
+    for (const b of menu.querySelectorAll('.seg button')) {
+      b.onclick = () => {
+        const set = b.parentElement.dataset.set;
+        if (set === 'q') onQuality(b.dataset.q);
+        else if (set === 'style') onStyle(b.dataset.v);
+        else if (set === 'time') onTime(b.dataset.v);
+        else if (set === 'rain') onRain(b.dataset.v === 'rain');
+      };
+    }
+    $('#vgo').innerHTML = spots.map((s, i) => `<button type="button" data-go="${i}"><kbd>${i + 1}</kbd>${s}</button>`).join('');
+    $('#vgo').onclick = (e) => { const g = e.target.closest('[data-go]'); if (g) { onGo(+g.dataset.go); show(false); } };
     $('#btn-help').onclick = onHelp;
     $('#help .x').onclick = () => { $('#help').hidden = true; };
     $('#bigmap .x').onclick = () => this.closeBig();
