@@ -21,7 +21,7 @@ const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">edited b
 
 function meta(sub, target) {
   const stale = staleness(sub);
-  return `${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
+  return `${stale ? `<p class="stale">${esc(stale)}</p>` : ''}
     <div class="meta">By ${byline(sub.author, sub.verified)} · checked ${fmtDate(sub.reviewed_at)}
       ${sub.payload.school_year ? ` · ${esc(sub.payload.school_year)}` : ''}
       ${edited(sub)} · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
@@ -35,16 +35,14 @@ function fieldList(kind, payload, skip = []) {
       const body = f.type === 'url'
         ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener nofollow">Open link ↗</a>` : esc(v))
         : f.type === 'textarea' ? prose(v) : esc(v);
-      return `<div class="fact"><div class="label">${esc(f.label)}</div><div class="v">${body}</div></div>`;
+      return `<div><dt>${esc(f.label)}</dt><dd>${body}</dd></div>`;
     }).join('');
-  return facts ? `<div class="kv-grid">${facts}</div>` : '';
+  return facts ? `<dl class="flist">${facts}</dl>` : '';
 }
 
 function empty(text, kind, teacher, cta = 'Add it') {
-  return `<div class="empty-card"><p>${esc(text)}</p><a class="btn small" href="${submitUrl(kind, teacher)}">${esc(cta)}</a></div>`;
+  return `<p class="empty-line">${esc(text)} <a class="add-link" href="${submitUrl(kind, teacher)}">${esc(cta)} →</a></p>`;
 }
-
-const initial = (name) => esc(name.trim().split(/\s+/).pop().charAt(0).toUpperCase());
 
 async function draw() {
   const subs = await s.approved({ course_slug: page.slug });
@@ -53,10 +51,10 @@ async function draw() {
 
   // Overview
   const ov = latest('course_overview');
-  const stat = (label, v) => (v ? `<div class="stat"><span class="label">${label}</span><b>${esc(v)}</b></div>` : '');
+  const stat = (label, v) => (v ? `<div><dt>${label}</dt><dd>${esc(v)}</dd></div>` : '');
   $('#overview').innerHTML = ov
-    ? `<div class="stat-grid">${stat('Time outside class', ov.payload.workload)}${stat('Difficulty', ov.payload.difficulty)}${stat('AP exam', ov.payload.ap_exam)}</div>
-       <blockquote class="quote">${prose(ov.payload.summary)}</blockquote>
+    ? `<blockquote class="pull">${prose(ov.payload.summary)}</blockquote>
+       <dl class="facts small">${stat('Time outside class', ov.payload.workload)}${stat('Difficulty', ov.payload.difficulty)}${stat('AP exam', ov.payload.ap_exam)}</dl>
        ${fieldList('course_overview', ov.payload, ['summary', 'workload', 'difficulty', 'ap_exam'])}
        ${meta(ov, 'overview')}
        <a class="edit" href="${submitUrl('course_overview')}">Suggest an update</a>`
@@ -67,14 +65,16 @@ async function draw() {
   for (const x of subs) if (x.kind === 'teacher_section' && x.teacher && !names.includes(x.teacher)) names.push(x.teacher);
   const sections = names.map((t) => [t, latest('teacher_section', (x) => x.teacher === t)]);
   const tLink = (t) => (page.teacherSlugs?.[t] ? `<a href="${root}teachers/${page.teacherSlugs[t]}/">${esc(t)}</a>` : esc(t));
-  $('#teachers').innerHTML = names.length ? sections.map(([t, sec]) => `
-    <article class="teacher ${sec ? '' : 'is-empty'}" id="t-${esc(t.toLowerCase().replace(/\W+/g, '-'))}">
-      <header class="t-head"><span class="t-av" aria-hidden="true">${initial(t)}</span>
-        <div><h3>${tLink(t)}</h3>${sec?.payload.room ? `<a class="meta" href="${root}map/#${encodeURIComponent(sec.payload.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, ''))}">Room ${esc(sec.payload.room)} · on the map</a>` : ''}</div></header>
-      ${sec ? fieldList('teacher_section', sec.payload, ['room', 'source']) + meta(sec, `teacher:${t}`)
-              + `<a class="edit" href="${submitUrl('teacher_section', t)}">Suggest an update</a>`
-            : `<p class="meta">Nobody has described this teacher’s version yet.</p><a class="btn small ghost" href="${submitUrl('teacher_section', t)}">Fill it in</a>`}
+  const tid = (t) => `t-${esc(t.toLowerCase().replace(/\W+/g, '-'))}`;
+  const written = sections.filter(([, sec]) => sec), unwritten = sections.filter(([, sec]) => !sec);
+  $('#teachers').innerHTML = names.length ? written.map(([t, sec]) => `
+    <article class="teacher" id="${tid(t)}">
+      <h3>${tLink(t)}</h3>${sec.payload.room ? `<a class="meta" href="${root}map/#${encodeURIComponent(sec.payload.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, ''))}">Room ${esc(sec.payload.room)} · on the map</a>` : ''}
+      ${fieldList('teacher_section', sec.payload, ['room', 'source']) + meta(sec, `teacher:${t}`)}
+      <a class="edit" href="${submitUrl('teacher_section', t)}">Suggest an update</a>
     </article>`).join('')
+    + (unwritten.length ? `<div class="t-missing">${written.length ? '<p class="sec-sub">Not written yet:</p>' : '<p class="empty-line">Nobody has described any teacher’s version of this class yet. Took it? Pick your teacher:</p>'}
+      <ul>${unwritten.map(([t]) => `<li id="${tid(t)}"><span>${tLink(t)}</span><a class="add-link" href="${submitUrl('teacher_section', t)}">Fill it in →</a></li>`).join('')}</ul></div>` : '')
     : empty('We don’t know who teaches this yet.', 'teacher_section', null, 'Add a teacher');
 
   const filled = sections.filter(([, sec]) => sec);

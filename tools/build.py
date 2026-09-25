@@ -289,17 +289,17 @@ def course_row(c, r):
 # real field in forms.js (course_overview / teacher_section / resource / tip):
 # don't promise anything the forms don't collect.
 HOME_COVERS = [
-    ('<path d="M9 4h6v3H9z"/><path d="M9 5H6v16h12V5h-3"/><path d="m9 14 2 2 4-4"/>', "Tests &amp; retakes",
+    ("Tests &amp; retakes",
      "What tests look like, how often they come, and whether you can retake them or do corrections."),
-    ('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', "Grading",
+    ("Grading",
      "How your grade is weighted, and what happens to late work."),
-    ('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', "Homework load",
+    ("Homework load",
      "How much there is and how much time it takes outside class."),
-    ('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>', "Teacher by teacher",
+    ("Teacher by teacher",
      "The same class can run differently with each teacher, so every teacher gets their own section."),
-    ('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>', "Study help",
+    ("Study help",
      "Study guides, resources and tips from students who’ve already taken it."),
-    ('<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>', "Is it right for you?",
+    ("Is it right for you?",
      "How hard it is, who should take it and how to prepare. Handy when you pick next year’s classes."),
 ]
 
@@ -307,11 +307,10 @@ HOME_COVERS = [
 def build_home(depts):
     grid = "".join(f"""<a class="subject" href="subjects/{e(d['slug'])}/"><b>{e(short_dept(d['name']))}</b>
       <span>{len(d['courses'])} classes</span></a>""" for d in depts)
-    covers = "".join(f'<div class="cover">{_I(icon)}<b>{title}</b><span>{text}</span></div>' for icon, title, text in HOME_COVERS)
+    covers = "".join(f'<div><dt>{title}</dt><dd>{text}</dd></div>' for title, text in HOME_COVERS)
     page("", "Wilkipedia", f"""
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
 <section class="hero">
-  <p class="hero-kicker">The student guide to Wilcox classes</p>
   <h1>Know a class before you take it.</h1>
   <p class="lede">Wilkipedia is a free guide to academics at Wilcox, written by Wilcox students. Look up any class to see how it’s tested and graded, how much homework it really takes, and what students who took it wish they’d known.</p>
   <form class="big-search" action="search/" role="search">
@@ -319,28 +318,28 @@ def build_home(depts):
     <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
     <button class="btn">Search</button>
   </form>
-  <p class="hero-trust"><span>Written by Wilcox students</span><span>Checked by a reviewer before it goes live</span><span>Not an official Wilcox or SCUSD site</span></p>
+  <p class="hero-trust">Written by Wilcox students. Checked by a reviewer before it goes live. Not an official Wilcox or SCUSD site.</p>
 </section>
 
-<section class="covers" aria-labelledby="covers-h">
-  <h2 class="label-h" id="covers-h">What each class page tells you</h2>
-  <div class="covers-grid">{covers}</div>
+<section class="home-sec" aria-labelledby="covers-h">
+  <h2 id="covers-h">What each class page tells you</h2>
+  <dl class="covers">{covers}</dl>
 </section>
 
-<section>
-  <h2 class="label-h">Browse by subject</h2>
+<section class="home-sec">
+  <h2>Browse by subject</h2>
   <div class="subjects">{grid}</div>
 </section>
 
-<section class="three">
-  <a class="panel" href="map/"><span class="label">Campus map</span><b>Find a classroom and who teaches there.</b><span class="meta">Browse by room instead of by class.</span></a>
-  <a class="panel" href="summer/"><span class="label">Summer homework</span><b>Every class’s summer work in one place.</b><span class="meta">Collected each May and June.</span></a>
-  <a class="panel members-only accent" href="submit/"><span class="label">Help build it</span><b>Add class info, a tip or a study guide.</b><span class="meta">Get credit on the leaderboard.</span></a>
-  <button type="button" class="panel guests-only accent js-signin"><span class="label">Help build it</span><b>Sign in to write pages and earn credit.</b><span class="meta">Use your school account for the SCUSD ✓ badge.</span></button>
+<section class="home-links">
+  <a href="map/"><b>Campus map</b><span>Find a classroom and who teaches there, by room instead of by class.</span></a>
+  <a href="summer/"><b>Summer homework</b><span>Every class’s summer work in one place, collected each May and June.</span></a>
+  <a class="members-only hl" href="submit/"><b>Help build it</b><span>Add class info, a tip or a study guide, and get credit on the leaderboard.</span></a>
+  <button type="button" class="guests-only hl js-signin"><b>Help build it</b><span>Sign in to write pages and earn credit. Use your school account for the SCUSD ✓ badge.</span></button>
 </section>
 
-<section>
-  <h2 class="label-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
+<section class="home-sec">
+  <h2>Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
 </section>
 """, desc="The student guide to classes at Wilcox High School in Santa Clara: how each class is tested and graded, homework load, study guides and tips, written by Wilcox students.",
          data={"page": "home"})
@@ -387,8 +386,9 @@ SEC_ICONS = {
 
 
 def sec_head(key, title, sub=""):
-    icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{SEC_ICONS[key]}</svg>'
-    return f'<div class="sec-head"><span class="sec-icon">{icon}</span><div><h2>{title}</h2>{f"<p class=meta>{sub}</p>" if sub else ""}</div></div>'
+    # A plain serif heading with an optional line under it. (Section icons were
+    # dropped in the de-templating pass: every section wore the same badge.)
+    return f'<h2>{title}</h2>{f"<p class=sec-sub>{sub}</p>" if sub else ""}'
 
 
 def build_courses(depts, courses):
@@ -396,40 +396,35 @@ def build_courses(depts, courses):
     for c in courses.values():
         stats = [(k, c.get(f)) for k, f in [("Grades", "grades"), ("UC/CSU a–g", "ucCsu"), ("Credits", "credits"),
                                              ("Course #", "courseNumber")]]
-        stats_html = "".join(f'<div class="stat"><span class="label">{k}</span><b>{e(v)}</b></div>' for k, v in stats if v)
+        stats_html = "".join(f'<div><dt>{k}</dt><dd>{e(v)}</dd></div>' for k, v in stats if v)
         prereq = c.get("prerequisite")
         desc_html = "".join(f"<p>{e(p)}</p>" for p in (c.get("description") or "").split("\n\n") if p.strip())
         is_ap = c["name"].startswith("AP ")
         where = "" if c.get("offeredAtListed", True) else '<p class="note">This program is taught off campus at SVCTE, not at Wilcox.</p>'
         page(f"courses/{c['slug']}/", c["name"], f"""
 <nav class="crumbs"><a href="../../subjects/">All classes</a> / <a href="../../subjects/{e(c['department'])}/">{e(dept_name[c['department']])}</a></nav>
-<header class="course-hero">
-  <div class="hero-top">
-    <div><div class="label">{e(dept_name[c['department']])}</div><h1>{e(c['name'])}</h1></div>
-    <div class="c-badges">{course_badges(c)}</div>
-  </div>
-  <div class="stat-grid">{stats_html}</div>
-  {f'<div class="prereq"><span class="label">Prerequisite</span>{e(prereq)}</div>' if prereq else ''}
+<header class="entry-head">
+  <div class="entry-title"><h1>{e(c['name'])}</h1><div class="c-badges">{course_badges(c)}</div></div>
+  <dl class="facts">{stats_html}</dl>
+  {f'<p class="prereq"><b>Prerequisite.</b> {e(prereq)}</p>' if prereq else ''}
   {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
 </header>
 {where}
 
-<nav class="toc pills" aria-label="On this page"><a href="#s-overview">Overview</a><a href="#s-teachers">Teachers</a><a href="#s-resources">Resources</a><a href="#s-tips">Tips</a><a href="#s-summer">Summer HW</a><a href="#comments">Comments</a><a href="#s-catalog">Catalog</a></nav>
+<nav class="entry-toc" aria-label="On this page"><a href="#s-overview">Overview</a><a href="#s-teachers">Teachers</a><a href="#s-resources">Resources</a><a href="#s-tips">Tips</a><a href="#s-summer">Summer HW</a><a href="#comments">Comments</a><a href="#s-catalog">Catalog</a></nav>
 
-<section id="s-overview" class="sec">{sec_head("overview", "What students say")}<div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
+<section id="s-overview" class="entry-sec">{sec_head("overview", "What students say")}<div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
 
-<section id="s-teachers" class="sec">{sec_head("teachers", "Teachers", "Each teacher’s section is written by their students.")}
+<section id="s-teachers" class="entry-sec">{sec_head("teachers", "Teachers", "Each teacher’s section is written by their students.")}
   <div id="teachers" class="teachers dyn"></div>
   <div id="compare" hidden><h3>Side by side</h3><div class="scroll-x"><table id="compare-table" class="compare"></table></div></div>
 </section>
 
-<div class="sec-row">
-  <section id="s-resources" class="sec">{sec_head("resources", "Resources &amp; study guides")}<div id="resources" class="dyn"></div></section>
-  <section id="s-tips" class="sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
-</div>
-<section id="s-summer" class="sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
+<section id="s-resources" class="entry-sec">{sec_head("resources", "Resources &amp; study guides")}<div id="resources" class="dyn"></div></section>
+<section id="s-tips" class="entry-sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
+<section id="s-summer" class="entry-sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
 
-<section id="comments" class="sec">{sec_head("comments", "Comments", 'About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a>')}
+<section id="comments" class="entry-sec">{sec_head("comments", "Comments", 'About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a>')}
   <form id="comment-form" class="comment-form">
     <div id="replying" class="meta" hidden>Replying to a comment · <button type="button" class="linkish" id="cancel-reply">cancel</button></div>
     <label class="sr" for="comment-prompt">Topic</label><select id="comment-prompt"></select>
@@ -440,7 +435,7 @@ def build_courses(depts, courses):
   <div id="comment-list"></div>
 </section>
 
-<section id="s-catalog" class="sec sec-quiet">{sec_head("catalog", "Catalog description", f"From the {e(CATALOG_SOURCE)}, page {e(c.get('page') - 1 if isinstance(c.get('page'), int) else '?')}.")}
+<section id="s-catalog" class="entry-sec quiet">{sec_head("catalog", "Catalog description", f"From the {e(CATALOG_SOURCE)}, page {e(c.get('page') - 1 if isinstance(c.get('page'), int) else '?')}.")}
   <div class="catalog-desc">{desc_html or '<p class="meta">The catalog has no description for this class.</p>'}</div></section>
 """, desc=f"{c['name']} at Wilcox High School: what students say about tests, grading and homework, plus study guides and tips."
           + (" Includes AP exam info." if is_ap else ""),
