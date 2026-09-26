@@ -1385,3 +1385,19 @@ html.gated { overflow: hidden; }
 .tour.still .tour-spot, .tour.still .tour-bubble { transition: none; animation: none; }
 @keyframes tour-pop { from { opacity: 0; transform: translateY(6px) scale(.97); } }
 @media print { .tour { display: none; } }
+/* Room schedules: the Period grid in forms, and the year-labelled schedule on the map and teacher pages */
+.periods-in { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 14px; }
+.periods-in label { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 400; }
+.periods-in label span { flex: none; width: 5.2em; font: 600 .85rem var(--sans); color: var(--muted); }
+.periods-in input { flex: 1; min-width: 0; }
+.periods-in.invalid { outline: 2px solid var(--bad); outline-offset: 4px; border-radius: 6px; }
+.sched { margin: 10px 0 4px; }
+.sched-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; font-size: .92rem; }
+ol.periods { list-style: none; margin: 0; padding: 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; font-size: .92rem; }
+ol.periods li { display: flex; gap: 12px; padding: 6px 12px; }
+ol.periods li + li { border-top: 1px solid var(--rule); }
+ol.periods .pn { flex: none; width: 2em; font: 700 .8rem var(--sans); color: var(--muted); padding-top: 2px; }
+.sched > .meta { margin: 8px 0 0; font-size: .88rem; }
+.sched-past { margin-top: 10px; }
+.sched-past summary { cursor: pointer; color: var(--accent); font-size: .9rem; width: max-content; }
+.sched-past .sched-head { margin-top: 12px; }

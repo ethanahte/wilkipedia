@@ -10,6 +10,19 @@ export function schoolYear(offset = 0) {
 }
 const YEARS = () => [schoolYear(0), schoolYear(-1), schoolYear(1)];
 
+// Wilcox's class periods (data/bell.json: Monday runs all seven)
+export const PERIODS = [1, 2, 3, 4, 5, 6, 7];
+
+// Room schedules written before the Period grid existed are free text, e.g.
+// "P1 Civics\nP3 Civics\nP4 AP Macro" or "P1 AP Chem · P2 Chemistry · P3 prep".
+// Returns {1: 'Civics', …} when the whole text reads as periods, else null (shown as written).
+export function parseSchedule(text) {
+  const out = {};
+  const rest = String(text || '').replace(/\b(?:P|Per\.?|Period)\s*([1-7])(?:st|nd|rd|th)?\s*[:.\-–]?\s*([^\n·,;|]*?)\s*(?=\b(?:P|Per\.?|Period)\s*[1-7]\b|[\n·,;|]|$)/gi,
+    (_, n, what) => { if (what.trim()) out[n] = what.trim(); return ''; });
+  return Object.keys(out).length && !/[a-z0-9]/i.test(rest) ? out : null;
+}
+
 export const KINDS = {
   course_overview: {
     label: 'Course overview',
@@ -48,12 +61,31 @@ export const KINDS = {
         hint: 'e.g. "Warm-up quiz every Monday." Describe the class, not the person.' },
       { key: 'syllabus_url', label: 'Link to the syllabus', type: 'url' },
       { key: 'room', label: 'Room number', type: 'text',
-        hint: 'As it appears on the campus map, e.g. B204 or P116. This puts the class on the map.' },
-      { key: 'schedule', label: 'Schedule', type: 'textarea',
-        hint: 'Which period they teach what, e.g. "P1 AP Chem · P2 Chemistry · P3 prep · P4 Chemistry".' },
+        hint: 'As it appears on the campus map, e.g. B204 or P116. This puts the class on the map. The period-by-period schedule is its own form: Room schedule.' },
+      // Replaced by the room_schedule kind. Old sections keep and show theirs; new forms don't ask.
+      { key: 'schedule', label: 'Schedule', type: 'textarea', legacy: true },
       { key: 'source', label: 'Source for the facts above', type: 'text', required: true,
         hint: 'e.g. "Syllabus handed out Aug 2026" or a link. Reviewers check this.' },
       { key: 'school_year', label: 'School year this is about', type: 'select', required: true, options: YEARS },
+    ],
+  },
+
+  // One teacher's schedule for one school year. Kept per year: next year's is a
+  // new submission, and the old one stays under "Past years" on the map and the
+  // teacher's page. Not tied to a course, since a schedule spans several.
+  room_schedule: {
+    label: 'Room schedule',
+    blurb: 'Which class a teacher has each period, and in which room. One school year at a time.',
+    scope: 'staff',
+    fields: [
+      { key: 'school_year', label: 'School year', type: 'select', required: true, options: YEARS,
+        hint: 'Schedules change every year, so each year’s is kept separately. Older years stay viewable.' },
+      { key: 'room', label: 'Room', type: 'text', required: true, max: 12,
+        hint: 'As it appears on the campus map, e.g. B106 or S112.' },
+      { key: 'periods', label: 'Class each period', type: 'periods', required: true,
+        hint: 'Pick a class from the list, or type “Prep” for a free period. Leave a period blank if you don’t know it.' },
+      { key: 'source', label: 'How do you know?', type: 'text', max: 120,
+        hint: 'e.g. "I’m in their 3rd period" or "Posted on the classroom door".' },
     ],
   },
 

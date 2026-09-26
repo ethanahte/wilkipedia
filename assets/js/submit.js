@@ -3,7 +3,7 @@
 //   ?bounty=<id>                                 (from a claimed bounty)
 
 import { initHeader, requireUser, renderFields, suggestions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
-import { KINDS } from './forms.js';
+import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
 const q = new URLSearchParams(location.search);
@@ -12,8 +12,17 @@ const data = await courses();
 const acts = await fetch(dataUrl('data/activities.json')).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 suggestions.clubs = acts?.clubs?.map((c) => c.name) ?? [];
 suggestions.sports = acts?.sports?.map((c) => c.name) ?? [];
-const noCourse = (scope) => scope === 'school' || scope === 'activity';
+// 'staff' (a room schedule) names a teacher but no course: a schedule spans several
+const noCourse = (scope) => scope === 'school' || scope === 'activity' || scope === 'staff';
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
+const allTeachers = [...new Set(data.courses.flatMap((c) => c.teachers || []))].sort((a, b) => a.localeCompare(b));
+// The Period grid suggests the chosen teacher's classes first, then every class
+function periodSuggestions() {
+  const mine = data.courses.filter((c) => state.teacher && (c.teachers || []).includes(state.teacher)).map((c) => c.name);
+  suggestions.periods = [...mine, ...data.courses.map((c) => c.name).filter((n) => !mine.includes(n))];
+  const dl = $('#dl-periods');
+  if (dl) dl.innerHTML = ['Prep', ...suggestions.periods].map((o) => `<option value="${esc(o)}">`).join('');
+}
 let bounties = [];
 let form = null;
 
@@ -40,13 +49,13 @@ function courseFromInput() {
 
 function paintTeacher() {
   const scope = state.kind && KINDS[state.kind].scope;
-  const wants = scope === 'teacher' || scope === 'course-or-teacher';
+  const wants = scope === 'teacher' || scope === 'course-or-teacher' || scope === 'staff';
   $('#teacher-row').hidden = !wants;
   if (!wants) return;
-  const list = bySlug[state.course]?.teachers || [];
-  $('#teacher-label').innerHTML = scope === 'teacher'
+  const list = scope === 'staff' ? allTeachers : bySlug[state.course]?.teachers || [];
+  $('#teacher-label').innerHTML = scope === 'teacher' || scope === 'staff'
     ? 'Teacher <span class="req">*</span>' : 'Teacher <span class="hint-inline">(optional)</span>';
-  $('#teacher').innerHTML = `<option value="">${scope === 'teacher' ? 'Choose…' : 'All teachers / not specific'}</option>`
+  $('#teacher').innerHTML = `<option value="">${scope === 'teacher' || scope === 'staff' ? 'Choose…' : 'All teachers / not specific'}</option>`
     + list.map((t) => `<option ${t === state.teacher ? 'selected' : ''}>${esc(t)}</option>`).join('')
     + `<option value="__other" ${state.teacher && !list.includes(state.teacher) ? 'selected' : ''}>Someone not listed…</option>`;
   $('#teacher-other').hidden = $('#teacher').value !== '__other';
@@ -72,8 +81,10 @@ function paint() {
   const preset = {};
   if (q.get('room')) preset.room = q.get('room').toUpperCase();
   if (q.get('name')) preset.name = q.get('name');
+  if (state.kind === 'room_schedule') preset.school_year = schoolYear(0);   // this year's, unless they change it
   const draft = drafts.get(draftKey());
   if (draft?.teacher && !state.teacher) state.teacher = draft.teacher;
+  periodSuggestions();
   form = renderFields($('#fields'), state.kind, { ...preset, ...(draft?.values || {}), ...(keep || {}) });
   $('#fields').dataset.kind = state.kind;
   $('#draft-note').hidden = !draft;
@@ -88,6 +99,7 @@ $('#course').addEventListener('change', () => { state.course = courseFromInput()
 $('#teacher').addEventListener('change', () => {
   $('#teacher-other').hidden = $('#teacher').value !== '__other';
   state.teacher = $('#teacher').value === '__other' ? '' : $('#teacher').value;
+  periodSuggestions();
 });
 
 $('#submit-form').addEventListener('input', saveDraft);
@@ -109,7 +121,7 @@ $('#submit-form').addEventListener('submit', async (e) => {
   if (!noCourse(scope) && !state.course) return err('Pick a course from the list.');
   const teacher = $('#teacher-row').hidden ? null
     : ($('#teacher').value === '__other' ? $('#teacher-other').value.trim() : $('#teacher').value) || null;
-  if (scope === 'teacher' && !teacher) return err('Pick which teacher this is about.');
+  if ((scope === 'teacher' || scope === 'staff') && !teacher) return err('Pick which teacher this is about.');
   const missing = form.check();
   if (missing) return err(missing);
   if (!$('#rules-ok').checked) return err('Please confirm the two rules at the bottom.');
@@ -126,7 +138,7 @@ $('#submit-form').addEventListener('submit', async (e) => {
   drafts.clear(draftKey());
   $('#submit-form').hidden = true;
   $('#done').hidden = false;
-  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'] }[state.kind];
+  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'], room_schedule: [`${root}map/`, 'the map'] }[state.kind];
   $('#done-course').innerHTML = back ? `<a class="btn ghost" href="${back[0]}">Back to ${back[1]}</a>`
     : !noCourse(scope) && state.course
       ? `<a class="btn ghost" href="${courseUrl(state.course)}">Back to ${esc(bySlug[state.course].name)}</a>` : '';

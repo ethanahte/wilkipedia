@@ -2,7 +2,7 @@
 // form renderer used by the submit page and the course page's quick-add.
 
 import { store, MODE, REVIEWER_ROLES, TERMS_VERSION } from './store.js';
-import { KINDS, optionsOf } from './forms.js';
+import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear } from './forms.js';
 
 export const root = document.body.dataset.root || './';
 export const $ = (sel, el = document) => el.querySelector(sel);
@@ -192,10 +192,58 @@ function paintThemeToggle() {
   b.title = b.getAttribute('aria-label');
 }
 
+// ── room schedules ──
+// "Room b-204" / "b204" / "B 204" all mean B204
+export const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '');
+
+// One teacher's schedules, newest year first: [{year, periods} | {year, text}].
+// Shows this school year's (or the newest, labelled as older), with the rest
+// under "Past years". `link(name)` turns a class name into a link where it can.
+export function scheduleBlock(list, { add = '', link = (x) => esc(x), rooms = false } = {}) {
+  if (!list.length) return `<p class="meta">No schedule yet.${add ? ` <a href="${add}">Add it</a>` : ''}</p>`;
+  const now = schoolYear(0);
+  const table = (x) => (x.periods
+    ? `<ol class="periods">${PERIODS.map((n) => `<li><span class="pn">P${n}</span>${x.periods[n]
+      ? (/^(prep|free|none|no class|—|-)$/i.test(x.periods[n]) ? `<span class="meta">${esc(x.periods[n])}</span>` : link(x.periods[n]))
+      : '<span class="meta">—</span>'}</li>`).join('')}</ol>`
+    : `<p>${esc(x.text)}</p>`);
+  const [first, ...past] = list;
+  const old = first.year !== now;
+  return `<div class="sched">
+      <div class="sched-head"><b>${esc(first.year || 'Undated')} schedule</b>${rooms && first.room ? `<span class="meta">Room ${esc(first.room)}</span>` : ''}${old ? `<span class="tag warn">Not this year’s</span>` : ''}</div>
+      ${table(first)}
+      ${old && add ? `<p class="meta">This is from ${esc(first.year || 'an earlier year')}. Know the ${esc(now)} schedule? <a href="${add}">Add it</a></p>` : ''}
+      ${past.length ? `<details class="sched-past"><summary>Past years (${past.length})</summary>${past.map((x) =>
+        `<div class="sched-head"><b>${esc(x.year || 'Undated')}</b>${rooms && x.room ? `<span class="meta">Room ${esc(x.room)}</span>` : ''}</div>${table(x)}`).join('')}</details>` : ''}
+    </div>`;
+}
+
+// Approved room_schedule submissions plus the free-text schedules in older
+// teacher sections, grouped as {teacher: {rooms: Set, list: [{year, periods|text}]}},
+// one entry per teacher per year (the newest wins), newest year first.
+export function collectSchedules(schedules, sections = []) {
+  const by = {};
+  const put = (teacher, room, year, entry) => {
+    const t = (by[teacher] ??= { rooms: new Set(), list: [] });
+    if (room) t.rooms.add(normRoom(room));
+    if (!entry || t.list.some((x) => x.year === year)) return;
+    t.list.push({ year, room: normRoom(room), ...entry });
+  };
+  for (const x of schedules) if (x.teacher) put(x.teacher, x.payload.room, x.payload.school_year, { periods: x.payload.periods || {} });
+  for (const x of sections) {
+    if (!x.teacher) continue;
+    const text = x.payload.schedule;
+    put(x.teacher, x.payload.room, x.payload.school_year, text ? (parseSchedule(text) ? { periods: parseSchedule(text) } : { text }) : null);
+  }
+  for (const t of Object.values(by)) t.list.sort((a, b) => String(b.year || '').localeCompare(String(a.year || '')));
+  return by;
+}
+
 export const slugify = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 // Where a submission lives, as [label, url]: its class page, a club/team card, or School info.
 export function placeOf(x, courseName = {}) {
+  if (x.kind === 'room_schedule') return [`Room ${x.payload?.room || '?'}`, `${root}map/#${encodeURIComponent(normRoom(x.payload?.room))}`];
   if (x.kind === 'club') return [x.payload?.name || 'Club', `${root}clubs/#${slugify(x.payload?.name)}`];
   if (x.kind === 'sport') return [x.payload?.name || 'Sports team', `${root}sports/#${slugify(x.payload?.name)}`];
   if (x.course_slug) return [courseName[x.course_slug] || x.course_slug, `${root}courses/${x.course_slug}/`];
@@ -546,12 +594,19 @@ export const suggestions = {};
 // returns the first missing required field.
 export function renderFields(el, kind, preset = {}) {
   const def = KINDS[kind];
-  el.innerHTML = def.fields.map((f) => {
+  // A legacy field only appears when editing something that already has it
+  const fields = def.fields.filter((f) => !f.legacy || preset[f.key]);
+  el.innerHTML = fields.map((f) => {
     const id = `f-${f.key}`;
     const req = f.required ? ' <span class="req" aria-hidden="true">*</span>' : '';
     const val = preset[f.key] ?? '';
     let input;
-    if (f.type === 'textarea') {
+    if (f.type === 'periods') {
+      const cur = val && typeof val === 'object' ? val : {};
+      input = `<div class="periods-in" id="${id}" role="group" aria-label="${esc(f.label)}">${PERIODS.map((n) =>
+        `<label><span>Period ${n}</span><input name="${f.key}.${n}" value="${esc(cur[n] || '')}" list="dl-periods" maxlength="60" autocomplete="off" placeholder="—"></label>`).join('')}</div>
+        <datalist id="dl-periods">${['Prep', ...(suggestions.periods || [])].map((o) => `<option value="${esc(o)}">`).join('')}</datalist>`;
+    } else if (f.type === 'textarea') {
       input = `<textarea id="${id}" name="${f.key}" rows="4" ${f.max ? `maxlength="${f.max}"` : ''} ${f.required ? 'required' : ''}>${esc(val)}</textarea>`;
     } else if (f.type === 'select') {
       input = `<select id="${id}" name="${f.key}" ${f.required ? 'required' : ''}>
@@ -560,23 +615,31 @@ export function renderFields(el, kind, preset = {}) {
       </select>`;
     } else {
       const list = f.suggest && suggestions[f.suggest] ? `list="dl-${f.key}"` : '';
-      input = `<input id="${id}" name="${f.key}" type="${f.type === 'url' ? 'url' : 'text'}" value="${esc(val)}" ${list} autocomplete="off" ${f.required ? 'required' : ''} ${f.type === 'url' ? 'placeholder="https://…"' : ''}>`
+      input = `<input id="${id}" name="${f.key}" type="${f.type === 'url' ? 'url' : 'text'}" value="${esc(val)}" ${list} autocomplete="off" ${f.max ? `maxlength="${f.max}"` : ''} ${f.required ? 'required' : ''} ${f.type === 'url' ? 'placeholder="https://…"' : ''}>`
         + (list ? `<datalist id="dl-${f.key}">${suggestions[f.suggest].map((o) => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
     }
     return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label>
       ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;
   }).join('');
+  const periodsOf = (f) => Object.fromEntries(PERIODS.map((n) => [n, $(`[name="${f.key}.${n}"]`, el).value.trim()]).filter(([, v]) => v));
   return {
     values() {
       const out = {};
-      for (const f of def.fields) {
+      for (const f of fields) {
+        if (f.type === 'periods') { const v = periodsOf(f); if (Object.keys(v).length) out[f.key] = v; continue; }
         const v = $(`[name="${f.key}"]`, el).value.trim();
         if (v) out[f.key] = v;
       }
       return out;
     },
     check() {
-      for (const f of def.fields) {
+      for (const f of fields) {
+        if (f.type === 'periods') {
+          const bad = f.required && !Object.keys(periodsOf(f)).length;
+          $(`#f-${f.key}`, el).classList.toggle('invalid', bad);
+          if (bad) { $(`[name="${f.key}.1"]`, el).focus(); return 'Fill in at least one period.'; }
+          continue;
+        }
         const input = $(`[name="${f.key}"]`, el);
         const v = input.value.trim();
         const bad = (f.required && !v) || (f.type === 'url' && v && !safeUrl(v));

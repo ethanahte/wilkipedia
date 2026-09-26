@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS } from './ui.js';
+import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -16,7 +16,8 @@ window.addEventListener('hashchange', () => { tab = location.hash.slice(1).repla
 function payloadHtml(kind, p) {
   return KINDS[kind].fields.filter((f) => p[f.key]).map((f) => {
     const v = p[f.key];
-    const body = f.type === 'url' ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span class="bad">${esc(v)}</span>`)
+    const body = f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])
+      : f.type === 'url' ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span class="bad">${esc(v)}</span>`)
       : f.type === 'textarea' ? prose(v) : esc(v);
     return `<div class="kv"><div class="k">${esc(f.label)}</div><div class="v">${body}</div></div>`;
   }).join('');

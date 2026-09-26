@@ -148,7 +148,7 @@ create table public.submissions (
   course_slug text,                                   -- null for school-wide info
   kind        text not null check (kind in
               ('course_overview', 'teacher_section', 'resource', 'tip', 'summer_hw', 'school_info',
-               'club', 'sport')),
+               'club', 'sport', 'room_schedule')),
   teacher     text,
   payload     jsonb not null,
   status      text not null default 'pending'

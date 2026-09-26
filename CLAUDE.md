@@ -92,6 +92,20 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   asked. **Changing the Terms in a way that matters:** bump `terms_current()` in
   SQL, `TERMS_VERSION` in store.js, and the "Version N" line on the page, all
   together. Everyone is then asked again.
+- **Room schedules** (kind `room_schedule`, migration 013; scope `staff`, meaning a
+  teacher but no course, because one schedule spans several classes). The payload
+  is `{school_year, room, periods: {"1": "Civics", …}, source}`. Periods come from
+  `PERIODS` in forms.js (1–7, matching bell.json), and the form field type is
+  `periods`, a grid in `renderFields`. **Each school year is its own row**, so next
+  year's schedule is a new submission and older ones stay. `collectSchedules`
+  (ui.js) gathers one entry per teacher per year, newest first, and also reads the
+  old free-text `schedule` in teacher sections, turned into the grid by
+  `parseSchedule` when it can be (shown as written otherwise). `scheduleBlock`
+  renders the current school year's schedule with a "Not this year's" tag when
+  it's older, and puts the rest under "Past years". It's used on the map's room
+  panel (only that room's years) and on teacher pages (`#t-sched`, every room).
+  `teacher_section.schedule` is `legacy: true`: hidden on new forms, still shown
+  and editable where it already exists.
 - **Welcome tour** (`tour.js`, `startTour(name)`): speech bubbles with a
   spotlight that point at the header buttons one at a time. It starts when a
   member clicks "Agree and continue" on the Terms screen, which is once per

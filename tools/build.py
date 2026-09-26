@@ -467,6 +467,8 @@ def build_teachers(teachers, courses):
 <h2>Classes</h2>
 {f'<ul class="plain-list">{cs}</ul>' if cs else '<p class="meta">No classes matched in the catalog.</p>'}
 <p class="meta">Listed in the staff directory as: {e(', '.join(others)) or '—'}. Each class page has a section on how this teacher runs it.</p>
+<h2>Room and schedule</h2>
+<div id="t-sched" data-teacher="{e(t['name'])}"><p class="meta">Loading…</p></div>
 """, desc=f"Classes taught by {t['name']} at Wilcox High School.", data={"page": "static"})
 
 
@@ -741,7 +743,7 @@ def build_static():
   <p class="meta credit" id="map-credit"></p>
 </div>
 <section><h2>Rooms with info</h2>
-  <p class="meta">Built from the room numbers students add to teacher sections. <a href="../submit/?kind=teacher_section">Add a teacher’s room and schedule</a></p>
+  <p class="meta">Built from the room schedules and teacher sections students add. Each school year gets its own schedule, and past years stay viewable. <a href="../submit/?kind=room_schedule">Add a room schedule</a></p>
   <div id="room-list"><div class="meta">Loading…</div></div>
 </section>""", active="map/", script="map.js", data={"page": "map"},
          desc="Interactive map of Wilcox High School: tap a classroom to see who teaches there, what they teach and when.")

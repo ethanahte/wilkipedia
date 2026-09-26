@@ -84,10 +84,11 @@ export async function addLive(store) {
     const courseNames = Object.fromEntries((await load()).filter((x) => x.t === 'c').map((x) => [x.u, x.n]));
     live = subs.map((x) => {
       const p = x.payload || {};
-      const text = Object.values(p).filter((v) => typeof v === 'string').join(' ');
+      const text = [...Object.values(p), ...Object.values(p.periods || {})].filter((v) => typeof v === 'string').join(' ');
       let n, u, d;
       if (x.kind === 'school_info') { n = p.title || 'School info'; u = 'school/'; d = `School info · ${p.topic || ''}`; }
       else if (x.kind === 'club' || x.kind === 'sport') return null;   // folded into their cards below
+      else if (x.kind === 'room_schedule') { n = `Room ${p.room || ''}`; u = `map/#${encodeURIComponent(p.room || '')}`; d = `${x.teacher || 'Teacher'} · ${p.school_year || ''} schedule`; }
       else if (x.course_slug) {
         u = `courses/${x.course_slug}/`;
         n = courseNames[u] || x.course_slug;

@@ -9,7 +9,7 @@
 // `mode` is always 'plan' now (an aerial photo view was tried and removed).
 // room contents come from approved teacher sections whose "room" field matches.
 
-import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root } from './ui.js';
+import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root, normRoom, collectSchedules, scheduleBlock } from './ui.js';
 import { todaysLunch, sortedCats, itemHtml } from './menu.js';
 
 const s = await initHeader();
@@ -30,14 +30,17 @@ const course = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
 const teacherSlug = Object.fromEntries(index.filter((x) => x.t === 't').map((x) => [x.n, x.s]));
 const roomById = Object.fromEntries(map.rooms.map((r) => [r.id, r]));
 
-// "Room b-204" / "b204" / "B 204" all mean B204
-const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '');
 
-// ── room contents from approved teacher sections ──
+// A class name typed into a schedule links to its page when it matches one
+const courseByName = Object.fromEntries(data.courses.map((c) => [c.name.toLowerCase(), c.slug]));
+const classLink = (name) => (courseByName[name.toLowerCase()] ? `<a href="${courseUrl(courseByName[name.toLowerCase()])}">${esc(name)}</a>` : esc(name));
+
+// ── room contents from approved teacher sections and room schedules ──
 let byRoom = {};
 let clubsByRoom = {};
 async function loadRooms() {
-  const [sections, clubs] = await Promise.all([s.approved({ kind: 'teacher_section' }), s.approved({ kind: 'club' })]);
+  const [sections, clubs, schedules] = await Promise.all([s.approved({ kind: 'teacher_section' }), s.approved({ kind: 'club' }),
+    s.approved({ kind: 'room_schedule' })]);
   byRoom = {};
   clubsByRoom = {};
   for (const c of clubs) {
@@ -46,15 +49,30 @@ async function loadRooms() {
     const list = (clubsByRoom[id] ??= []);
     if (!list.some((x) => x.name === c.payload.name)) list.push({ name: c.payload.name, meets: c.payload.meets });
   }
+  const sched = collectSchedules(schedules, sections);
+  const entry = (id, teacher) => {
+    const list = (byRoom[id] ??= []);
+    let t = list.find((y) => y.teacher === teacher);
+    // only this room's schedules: a teacher who moved rooms has older years elsewhere
+    if (!t) list.push(t = { teacher, courses: [], schedules: (sched[teacher]?.list || []).filter((x) => x.room === id) });
+    return t;
+  };
   for (const x of sections) {
     const id = normRoom(x.payload.room);
     if (!id || !x.teacher) continue;
-    const list = (byRoom[id] ??= []);
-    let t = list.find((y) => y.teacher === x.teacher);
-    if (!t) list.push(t = { teacher: x.teacher, courses: [], schedule: null, year: null });
+    const t = entry(id, x.teacher);
     if (x.course_slug && !t.courses.includes(x.course_slug)) t.courses.push(x.course_slug);
-    // sections arrive newest first: keep the newest schedule
-    if (!t.schedule && x.payload.schedule) { t.schedule = x.payload.schedule; t.year = x.payload.school_year; }
+  }
+  for (const [teacher, v] of Object.entries(sched)) {
+    for (const id of v.rooms) {
+      if (!id) continue;
+      const t = entry(id, teacher);
+      // classes named in this room's newest schedule count as taught here
+      for (const name of Object.values(t.schedules[0]?.periods || {})) {
+        const slug = courseByName[String(name).toLowerCase()];
+        if (slug && !t.courses.includes(slug)) t.courses.push(slug);
+      }
+    }
   }
 }
 
@@ -203,13 +221,13 @@ function panelHtml(r) {
   const clubs = clubsByRoom[r.id] || [];
   const clubHtml = clubs.length ? `<section class="mp-teacher"><h3>Clubs that meet here</h3><ul class="mp-clubs">${clubs.map((c) =>
     `<li><a href="${root}clubs/#${slugify(c.name)}">${esc(c.name)}</a>${c.meets ? `<span class="meta"> · ${esc(c.meets)}</span>` : ''}</li>`).join('')}</ul></section>` : '';
-  const add = `${root}submit/?kind=teacher_section&room=${encodeURIComponent(r.id)}`;
+  const add = (teacher) => `${root}submit/?kind=room_schedule&room=${encodeURIComponent(r.id)}${teacher ? `&teacher=${encodeURIComponent(teacher)}` : ''}`;
   if (!list.length && clubs.length) return head + clubHtml;
   if (!list.length) {
     return `${head}<div class="mp-empty">
       <p>${r.kind === 'classroom' ? 'Nobody has added who teaches here yet.' : r.kind === 'office' ? 'An office, not a classroom.' : 'A shared space, not a classroom.'}</p>
-      ${r.kind === 'classroom' ? `<p><a class="btn" href="${add}">Add the teacher and schedule</a></p>
-      <p class="meta">Pick the class and teacher, then put <b>${esc(r.id)}</b> in the room field.</p>` : ''}</div>`;
+      ${r.kind === 'classroom' ? `<p><a class="btn" href="${add()}">Add the teacher and schedule</a></p>
+      <p class="meta">Pick the teacher and fill in what they teach each period.</p>` : ''}</div>`;
   }
   return `${head}${list.map((t) => `<section class="mp-teacher">
       <h3>${teacherSlug[t.teacher] ? `<a href="${root}teachers/${teacherSlug[t.teacher]}/">${esc(t.teacher)}</a>` : esc(t.teacher)}</h3>
@@ -218,11 +236,9 @@ function panelHtml(r) {
         return c ? `<li class="course-row"><a href="${courseUrl(slug)}"><span class="c-name">${esc(c.name)}</span>
           <span class="c-meta">${c.grades ? `Grades ${esc(c.grades)}` : ''}</span></a><span class="c-badges">${badges(c)}</span></li>` : '';
       }).join('')}</ul>
-      <div class="kv"><div class="k">Schedule</div><div class="v">${t.schedule
-        ? `${esc(t.schedule)}${t.year ? ` <span class="tag">${esc(t.year)}</span>` : ''}`
-        : `<span class="meta">Not added yet.</span> <a href="${add}">Add it</a>`}</div></div>
+      ${scheduleBlock(t.schedules, { add: add(t.teacher), link: classLink })}
     </section>`).join('')}${clubHtml}
-    <p class="meta mp-foot">Wrong or missing? <a href="${add}">Update this room</a></p>`;
+    <p class="meta mp-foot">Wrong, missing or a new school year? <a href="${add()}">Add a schedule for this room</a></p>`;
 }
 
 function select(id, { fly = true } = {}) {

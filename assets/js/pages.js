@@ -3,7 +3,7 @@
 
 import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
-         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements,
+         CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
@@ -593,7 +593,19 @@ const pages = {
     $('#bell-full').innerHTML = fullHtml(await loadBell());
   },
 
-  static() {},
+  // Teacher pages: their room and period schedule, this year's first
+  async static() {
+    const box = $('#t-sched');
+    if (!box) return;
+    const name = box.dataset.teacher;
+    const [scheds, secs, data] = await Promise.all([s.approved({ kind: 'room_schedule' }), s.approved({ kind: 'teacher_section' }), courses()]);
+    const bySlug = Object.fromEntries(data.courses.map((c) => [c.name.toLowerCase(), c.slug]));
+    const link = (n) => (bySlug[n.toLowerCase()] ? `<a href="${courseUrl(bySlug[n.toLowerCase()])}">${esc(n)}</a>` : esc(n));
+    const list = collectSchedules(scheds.filter((x) => x.teacher === name), secs.filter((x) => x.teacher === name))[name]?.list || [];
+    const add = `${root}submit/?kind=room_schedule&teacher=${encodeURIComponent(name)}`;
+    box.innerHTML = scheduleBlock(list, { add, link, rooms: true })
+      + (list.length ? `<p class="meta">${list[0].room ? `<a href="${root}map/#${encodeURIComponent(list[0].room)}">See room ${esc(list[0].room)} on the map</a> · ` : ''}<a href="${add}">Add or update a schedule</a></p>` : '');
+  },
 };
 
 await pages[which]?.();
