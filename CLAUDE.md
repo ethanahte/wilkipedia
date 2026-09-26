@@ -170,6 +170,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     clicked class name `class-title` in `pageswap` so it glides into the class
     page's h1. The theme circle reveal is scoped to `html.theme-vt`.
   - One signature moment only (the map). Don't add competing spectacle.
+- **Clubs and sports** (`activities()` in pages.js): official list plus
+  student info merged by name, as before. Clubs open with a field: one dot per
+  club gathered by category (lieflat-charts L6 Cluster Field), gold if students
+  wrote about it. Click a dot to open the club; click a label to filter; the
+  field goes three across under 640 px. Below it is a compact index: category
+  columns of one-line `<details>` rows that open in place, with search,
+  category chips and weekday chips. Days are read from the `meets` text as
+  whole words, so "monthly" isn't Monday. Sports are a season board: Fall,
+  Winter and Spring side by side, a tick per team, and level badges
+  (V/JV/FS/F, with a key). `#slug` links open the row.
 - **By the numbers** (`numbers/`, `numbers.js`): five charts built from
   lieflat-charts gallery templates (L2 Dot Cascade, L4 Arc Matrix, F5 Tick Rows,
   F1 Rung Bars, L3 Barcode Lollipop), code skeleton kept, real data only.

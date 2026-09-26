@@ -809,7 +809,9 @@ def build_static():
     page("clubs/", "Clubs", """
 <h1>Clubs</h1>
 <p class="lede">Every club at Wilcox: what it does, when it meets, and how to join.</p>
+<div id="act-viz" class="cf"></div>
 <div class="list-tools"><input id="act-q" type="search" placeholder="Search clubs" aria-label="Search clubs"><div class="chips" id="act-filter"></div></div>
+<div class="chips act-days" id="act-days"></div>
 <div id="act-list"><div class="meta">Loading…</div></div>
 <p class="meta" id="act-source"></p>
 <p><a class="btn ghost" href="../submit/?kind=club">Add info about a club</a></p>""", active="clubs/", data={"page": "clubs"},
@@ -819,6 +821,7 @@ def build_static():
 <h1>Sports</h1>
 <p class="lede">Wilcox Chargers teams by season: tryouts, practice, and what it’s like to play.</p>
 <div class="list-tools"><input id="act-q" type="search" placeholder="Search teams" aria-label="Search teams"><div class="chips" id="act-filter"></div></div>
+<p class="meta sp-key">Levels: <b>V</b> varsity · <b>JV</b> junior varsity · <b>FS</b> frosh-soph · <b>F</b> frosh. Tap a team for its coaches and what students say.</p>
 <div id="act-list"><div class="meta">Loading…</div></div>
 <p class="meta" id="act-source"></p>
 <p><a class="btn ghost" href="../submit/?kind=sport">Add info about a team</a></p>""", active="sports/", data={"page": "sports"},

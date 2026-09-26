@@ -73,7 +73,8 @@ async function activities(kind) {
 
   const field = (label, v, cls = '') => (v ? `<div class="fact ${cls}"><div class="label">${label}</div><div class="v">${prose(v)}</div>
     ${cls === 'desc' && v.length > 220 ? '<button type="button" class="linkish more-btn">Show more</button>' : ''}</div>` : '');
-  const card = ([k, o]) => {
+  // One class's details: what students wrote, else the official list's
+  const details = ([k, o]) => {
     const p = o.info?.payload || {};
     const room = p.room ? p.room.toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '') : null;
     const add = `${root}submit/?kind=${kind}&name=${encodeURIComponent(o.name)}`;
@@ -81,33 +82,98 @@ async function activities(kind) {
       ? field('What they do', p.what || o.description, 'desc') + field('Meets', p.meets || o.meets)
         + (room ? `<div class="fact"><div class="label">Room</div><div class="v"><a href="${root}map/#${esc(room)}">${esc(p.room)} · on the map</a></div></div>` : '')
         + field('Advisor', p.advisor || o.advisor) + field('How to join', p.join)
-      : field('Tryouts', p.tryouts) + field('Practice', p.practice) + field('What it’s like', p.experience) + field('Tips', p.tips)
+      : field('Levels', o.levels?.join(', ')) + field('Tryouts', p.tryouts) + field('Practice', p.practice) + field('What it’s like', p.experience) + field('Tips', p.tips)
         + (o.coaches?.length ? field('Coach' + (o.coaches.length > 1 ? 'es' : ''), o.coaches.join(', ')) : '');
     const link = safeLink(p.link) || o.url;
-    return `<article class="act-card" id="${esc(k)}" data-group="${esc(groupOf(o))}" data-name="${esc(o.name.toLowerCase())}">
-      <header><h3>${esc(o.name)}</h3>${kind === 'sport' && o.levels?.length ? o.levels.map((l) => `<span class="tag">${esc(l)}</span>`).join('') : ''}</header>
-      ${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
+    return `${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
       <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${o.info.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : ''}</span>` : ''}
         <span class="act-links">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener nofollow">Page ↗</a>` : ''}
-        <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>
-    </article>`;
+        <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>`;
   };
+  // Meeting days, read from the "meets" text (whole words: "monthly" is not Monday)
+  const DAYS = [['Mon', /\bmon(day)?s?\b/i], ['Tue', /\btues?(day)?s?\b/i], ['Wed', /\bwed(nesday)?s?\b/i], ['Thu', /\bthu(rs?(day)?)?s?\b/i], ['Fri', /\bfri(day)?s?\b/i]];
+  const daysOf = (o) => DAYS.filter(([, re]) => re.test(o.info?.payload?.meets || o.meets || '')).map(([d]) => d);
+  // Team levels, short: Varsity → V, JV, Frosh-Soph → FS, Frosh → F
+  const LEVEL = { Varsity: ['V', 'Varsity'], JV: ['JV', 'Junior varsity'], 'Frosh-Soph': ['FS', 'Frosh-soph'], Frosh: ['F', 'Frosh'], 'JV/Fresh': ['JV/F', 'JV and frosh'] };
+  const row = ([k, o]) => {
+    const tail = kind === 'club'
+      ? `<span class="ai-days">${daysOf(o).join(' · ')}</span>`
+      : `<span class="ai-levels">${(o.levels || []).map((l) => `<abbr title="${esc((LEVEL[l] || [l, l])[1])}">${esc((LEVEL[l] || [l])[0])}</abbr>`).join('')}</span>`;
+    return `<details class="ai-row" id="${esc(k)}" data-group="${esc(groupOf(o))}" data-days="${daysOf(o).join(' ')}" data-name="${esc(o.name.toLowerCase())}">
+      <summary><i class="ai-dot${o.info ? ' has' : ''}"></i><span class="ai-name">${esc(o.name)}</span>${tail}</summary>
+      <div class="ai-body">${details([k, o])}</div></details>`;
+  };
+  const byGroup = (grp) => items.filter(([, o]) => groupOf(o) === grp);
+  // Clubs: groups by size, biggest first; sports: by season
+  if (kind === 'club') groups.sort((a, b) => byGroup(b).length - byGroup(a).length || a.localeCompare(b));
+  $('#act-list').innerHTML = !items.length ? `<div class="empty">Nothing listed yet. <a href="${root}submit/?kind=${kind}">Add the first one</a>.</div>`
+    : `<div class="${kind === 'club' ? 'ai-cols' : 'sp-board'}">${groups.map((grp) => `<section class="ai-group" data-group="${esc(grp)}">
+        <h2>${esc(grp)} <span class="ai-count">${byGroup(grp).length}</span></h2>
+        ${kind === 'sport' ? `<div class="sp-ticks" aria-hidden="true">${byGroup(grp).map(() => '<i></i>').join('')}</div>` : ''}
+        ${byGroup(grp).map(row).join('')}</section>`).join('')}</div><div class="empty" id="act-none" hidden>No matches.</div>`;
+
+  // Clubs: the field, one dot per club, gathered by what kind of club it is (Lupi L6 Cluster Field)
+  if (kind === 'club' && items.length) {
+    // five across on a wide screen, three on a phone (so the labels stay readable)
+    const narrow = $('#act-viz').clientWidth < 640, W = narrow ? 600 : 1000, R = 7.4, GAP = 19;
+    const per = narrow ? 3 : Math.ceil(groups.length / 2), cw = W / per, rows = Math.ceil(groups.length / per);
+    let svg = '';
+    groups.forEach((grp, gi) => {
+      const list = byGroup(grp), cx = cw * (gi % per) + cw / 2, cy = 100 + Math.floor(gi / per) * 190;
+      list.forEach(([k, o], i) => {                               // a sunflower: tight, even, no overlaps
+        const r = GAP * 0.62 * Math.sqrt(i + 0.5), a = i * 2.39996;
+        svg += `<a class="cf-dot${o.info ? ' has' : ''}" href="#${esc(k)}" data-k="${esc(k)}"><circle cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="${R}"/><title>${esc(o.name)}</title></a>`;
+      });
+      svg += `<g class="cf-label" data-g="${esc(grp)}" role="button" tabindex="0"><text x="${cx}" y="${cy + 82}" text-anchor="middle">${esc(grp)}</text>
+        <text class="n" x="${cx}" y="${cy + 99}" text-anchor="middle">${list.length} club${list.length === 1 ? '' : 's'}</text></g>`;
+    });
+    $('#act-viz').innerHTML = `<svg class="cf-svg" viewBox="0 0 ${W} ${rows * 190 + 20}" role="group" aria-label="Every club as a dot, gathered by kind">${svg}</svg>
+      <p class="cf-key"><i></i> a club <i class="has"></i> students have written about it · point at a dot for its name, click to open it</p>`;
+    $('#act-viz').addEventListener('click', (e) => {
+      const d = e.target.closest('.cf-dot');
+      if (d) { e.preventDefault(); openItem(d.dataset.k); return; }
+      const l = e.target.closest('.cf-label');
+      if (l) pick(l.dataset.g);
+    });
+    $('#act-viz').addEventListener('keydown', (e) => { const l = e.target.closest('.cf-label'); if (l && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pick(l.dataset.g); } });
+  }
+
   const draw = () => {
     const q = $('#act-q').value.trim().toLowerCase();
     const g = $('#act-filter [aria-pressed="true"]')?.dataset.g || 'all';
-    const vis = items.filter(([, o]) => (g === 'all' || groupOf(o) === g) && (!q || o.name.toLowerCase().includes(q)));
-    $('#act-list').innerHTML = !items.length ? `<div class="empty">Nothing listed yet. <a href="${root}submit/?kind=${kind}">Add the first one</a>.</div>`
-      : kind === 'club' ? (vis.length ? `<div class="act-grid">${vis.map(card).join('')}</div>` : '<div class="empty">No matches.</div>')
-        : groups.map((grp) => { const list = vis.filter(([, o]) => groupOf(o) === grp);
-            return list.length ? `<section class="season"><h2>${esc(grp)}</h2><div class="act-grid">${list.map(card).join('')}</div></section>` : ''; }).join('')
-          || '<div class="empty">No matches.</div>';
+    const d = $('#act-days [aria-pressed="true"]')?.dataset.d || 'all';
+    let shown = 0;
+    for (const el of $$('#act-list .ai-row')) {
+      const ok = (g === 'all' || el.dataset.group === g) && (!q || el.dataset.name.includes(q))
+        && (d === 'all' || (d === 'none' ? !el.dataset.days : el.dataset.days.split(' ').includes(d)));
+      el.hidden = !ok; shown += ok;
+    }
+    for (const sec of $$('#act-list .ai-group')) sec.hidden = !sec.querySelector('.ai-row:not([hidden])');
+    for (const dot of $$('#act-viz .cf-dot')) dot.classList.toggle('off', !!document.getElementById(dot.dataset.k)?.hidden);
+    const none = $('#act-none'); if (none) none.hidden = shown > 0;
   };
+  const pick = (grp) => { $$('#act-filter .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.g === grp)); draw(); $('#act-list').scrollIntoView({ block: 'start', behavior: 'smooth' }); };
+  function openItem(k) {
+    const el = document.getElementById(k);
+    if (!el) return;
+    if (el.hidden) { $('#act-q').value = ''; $$('#act-filter .chip, #act-days .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.g === 'all' || c.dataset.d === 'all')); draw(); }
+    el.open = true; el.classList.add('flash'); el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    history.replaceState(null, '', `#${k}`);
+  }
   $('#act-filter').innerHTML = `<button class="chip" data-g="all" aria-pressed="true">All</button>`
     + groups.map((grp) => `<button class="chip" data-g="${esc(grp)}" aria-pressed="false">${esc(grp)}</button>`).join('');
+  if (kind === 'club') $('#act-days').innerHTML = '<span class="meta">Meets on</span><button class="chip" data-d="all" aria-pressed="true">Any day</button>'
+    + DAYS.map(([d]) => `<button class="chip" data-d="${d}" aria-pressed="false">${d}</button>`).join('') + '<button class="chip" data-d="none" aria-pressed="false">Not listed</button>';
   $('#act-filter').addEventListener('click', (e) => {
     const b = e.target.closest('[data-g]');
     if (!b) return;
     $$('#act-filter .chip').forEach((c) => c.setAttribute('aria-pressed', c === b));
+    draw();
+  });
+  $('#act-days')?.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-d]');
+    if (!b) return;
+    $$('#act-days .chip').forEach((c) => c.setAttribute('aria-pressed', c === b));
     draw();
   });
   $('#act-q').addEventListener('input', draw);
@@ -127,8 +193,8 @@ async function activities(kind) {
     b.textContent = open ? 'Show less' : 'Show more';
   });
   draw();
-  const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-  if (target) { target.classList.add('flash'); target.scrollIntoView({ block: 'center' }); }
+  const hashed = location.hash && decodeURIComponent(location.hash.slice(1));
+  if (hashed && document.getElementById(hashed)) openItem(hashed);
 }
 const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
 

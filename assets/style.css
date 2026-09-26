@@ -831,6 +831,49 @@ a.res-card:hover b { text-decoration: underline 2px var(--gold); text-underline-
 .act-card footer { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .88rem; margin-top: 8px; }
 .act-links { display: flex; gap: 12px; margin-left: auto; }
 .season h2 { margin-top: 1.2em; }
+/* the clubs field: one dot per club, gathered by kind (Lupi L6 Cluster Field) */
+.cf { margin: 8px 0 4px; }
+.cf-svg { display: block; width: 100%; height: auto; font-family: var(--sans); }
+.cf-dot circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1.3; transition: r .15s, fill .15s, opacity .2s; }
+.cf-dot.has circle { fill: var(--gold); stroke: var(--gold-ink); }
+.cf-dot:hover circle, .cf-dot:focus-visible circle { r: 10; fill: var(--ink); }
+.cf-dot.off circle { opacity: .14; }
+.cf-label { cursor: pointer; outline: none; }
+.cf-label text { font: 500 17px var(--serif); fill: var(--ink); }
+.cf-label text.n { font: 12px var(--sans); fill: var(--muted); }
+.cf-label:hover text:first-child, .cf-label:focus-visible text:first-child { text-decoration: underline; }
+.cf-key { margin: 0; color: var(--muted); font-size: .82rem; }
+.cf-key i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.3px solid var(--ink); background: var(--paper); margin: 0 3px -1px 8px; }
+.cf-key i:first-child { margin-left: 0; }
+.cf-key i.has { background: var(--gold); border-color: var(--gold-ink); }
+.act-days { margin: -4px 0 14px; align-items: center; }
+.act-days .meta { margin-right: 4px; }
+/* the index: one line a club or team, opening in place */
+.ai-cols { columns: 3 300px; column-gap: 28px; }
+.ai-group { break-inside: avoid; margin: 0 0 22px; }
+.ai-group h2 { font-size: 1.05rem; margin: 0 0 4px; padding-bottom: 4px; border-bottom: 2px solid var(--ink); display: flex; align-items: baseline; gap: 8px; }
+.ai-count { font: 600 .78rem var(--sans); color: var(--muted); }
+.ai-row { border-bottom: 1px solid var(--rule); }
+.ai-row > summary { display: flex; align-items: baseline; gap: 8px; padding: 6px 2px; cursor: pointer; list-style: none; }
+.ai-row > summary::-webkit-details-marker { display: none; }
+.ai-row > summary:hover .ai-name { text-decoration: underline; }
+.ai-row[open] > summary .ai-name { font-weight: 700; }
+.ai-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; border: 1.3px solid var(--ink); background: var(--paper); transform: translateY(-1px); }
+.ai-dot.has { background: var(--gold); border-color: var(--gold-ink); }
+.ai-name { flex: 1; min-width: 0; }
+.ai-days { flex: none; color: var(--muted); font-size: .78rem; }
+.ai-levels { flex: none; display: flex; gap: 3px; }
+.ai-levels abbr { text-decoration: none; font: 700 .68rem var(--sans); padding: 1px 5px; border: 1px solid var(--ink); border-radius: 4px; }
+.ai-levels abbr[title="Varsity"] { background: var(--ink); color: var(--paper); }
+.ai-body { padding: 2px 2px 12px 16px; }
+.ai-body .kv-grid { margin: 4px 0 8px; }
+.ai-body footer { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .86rem; }
+/* sports: the three seasons side by side */
+.sp-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; align-items: start; }
+.sp-board .ai-group h2 { font-size: 1.5rem; }
+.sp-key { margin: -4px 0 16px; }
+.sp-ticks { display: flex; gap: 3px; margin: 6px 0 8px; }
+.sp-ticks i { width: 4px; height: 14px; background: var(--ink); border-radius: 1px; }
 .flash { animation: flash 1.6s ease 2; }
 @keyframes flash { 50% { box-shadow: 0 0 0 4px var(--gold); } }
 .sec { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px; margin: 16px 0; }
