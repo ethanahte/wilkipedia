@@ -207,21 +207,31 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **The P building (P100–P107) is `campus/js/portables.js`**, drawn from Ethan's
     photos of September 2026, not by a facade kit (layout style `portable`, which
     buildings.js skips). It has two rows of four portable modules (one per room,
-    in official-map order). The roof is one level along a row, with yellow fascia.
+    in official-map order), each a standard 24 × 40 ft portable with its 7.3 m
+    short side to the courtyard (`MOD`, `DEPTH`; measured off IMG_2303 after Ethan
+    said they were too wide). The rows start at the quad (z 41.1) and end at 70.3;
+    layout.js's P-w/P-e footprints and P_XFORM must match. The roof is one level along a row, with yellow fascia.
     Each classroom has its own cantilevered canopy over the courtyard, with bare
     wall between one canopy and the next (an E in plan). There's
     board-and-batten `siding` (a texture in toon.js), yellow-framed windows,
-    yellow doors in charcoal frames with "P 10x" plates, and wall air
-    conditioners on the backs. The courtyard is open to the sky, raised 0.45 m
+    yellow doors in charcoal frames near each module's right-hand end, and wall air
+    conditioners on the backs. The rooms' clickable number plates sit on the
+    wall between each door and its window at eye height: `portableDoors()`
+    feeds rooms.js, which skips its usual nearest-wall-at-the-eave placement for
+    these rooms. The east row's back has groundcover, flax and trees (IMG_2306,
+    2308). The west row's back has bark mulch and a clipped `hedge()` that wraps
+    round its ball-field end (IMG_2307), and the east row's ball-field end has a
+    hedge too. The courtyard is open to the sky, raised 0.45 m
     (`FLOOR`, walkable through addHeight), with shade trees in wooden bench
     surrounds and umbrella tables. At the ball-field end are the W · H · S
     planters (2.1 m wide) with two 2.7 m flights of steps between them. Two
     umbrella tables sit on the centre line between the three trees. At the quad
-    end, per Ethan: two steps up from the quad, split in two by a black planter
+    end, per Ethan: two steps up from the quad, split in two by a small (1.8 m) black planter
     with a tree and painted rocks (a handrail beside it), and a plain square
     black planter, no tree, beside P100. Facing in from the quad, the ramp is on the left (along
-    the east row's end wall) and two drinking fountains are on the right
-    (against the west row's, to the right of a U-shaped barrier). A picket
+    the east row's end wall) and two drinking fountains are on the right,
+    out by the far west corner of the west row's end wall, with a U-shaped
+    barrier just to their left (IMG_2322). A picket
     fence runs in an L down the ramp's outer side, across the landing's front and
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different

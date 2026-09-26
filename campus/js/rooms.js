@@ -1,7 +1,8 @@
 // Rooms. The list comes from the official campus map (data/map.json on the
 // site), never typed in here. Each room's box on that map is carried into the
 // 3D campus through its building's own map→world transform (layout.js), and a
-// numbered plate goes on the nearest outside wall at that floor's height.
+// numbered plate goes on the nearest outside wall at that floor's height. The P
+// building's classrooms (portables.js) have real doors, so theirs go beside the door.
 //
 // Plates are clickable (onRoomSelect), and ?room=B107 lands you in front of one.
 // Real doors and interiors replace the plates building by building in later phases.
@@ -9,6 +10,7 @@
 import * as THREE from 'three';
 import { ROOM_XFORM, P_XFORM, PLACES, BUILDINGS } from './layout.js';
 import { wallEdges } from './buildings.js';
+import { portableDoors } from './portables.js';
 import { gbuffer, TOON, maxAniso } from './toon.js';
 
 const FLOOR_H = { B: 4.5, R: 4.4 };
@@ -56,8 +58,17 @@ const OWNER = {
 export async function loadRooms(url, group) {
   const data = await fetch(url).then((r) => r.json());
   const placed = [];
+  const doors = portableDoors();
   for (const r of data.rooms) {
     if (r.kind === 'building') continue;
+    // The P building's classrooms have real doors: the plate goes beside each one.
+    const d = doors[r.id];
+    if (d) {
+      const room = { id: r.id, label: r.label, building: r.building, buildingName: r.buildingName, floor: 1, kind: r.kind,
+        ...d, rot: Math.atan2(d.nx, d.nz), stand: 4.5, idx: rooms.length };
+      rooms.push(room); byId.set(r.id, room);
+      continue;
+    }
     const spot = worldSpot(r);
     if (!spot) continue;
     const pool = BUILDINGS.filter((b) => (OWNER[r.building] || []).includes(b.id));
@@ -140,6 +151,6 @@ export function placeHighlight(h, r) {
 
 // Where to stand to read a room's plate: a few metres out, facing it.
 export function standFor(r) {
-  const d = r.floor > 1 ? 8 + r.floor * 2.5 : 7;
-  return { x: r.x + r.nx * d, z: r.z + r.nz * d, yaw: Math.atan2(r.nx, r.nz), pitch: r.floor > 1 ? Math.atan2(r.y - 1.6, d) * 0.9 : 0.08 };
+  const d = r.stand || (r.floor > 1 ? 8 + r.floor * 2.5 : 7);
+  return { x: r.x + r.nx * d, z: r.z + r.nz * d, yaw: Math.atan2(r.nx, r.nz), pitch: r.floor > 1 ? Math.atan2(r.y - 1.6, d) * 0.9 : r.stand ? 0 : 0.08 };
 }
