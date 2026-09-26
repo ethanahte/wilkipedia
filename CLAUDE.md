@@ -154,8 +154,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     all of social science and SVCTE, whose prerequisites never name a class.
     Don't invent links. The one exception is `SEQUENCES` in pathways.py, all
     from Ethan: `GRADE_YEARS` (English and social science; any class of one
-    year leads to any of the next; AP Psych is in both 11th and 12th, and a
-    `loose` link into a class of its own first year doesn't count for columns) and `LEVELS` (EL, Japanese 1 → 2). They're
+    year leads to any of the next; AP Psych stays unlinked, Ethan's call. A
+    class listed in two years would get `loose` links that don't count for columns) and `LEVELS` (EL, Japanese 1 → 2). They're
     drawn as gold `seq` lines labelled "next grade or level, not a
     prerequisite", and the info bar lists them as "Next year or level", apart
     from "Leads to". `EL_EXIT`: finishing EL Advanced moves you into the regular

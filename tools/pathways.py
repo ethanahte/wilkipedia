@@ -69,8 +69,8 @@ GRADE_YEARS = [
      ["english-11", "ap-english-language-and-composition", "honors-british-literature"],
      ["ap-english-literature-and-composition", "csu-expository-reading-and-writing"]],
     [["world-history", "ap-european-history"],
-     ["us-history", "ap-us-history", "ap-psychology"],
-     ["civics", "economics", "ap-us-government-and-politics", "ap-macroeconomics", "ap-psychology"]],   # AP Psych: 11th or 12th (Ethan)
+     ["us-history", "ap-us-history"],
+     ["civics", "economics", "ap-us-government-and-politics", "ap-macroeconomics"]],   # AP Psych stays unlinked (Ethan)
 ]
 # By level: EL follows the catalog's beginning / intermediate / advanced
 # descriptions; Japanese 1 comes before Japanese 2 (Ethan; the catalog lists no
