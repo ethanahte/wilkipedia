@@ -104,6 +104,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   renders the current school year's schedule with a "Not this year's" tag when
   it's older, and puts the rest under "Past years". It's used on the map's room
   panel (only that room's years) and on teacher pages (`#t-sched`, every room).
+  Period boxes accept only a full catalog class name or "Prep" (checked in
+  `renderFields`, saved in the catalog's spelling), and `courseMatcher` links exact
+  names only: no guessing from short names.
   `teacher_section.schedule` is `legacy: true`: hidden on new forms, still shown
   and editable where it already exists.
 - **Welcome tour** (`tour.js`, `startTour(name)`): speech bubbles with a

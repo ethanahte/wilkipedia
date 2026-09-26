@@ -196,18 +196,11 @@ function paintThemeToggle() {
 // "Room b-204" / "b204" / "B 204" all mean B204
 export const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '');
 
-// Finds the class a schedule names: the exact catalog name, or a short form that
-// starts exactly one class's name ("AP Macro" → AP Macroeconomics). Anything
-// less certain stays unlinked rather than guessed.
+// Finds the class a schedule names by its full catalog name (the form only
+// accepts full names). Nothing is guessed: anything else stays unlinked.
 export function courseMatcher(list) {
   const exact = Object.fromEntries(list.map((c) => [c.name.toLowerCase(), c.slug]));
-  return (name) => {
-    const n = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
-    if (exact[n]) return exact[n];
-    if (n.length < 4) return null;
-    const hits = list.filter((c) => c.name.toLowerCase().startsWith(n));
-    return hits.length === 1 ? hits[0].slug : null;
-  };
+  return (name) => exact[String(name || '').trim().toLowerCase().replace(/\s+/g, ' ')] || null;
 }
 
 // One teacher's schedules, newest year first: [{year, periods} | {year, text}].
@@ -490,7 +483,7 @@ export async function requireUser(s, why = 'to do that') {
 // ── reviewer editing ──
 // Opens the submission's own form, filled in, plus a required reason. Saving
 // keeps the old version and notifies the author (edit_submission in schema.sql).
-export function openEditor(store, sub, onSaved) {
+export async function openEditor(store, sub, onSaved) {
   const wrap = document.createElement('div');
   wrap.className = 'modal';
   wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ed-title">
@@ -505,6 +498,9 @@ export function openEditor(store, sub, onSaved) {
       <div class="r-actions"><button class="btn">Save changes</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
     </form>`;
   document.body.append(wrap);
+  if (KINDS[sub.kind]?.fields.some((f) => f.type === 'periods') && !suggestions.periods?.length) {
+    suggestions.periods = (await courses()).courses.map((c) => c.name);
+  }
   const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
   const close = () => wrap.remove();
   wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
@@ -635,7 +631,13 @@ export function renderFields(el, kind, preset = {}) {
     return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label>
       ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;
   }).join('');
-  const periodsOf = (f) => Object.fromEntries(PERIODS.map((n) => [n, $(`[name="${f.key}.${n}"]`, el).value.trim()]).filter(([, v]) => v));
+  // Period boxes take a full class name from the catalog, or "Prep", written the catalog's way
+  const canon = () => new Map(['Prep', ...(suggestions.periods || [])].map((n) => [n.toLowerCase(), n]));
+  const periodsOf = (f) => {
+    const c = canon();
+    return Object.fromEntries(PERIODS.map((n) => [n, $(`[name="${f.key}.${n}"]`, el).value.trim().replace(/\s+/g, ' ')])
+      .filter(([, v]) => v).map(([n, v]) => [n, c.get(v.toLowerCase()) || v]));
+  };
   return {
     values() {
       const out = {};
@@ -649,9 +651,23 @@ export function renderFields(el, kind, preset = {}) {
     check() {
       for (const f of fields) {
         if (f.type === 'periods') {
-          const bad = f.required && !Object.keys(periodsOf(f)).length;
+          const vals = periodsOf(f);
+          const bad = f.required && !Object.keys(vals).length;
           $(`#f-${f.key}`, el).classList.toggle('invalid', bad);
           if (bad) { $(`[name="${f.key}.1"]`, el).focus(); return 'Fill in at least one period.'; }
+          const names = suggestions.periods || [];
+          $$(`#f-${f.key} input`, el).forEach((i) => i.classList.remove('invalid'));
+          if (!names.length) continue;                    // catalog not loaded: nothing to check against
+          const c = canon();
+          for (const [n, v] of Object.entries(vals)) {
+            if (c.has(v.toLowerCase())) continue;
+            const input = $(`[name="${f.key}.${n}"]`, el);
+            input.classList.add('invalid');
+            input.focus();
+            const words = v.toLowerCase().split(/\s+/);
+            const near = names.filter((x) => words.every((w) => x.toLowerCase().includes(w))).slice(0, 3);
+            return `Period ${n}: “${v}” isn’t a full class name. Pick it from the list${near.length ? ` (maybe ${near.join(' or ')}?)` : ''}, or type Prep.`;
+          }
           continue;
         }
         const input = $(`[name="${f.key}"]`, el);
