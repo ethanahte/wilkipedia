@@ -29,9 +29,10 @@ export const BUILDINGS = [
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
   { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, poly: rect(33.2, -22.9, 54.7, 25.2), floors: 3 },
-  // The P building: two wings of classrooms with a covered corridor between them.
-  { id: 'P-w', name: 'P building', style: 'p', h: 4.2, poly: rect(-11.7, 41.1, 2.3, 77.6) },
-  { id: 'P-e', name: 'P building', style: 'p', h: 4.2, poly: rect(14, 41.1, 28, 77.6) },
+  // The P building (P100–P107): two rows of portable classrooms facing each other
+  // across an open courtyard. Drawn by portables.js from photos, not by the kits here.
+  { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-11.7, 41.1, 2.3, 77.6) },
+  { id: 'P-e', name: 'P building', style: 'portable', h: 3.6, poly: rect(14, 41.1, 28, 77.6) },
   { id: 'AUXGYM', name: 'Small gym (Auxiliary Gym)', style: 'gym', h: 9, poly: rect(44.4, 36, 79.5, 61.2) },
   // Gym complex
   { id: 'GYM-n', name: 'Wrestling, weight and locker rooms', style: 'gym', h: 5.5, poly: rect(74.8, -47.7, 115.4, -31.4) },

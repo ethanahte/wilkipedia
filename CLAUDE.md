@@ -204,6 +204,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     cedar's trunk, +x east, +z south. Measured off the Apple Maps satellite
     view (0.4675 m/px) and matched to the official campus map. Fix a building by
     fixing its numbers there; walls, colliders, the minimap and room plates follow.
+  - **The P building (P100–P107) is `campus/js/portables.js`**, drawn from Ethan's
+    photos of September 2026, not by a facade kit (layout style `portable`, which
+    buildings.js skips). It has two rows of four portable modules (one per room,
+    in official-map order), stepped roofs with yellow fascia, and deep
+    cantilevered canopies on the courtyard side with no posts. There's
+    board-and-batten `siding` (a texture in toon.js), yellow-framed windows,
+    yellow doors in charcoal frames with "P 10x" plates, and wall air
+    conditioners on the backs. The courtyard is open to the sky, raised 0.45 m
+    (`FLOOR`, walkable through addHeight), with shade trees in wooden bench
+    surrounds and umbrella tables. At the ball-field end are the W · H · S
+    planters with two flights of steps. Not photographed yet: the ramps, the
+    drinking fountains, and how the courtyard meets the quad (drawn as a slope).
+    The other P clusters (P108–P120) still use the old `p` kit.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
     `campus/js/osm.js` (generated, don't hand-edit): every house footprint

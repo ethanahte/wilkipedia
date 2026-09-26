@@ -232,6 +232,7 @@ export function buildBuildings(W) {
     const wall = WALL[b.style] || C.cream;
     const roofY = b.h - 0.5;
     if (b.style === 'theatre-lobby') { lobbyGlass(W, b); continue; }
+    if (b.style === 'portable') continue;           // portables.js
     W.prism('stucco', b.poly, 0, roofY, wall, { top: true, topMat: 'roof', topCol: C.roof });
     // no parapet on a wall shared with a neighbour at least as tall: it would be
     // hidden, and its coping would overlap the neighbour's and flicker

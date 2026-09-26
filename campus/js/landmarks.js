@@ -127,10 +127,6 @@ export function buildLandmarks(W, group, fontFamily) {
   W.slab('flat', -17.8, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.1, wz1 - 0.3, x + 0.1, wz1 - 0.1, 0, 3.5, fin);
 
-  // ── P building: the covered corridor between the two wings ──
-  W.slab('flat', 2.3, 41.1, 14, 77.6, 3.65, 3.9, fin);
-  for (let zz = 45; zz < 77; zz += 6) W.slab('flat', 8.05, zz - 0.12, 8.3, zz + 0.12, 0, 3.65, fin);
-
   // ── the Career Center's yellow awning on B, over its quad-side door ──
   awning(W, -54.7, 26.2, 31.2, 1.6, 2.7, color('#e8b930'), 'x');
 

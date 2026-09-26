@@ -16,6 +16,7 @@ import { makeTextures, makeMaterials, setAniso, setHardLight, SUN_VIEW, DAY as D
 import { buildGround } from './ground.js';
 import { buildBuildings } from './buildings.js';
 import { buildLandmarks } from './landmarks.js';
+import { buildPortables } from './portables.js';
 import { buildQuad } from './quad.js';
 import { buildProps } from './props.js';
 import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, makeRain, makeRipples, makeLightPools, makeLightCones, SUN, HORIZON } from './life.js';
@@ -102,6 +103,7 @@ async function boot() {
   steps.push(['Raising the buildings', () => buildBuildings(W)]);
   const decals = new THREE.Group(); scene.add(decals);
   steps.push(['Hanging the signs', () => buildLandmarks(W, decals, fontFamily)]);
+  steps.push(['Setting down the portables', () => buildPortables(W, decals)]);
   steps.push(['Planting the cedar', () => buildQuad(W)]);
   steps.push(['Filling in the neighbourhood', () => buildProps(W, scene, quality, M)]);
   let sky, clouds, birds, flags, leaves, rain, ripples, pools, cones;

@@ -110,7 +110,7 @@ function stage(W, R) {
   for (const s of [-1, 1]) addBox(cx + s * (r + 0.1) - 0.6, cz - 0.4, cx + s * (r + 0.1) + 0.6, cz + 2.0);
 }
 
-function umbrellaTable(W, x, z, R) {
+export function umbrellaTable(W, x, z, R) {
   const rot = R() * Math.PI;
   W.cyl('flat', x, 0, z, 0.06, 0.06, 0.74, 6, black);
   W.cyl('flat', x, 0.72, z, 0.62, 0.62, 0.05, 16, black);

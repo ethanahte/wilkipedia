@@ -259,6 +259,14 @@ export function makeTextures() {
     g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillRect(5, 0, 3, h);
   }, { repeat: [0.55, 4] });
 
+  // Board-and-batten siding (the P portables): a groove every 0.4 m, lit on one edge.
+  T.siding = canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+    noise(g, w, h, 8, 5);
+    g.fillStyle = 'rgba(70,60,45,0.22)'; g.fillRect(0, 0, 3, h);
+    g.fillStyle = 'rgba(255,255,255,0.7)'; g.fillRect(3, 0, 2, h);
+  }, { repeat: [0.4, 3] });
+
   T.brick = canvasTex(128, 64, (g, w, h) => {
     g.fillStyle = '#8f8a86'; g.fillRect(0, 0, w, h);
     for (let row = 0; row < 4; row++) {
@@ -330,6 +338,7 @@ export function makeMaterials(T) {
     solar: toon({ map: T.solar }),
     metal: toon({ map: T.metal }),
     brick: toon({ map: T.brick }),
+    siding: toon({ map: T.siding }),
     mosaic: toon({ map: T.mosaic }),
     leaf: toon({ side: THREE.DoubleSide }),
     foliage: gbuffer(new THREE.MeshToonMaterial({ gradientMap: TOON, vertexColors: true, map: T.leaves, alphaTest: 0.5, side: THREE.DoubleSide }), { ink: 'soft' }),
