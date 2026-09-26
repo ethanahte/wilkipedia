@@ -16,7 +16,7 @@ const LANES = [['english', 'English'], ['math', 'Math'], ['science', 'Science'],
                ['world-language', 'World language'], ['visual-performing-arts', 'Arts'], ['practical-arts', 'Practical arts'],
                ['physical-education', 'PE'], ['electives', 'Electives'], ['svcte', 'SVCTE']];
 const W = 1000, GUTTER = 104, TOP = 34, ROW = 27, LANE_PAD = 14;
-const HINT = 'Point at a class to see what leads to it and where it goes. Grey lines are prerequisites quoted from the course catalog; gold lines are the order Wilcox students take English in; a hollow station is a class linked to no other.';
+const HINT = 'Point at a class to see what leads to it and where it goes. Grey lines are prerequisites quoted from the course catalog; gold lines only show which year or level comes next, not a prerequisite; a hollow station is a class linked to no other.';
 
 // Short names for the map only (the info bar and class pages use full names)
 const SHORT = {
@@ -89,6 +89,9 @@ export async function mount(el, s) {
   const { lanes, pos, height, levels, colW } = layout(data);
   const bySlug = Object.fromEntries(data.nodes.map((n) => [n.slug, n]));
   const out = {}, into = {};
+  const kindOf = {};                              // "from>to" → 'pre' (catalog prerequisite), 'sequence' or 'exit'
+  for (const e of data.edges) kindOf[`${e.from}>${e.to}`] = e.kind || 'pre';
+  const outOf = (slug, kind) => (out[slug] || []).filter((t) => kindOf[`${slug}>${t}`] === kind);
   const exits = {};                               // EL Advanced and the classes it leads out into
   for (const e of data.edges) { (out[e.from] ||= []).push(e.to); (into[e.to] ||= []).push(e.from); if (e.kind === 'exit') exits[e.from] = exits[e.to] = true; }
   const walk = (start, next) => { const seen = new Set(); const q = [start]; while (q.length) for (const n of next[q.shift()] || []) if (!seen.has(n)) { seen.add(n); q.push(n); } return seen; };
@@ -176,7 +179,8 @@ export async function mount(el, s) {
     info.innerHTML = `<div class="pw-card">
       <div><a class="pw-name" href="${courseUrl(slug)}">${esc(n.name)}</a>${n.grades ? `<span class="meta"> · grades ${esc(n.grades)}</span>` : ''}</div>
       ${n.prereq ? `<p><span class="pw-k">Catalog prerequisite</span> “${esc(n.prereq)}”</p>` : '<p><span class="pw-k">Catalog prerequisite</span> none listed</p>'}
-      ${out[slug] ? `<p><span class="pw-k">Leads to</span> ${names(out[slug])}</p>` : ''}
+      ${outOf(slug, 'pre').length ? `<p><span class="pw-k">Leads to</span> ${names(outOf(slug, 'pre'))}</p>` : ''}
+      ${outOf(slug, 'sequence').length ? `<p><span class="pw-k">Next year or level</span> ${names(outOf(slug, 'sequence'))}</p>` : ''}
       ${exits[slug] ? '<p><span class="pw-k">Leaving EL</span> Finish EL Advanced to move into the English class for your grade.</p>' : ''}
       <a class="add-link" href="${courseUrl(slug)}">Open the class page →</a></div>`;
   }

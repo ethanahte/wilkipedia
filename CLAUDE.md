@@ -152,13 +152,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     before general). A class the catalog links to nothing is a hollow `solo`
     station in a row below its subject's columns, in grade order. That covers
     all of social science and SVCTE, whose prerequisites never name a class.
-    Don't draw grade sequences as links. The one exception is `SEQUENCES` in
-    pathways.py: the order students take English (and EL) in, given by Ethan
-    and drawn as gold `seq` lines, labelled as such, never as prerequisites.
-    Any English class of one year leads to any of the next (`ENGLISH_YEARS`).
-    `EL_EXIT`: finishing EL Advanced moves you into the regular English class
-    for your grade. These are dashed gold `exit` lines shown only when pointed
-    at, and left out of the column depth.
+    Don't invent links. The one exception is `SEQUENCES` in pathways.py, all
+    from Ethan: `GRADE_YEARS` (English and social science; any class of one
+    year leads to any of the next) and `LEVELS` (EL, Japanese 1 → 2). They're
+    drawn as gold `seq` lines labelled "next grade or level, not a
+    prerequisite", and the info bar lists them as "Next year or level", apart
+    from "Leads to". `EL_EXIT`: finishing EL Advanced moves you into the regular
+    English class for your grade. These are dashed gold `exit` lines shown only
+    when pointed at, and left out of the column depth.
     `HIDDEN` leaves the PRT and BSC classes off the map (Ethan). The palette and previews skip
     a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search

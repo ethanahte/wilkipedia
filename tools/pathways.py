@@ -56,25 +56,31 @@ ALIASES = {
     r"AP Language": "ap-spanish-language-and-culture",
 }
 
-# The order Wilcox students take English in. The catalog names no class as a
-# prerequisite for any English class, so this comes from Ethan (Wilkipedia's
-# founder, a Wilcox student), September 2026: each year you can take any English
-# class offered for that year, whatever you took the year before (Honors 9, then
-# regular 10, British Literature in 11, ERWC in 12). So every class of one year
-# links to every class of the next. The map draws these in gold as the order
-# students take them in, never as a catalog prerequisite. The EL order follows the
-# catalog's beginning / intermediate / advanced descriptions. Correct them only
-# from Ethan.
-ENGLISH_YEARS = [
-    ["english-9", "honors-english-9"],
-    ["english-10", "honors-english-10"],
-    ["english-11", "ap-english-language-and-composition", "honors-british-literature"],
-    ["ap-english-literature-and-composition", "csu-expository-reading-and-writing"],
+# Grade and level order, from Ethan (Wilkipedia's founder, a Wilcox student),
+# September 2026. These are NOT prerequisites: the catalog names none for these
+# classes. They show which classes belong to which year (or level), and the map
+# draws them in gold and labels them as such. Correct them only from Ethan.
+# By grade: each year you may take any of that year's classes, whatever you took
+# the year before (Honors 9, then regular 10, British Literature in 11, ERWC in 12),
+# so every class of one year links to every class of the next.
+GRADE_YEARS = [
+    [["english-9", "honors-english-9"],
+     ["english-10", "honors-english-10"],
+     ["english-11", "ap-english-language-and-composition", "honors-british-literature"],
+     ["ap-english-literature-and-composition", "csu-expository-reading-and-writing"]],
+    [["world-history", "ap-european-history"],
+     ["us-history", "ap-us-history"],
+     ["civics", "economics", "ap-us-government-and-politics", "ap-macroeconomics"]],
 ]
-SEQUENCES = [(a, b) for this, nxt in zip(ENGLISH_YEARS, ENGLISH_YEARS[1:]) for a in this for b in nxt] + [
+# By level: EL follows the catalog's beginning / intermediate / advanced
+# descriptions; Japanese 1 comes before Japanese 2 (Ethan; the catalog lists no
+# prerequisite for Japanese 2).
+LEVELS = [
     ("el-beginning", "el-intermediate"), ("el-beginning-grammar-vocabulary-reading", "el-intermediate"),
-    ("el-intermediate", "el-advanced"),
+    ("el-intermediate", "el-advanced"), ("japanese-1", "japanese-2"),
 ]
+SEQUENCES = [(a, b) for years in GRADE_YEARS for this, nxt in zip(years, years[1:]) for a in this for b in nxt] + LEVELS
+
 # Leaving EL (Ethan): you must finish EL Advanced to move into the regular English
 # class for your grade. Drawn only when one of these is pointed at, and left out of
 # the column count, since it can lead back to English 9.
