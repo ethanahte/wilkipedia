@@ -207,17 +207,21 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **The P building (P100–P107) is `campus/js/portables.js`**, drawn from Ethan's
     photos of September 2026, not by a facade kit (layout style `portable`, which
     buildings.js skips). It has two rows of four portable modules (one per room,
-    in official-map order), stepped roofs with yellow fascia, and deep
-    cantilevered canopies on the courtyard side with no posts. There's
+    in official-map order). The roof is one level along a row, with yellow fascia.
+    Each classroom has its own cantilevered canopy over the courtyard, with bare
+    wall between one canopy and the next (an E in plan). There's
     board-and-batten `siding` (a texture in toon.js), yellow-framed windows,
     yellow doors in charcoal frames with "P 10x" plates, and wall air
     conditioners on the backs. The courtyard is open to the sky, raised 0.45 m
     (`FLOOR`, walkable through addHeight), with shade trees in wooden bench
     surrounds and umbrella tables. At the ball-field end are the W · H · S
-    planters with two flights of steps. At the quad end, per Ethan: two steps
-    up from the quad. Facing in from the quad, the ramp is on the left (along
+    planters (2.1 m wide) with two 2.7 m flights of steps between them. Two
+    umbrella tables sit on the centre line between the three trees. At the quad
+    end, per Ethan: two steps up from the quad, with one handrail up the middle
+    and a square black planter (tree, painted rocks) beside P100. Facing in from the quad, the ramp is on the left (along
     the east row's end wall) and two drinking fountains are on the right
-    (against the west row's). The other P clusters (P108–P120) look different
+    (against the west row's, to the right of a U-shaped barrier). The ramp's
+    rails run only down the slope. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes

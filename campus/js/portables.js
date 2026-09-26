@@ -2,10 +2,11 @@
 // portable classrooms facing each other across an open, tree-shaded courtyard
 // that runs from the ball-field end up to the quad.
 //   - every classroom is its own module (four a row, the rooms on the official
-//     map), and the roofs step a little from one module to the next
+//     map); the roof is one level along a row
 //   - white board-and-batten siding over a plain skirting band
 //   - a low-slope metal roof with a yellow fascia: a deep canopy over the
-//     courtyard walk (cantilevered, no posts) and a short eave everywhere else
+//     courtyard walk for each classroom (cantilevered, no posts, bare wall between
+//     one classroom's and the next: an E in plan) and a short eave everywhere else
 //   - courtyard side: a yellow door in a charcoal frame with its room number and
 //     a wall light, then a wide window in a thick yellow frame
 //   - outer sides: yellow-framed windows and wall-hung air conditioners with
@@ -14,9 +15,10 @@
 //     trees down the middle in wooden bench surrounds, umbrella tables, and at
 //     the ball-field end three black planters lettered W · H · S with steps
 //     and grey pipe handrails between them
-// At the quad end (from Ethan): two steps up from the quad; facing in from the
-// quad, the ramp is on the left (along the east row's end wall) and the two
-// drinking fountains on the right (against the west row's end wall).
+// At the quad end (from Ethan): two steps up from the quad, a square planter
+// beside P100; facing in from the quad, the ramp is on the left (along the east
+// row's end wall) and the drinking fountains on the right (against the west
+// row's end wall, to the right of a U-shaped barrier).
 
 import * as THREE from 'three';
 import { color, rng } from './geo.js';
@@ -40,10 +42,11 @@ const Z = [41.1, 50.225, 59.35, 68.475, 77.6];                     // module edg
 const COURT = { x0: 2.3, x1: 14 };
 const ROWS = [
   // inner: the courtyard side's x; dir: which way the courtyard side faces (+1 = east)
-  { id: 'P-w', x0: -11.7, x1: 2.3, inner: 2.3, dir: 1, rooms: ['P100', 'P101', 'P102', 'P103'], rise: [0, 0.22, 0.08, 0.3] },
-  { id: 'P-e', x0: 14, x1: 28, inner: 14, dir: -1, rooms: ['P107', 'P106', 'P105', 'P104'], rise: [0.18, 0.04, 0.26, 0.1] },
+  { id: 'P-w', x0: -11.7, x1: 2.3, inner: 2.3, dir: 1, rooms: ['P100', 'P101', 'P102', 'P103'] },
+  { id: 'P-e', x0: 14, x1: 28, inner: 14, dir: -1, rooms: ['P107', 'P106', 'P105', 'P104'] },
 ];
-const WALL = 3.2;                           // eave height above the driveway
+const WALL = 3.2;                           // eave height above the driveway (one level along a row)
+const GAP = 0.6;                            // wall left bare either side of a module joint, between two canopies
 
 export function buildPortables(W, group) {
   const R = rng(107), WR = rng(108);
@@ -58,7 +61,7 @@ export function buildPortables(W, group) {
 
 // ── one classroom ──
 function module(W, group, row, i, pane) {
-  const z0 = Z[i], z1 = Z[i + 1], zm = (z0 + z1) / 2, H = WALL + row.rise[i];
+  const z0 = Z[i], z1 = Z[i + 1], zm = (z0 + z1) / 2, H = WALL;
   const { x0, x1, inner, dir } = row;
   const outer = dir > 0 ? x0 : x1;             // the back wall's x
   // walls: siding over a skirting band
@@ -66,18 +69,18 @@ function module(W, group, row, i, pane) {
   W.prism('siding', poly, 0.5, H, C.siding, { top: false });
   W.prism('flat', [[x0 - 0.03, z0 - 0.03], [x1 + 0.03, z0 - 0.03], [x1 + 0.03, z1 + 0.03], [x0 - 0.03, z1 + 0.03]], 0, 0.5, C.skirt, { top: false });
 
-  // roof: a thin slab reaching 2.2 m over the courtyard walk and 0.35 m elsewhere
-  const endN = i === 0 ? 0.3 : 0, endS = i === 3 ? 0.3 : 0;
-  const rx0 = dir > 0 ? x0 - 0.35 : x0 - 2.2, rx1 = dir > 0 ? x1 + 2.2 : x1 + 0.35;
-  W.slab('flat', rx0, z0 - endN, rx1, z1 + endS, H, H + 0.14, C.soffit);
-  // (seams run across the module, from the courtyard to the back)
-  W.quad('metal', [rx0, H + 0.145, z0 - endN], [rx0, H + 0.145, z1 + endS], [rx1, H + 0.145, z1 + endS], [rx1, H + 0.145, z0 - endN], C.roof, 'auto');
-  // the yellow fascia round its edge
-  const f = 0.26, t = 0.05;
-  W.slab('flat', rx0 - t, z0 - endN - t, rx0, z1 + endS + t, H - 0.06, H + f - 0.06, C.yellow);
-  W.slab('flat', rx1, z0 - endN - t, rx1 + t, z1 + endS + t, H - 0.06, H + f - 0.06, C.yellow);
-  W.slab('flat', rx0, z0 - endN - t, rx1, z0 - endN, H - 0.06, H + f - 0.06, C.yellow);
-  W.slab('flat', rx0, z1 + endS, rx1, z1 + endS + t, H - 0.06, H + f - 0.06, C.yellow);
+  // roof: one level along the row, a 0.35 m eave at the back and the row's ends.
+  // Over the courtyard each classroom has its OWN canopy, 2.2 m deep, with bare
+  // wall between it and the next one's (Ethan: "like an E", photo IMG_2304).
+  const first = i === 0, last = i === 3;
+  const endN = first ? 0.3 : 0, endS = last ? 0.3 : 0;
+  const bx = dir > 0 ? x0 - 0.35 : x1 + 0.35;                 // the back eave's edge
+  roofPiece(W, Math.min(bx, inner), z0 - endN, Math.max(bx, inner), z1 + endS, H,
+    { back: dir > 0 ? 'x0' : 'x1', n: first, s: last });
+  const cz0 = first ? z0 - endN : z0 + GAP, cz1 = last ? z1 + endS : z1 - GAP;
+  const cx = inner + dir * 2.2;
+  roofPiece(W, Math.min(inner, cx), cz0, Math.max(inner, cx), cz1, H,
+    { back: dir > 0 ? 'x1' : 'x0', n: true, s: true });
 
   // courtyard side: door (its number and a light to its left, as in the photos), then the big window.
   // face(): local +z points out of the wall and local -x is the left of someone facing it
@@ -96,6 +99,9 @@ function module(W, group, row, i, pane) {
   numberPlate(group, row.rooms[i], inner + dir * 0.03, FLOOR + 1.55, doorZ + left * 0.95, dir);
   face(inner + dir * 0.03, FLOOR + 1.75, winZ, () => yellowWindow(W, 2.3, 1.25, pane()));
 
+  // the east row's end wall facing the quad has a window too (IMG_2321)
+  if (first && dir < 0) W.with(x0 + 4.2, 2.25, z0 - 0.03, Math.PI, () => yellowWindow(W, 2.0, 1.15, pane()));
+
   // the back: a window and a wall-hung air conditioner, with its conduit and a downspout
   const back = -dir;
   const bface = (d, y, fn) => W.with(outer + back * 0.02, y, zm + d, back > 0 ? Math.PI / 2 : -Math.PI / 2, fn);
@@ -108,6 +114,18 @@ function module(W, group, row, i, pane) {
     W.box('flat', 0.62, 0.95, 0.07, 0.24, 0.3, 0.1, C.hvac);                             // its box
   });
   bface(dir > 0 ? -(z1 - z0) / 2 + 0.15 : (z1 - z0) / 2 - 0.15, 0, () => W.box('flat', 0, H / 2, 0.06, 0.09, H, 0.09, C.siding));   // downspout
+}
+
+// A flat roof piece: cream soffit, metal top (seams running across the row), and
+// a yellow fascia on the edges named: back ('x0' or 'x1', the long edge), n, s.
+function roofPiece(W, x0, z0, x1, z1, H, { back, n, s }) {
+  W.slab('flat', x0, z0, x1, z1, H, H + 0.14, C.soffit);
+  W.quad('metal', [x0, H + 0.145, z0], [x0, H + 0.145, z1], [x1, H + 0.145, z1], [x1, H + 0.145, z0], C.roof, 'auto');
+  const f0 = H - 0.06, f1 = H + 0.2, t = 0.05;
+  if (back === 'x0') W.slab('flat', x0 - t, z0 - (n ? t : 0), x0, z1 + (s ? t : 0), f0, f1, C.yellow);
+  if (back === 'x1') W.slab('flat', x1, z0 - (n ? t : 0), x1 + t, z1 + (s ? t : 0), f0, f1, C.yellow);
+  if (n) W.slab('flat', x0, z0 - t, x1, z0, f0, f1, C.yellow);
+  if (s) W.slab('flat', x0, z1, x1, z1 + t, f0, f1, C.yellow);
 }
 
 // A wide window in a thick yellow frame: two sliders either side of a fixed centre pane.
@@ -158,32 +176,52 @@ function courtyard(W, group, R) {
   // the quad end (Ethan: two steps up from the quad; the ramp on the left and
   // the drinking fountains on the right, facing in from the quad)
   const RAMP = { x0: 16, x1: 21.2, z0: 39.3, z1: 40.9 }, landX = 12.2;
-  W.slab('flat', x0, zN - 0.6, landX, zN, 0, FLOOR / 2, C.concrete);                  // the lower step
+  // a square black planter right beside P100, a tree and painted rocks in it (IMG_2321)
+  const NQ = { x0: 2.4, x1: 5.0, z0: zN - 1.9, z1: zN + 0.7 }, nqTop = 0.55;
+  W.slab('flat', NQ.x0, NQ.z0, NQ.x1, NQ.z1, 0, nqTop, C.planter);
+  W.slab('flat', NQ.x0 + 0.13, NQ.z0 + 0.13, NQ.x1 - 0.13, NQ.z1 - 0.13, nqTop - 0.08, nqTop - 0.02, C.soil);
+  const nqx = (NQ.x0 + NQ.x1) / 2 + 0.3, nqz = (NQ.z0 + NQ.z1) / 2 - 0.2;
+  shadeTree(W, nqx, nqz, R, { h: 8.5, y: nqTop - 0.05, cols: G.leaf });
+  const ROCKS = ['#d65a5a', '#e0b73d', '#6a9ed8', '#8fc46a', '#b58ad6', '#f0efe8', '#e98f4f'].map(color);
+  for (let k = 0; k < 16; k++) {
+    const rx = NQ.x0 + 0.3 + R() * (NQ.x1 - NQ.x0 - 0.6), rz = NQ.z0 + 0.3 + R() * (NQ.z1 - NQ.z0 - 0.6);
+    if (Math.hypot(rx - nqx, rz - nqz) < 0.45) continue;
+    W.blob('flat', rx, nqTop - 0.01, rz, 0.07 + R() * 0.04, 0.045, 0.06 + R() * 0.03, ROCKS[k % ROCKS.length], 0);
+  }
+  addBox(NQ.x0, NQ.z0, NQ.x1, NQ.z1);
+  W.slab('flat', NQ.x1, zN - 0.6, landX, zN, 0, FLOOR / 2, C.concrete);                // the lower step
+  // one handrail up the middle of the two steps
+  const hx = (NQ.x1 + landX) / 2;
+  W.rod('flat', [hx, 0.9, zN - 1.0], [hx, FLOOR + 0.9, zN + 0.1], 0.05, C.rail);
+  W.rod('flat', [hx, FLOOR + 0.9, zN + 0.1], [hx, FLOOR + 0.9, zN + 0.5], 0.05, C.rail);
+  for (const [z, y] of [[zN - 1.0, 0], [zN + 0.5, FLOOR]]) W.box('flat', hx, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
+  addBox(hx - 0.05, zN - 1.0, hx + 0.05, zN + 0.5);
   // the ramp's top landing, in front of the east row's end wall, then the ramp
   // running east along that wall down to the quad
   W.slab('flat', landX, RAMP.z0, RAMP.x0, zN, 0, FLOOR, C.concrete);
   const rise = (x) => FLOOR * (RAMP.x1 - x) / (RAMP.x1 - RAMP.x0);
   W.quad('flat', [RAMP.x0, FLOOR, RAMP.z1], [RAMP.x1, 0.004, RAMP.z1], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], C.concrete, 'auto');
   W.quad('flat', [RAMP.x0, 0, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x1, 0, RAMP.z0], C.concrete, 'auto');   // its side
-  for (const z of [RAMP.z0 + 0.06, RAMP.z1 - 0.02]) {                                    // grey pipe rails both sides
-    W.rod('flat', [landX + 0.1, FLOOR + 0.9, z], [RAMP.x0, FLOOR + 0.9, z], 0.05, C.rail);
+  // grey pipe rails down both sides of the slope only: its top opens onto the landing
+  for (const z of [RAMP.z0 + 0.06, RAMP.z1 - 0.02]) {
     W.rod('flat', [RAMP.x0, FLOOR + 0.9, z], [RAMP.x1 + 0.3, 0.9, z], 0.05, C.rail);
     for (const x of [RAMP.x0, (RAMP.x0 + RAMP.x1) / 2, RAMP.x1 + 0.3]) {
       const y = x <= RAMP.x0 ? FLOOR : rise(Math.min(x, RAMP.x1));
       W.box('flat', x, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
     }
   }
-  W.rod('flat', [landX + 0.1, FLOOR + 0.9, RAMP.z0 + 0.06], [landX + 0.1, FLOOR + 0.9, zN - 0.05], 0.05, C.rail);
   addBox(RAMP.x0, RAMP.z0 - 0.1, RAMP.x1 + 0.3, RAMP.z0 + 0.1);                          // the outer rail
-  // two drinking fountains against the west row's end wall
-  for (const x of [-2.6, -0.9]) fountain(W, x, zN - 0.02);
-  // a U-shaped pipe barrier standing out from the wall beside them (photo IMG_2322)
-  W.rod('flat', [-3.5, 0.9, zN - 0.12], [-3.5, 0.9, zN - 0.95], 0.05, C.rail);
-  for (const z of [zN - 0.12, zN - 0.95]) W.rod('flat', [-3.5, 0, z], [-3.5, 0.9, z], 0.05, C.rail);
-  addBox(-3.55, zN - 0.95, -3.45, zN);
+  // a U-shaped pipe barrier standing out from the west row's end wall, and to its
+  // right (facing the wall from the quad) the two drinking fountains (IMG_2322)
+  const ux = -0.3;
+  W.rod('flat', [ux, 0.9, zN - 0.12], [ux, 0.9, zN - 0.95], 0.05, C.rail);
+  for (const z of [zN - 0.12, zN - 0.95]) W.rod('flat', [ux, 0, z], [ux, 0.9, z], 0.05, C.rail);
+  addBox(ux - 0.05, zN - 0.95, ux + 0.05, zN);
+  for (const x of [-1.3, -2.9]) fountain(W, x, zN - 0.02);
 
   // the ball-field end: W · H · S planters with two flights of steps between them
-  const P = [['W', x0, x0 + 2.4], ['H', xm - 1.15, xm + 1.15], ['S', x1 - 2.4, x1]];
+  // (the flights are 2.7 m wide, the planters 2.1 m: Ethan, and IMG_2304)
+  const PW = 2.1, P = [['W', x0, x0 + PW], ['H', xm - PW / 2, xm + PW / 2], ['S', x1 - PW, x1]];
   const zP = zS + 2.0, top = 0.95;
   for (const [letter, a, b] of P) {
     W.slab('flat', a, zS - 0.3, b, zP, 0, top, C.planter);
@@ -193,7 +231,7 @@ function courtyard(W, group, R) {
   }
   shadeTree(W, xm, zS + 0.85, R, { h: 9.5, y: top - 0.1, cols: G.leaf });              // the H planter's tree
   for (let k = 0; k < 3; k++) grassTuft(W, x0 + 0.6 + k * 0.6, zS + 0.8 + R() * 0.4, R, { y: top - 0.1, h: 0.5 });   // W's plants
-  const flights = [[x0 + 2.4, xm - 1.15], [xm + 1.15, x1 - 2.4]];
+  const flights = [[x0 + PW, xm - PW / 2], [xm + PW / 2, x1 - PW]];
   for (const [a, b] of flights) {
     W.slab('flat', a, zS, b, zS + 0.6, 0, FLOOR * 2 / 3, C.concrete);
     W.slab('flat', a, zS + 0.6, b, zS + 1.2, 0, FLOOR / 3, C.concrete);
@@ -202,7 +240,7 @@ function courtyard(W, group, R) {
       for (const [zz, y] of [[zS - 0.4, FLOOR], [zS + 1.5, 0]]) W.box('flat', x, y + 0.45, zz, 0.05, 0.9, 0.05, C.rail);
     }
   }
-  for (const x of [x0 + 2.75, x1 - 2.75]) { W.cyl('flat', x, 0, zP + 0.5, 0.3, 0.32, 0.9, 12, C.can); addCircle(x, zP + 0.5, 0.35); }
+  for (const x of [x0 + PW + 0.35, x1 - PW - 0.35]) { W.cyl('flat', x, 0, zP + 0.5, 0.3, 0.32, 0.9, 12, C.can); addCircle(x, zP + 0.5, 0.35); }
 
   // shade trees down the middle, each in a square wooden bench
   for (const z of [49, 59.5, 69.5]) {
@@ -212,13 +250,13 @@ function courtyard(W, group, R) {
     shadeTree(W, xm, z, R, { h: 9 + R() * 1.5, y: FLOOR + 0.45, cols: G.leaf });
     addBox(xm - 1.5, z - 1.5, xm + 1.5, z + 1.5);
   }
-  // umbrella tables (on the terrace)
-  W.with(0, FLOOR, 0, 0, () => { for (const [x, z] of [[4.8, 44.5], [11.4, 54.2], [4.9, 64.3]]) umbrellaTable(W, x, z, R); });
+  // umbrella tables down the middle, between the three trees
+  W.with(0, FLOOR, 0, 0, () => { for (const z of [54.25, 64.5]) umbrellaTable(W, xm, z, R); });
 
   // walking: the terrace, the two steps and the ramp up from the quad, the flights at the far end
   addHeight((x, z) => {
     if (x >= x0 && x <= x1 && z >= zN && z <= zS) return FLOOR;
-    if (x >= x0 && x < landX && z >= zN - 0.6 && z < zN) return FLOOR / 2;
+    if (x >= NQ.x1 && x < landX && z >= zN - 0.6 && z < zN) return FLOOR / 2;
     if (x >= landX && x <= RAMP.x0 && z >= RAMP.z0 && z < zN) return FLOOR;
     if (x > RAMP.x0 && x <= RAMP.x1 && z >= RAMP.z0 && z <= RAMP.z1) return rise(x);
     if (x >= x0 && x <= x1 && z > zS && z <= zS + 1.2) return z <= zS + 0.6 ? FLOOR * 2 / 3 : FLOOR / 3;
