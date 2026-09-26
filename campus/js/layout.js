@@ -137,19 +137,18 @@ export const LAWN_W = { box: [-37.5, 17.5, -22, 32.3] };             // minus th
 export const LAWN_E = [[-3.3, 14.5], [15.9, 11.2], [23.4, 23.8], [-11.2, 32.3]];
 export const CEDAR = { x: 0, z: 0, bed: 4.2 };
 // In front of Building R on the quad side (Ethan; IMG_2349–2352, the satellite): a
-// bed shaped like a handsaw. A straight strip runs along the building, a narrow
-// paved gap off it (its back at x 31.0; the blocks stand at 31.6), and teeth stand
-// out from its front toward the quad, each long on its north side and short on its
-// south. Umbrella tables sit in the notches; two benches back onto the strip's
-// front edge past the last tooth, by the ASB Office.
+// bed shaped like a Toblerone bar seen from the side. A straight strip runs along
+// the building with a paved walk between (its back at x 30.1; the blocks stand at
+// 31.6), and identical, symmetric triangles stand side by side on its front,
+// pointing at the quad. Umbrella tables sit in the notches between the triangles;
+// the two benches back onto the last triangle's south slanted edge, by the ASB Office.
 export const R_FRONT = {
-  back: 31.0, front: 29.6, z0: -18.8, z1: 13.9,
-  teeth: [[-18.8, -7.4, 25.8, -10.6], [-7.4, 2.6, 26.6, -0.4], [2.6, 9.8, 27.4, 7.6]],    // [z0, z1, tip x, tip z]
-  trees: [[30.0, -2.5], [30.0, 6.8]],                                                    // the two big trees (IMG_2350)
-  tables: [[27.4, -19.6], [25.9, -15.6], [27.2, -6.3], [27.6, 3.4]],
-  longTable: [25.0, -3.0, Math.PI / 2, 2.8],                                              // x, z, rot, length: the one long green table
-  cans: [[26.0, -8.4], [26.4, 5.4], [28.6, -19.9]],
-  benches: [10.8, 12.9],                                                                 // z, along the strip's front edge
+  back: 30.1, front: 27.9, z0: -18.6, z1: 13.2, teeth: 3, tip: 25.3,
+  trees: [[28.6, -2.7], [28.6, 7.9]],                                                    // the two big trees (IMG_2350)
+  tables: [[26.0, -19.9], [24.0, -16.3], [25.3, -8.0], [25.3, 2.6]],
+  longTable: [23.3, -2.7, Math.PI / 2, 2.8],                                              // x, z, rot, length: the one long green table
+  cans: [[23.4, -9.3], [23.6, 4.0], [28.6, -19.9]],
+  benches: [1.6, 3.9],                                                                   // metres along the last triangle's south edge from its tip
   pots: [[32.55, 15.6, 'white'], [32.55, 17.8, 'white'], [32.6, 19.7, 'clay']],          // IMG_2342
 };
 // Round the cedar (Ethan's photos IMG_2332–2335): a light-blue and a green picnic

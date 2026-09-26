@@ -281,23 +281,25 @@ const BANNERS = [banner(['CHARGER', 'STRONG']), banner(['WILCOX', 'CHARGERS'])];
 // benches and pots by the ASB Office.
 function frontOfR(W, R) {
   const F = R_FRONT, BX = F.front, mulch = color('#5e4231');
+  const tw = (F.z1 - F.z0) / F.teeth;
+  const TEETH = Array.from({ length: F.teeth }, (_, i) => [F.z0 + i * tw, F.z0 + (i + 1) * tw, F.tip, F.z0 + (i + 0.5) * tw]);
   const inTooth = (x, z, [z0, z1, tx, tz]) => {
     const side = (ax, az, bx, bz) => (bx - ax) * (z - az) - (bz - az) * (x - ax);
     const a = side(BX, z0, tx, tz), b = side(tx, tz, BX, z1), c = side(BX, z1, BX, z0);
     return (a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0);
   };
-  const inBed = (x, z) => F.teeth.some((t) => inTooth(x, z, t)) || (x >= F.front && x <= F.back && z >= F.z0 && z <= F.z1);
+  const inBed = (x, z) => TEETH.some((t) => inTooth(x, z, t)) || (x >= F.front && x <= F.back && z >= F.z0 && z <= F.z1);
   // the straight strip along the building, then the teeth off its front
   W.slab('flat', F.front, F.z0, F.back, F.z1, 0, 0.06, mulch);
   addBox(F.front, F.z0, F.back, F.z1);
-  for (const [z0, z1, tx, tz] of F.teeth) {
+  for (const [z0, z1, tx, tz] of TEETH) {
     W.prism('flat', [[BX + 0.02, z0], [tx, tz], [BX + 0.02, z1]], 0, 0.06, mulch);
     addPoly([[BX, z0], [tx, tz], [BX, z1]]);
   }
   // plants on a jittered grid: fountain grasses, red-tipped shrubs, flax (IMG_2351)
   const clear = (x, z) => !F.trees.some(([a, b]) => Math.hypot(x - a, z - b) < 1.0);
   for (let z = F.z0 + 0.4; z < F.z1 - 0.3; z += 1.05) {
-    for (let x = 25.9; x < F.back - 0.3; x += 1.1) {
+    for (let x = F.tip + 0.5; x < F.back - 0.3; x += 1.1) {
       const px = x + (R() - 0.5) * 0.6, pz = z + (R() - 0.5) * 0.6;
       if (!inBed(px, pz) || !inBed(px + 0.35, pz) || !inBed(px - 0.35, pz) || !clear(px, pz)) continue;
       const k = R();
@@ -312,7 +314,10 @@ function frontOfR(W, R) {
   const [lx, lz, lrot, llen] = F.longTable;
   picnic(W, lx, lz, lrot, green, green, green, greenDark, llen);
   for (const [x, z] of F.cans) can(W, x, z);
-  for (const z of F.benches) bench(W, F.front - 0.3, z);      // their backs on the strip's edge
+  // the benches back onto the last triangle's south slanted edge, facing out from it
+  const [, lz1, ltx, ltz] = TEETH[TEETH.length - 1], el = Math.hypot(BX - ltx, lz1 - ltz);
+  const ux = (BX - ltx) / el, uz = (lz1 - ltz) / el, rot = Math.atan2(-uz, ux) + Math.PI / 2;
+  for (const t of F.benches) bench(W, ltx + ux * t - uz * 0.3, ltz + uz * t + ux * 0.3, rot);
   for (const [x, z, kind] of F.pots) {
     if (kind === 'white') { W.box('flat', x, 0.29, z, 0.5, 0.58, 0.5, color('#f3f2ed')); shrub(W, x, z, R, { s: 0.42, y: 0.56, cols: G.leaf }); }
     else { W.cyl('flat', x, 0, z, 0.2, 0.15, 0.4, 12, color('#b86b45')); shrub(W, x, z, R, { s: 0.4, y: 0.38, cols: G.leaf }); }
@@ -320,15 +325,17 @@ function frontOfR(W, R) {
   }
 }
 
-// A black mesh bench with a back, facing the quad (-x) (IMG_2349).
-function bench(W, x, z) {
-  W.box('flat', x, 0.45, z, 0.42, 0.04, 1.8, black);
-  W.box('flat', x + 0.23, 0.72, z, 0.04, 0.42, 1.8, black);
-  for (const s of [-1, 1]) {
-    W.box('flat', x, 0.22, z + s * 0.75, 0.36, 0.45, 0.05, black);
-    W.box('flat', x + 0.23, 0.5, z + s * 0.75, 0.04, 0.5, 0.05, black);
-  }
-  addBox(x - 0.22, z - 0.92, x + 0.26, z + 0.92);
+// A black mesh bench with a back (IMG_2349). Unrotated it faces -x, its back to +x.
+function bench(W, x, z, rot = 0) {
+  W.with(x, 0, z, rot, () => {
+    W.box('flat', 0, 0.45, 0, 0.42, 0.04, 1.8, black);
+    W.box('flat', 0.23, 0.72, 0, 0.04, 0.42, 1.8, black);
+    for (const s of [-1, 1]) {
+      W.box('flat', 0, 0.22, s * 0.75, 0.36, 0.45, 0.05, black);
+      W.box('flat', 0.23, 0.5, s * 0.75, 0.04, 0.5, 0.05, black);
+    }
+  });
+  addOBB(x + 0.02, z, 0.5, 1.85, rot);
 }
 
 function can(W, x, z) {
