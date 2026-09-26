@@ -280,22 +280,24 @@ const BANNERS = [banner(['CHARGER', 'STRONG']), banner(['WILCOX', 'CHARGERS'])];
 // and two big trees, the umbrella tables in its notches, the long green table,
 // benches and pots by the ASB Office.
 function frontOfR(W, R) {
-  const F = R_FRONT, BX = F.back, mulch = color('#5e4231');
+  const F = R_FRONT, BX = F.front, mulch = color('#5e4231');
   const inTooth = (x, z, [z0, z1, tx, tz]) => {
     const side = (ax, az, bx, bz) => (bx - ax) * (z - az) - (bz - az) * (x - ax);
     const a = side(BX, z0, tx, tz), b = side(tx, tz, BX, z1), c = side(BX, z1, BX, z0);
     return (a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0);
   };
-  const inBed = (x, z) => F.teeth.some((t) => inTooth(x, z, t)) || F.bays.some(([z0, z1]) => x >= BX && x <= 32.6 && z >= z0 && z <= z1);
+  const inBed = (x, z) => F.teeth.some((t) => inTooth(x, z, t)) || (x >= F.front && x <= F.back && z >= F.z0 && z <= F.z1);
+  // the straight strip along the building, then the teeth off its front
+  W.slab('flat', F.front, F.z0, F.back, F.z1, 0, 0.06, mulch);
+  addBox(F.front, F.z0, F.back, F.z1);
   for (const [z0, z1, tx, tz] of F.teeth) {
-    W.prism('flat', [[BX, z0], [tx, tz], [BX, z1]], 0, 0.06, mulch);
+    W.prism('flat', [[BX + 0.02, z0], [tx, tz], [BX + 0.02, z1]], 0, 0.06, mulch);
     addPoly([[BX, z0], [tx, tz], [BX, z1]]);
   }
-  for (const [z0, z1] of F.bays) { W.slab('flat', BX - 0.05, z0, 32.6, z1, 0, 0.06, mulch); addBox(BX, z0, 32.6, z1); }
   // plants on a jittered grid: fountain grasses, red-tipped shrubs, flax (IMG_2351)
   const clear = (x, z) => !F.trees.some(([a, b]) => Math.hypot(x - a, z - b) < 1.0);
-  for (let z = -18.4; z < 11.2; z += 1.05) {
-    for (let x = 25.9; x < 32.4; x += 1.1) {
+  for (let z = F.z0 + 0.4; z < F.z1 - 0.3; z += 1.05) {
+    for (let x = 25.9; x < F.back - 0.3; x += 1.1) {
       const px = x + (R() - 0.5) * 0.6, pz = z + (R() - 0.5) * 0.6;
       if (!inBed(px, pz) || !inBed(px + 0.35, pz) || !inBed(px - 0.35, pz) || !clear(px, pz)) continue;
       const k = R();
@@ -310,7 +312,7 @@ function frontOfR(W, R) {
   const [lx, lz, lrot, llen] = F.longTable;
   picnic(W, lx, lz, lrot, green, green, green, greenDark, llen);
   for (const [x, z] of F.cans) can(W, x, z);
-  for (const z of F.benches) bench(W, 29.2, z);
+  for (const z of F.benches) bench(W, F.front - 0.3, z);      // their backs on the strip's edge
   for (const [x, z, kind] of F.pots) {
     if (kind === 'white') { W.box('flat', x, 0.29, z, 0.5, 0.58, 0.5, color('#f3f2ed')); shrub(W, x, z, R, { s: 0.42, y: 0.56, cols: G.leaf }); }
     else { W.cyl('flat', x, 0, z, 0.2, 0.15, 0.4, 12, color('#b86b45')); shrub(W, x, z, R, { s: 0.4, y: 0.38, cols: G.leaf }); }

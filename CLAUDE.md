@@ -279,11 +279,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       counter on two legs, and a cream knee wall. Its awning is rounded
       (`roundAwning` in landmarks.js).
     - In front, on the quad side (`frontOfR()` in quad.js, `R_FRONT` in
-      layout.js): a bed shaped like a handsaw's edge. Its straight back is 0.6 m
-      off the blocks and reaches into the window bays; its teeth point at the
-      quad, each long on the north and short on the south (Ethan, the
-      satellite). Umbrella tables sit in the notches. Also: two big trees in
-      the southern teeth, one long green picnic table, two benches and white
+      layout.js): a bed shaped like a handsaw (Ethan, the satellite). A
+      straight strip runs along the building, 0.6 m off the blocks, with a
+      straight back and no bits reaching into the window bays. Its teeth stand
+      out from the strip's front toward the quad, each long on the north and
+      short on the south. Umbrella tables sit in the notches. Also: two big
+      trees in the southern teeth, one long green picnic table, two benches
+      backing onto the strip's front edge past the last tooth, and white
       square pots plus a clay one by the ASB Office.
   - **Room plates are hidden for now (Ethan)** except the P building's door
     plates. A hidden plate keeps its slot in the mesh as a collapsed quad, so
