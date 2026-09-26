@@ -324,8 +324,13 @@ for k in sorted(section_at):
 def dslug(name):
     return "svcte" if name.startswith("Silicon") else slugify(name)
 
+# Taught at Wilcox although the catalog lists another school: the Wilcox staff
+# directory names a teacher for them, and Ethan confirms. course# -> note shown on the page
+WILCOX_ANYWAY = {"102715": "The catalog lists Theater 1 at Santa Clara only, but the Wilcox staff "
+                           "directory lists it (as Theatre 1) for Claire Robson."}
+
 def at_wilcox(c):
-    if not c["offeredAtListed"]:
+    if not c["offeredAtListed"] or c["courseNumber"] in WILCOX_ANYWAY:
         return True
     return any("wilcox" in x.lower() for x in c["offeredAt"])
 
@@ -356,7 +361,7 @@ for c in kept:
          "prerequisite": c["prerequisite"]}
     if c.get("corequisite"):
         o["corequisite"] = c["corequisite"]
-    notes = [x for x in (c.get("headerNote"), c.get("trailingNote")) if x]
+    notes = [x for x in (c.get("headerNote"), c.get("trailingNote"), WILCOX_ANYWAY.get(c["courseNumber"])) if x]
     if notes:
         o["note"] = " ".join(notes)
     o["description"] = c["description"]

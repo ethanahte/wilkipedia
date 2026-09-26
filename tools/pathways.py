@@ -93,8 +93,9 @@ for years in GRADE_YEARS:
 # the column count, since it can lead back to English 9.
 EL_EXIT = [("el-advanced", s) for s in ("english-9", "english-10", "english-11", "csu-expository-reading-and-writing")]
 
-# Left off the map (Ethan): the PRT and BSC classes
-HIDDEN = lambda c: c["name"].startswith(("PRT ", "BSC "))
+# Left off the map (Ethan): the PRT and BSC classes, and the theatre classes Wilcox
+# doesn't run (its theatre classes are Theater 1 and Theatre Productions)
+HIDDEN = lambda c: c["name"].startswith(("PRT ", "BSC ")) or c["slug"] in {"theater-2", "theatre-productions-honors"}
 
 # "Completion of Level 2" in a language course means level 2 of that language
 LEVEL = re.compile(r"Level ([1-4])")

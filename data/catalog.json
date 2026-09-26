@@ -1849,6 +1849,24 @@
       "page": 89
     },
     {
+      "slug": "theater-1",
+      "name": "Theater 1",
+      "department": "visual-performing-arts",
+      "grades": "9-12",
+      "courseNumber": "102715",
+      "ucCsu": "F",
+      "credits": "10, year",
+      "ctePathway": null,
+      "offeredAt": [
+        "Santa Clara"
+      ],
+      "offeredAtListed": true,
+      "prerequisite": "None",
+      "note": "The catalog lists Theater 1 at Santa Clara only, but the Wilcox staff directory lists it (as Theatre 1) for Claire Robson.",
+      "description": "An introductory drama course which covers the basic techniques of mime, improvisation, character development, stage movement, memorization, and voice. Additional coursework will cover musical theater, play analysis, film studies, and development, as well as the historical and cultural roots of theatre. Students will be asked to write and perform simple scenes, scripts, and critical reviews of films and live theatrical performances. All students will perform scenes and monologues from culturally diverse drama. The culminating year-end project will be a student showcase.",
+      "page": 89
+    },
+    {
       "slug": "theater-2",
       "name": "Theater 2",
       "department": "visual-performing-arts",

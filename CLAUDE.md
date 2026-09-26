@@ -20,7 +20,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Never invent facts** about courses, teachers, policies, dates or schools.
   Course data comes only from the SCUSD catalog (`data/catalog.json`), and
   teacher data only from the Wilcox staff directory (`data/directory-raw.json`).
-  Empty is correct when we don't know.
+  Empty is correct when we don't know. The catalog keeps only classes it lists at
+  Wilcox; `WILCOX_ANYWAY` in `tools/parse_catalog.py` adds back one it lists
+  elsewhere when the staff directory names a Wilcox teacher for it and Ethan
+  confirms (Theater 1), with a note on the class page saying so.
 - **No comment threads or ratings on teachers.** Comments live on course pages
   only, and teacher sections are factual fields. This is the main protection
   against the site being shut down. Don't add star ratings.
@@ -165,7 +168,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     from "Leads to". `EL_EXIT`: finishing EL Advanced moves you into the regular
     English class for your grade. These are dashed gold `exit` lines shown only
     when pointed at, and left out of the column depth.
-    `HIDDEN` leaves the PRT and BSC classes off the map (Ethan). The palette and previews skip
+    `HIDDEN` leaves the PRT and BSC classes, Theater 2 and Theatre Productions
+    Honors off the map (Ethan: Wilcox runs Theater 1 and Theatre Productions). The palette and previews skip
     a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search
     button open it; `/` too unless the page has an element with `data-slash`.
