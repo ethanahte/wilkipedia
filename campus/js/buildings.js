@@ -64,17 +64,17 @@ function windowAt(W, e, t, y, w, h, { frame = C.frame, depth = 0.12 } = {}) {
   });
 }
 
-function doorAt(W, e, t, w, h, col, { glass = false, frameCol = C.frame } = {}) {
+function doorAt(W, e, t, w, h, col, { glass = false, frameCol = C.frame, single = false, plain = false } = {}) {
   onWall(W, e, t, h / 2, 0.02, () => {
     W.box('flat', 0, 0, 0, w + 0.2, h + 0.1, 0.1, frameCol);
     if (glass) {
       W.quad('glass', [-w / 2, -h / 2, 0.06], [w / 2, -h / 2, 0.06], [w / 2, h / 2, 0.06], [-w / 2, h / 2, 0.06], C.glassTint, [[0, 0], [w, 0], [w, h], [0, h]]);
-      W.box('flat', 0, 0, 0.08, 0.08, h, 0.04, frameCol);
+      if (!single) W.box('flat', 0, 0, 0.08, 0.08, h, 0.04, frameCol);
       W.box('flat', 0, -h / 2 + 1.0, 0.1, w, 0.05, 0.04, color('#c9ccd0'));   // push bar
     } else {
       W.box('flat', 0, 0, 0.05, w, h, 0.04, col);
       // narrow vertical window, as on every American hallway door
-      W.quad('glass', [w * 0.12, 0.1, 0.075], [w * 0.28, 0.1, 0.075], [w * 0.28, h * 0.42, 0.075], [w * 0.12, h * 0.42, 0.075], DARK, 'auto');
+      if (!plain) W.quad('glass', [w * 0.12, 0.1, 0.075], [w * 0.28, 0.1, 0.075], [w * 0.28, h * 0.42, 0.075], [w * 0.12, h * 0.42, 0.075], DARK, 'auto');
       W.box('flat', -w * 0.32, -0.05, 0.09, 0.05, 0.3, 0.05, color('#b9bcc0'));   // handle
     }
   });
@@ -140,7 +140,7 @@ const KITS = {
     // belt course between the floors
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
   },
-  r(W, b, e) { rFace(W, b, e); },
+  r() {},                                       // buildR() draws R whole
   caf(W, b, e, R) {
     if (e.len < 4) return;
     const tall = b.h > 6;
@@ -215,15 +215,19 @@ const WALL = {
 };
 
 // ── Building R ──
-// Its faces are laid out from Ethan's photos, face by face, rather than by a
-// repeating rhythm. t runs along a face as edges() gives it: the west face from
-// its north end, the east face from its south end, the south face from its west
-// end and the north face from its east end.
+// Built piece by piece from Ethan and his photos (IMG_2342–2361), placed by world
+// position rather than by a repeating rhythm. The numbers match R's outline in
+// layout.js: the quad face at x 33.2, the thick blocks out to 31.6, the step at
+// x 41.1, the pool face at 54.7, the narrow ends at z -21.6 / 25.2, the wide ends
+// at -23.75 / 27.3 with their entrances set 0.9 m in between x 43.1 and 46.9.
 const RC = {
   reveal: color('#d2c6ab'), tower: color('#a4a8aa'), towerLine: color('#8e9294'), panel: color('#eef0eb'),
   grid: color('#7c8186'), teal: color('#a9dcd6'), canopy: color('#8a8f94'), sconce: color('#6f7378'), cap: color('#ece0c4'),
+  wall: color('#ece0c4'), steel: color('#b8bcc0'), galv: color('#a9aeb3'), dark: color('#5f6368'),
 };
 const R_FLOORS = [0, 4.4, 8.8];
+const RD = 0.22;             // the precast skin laid over R's end walls: its openings are set this far in
+const RQ = 33.2, RF = 31.6, RS = 41.1, RE = 54.7, RN = -21.6, RNW = -23.75, RSN = 25.2, RSW = 27.3, RX0 = 43.1, RX1 = 46.9, RIN = 0.9;
 
 // The precast's reveals: a groove every 1.2 m up and every 2.7 m along.
 function reveals(W, e, t0, t1, top, off = 0) {
@@ -234,30 +238,50 @@ function reveals(W, e, t0, t1, top, off = 0) {
   for (let t = t0 + 2.7; t < t1 - 0.4; t += 2.7) onWall(W, e, t, top / 2, off + 0.012, () => W.box('flat', 0, 0, 0, 0.035, top, 0.02, RC.reveal));
 }
 // The triangular wall lamps (Ethan): a dark three-sided shade, lit underneath at night.
-function sconce(W, e, t, y) {
-  onWall(W, e, t, y, 0.02, () => {
+function sconce(W, e, t, y, off = 0) {
+  onWall(W, e, t, y, off + 0.02, () => {
     W.cyl('flat', 0, 0, 0.12, 0, 0.21, 0.26, 3, RC.sconce);
     W.cyl('glow', 0, -0.005, 0.12, 0.19, 0.19, 0.01, 3, color('#ffe6bd'), { top: false, bottom: true });
   });
-  LIGHTS.push([e.ax + e.dx * t + e.nx * 0.3, e.az + e.dz * t + e.nz * 0.3, y - 0.2, 3.5]);
+  LIGHTS.push([e.ax + e.dx * t + e.nx * (off + 0.3), e.az + e.dz * t + e.nz * (off + 0.3), y - 0.2, 3.5]);
 }
 
-// A grey concrete tower standing out from the wall, full height but for a cream
-// cap, with louvers on the chosen floors.
-function rTower(W, e, t0, t1, h, louvers, out = 0.35) {
-  const w = t1 - t0, top = h - 0.7;
-  onWall(W, e, (t0 + t1) / 2, 0, out / 2, () => {
-    W.box('stucco', 0, top / 2, 0, w, top, out + 0.02, RC.tower);
-    W.box('stucco', 0, top + 0.4, 0, w, 0.8, out + 0.02, RC.cap);
-    for (const y of [2.2, 6.6, 11]) W.box('flat', 0, y, out / 2 + 0.012, w, 0.035, 0.02, RC.towerLine);
-  });
-  for (const f of louvers) {
-    onWall(W, e, (t0 + t1) / 2, R_FLOORS[f] + 2.2, out + 0.02, () => {
-      W.box('flat', 0, 0, 0, w - 0.4, 2.5, 0.06, RC.towerLine);
-      W.box('louver', 0, 0, 0.04, w - 0.6, 2.3, 0.03, color('#b7bbbe'));
-    });
-  }
+// A wall face with outward normal (nx, nz) between two points; t runs as edges() would.
+function rWall(ax, az, bx, bz, nx, nz) {
+  const dx = nz, dz = -nx;
+  if ((bx - ax) * dx + (bz - az) * dz < 0) [ax, az, bx, bz] = [bx, bz, ax, az];
+  return { ax, az, bx, bz, len: Math.hypot(bx - ax, bz - az), dx, dz, nx, nz, rot: -Math.atan2(dz, dx) };
 }
+const tAt = (e, x, z) => (x - e.ax) * e.dx + (z - e.az) * e.dz;
+const span = (e, p, q) => { const a = tAt(e, ...p), b = tAt(e, ...q); return [Math.min(a, b), Math.max(a, b)]; };
+
+// A skin of precast RD thick laid over a wall from t0 to t1, ground to `top`,
+// with openings [ta, tb, ya, yb]: the windows and doors set in them sit back
+// from its face, as the real ones do (Ethan). Its reveals break at the openings.
+function rSkin(W, e, t0, t1, top, holes = []) {
+  const ts = [...new Set([t0, t1, ...holes.flatMap(([a, b]) => [a, b])])].filter((t) => t >= t0 && t <= t1).sort((a, b) => a - b);
+  for (let i = 0; i + 1 < ts.length; i++) {
+    const a = ts[i], b = ts[i + 1], m = (a + b) / 2;
+    if (b - a < 0.005) continue;
+    const cut = holes.filter(([ha, hb]) => ha < m && hb > m).map(([, , ya, yb]) => [ya, yb]).sort((p, q) => p[0] - q[0]);
+    const pieces = [];
+    let y = 0;
+    for (const [ya, yb] of cut) { if (ya > y + 0.005) pieces.push([y, ya]); y = Math.max(y, yb); }
+    if (top > y + 0.005) pieces.push([y, top]);
+    for (const [ya, yb] of pieces) {
+      onWall(W, e, m, 0, RD / 2, () => {
+        W.box('stucco', 0, (ya + yb) / 2, 0, b - a, yb - ya, RD, RC.wall);
+        for (let yy = 1.2; yy < top - 0.3; yy += 1.2) if (yy > ya + 0.03 && yy < yb - 0.03) W.box('flat', 0, yy, RD / 2 + 0.006, b - a, 0.035, 0.012, RC.reveal);
+      });
+      for (let tt = t0 + 2.7; tt < t1 - 0.4; tt += 2.7) {
+        if (tt > a + 0.03 && tt < b - 0.03) onWall(W, e, tt, (ya + yb) / 2, RD + 0.006, () => W.box('flat', 0, 0, 0, 0.035, yb - ya, 0.012, RC.reveal));
+      }
+    }
+  }
+  onWall(W, e, (t0 + t1) / 2, top + 0.04, RD / 2, () => W.box('flat', 0, 0, 0, t1 - t0, 0.08, RD + 0.06, C.fin));
+}
+// An opening for a window drawn by windowAt at (t, y, w, h).
+const winHole = (t, y, w, h) => [t - w / 2 - 0.08, t + w / 2 + 0.08, y - h / 2 - 0.08, y + h / 2 + 0.08];
 
 // A bay of white panels on a grey grid, a row of teal glass at the head of each
 // floor and a strip of glass up one side (IMG_2350, IMG_2352).
@@ -268,7 +292,6 @@ function rBay(W, e, t0, t1, { storefront = false } = {}) {
     const y0 = f + 0.8, y1 = f + 3.4;
     onWall(W, e, mid, 0, 0.03, () => {
       W.box('flat', 0, (y0 + y1) / 2, 0, w - 0.3, y1 - y0, 0.05, RC.panel);
-      // the teal row, and the side strip
       const gx0 = -w / 2 + 0.25, gx1 = w / 2 - 0.95;
       W.quad('glass', [gx0, y1 - 0.62, 0.03], [gx1, y1 - 0.62, 0.03], [gx1, y1 - 0.08, 0.03], [gx0, y1 - 0.08, 0.03], RC.teal, 'auto');
       W.quad('glass', [w / 2 - 0.8, y0 + 0.08, 0.03], [w / 2 - 0.25, y0 + 0.08, 0.03], [w / 2 - 0.25, y1 - 0.08, 0.03], [w / 2 - 0.8, y1 - 0.08, 0.03], pane(), 'auto');
@@ -288,87 +311,155 @@ function rBay(W, e, t0, t1, { storefront = false } = {}) {
   }
 }
 
-// A plain cream stretch: its reveals, and narrow windows up it if asked.
-function rPier(W, e, t0, t1, h, { narrow = null } = {}) {
-  reveals(W, e, t0, t1, h - 0.6);
-  if (narrow != null) for (const f of R_FLOORS) windowAt(W, e, narrow, f + 2.2, 0.62, 2.5, { frame: RC.grid });
-}
-
-// An entrance: grey canopy, double glass doors and transom, and a big gridded
-// window on each floor above (IMG_2345, IMG_2357). t = its middle.
-function rEntrance(W, e, t) {
-  onWall(W, e, t, 0, 0, () => {
-    W.box('flat', 0, 3.3, 1.3, 3.6, 0.26, 2.6, RC.canopy);
-    W.box('flat', 0, 3.17, 1.3, 3.4, 0.02, 2.4, color('#5b5f63'));
+// A single glass door with a panel over it: a grey louver (the ends' side doors)
+// or glass (the quad corners' doors). Returns its opening for rSkin.
+function rSideDoor(W, e, t, glassTop = false) {
+  doorAt(W, e, t, 0.95, 2.3, null, { glass: true, frameCol: RC.grid, single: true });
+  onWall(W, e, t, 2.72, 0.02, () => {
+    W.box('flat', 0, 0, 0, 1.15, 0.74, 0.1, RC.grid);
+    if (glassTop) W.quad('glass', [-0.45, -0.29, 0.06], [0.45, -0.29, 0.06], [0.45, 0.29, 0.06], [-0.45, 0.29, 0.06], pane(), 'auto');
+    else W.box('louver', 0, 0, 0.06, 0.92, 0.56, 0.03, color('#9ca1a6'));
   });
-  doorAt(W, e, t, 1.9, 2.4, null, { glass: true, frameCol: RC.grid });
-  windowAt(W, e, t, 2.75, 2.1, 0.5, { frame: RC.grid });
-  for (const f of [4.4, 8.8]) windowAt(W, e, t, f + 2.2, 2.6, 2.7, { frame: RC.grid });
+  return [t - 0.58, t + 0.58, 0, 3.09];
 }
-const fountain = (W, e, t) => onWall(W, e, t, 0.62, 0.14, () => {
-  W.box('flat', 0, 0, 0, 0.45, 0.36, 0.28, color('#9ea3a8'));
-  W.box('flat', 0, 0.19, 0.02, 0.36, 0.02, 0.2, color('#c9ccd0'));
-});
-const serviceDoor = (W, e, t) => doorAt(W, e, t, 0.9, 2.2, color('#e8dcc2'), { frameCol: color('#d9ccb0') });
+// The stainless bottle-filler fountain (IMG_2347, IMG_2355): the filler above,
+// the bowl, the housing below; and the pipe guard beside it.
+function rFountain(W, e, t, off) {
+  onWall(W, e, t, 0, off, () => {
+    W.box('flat', 0, 1.36, 0.06, 0.42, 0.62, 0.12, RC.steel);
+    W.box('flat', 0, 1.32, 0.122, 0.28, 0.36, 0.01, RC.dark);
+    W.box('flat', 0, 0.96, 0.2, 0.52, 0.13, 0.4, RC.steel);
+    W.box('flat', 0, 1.027, 0.22, 0.4, 0.006, 0.28, RC.dark);
+    W.cyl('flat', 0.1, 1.02, 0.3, 0.02, 0.02, 0.07, 6, RC.steel);
+    W.box('flat', 0, 0.68, 0.15, 0.4, 0.42, 0.3, color('#9ea3a8'));
+    for (let y = 0.55; y < 0.85; y += 0.06) W.box('flat', -0.12, y, 0.302, 0.1, 0.015, 0.006, RC.dark);
+  });
+}
+function rGuard(W, e, t, off) {
+  onWall(W, e, t, 0, off, () => {
+    for (const z of [0.1, 0.56]) W.cyl('flat', 0, 0, z, 0.024, 0.024, 0.88, 8, RC.galv);
+    W.box('flat', 0, 0.88, 0.33, 0.05, 0.05, 0.5, RC.galv);
+  });
+}
+const serviceDoor = (W, e, t) => doorAt(W, e, t, 0.9, 2.2, color('#e8dcc2'), { frameCol: color('#d9ccb0'), plain: true });
 
-// The 凸's faces. `corner` is the t of this face's end at the step between the
-// two blocks, where the drinking fountains are (Ethan; IMG_2344, IMG_2346, IMG_2347).
-function rNarrowEnd(W, e, h, corner) {
-  // the narrow block's end: blank precast but for a glass door with a small
-  // window over it on each floor, a light, and a fountain in the corner
-  const mid = e.len * 0.55, away = corner > 0 ? -1 : 1;
-  reveals(W, e, 0.2, e.len - 0.2, h - 0.6);
-  for (const f of [4.4, 8.8]) windowAt(W, e, mid, f + 2.4, 0.75, 0.7, { frame: RC.grid });
-  doorAt(W, e, mid, 0.95, 2.3, null, { glass: true, frameCol: RC.grid });
-  windowAt(W, e, mid, 2.75, 0.8, 0.45, { frame: RC.grid });
-  sconce(W, e, mid + away * 1.3, 3.1);
-  fountain(W, e, corner + away * 0.7);
-}
-function rWideEnd(W, e, h, corner, north) {
-  // the back block's end: its entrance right beside the step, tall narrow
-  // windows further along, and on the north the big louver panel by the door
-  const dir = corner > 0 ? -1 : 1, ent = corner + dir * 2.6;
-  reveals(W, e, 0.2, e.len - 0.2, h - 0.6);
-  rEntrance(W, e, ent);
-  const tn = corner + dir * (e.len - 3.6);
-  for (const f of R_FLOORS) windowAt(W, e, tn, f + 2.3, 0.7, 2.6, { frame: RC.grid });
-  if (north) onWall(W, e, ent + dir * 3.2, 2.0, 0.03, () => { W.box('flat', 0, 0, 0, 2.3, 3.2, 0.1, RC.cap); W.box('louver', 0, 0, 0.06, 2.0, 2.9, 0.03, color('#f2ead8')); });
-  sconce(W, e, corner + dir * 0.6, 3.1);
-  sconce(W, e, ent + dir * (north ? 5.0 : 2.4), 3.1);
-}
-
-function rFace(W, b, e) {
-  const h = b.h, cx = (x) => Math.abs(x - 41.1) < 0.05;
-  if (e.nz > 0.5 || e.nz < -0.5) {
-    const north = e.nz < 0, atStepA = cx(e.ax), atStepB = cx(e.bx);
-    const corner = atStepA ? 0 : e.len;
-    if (e.len < 10) return rNarrowEnd(W, e, h, atStepA ? 0 : atStepB ? e.len : corner);
-    return rWideEnd(W, e, h, corner, north);
-  }
-  if (e.nx < -0.5 && e.len < 3) {
-    // the step's short west-facing faces: a service door on the south one
-    reveals(W, e, 0.1, e.len - 0.1, h - 0.6);
-    if (e.az > 0) serviceDoor(W, e, e.len / 2);
+// A thick block standing out from the quad face (Ethan: "much thicker"), half a
+// grey AC shaft with louvers, half plain cream wall (IMG_2344, IMG_2349, IMG_2352).
+function rBlock(W, h, z0, z1, kind, { louvers = [], door = false, sides = [] } = {}) {
+  const front = rWall(RF, z0, RF, z1, -1, 0), [a, b] = span(front, [RF, z0], [RF, z1]);
+  const sideFaces = sides.map((z) => rWall(RF, z, RQ, z, 0, z === z0 ? -1 : 1));
+  if (kind === 'grey') {
+    W.slab('stucco', RF, z0, RQ, z1, 0, h - 0.7, RC.tower);
+    W.slab('stucco', RF, z0, RQ, z1, h - 0.7, h + 0.08, RC.wall);
+    for (const e of [front, ...sideFaces]) onWall(W, e, e.len / 2, 0, 0.012, () => { for (const y of [2.2, 6.6, 11]) W.box('flat', 0, y, 0, e.len, 0.035, 0.02, RC.towerLine); });
+    for (const f of louvers) {
+      onWall(W, front, (a + b) / 2, R_FLOORS[f] + 2.2, 0.02, () => {
+        W.box('flat', 0, 0, 0, b - a - 0.4, 2.5, 0.06, RC.towerLine);
+        W.box('louver', 0, 0, 0.04, b - a - 0.6, 2.3, 0.03, color('#b7bbbe'));
+      });
+    }
+    if (door) doorAt(W, front, (a + b) / 2, 0.95, 2.2, color('#8f9496'), { frameCol: RC.grid });
     return;
   }
-  if (e.nx < -0.5) {
-    // the quad side, north to south: corner pier, tower, three bays with towers
-    // between, tower, the ASB Office's bay, tower, corner pier (IMG_2342, IMG_2350–2352)
-    const z0 = e.az, T = (z) => z - z0;
-    const TOWERS = [[-19.2, -17.0], [-9.33, -7.13], [0.53, 2.73], [10.4, 12.6], [20.2, 22.4]];
-    const BAYS = [[-17.0, -9.33], [-7.13, 0.53], [2.73, 10.4], [12.6, 20.2, true]];
-    rPier(W, e, T(-21.6), T(-19.2), h, { narrow: T(-20.4) });
-    rPier(W, e, T(22.4), T(25.2), h, { narrow: T(23.8) });
-    doorAt(W, e, T(23.8), 0.95, 2.3, null, { glass: true, frameCol: RC.grid });
-    for (const [a, c] of TOWERS) rTower(W, e, T(a), T(c), h, [0, 2]);
-    for (const [a, c, sf] of BAYS) rBay(W, e, T(a), T(c), { storefront: !!sf });
+  if (kind === 'cream') {
+    W.slab('stucco', RF, z0, RQ, z1, 0, h, RC.wall);
+    W.slab('flat', RF - 0.03, z0, RQ, z1, h, h + 0.08, C.fin);
+    reveals(W, front, a, b, h - 0.6);
+    for (const e of sideFaces) reveals(W, e, 0, e.len, h - 0.6);
+    sconce(W, front, (a + b) / 2, 3.1);
     return;
   }
+  // a corner: the cream block has narrow windows up it and a glass door at the
+  // foot, set in a skin like the ends (IMG_2348, IMG_2352)
+  W.slab('stucco', RF + RD, z0, RQ, z1, 0, h, RC.wall);
+  const inner = rWall(RF + RD, z0, RF + RD, z1, -1, 0), m = inner.len / 2, holes = [rSideDoor(W, inner, m, true)];
+  for (const f of [4.4, 8.8]) { windowAt(W, inner, m, f + 2.1, 0.62, 2.6, { frame: RC.grid }); holes.push(winHole(m, f + 2.1, 0.62, 2.6)); }
+  rSkin(W, inner, 0, inner.len, h, holes);
+  sconce(W, front, m - 1.0, 3.1);
+}
+
+// One end of R (north or south): the narrow block's end, the step, and the wide
+// block's end with its entrance set in beside the step.
+function rEnd(W, h, north) {
+  const s = north ? -1 : 1, zN = north ? RN : RSN, zW = north ? RNW : RSW, zR = zW - s * RIN;
+  // the narrow end: blank but for the side door with two small windows above,
+  // a lamp, and by the inside corner the fountain and its guard (Ethan; IMG_2344,
+  // IMG_2346, IMG_2347, IMG_2355). k = metres from the inside corner.
+  const nE = rWall(RF, zN, RS, zN, 0, s), kx = (k) => tAt(nE, RS - RD - k, zN);   // from the corner as seen
+  const holes = [rSideDoor(W, nE, kx(1.75))];
+  for (const f of [4.4, 8.8]) { windowAt(W, nE, kx(1.75), f + 2.4, 0.75, 0.7, { frame: RC.grid }); holes.push(winHole(kx(1.75), f + 2.4, 0.75, 0.7)); }
+  rSkin(W, nE, ...span(nE, [RF, zN], [RS, zN]), h, holes);
+  rFountain(W, nE, kx(0.42), RD);
+  rGuard(W, nE, kx(1.0), RD);
+  sconce(W, nE, kx(3.4), 3.1, RD);
+  // the step: the white service door by the inside corner, a card reader, the fire bell
+  const st = rWall(RS, zN, RS, zW, -1, 0), [p0, p1] = span(st, [RS, zN + s * RD], [RS, zW + s * RD]);
+  const sk = (k) => tAt(st, RS, zN + s * (RD + k));
+  serviceDoor(W, st, sk(0.75));
+  rSkin(W, st, p0, p1, h, [[sk(0.75) - 0.55, sk(0.75) + 0.55, 0, 2.3]]);
+  onWall(W, st, sk(1.55), 1.3, RD + 0.01, () => W.box('flat', 0, 0, 0, 0.12, 0.16, 0.04, color('#26282b')));
+  onWall(W, st, sk(0.95), 3.8, RD + 0.03, () => W.box('flat', 0, 0, 0, 0.24, 0.24, 0.06, color('#c8352e')));
+  // the wide end: a pier by the step with a lamp and camera, the entrance, then
+  // tall narrow windows (the lowest reaching the ground) with a lamp either side
+  const wE = rWall(RS - RD, zW, RE, zW, 0, s), wx = (x) => tAt(wE, x, zW);
+  rSkin(W, wE, ...span(wE, [RS - RD, zW], [RX0, zW]), h);
+  sconce(W, wE, wx(42.4), 3.1, RD);
+  onWall(W, wE, wx(42.6), 3.9, RD, () => { W.box('flat', 0, 0, 0.08, 0.05, 0.05, 0.16, C.white); W.cyl('flat', 0, -0.1, 0.18, 0.07, 0.07, 0.1, 8, C.white); });
+  onWall(W, wE, wx(RX0 - 0.12), 0, RD + 0.08, () => W.cyl('flat', 0, 0, 0, 0.05, 0.05, 3.25, 8, color('#efe7d6')));
+  const wholes = [], nx = 51.0;
+  for (const [y, hh] of [[1.55, 2.95], [5.85, 2.75], [9.75, 2.55]]) { windowAt(W, wE, wx(nx), y, 0.7, hh, { frame: RC.grid }); wholes.push(winHole(wx(nx), y, 0.7, hh)); }
+  if (north) {
+    // the big cream louver panel beside the north entrance (IMG_2357)
+    onWall(W, wE, wx(48.4), 2.05, 0.03, () => { W.box('flat', 0, 0, 0, 2.3, 3.5, 0.1, RC.cap); W.box('louver', 0, 0, 0.06, 2.0, 3.2, 0.03, color('#f2ead8')); });
+    wholes.push([...span(wE, [47.25, zW], [49.55, zW]), 0.3, 3.8]);
+  } else sconce(W, wE, wx(49.2), 3.1, RD);
+  sconce(W, wE, wx(54.0), 3.1, RD);
+  rSkin(W, wE, ...span(wE, [RX1, zW], [RE, zW]), h, wholes);
+  // the entrance, set 0.9 m in under a band at the top: canopy, glass doors and
+  // side lights, and a big gridded window on each floor above (IMG_2345)
+  const bE = rWall(RX0, zR, RX1, zR, 0, s), bm = bE.len / 2;
+  onWall(W, bE, bm, 0, 0, () => {
+    W.box('flat', 0, 3.3, (RIN + RD + 1.3) / 2, 4.3, 0.26, RIN + RD + 1.3, RC.canopy);
+    W.box('flat', 0, 3.165, (RIN + RD + 1.3) / 2, 4.1, 0.02, RIN + RD + 1.1, color('#5b5f63'));
+  });
+  LIGHTS.push([bE.ax + bE.dx * bm + bE.nx * 1.2, bE.az + bE.dz * bm + bE.nz * 1.2, 3.1, 4.5]);
+  doorAt(W, bE, bm, 1.9, 2.4, null, { glass: true, frameCol: RC.grid });
+  for (const d of [-1.45, 1.45]) windowAt(W, bE, bm + d, 1.25, 0.7, 2.35, { frame: RC.grid });
+  windowAt(W, bE, bm, 2.85, 3.4, 0.5, { frame: RC.grid });
+  for (const [y, hh] of [[6.4, 3.0], [10.1, 2.6]]) {
+    windowAt(W, bE, bm, y, 3.3, hh, { frame: RC.grid });
+    for (const k of [-1, 1]) onWall(W, bE, bm, y + (k * hh) / 6, 0.03, () => W.box('flat', 0, 0, 0.09, 3.3, 0.06, 0.05, RC.grid));
+  }
+  for (const [x, n] of [[RX0, 1], [RX1, -1]]) reveals(W, rWall(x, zR, x, zW, n, 0), 0, RIN, 12.2);
+  W.slab('stucco', RX0, Math.min(zR, zW + s * RD), RX1, Math.max(zR, zW + s * RD), 12.2, h, RC.wall);
+  onWall(W, wE, (wx(RX0) + wx(RX1)) / 2, h + 0.04, RD / 2, () => W.box('flat', 0, 0, 0, RX1 - RX0, 0.08, RD + 0.06, C.fin));
+}
+
+function buildR(W, b) {
+  const h = b.h;
+  // the quad face: the thick blocks, and between them the window bays; the ASB
+  // Office is the southernmost (Ethan: "on the very right side")
+  const q = rWall(RQ, RN, RQ, RSN, -1, 0), T = (z) => tAt(q, RQ, z);
+  rBlock(W, h, RN, -19.0, 'corner');
+  rBlock(W, h, -19.0, -16.8, 'grey', { door: true, sides: [-16.8] });
+  for (const [z0, zm, z1, lv] of [[-9.9, -7.9, -6.7, [0, 1, 2]], [0.2, 2.2, 3.4, [0, 2]], [10.3, 12.3, 13.5, [0, 2]]]) {
+    rBlock(W, h, z0, zm, 'grey', { louvers: lv, sides: [z0] });
+    rBlock(W, h, zm, z1, 'cream', { sides: [z1] });
+  }
+  rBlock(W, h, 20.4, 22.6, 'grey', { louvers: [0, 2], sides: [20.4] });
+  rBlock(W, h, 22.6, RSN, 'corner');
+  for (const [z0, z1, sf] of [[-16.8, -9.9], [-6.7, 0.2], [3.4, 10.3], [13.5, 20.4, true]]) rBay(W, q, T(z0), T(z1), { storefront: !!sf });
+  rEnd(W, h, true);
+  rEnd(W, h, false);
   // the pool side: a sawtooth of grey towers with cream caps, the cream wall
   // between with a few doors and lights (IMG_2356, IMG_2361)
+  const e = rWall(RE, RNW, RE, RSW, 1, 0);
   reveals(W, e, 0.2, e.len - 0.2, h - 0.6);
   for (let t = 3.5, k = 0; t < e.len - 2; t += 7, k++) {
-    rTower(W, e, t - 0.9, t + 0.9, h, [], 0.9);
+    onWall(W, e, t, 0, 0.45, () => {
+      W.box('stucco', 0, (h - 0.7) / 2, 0, 1.8, h - 0.7, 0.92, RC.tower);
+      W.box('stucco', 0, h - 0.3, 0, 1.8, 0.8, 0.92, RC.cap);
+    });
     if (k % 2 === 0) sconce(W, e, t + 2.6, 3.1);
     if (k % 3 === 1) serviceDoor(W, e, t + 3.5);
   }
@@ -390,6 +481,7 @@ export function buildBuildings(W) {
     else if (b.style !== 'r') rooftop(W, b, R, roofY);
     const kit = KITS[b.style] || KITS.plain;
     for (const e of edges(b.poly)) kit(W, b, e, R);
+    if (b.style === 'r') buildR(W, b);
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
 

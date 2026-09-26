@@ -131,7 +131,7 @@ export function buildLandmarks(W, group, fontFamily) {
   awning(W, -54.7, 26.2, 31.2, 1.6, 2.7, color('#e8b930'), 'x');
 
   // ── Building R: the ASB Office awning on the quad side ──
-  const asbZ0 = 12.6, asbZ1 = 20.2;            // the southernmost bay (Ethan: "on the very right side")
+  const asbZ0 = 13.8, asbZ1 = 20.1;            // the southernmost bay (Ethan: "on the very right side")
   awning(W, 33.2, asbZ0, asbZ1, 1.5, 3.0, color('#c4a34f'), 'x');
   const asbTex = textCanvas(1024, 96, (g, w, h) => {
     g.fillStyle = '#16181b'; g.fillRect(0, 0, w, h);

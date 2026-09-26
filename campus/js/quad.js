@@ -53,17 +53,17 @@ export function buildQuad(W, decals) {
   for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true }); addCircle(x, z, 0.25); }
   // in front of Building R: beds of red-tipped shrubs, flax and grasses along its
   // base, two big leafy trees, benches along the beds, a few tables (IMG_2349–2352)
-  const RX = 33.2, bedX = 30.9;
-  for (const [z0, z1] of R_FRONT.beds) {
-    W.slab('flat', bedX, z0, RX, z1, 0, 0.06, color('#6b4a35'));
-    for (let z = z0 + 0.7; z < z1 - 0.5; z += 1.3 + R() * 0.6) {
-      const x = bedX + 0.5 + R() * 1.4, k = R();
+  for (const [x0, z0, x1, z1] of R_FRONT.beds) {
+    W.slab('flat', x0, z0, x1, z1, 0, 0.06, color('#6b4a35'));
+    for (let z = z0 + 0.6; z < z1 - 0.4; z += 1.3 + R() * 0.6) {
+      const x = x0 + 0.4 + R() * Math.max(0.1, x1 - x0 - 0.8), k = R();
       if (k < 0.45) shrub(W, x, z, R, { s: 0.9 + R() * 0.4, cols: RED_TIPS });
       else if (k < 0.7) flax(W, x, z, R, { h: 1.2 + R() * 0.4 });
       else grassTuft(W, x, z, R, { h: 0.7 + R() * 0.3, cols: GRASS });
     }
-    addBox(bedX, z0, RX, z1);
+    addBox(x0, z0, x1, z1);
   }
+  const bedX = 30.4;
   for (const [x, z] of R_FRONT.trees) {
     W.cyl('flat', x, 0, z, 1.7, 1.7, 0.05, 18, color('#6b4a35'));
     shadeTree(W, x, z, R, { h: 9.5 + R(), cols: G.leaf });

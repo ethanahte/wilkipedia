@@ -243,31 +243,37 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
-  - **Building R is `rFace()` in buildings.js** (style `r`), from Ethan and his
-    photos IMG_2342–2361:
-    - It is a 凸 in plan (layout.js; the step was measured off the satellite).
-      The narrow block faces the quad; the back block is 2.1 m wider at each
-      end, stepping out 7.9 m back from the quad face. Drinking fountains sit
-      in the inside corners.
-    - Everything is cream precast with reveals every 1.2 m up and 2.7 m along.
-    - The quad face runs, north to south: corner pier, then grey towers
-      (louvers top and bottom) alternating with bays of white panels, each bay
-      with a teal glass row at each floor's head and a glass strip up one
-      side. The ASB Office's glass front is the southernmost bay ("on the
-      very right side"; the awning is in landmarks.js), then a corner pier
-      with a glass door.
-    - Each wide end has its entrance right beside the step: grey canopy, glass
-      doors, big gridded windows above. Tall narrow windows sit further
-      along, and the north end has the big louver panel. The narrow ends have
-      a glass door with small windows above it. The south step face has a
-      service door.
-    - The pool face is a sawtooth of grey towers with cream caps. There is no
-      walkway behind the building (Ethan).
-    - The triangular wall lamps (`sconce()`) glow underneath and add to
-      `LIGHTS`.
-    - In front, on the quad side (`R_FRONT` in layout.js, built in quad.js):
-      beds of red-tipped shrubs, flax and grasses, two big trees, black mesh
-      benches, a few tables, and white pots by the ASB door.
+  - **Building R is `buildR()` in buildings.js**, from Ethan and his photos
+    IMG_2342–2361. It is built piece by piece by world position (the `R*`
+    constants must match R's outline in layout.js); `KITS.r` is empty.
+    - Plan: a 凸. The narrow block faces the quad and the back block is 2.1 m
+      wider at each end. Each wide end has its entrance set 0.9 m into the wall
+      beside the step (notches in the outline), under a solid band at the top.
+    - Quad face: thick blocks stand out 1.6 m from it (to x 31.6), each half a
+      grey AC shaft with louvers and half plain cream wall (Ethan: "much
+      thicker"). The corner blocks are cream with narrow windows and a glass
+      door with a glass transom. The window bays between are white panels
+      with teal glass, and the ASB Office's glass front is the southernmost
+      bay.
+    - End walls get `rSkin()`: a 0.22 m precast skin with openings, so windows
+      and doors sit back in the wall (Ethan: 凹进去). The skin draws its own
+      reveals and breaks them at the openings. Anything mounted on a skinned
+      face needs `off = RD`.
+    - Narrow ends: a single glass side door with a grey louver over it, 1.75 m
+      from the corner as seen, with two small windows above. The stainless
+      bottle-filler fountain (`rFountain`) and its pipe guard (`rGuard`, Ethan's
+      "piece of fence") sit by the corner.
+    - Step faces: a plain service door by the corner, a card reader and a red
+      fire bell.
+    - Wide ends: a pier with a lamp and camera, the recessed entrance (canopy,
+      glass doors and side lights, big gridded windows), then a column of tall
+      narrow windows whose lowest reaches the ground, with lamps either side.
+      The north end also has the big louver panel.
+    - Pool face: a sawtooth of grey towers. There is no walkway behind.
+    - The triangular wall lamps (`sconce()`) glow and add to `LIGHTS`.
+    - In front, on the quad side (`R_FRONT`, built in quad.js): beds in the bays
+      and in front of some blocks, two big trees, black mesh benches, tables,
+      and white pots by the ASB door.
   - **Room plates are hidden for now (Ethan)** except the P building's door
     plates. A hidden plate keeps its slot in the mesh as a collapsed quad, so
     `rooms[faceIndex / 2]` picking still lines up.

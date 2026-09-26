@@ -29,9 +29,13 @@ export const BUILDINGS = [
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
   // (Ethan, his photos IMG_2342–2361, the satellite): a 凸 in plan. The narrow block
-  // faces the quad; the back block is 2.1 m wider at each end, stepping out 7.9 m back.
+  // faces the quad; the back block is 2.1 m wider at each end, stepping out 7.9 m
+  // back. Each wide end has its entrance set 0.9 m into the wall beside the step.
+  // The thick grey-and-cream blocks along the quad side stand out from this
+  // outline (buildings.js buildR). Keep buildings.js's R_ numbers in step.
   { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, floors: 3,
-    poly: [[33.2, -21.6], [41.1, -21.6], [41.1, -23.75], [54.7, -23.75], [54.7, 27.3], [41.1, 27.3], [41.1, 25.2], [33.2, 25.2]] },
+    poly: [[33.2, -21.6], [41.1, -21.6], [41.1, -23.75], [43.1, -23.75], [43.1, -22.85], [46.9, -22.85], [46.9, -23.75], [54.7, -23.75],
+      [54.7, 27.3], [46.9, 27.3], [46.9, 26.4], [43.1, 26.4], [43.1, 27.3], [41.1, 27.3], [41.1, 25.2], [33.2, 25.2]] },
   // The P building (P100–P107): two rows of portable classrooms facing each other
   // across an open courtyard. Drawn by portables.js from photos, not by the kits here.
   { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-6.7, 41.1, 2.3, 70.3) },
@@ -135,12 +139,15 @@ export const CEDAR = { x: 0, z: 0, bed: 4.2 };
 // In front of Building R on the quad side (IMG_2349–2352): planting beds along its
 // base, two big leafy trees, black mesh benches along the beds, a few tables.
 export const R_FRONT = {
-  beds: [[-19.0, -9.6], [-6.9, 0.3], [3.0, 10.2]],            // z ranges, from the wall out to x 30.9
-  trees: [[28.8, -3.2], [28.8, 6.2]],
-  benches: [-12.4, -4.6, 1.6, 7.8],                              // z, facing the quad
-  tables: [[27.0, -15.5], [26.8, 10.6]],
+  // beds as [x0, z0, x1, z1]: in the window bays between the thick blocks, and a
+  // strip in front of some of the blocks (the blocks stand out to x 31.6)
+  beds: [[30.4, -16.8, 33.2, -9.9], [30.4, -6.7, 33.2, 0.2], [30.4, 3.4, 33.2, 10.3],
+    [30.4, -19.0, 31.6, -16.8], [30.4, -9.9, 31.6, -6.7], [30.4, 0.2, 31.6, 3.4]],
+  trees: [[28.6, -3.2], [28.6, 6.9]],
+  benches: [-12.4, -4.6, 1.8, 7.8],                              // z, facing the quad
+  tables: [[27.0, -15.5], [26.8, 11.4]],
   picnic: [[27.2, -8.8, 0]],
-  pots: [[32.6, 15.0], [32.6, 17.8]],                            // the white planters by the ASB Office door
+  pots: [[32.6, 15.2], [32.6, 18.6]],                            // the white planters by the ASB Office door
 };
 // Round the cedar (Ethan's photos IMG_2332–2335): a light-blue and a green picnic
 // table at the bed's west edge with grey cans beside them, and black mesh tables
