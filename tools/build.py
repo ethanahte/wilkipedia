@@ -91,6 +91,21 @@ def load():
         for c in t["courses"]:
             courses[c]["teachers"].append(t["name"])
 
+    # What students call a class (data/course-nicknames.json), checked so that
+    # every name means exactly one class
+    nick = json.loads((DATA / "course-nicknames.json").read_text())
+    nick.pop("_about", None)
+    seen = {c["name"].lower(): slug for slug, c in courses.items()}
+    for slug, v in nick.items():
+        if slug not in courses:
+            raise SystemExit(f"course-nicknames.json: no class with slug {slug!r}")
+        for n in ([v["call"]] if v.get("call") else []) + v.get("also", []):
+            if seen.get(n.lower(), slug) != slug:
+                raise SystemExit(f"course-nicknames.json: {n!r} already means {seen[n.lower()]}")
+            seen[n.lower()] = slug
+        courses[slug]["call"] = v.get("call")
+        courses[slug]["also"] = v.get("also", [])
+
     depts = catalog["departments"]
     for d in depts:
         d["courses"] = sorted((c for c in courses.values() if c["department"] == d["slug"]),
@@ -413,6 +428,7 @@ def build_courses(depts, courses):
 <nav class="crumbs"><a href="../../subjects/">All classes</a> / <a href="../../subjects/{e(c['department'])}/">{e(dept_name[c['department']])}</a></nav>
 <header class="entry-head">
   <div class="entry-title"><h1>{e(c['name'])}</h1><div class="c-badges">{course_badges(c)}</div></div>
+  {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}
   <dl class="facts">{stats_html}</dl>
   {f'<p class="prereq"><b>Prerequisite.</b> {e(prereq)}</p>' if prereq else ''}
   {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
@@ -916,7 +932,8 @@ def build_static():
 
 
 def build_data(depts, courses, teachers):
-    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers")} for c in courses.values()]
+    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers", "call", "also") if c.get(k) is not None}
+            for c in courses.values()]
     (DATA / "courses.json").write_text(json.dumps(
         {"departments": [{"slug": d["slug"], "name": short_dept(d["name"])} for d in depts], "courses": slim},
         ensure_ascii=False, separators=(",", ":")))
@@ -972,7 +989,7 @@ def build_search_index(depts, courses, teachers):
     for c in courses.values():
         idx.append({"t": "c", "n": c["name"], "u": f"courses/{c['slug']}/",
                     "d": " · ".join(x for x in [dept[c["department"]], f"Grades {c['grades']}" if c.get("grades") else ""] if x),
-                    "k": " ".join([dept[c["department"]], " ".join(c["teachers"]), c.get("courseNumber") or "",
+                    "k": " ".join([c.get("call") or "", " ".join(c.get("also") or []), dept[c["department"]], " ".join(c["teachers"]), c.get("courseNumber") or "",
                                    words(c.get("description"))])})
     for t in teachers:
         idx.append({"t": "t", "n": t["name"], "s": t["slug"], "u": f"teachers/{t['slug']}/",

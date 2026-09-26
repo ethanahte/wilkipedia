@@ -2,7 +2,7 @@
 //   ?course=<slug>&kind=<kind>&teacher=<name>   (from a course page)
 //   ?bounty=<id>                                 (from a claimed bounty)
 
-import { initHeader, requireUser, renderFields, suggestions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
+import { initHeader, requireUser, renderFields, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
 import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
@@ -19,9 +19,9 @@ const allTeachers = [...new Set(data.courses.flatMap((c) => c.teachers || []))].
 // The Period grid suggests the chosen teacher's classes first, then every class
 function periodSuggestions() {
   const mine = data.courses.filter((c) => state.teacher && (c.teachers || []).includes(state.teacher)).map((c) => c.name);
+  suggestions.courses = data.courses;
   suggestions.periods = [...mine, ...data.courses.map((c) => c.name).filter((n) => !mine.includes(n))];
-  const dl = $('#dl-periods');
-  if (dl) dl.innerHTML = ['Prep', ...suggestions.periods].map((o) => `<option value="${esc(o)}">`).join('');
+  refreshPeriodOptions();
 }
 let bounties = [];
 let form = null;

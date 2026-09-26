@@ -1402,3 +1402,5 @@ ol.periods .pn { flex: none; width: 2em; font: 700 .8rem var(--sans); color: var
 .sched-past summary { cursor: pointer; color: var(--accent); font-size: .9rem; width: max-content; }
 .sched-past .sched-head { margin-top: 12px; }
 .mp-also { margin: 2px 0 4px; }
+.aka { margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
+.aka b { color: var(--ink); font-weight: 600; }

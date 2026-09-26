@@ -9,7 +9,7 @@
 // `mode` is always 'plan' now (an aerial photo view was tried and removed).
 // room contents come from approved teacher sections whose "room" field matches.
 
-import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root, normRoom, collectSchedules, scheduleBlock, courseMatcher } from './ui.js';
+import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root, normRoom, collectSchedules, scheduleBlock, courseMatcher, classLinker } from './ui.js';
 import { todaysLunch, sortedCats, itemHtml } from './menu.js';
 
 const s = await initHeader();
@@ -33,7 +33,7 @@ const roomById = Object.fromEntries(map.rooms.map((r) => [r.id, r]));
 
 // A class name typed into a schedule links to its page when it matches one
 const matchCourse = courseMatcher(data.courses);
-const classLink = (name) => (matchCourse(name) ? `<a href="${courseUrl(matchCourse(name))}">${esc(name)}</a>` : esc(name));
+const classLink = classLinker(data.courses);
 
 // ── room contents from approved teacher sections and room schedules ──
 let byRoom = {};

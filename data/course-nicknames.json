@@ -1,0 +1,5 @@
+{
+  "_about": "What Wilcox students actually call a class, keyed by catalog slug. Only names Ethan has confirmed go here: nothing is guessed. 'call' is the everyday name shown in room schedules and under the class page title (leave it out to keep showing the catalog name). 'also' lists other names the site accepts in forms and search, and turns into this class. Every name must be unique across the file and must not be another class's catalog name. Edit, then run tools/build.py.",
+  "biology-of-the-living-earth": { "call": "Biology" },
+  "ap-macroeconomics": { "also": ["AP Macro"] }
+}

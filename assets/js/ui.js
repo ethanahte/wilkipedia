@@ -196,12 +196,38 @@ function paintThemeToggle() {
 // "Room b-204" / "b204" / "B 204" all mean B204
 export const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '');
 
-// Finds the class a schedule names by its full catalog name (the form only
-// accepts full names). Nothing is guessed: anything else stays unlinked.
-export function courseMatcher(list) {
-  const exact = Object.fromEntries(list.map((c) => [c.name.toLowerCase(), c.slug]));
-  return (name) => exact[String(name || '').trim().toLowerCase().replace(/\s+/g, ' ')] || null;
+// Class names a schedule may use: the catalog name, plus the everyday names in
+// data/course-nicknames.json (`call`, `also`) that Ethan has confirmed. Nothing
+// else is guessed: any other text stays unlinked.
+const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+export function courseNames(list) {
+  const m = new Map();
+  for (const c of list) for (const n of [c.name, c.call, ...(c.also || [])]) if (n) m.set(normName(n), c);
+  return m;
 }
+export function courseMatcher(list) {
+  const m = courseNames(list);
+  return (name) => m.get(normName(name))?.slug || null;
+}
+// A class name as a link, shown by what students call it ("Biology"), with the
+// catalog name on hover
+export function classLinker(list) {
+  const m = courseNames(list);
+  return (name) => {
+    const c = m.get(normName(name));
+    return c ? `<a href="${courseUrl(c.slug)}"${c.call ? ` title="${esc(c.name)}"` : ''}>${esc(c.call || c.name)}</a>` : esc(name);
+  };
+}
+// The Period boxes' suggestions: suggestions.periods (catalog names, the
+// teacher's first) shown by everyday name where there is one
+function periodOptions() {
+  const m = courseNames(suggestions.courses || []);
+  return ['<option value="Prep">', ...(suggestions.periods || []).map((n) => {
+    const c = m.get(normName(n));
+    return c?.call ? `<option value="${esc(c.call)}">${esc(c.name)}</option>` : `<option value="${esc(n)}">`;
+  })].join('');
+}
+export function refreshPeriodOptions() { const dl = $('#dl-periods'); if (dl) dl.innerHTML = periodOptions(); }
 
 // One teacher's schedules, newest year first: [{year, periods} | {year, text}].
 // Shows this school year's (or the newest, labelled as older), with the rest
@@ -499,7 +525,8 @@ export async function openEditor(store, sub, onSaved) {
     </form>`;
   document.body.append(wrap);
   if (KINDS[sub.kind]?.fields.some((f) => f.type === 'periods') && !suggestions.periods?.length) {
-    suggestions.periods = (await courses()).courses.map((c) => c.name);
+    suggestions.courses = (await courses()).courses;
+    suggestions.periods = suggestions.courses.map((c) => c.name);
   }
   const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
   const close = () => wrap.remove();
@@ -615,7 +642,7 @@ export function renderFields(el, kind, preset = {}) {
       const cur = val && typeof val === 'object' ? val : {};
       input = `<div class="periods-in" id="${id}" role="group" aria-label="${esc(f.label)}">${PERIODS.map((n) =>
         `<label><span>Period ${n}</span><input name="${f.key}.${n}" value="${esc(cur[n] || '')}" list="dl-periods" maxlength="60" autocomplete="off" placeholder="—"></label>`).join('')}</div>
-        <datalist id="dl-periods">${['Prep', ...(suggestions.periods || [])].map((o) => `<option value="${esc(o)}">`).join('')}</datalist>`;
+        <datalist id="dl-periods">${periodOptions()}</datalist>`;
     } else if (f.type === 'textarea') {
       input = `<textarea id="${id}" name="${f.key}" rows="4" ${f.max ? `maxlength="${f.max}"` : ''} ${f.required ? 'required' : ''}>${esc(val)}</textarea>`;
     } else if (f.type === 'select') {
@@ -631,8 +658,13 @@ export function renderFields(el, kind, preset = {}) {
     return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label>
       ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;
   }).join('');
-  // Period boxes take a full class name from the catalog, or "Prep", written the catalog's way
-  const canon = () => new Map(['Prep', ...(suggestions.periods || [])].map((n) => [n.toLowerCase(), n]));
+  // Period boxes take a class's catalog name or an approved everyday name, or
+  // "Prep", and save the catalog name
+  const canon = () => {
+    const m = new Map([['prep', 'Prep'], ...(suggestions.periods || []).map((n) => [n.toLowerCase(), n])]);
+    for (const [k, c] of courseNames(suggestions.courses || [])) m.set(k, c.name);
+    return m;
+  };
   const periodsOf = (f) => {
     const c = canon();
     return Object.fromEntries(PERIODS.map((n) => [n, $(`[name="${f.key}.${n}"]`, el).value.trim().replace(/\s+/g, ' ')])
@@ -665,7 +697,8 @@ export function renderFields(el, kind, preset = {}) {
             input.classList.add('invalid');
             input.focus();
             const words = v.toLowerCase().split(/\s+/);
-            const near = names.filter((x) => words.every((w) => x.toLowerCase().includes(w))).slice(0, 3);
+            const near = (suggestions.courses || []).filter((x) => words.every((w) => `${x.name} ${x.call || ''}`.toLowerCase().includes(w)))
+              .slice(0, 3).map((x) => x.call || x.name);
             return `Period ${n}: “${v}” isn’t a full class name. Pick it from the list${near.length ? ` (maybe ${near.join(' or ')}?)` : ''}, or type Prep.`;
           }
           continue;
