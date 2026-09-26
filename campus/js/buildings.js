@@ -3,8 +3,9 @@
 // The kits come from the photos:
 //   b      Building B: tan pilasters, light recessed panels, grey-framed window
 //          bands on both floors, tall louvre panels, a grey steel entry canopy
-//   r      Building R: three floors of tall dark window bands, light fins at every
-//          floor line, pilasters, solar panels on the roof
+//   r      Building R (Ethan's photos IMG_2342–2361): cream precast panels with
+//          reveals, grey concrete towers with louvers, bays of white panels with
+//          teal glass, recessed entrances with grey canopies; see rFace()
 //   caf/p  single-storey wings with a covered walkway, warm yellow doors and a
 //          band of clerestory windows
 //   s      the science building: white walls, curved metal barrel roofs
@@ -138,21 +139,7 @@ const KITS = {
     // belt course between the floors
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
   },
-  r(W, b, e, R) {
-    const h = b.h;
-    if (e.len < 4) return;
-    for (const { i, t } of bays(e.len, 3.6, 1.2)) {
-      if (i % 3 === 0) {
-        onWall(W, e, t - 1.8, 0, 0.25, () => W.box('stucco', 0, (h + 0.8) / 2, 0, 1.5, h + 0.8, 0.5, C.tan));
-        continue;
-      }
-      if (i % 5 === 4) { louverAt(W, e, t, h / 2, 1.1, h - 2.4); continue; }
-      // a tall band of windows running up through all three floors
-      for (const f of [0, 4.4, 8.8]) windowAt(W, e, t, f + 2.1, 2.5, 2.3);
-    }
-    // light fins at every floor line
-    for (const y of [4.3, 8.7]) onWall(W, e, e.len / 2, y, 0.2, () => W.box('flat', 0, 0, 0, e.len - 0.4, 0.14, 0.4, C.fin));
-  },
+  r(W, b, e) { rFace(W, b, e); },
   caf(W, b, e, R) {
     if (e.len < 4) return;
     const tall = b.h > 6;
@@ -226,6 +213,146 @@ const WALL = {
   s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
+// ── Building R ──
+// Its faces are laid out from Ethan's photos, face by face, rather than by a
+// repeating rhythm. t runs along a face as edges() gives it: the west face from
+// its north end, the east face from its south end, the south face from its west
+// end and the north face from its east end.
+const RC = {
+  reveal: color('#d2c6ab'), tower: color('#a4a8aa'), towerLine: color('#8e9294'), panel: color('#eef0eb'),
+  grid: color('#7c8186'), teal: color('#a9dcd6'), canopy: color('#8a8f94'), sconce: color('#6f7378'), cap: color('#ece0c4'),
+};
+const R_FLOORS = [0, 4.4, 8.8];
+
+// The precast's reveals: a groove every 1.2 m up and every 2.7 m along.
+function reveals(W, e, t0, t1, top, off = 0) {
+  if (t1 - t0 < 0.3) return;
+  onWall(W, e, (t0 + t1) / 2, 0, off + 0.012, () => {
+    for (let y = 1.2; y < top - 0.3; y += 1.2) W.box('flat', 0, y, 0, t1 - t0, 0.035, 0.02, RC.reveal);
+  });
+  for (let t = t0 + 2.7; t < t1 - 0.4; t += 2.7) onWall(W, e, t, top / 2, off + 0.012, () => W.box('flat', 0, 0, 0, 0.035, top, 0.02, RC.reveal));
+}
+const sconce = (W, e, t, y) => onWall(W, e, t, y, 0.02, () => W.cyl('flat', 0, 0, 0.1, 0, 0.2, 0.26, 3, RC.sconce));
+
+// A grey concrete tower standing out from the wall, full height but for a cream
+// cap, with louvers on the chosen floors.
+function rTower(W, e, t0, t1, h, louvers, out = 0.35) {
+  const w = t1 - t0, top = h - 0.7;
+  onWall(W, e, (t0 + t1) / 2, 0, out / 2, () => {
+    W.box('stucco', 0, top / 2, 0, w, top, out + 0.02, RC.tower);
+    W.box('stucco', 0, top + 0.4, 0, w, 0.8, out + 0.02, RC.cap);
+    for (const y of [2.2, 6.6, 11]) W.box('flat', 0, y, out / 2 + 0.012, w, 0.035, 0.02, RC.towerLine);
+  });
+  for (const f of louvers) {
+    onWall(W, e, (t0 + t1) / 2, R_FLOORS[f] + 2.2, out + 0.02, () => {
+      W.box('flat', 0, 0, 0, w - 0.4, 2.5, 0.06, RC.towerLine);
+      W.box('louver', 0, 0, 0.04, w - 0.6, 2.3, 0.03, color('#b7bbbe'));
+    });
+  }
+}
+
+// A bay of white panels on a grey grid, a row of teal glass at the head of each
+// floor and a strip of glass up one side (IMG_2350, IMG_2352).
+function rBay(W, e, t0, t1, { storefront = false } = {}) {
+  const w = t1 - t0, mid = (t0 + t1) / 2;
+  R_FLOORS.forEach((f, k) => {
+    if (k === 0 && storefront) return;
+    const y0 = f + 0.8, y1 = f + 3.4;
+    onWall(W, e, mid, 0, 0.03, () => {
+      W.box('flat', 0, (y0 + y1) / 2, 0, w - 0.3, y1 - y0, 0.05, RC.panel);
+      // the teal row, and the side strip
+      const gx0 = -w / 2 + 0.25, gx1 = w / 2 - 0.95;
+      W.quad('glass', [gx0, y1 - 0.62, 0.03], [gx1, y1 - 0.62, 0.03], [gx1, y1 - 0.08, 0.03], [gx0, y1 - 0.08, 0.03], RC.teal, 'auto');
+      W.quad('glass', [w / 2 - 0.8, y0 + 0.08, 0.03], [w / 2 - 0.25, y0 + 0.08, 0.03], [w / 2 - 0.25, y1 - 0.08, 0.03], [w / 2 - 0.8, y1 - 0.08, 0.03], pane(), 'auto');
+      for (const y of [y0, (y0 + y1 - 0.62) / 2, y1 - 0.62, y1]) W.box('flat', 0, y, 0.04, w - 0.3, 0.05, 0.03, RC.grid);
+      for (let x = gx0; x <= gx1 + 0.01; x += (gx1 - gx0) / Math.max(1, Math.round((gx1 - gx0) / 1.25))) W.box('flat', x, (y0 + y1) / 2, 0.04, 0.05, y1 - y0, 0.03, RC.grid);
+      for (const x of [w / 2 - 0.82, w / 2 - 0.23]) W.box('flat', x, (y0 + y1) / 2, 0.04, 0.05, y1 - y0, 0.03, RC.grid);
+    });
+  });
+  if (storefront) {
+    // the ASB Office's glass front under its awning (landmarks.js draws the awning)
+    onWall(W, e, mid, 1.45, 0.03, () => {
+      W.box('flat', 0, 0, 0, w - 0.3, 2.8, 0.08, RC.grid);
+      W.quad('glass', [-w / 2 + 0.3, -1.3, 0.05], [w / 2 - 0.3, -1.3, 0.05], [w / 2 - 0.3, 1.3, 0.05], [-w / 2 + 0.3, 1.3, 0.05], LIT, 'auto');
+      for (let x = -w / 2 + 0.3; x <= w / 2 - 0.29; x += (w - 0.6) / 7) W.box('flat', x, 0, 0.07, 0.06, 2.6, 0.03, RC.grid);
+      W.box('flat', 0, 0.55, 0.07, w - 0.6, 0.05, 0.03, RC.grid);
+    });
+  }
+}
+
+// A plain cream stretch: its reveals, and narrow windows up it if asked.
+function rPier(W, e, t0, t1, h, { narrow = null } = {}) {
+  reveals(W, e, t0, t1, h - 0.6);
+  if (narrow != null) for (const f of R_FLOORS) windowAt(W, e, narrow, f + 2.2, 0.62, 2.5, { frame: RC.grid });
+}
+
+// A recessed entrance: grey canopy, double glass doors and transom, and a big
+// gridded window on each floor above (IMG_2345, IMG_2357).
+function rEntrance(W, e, h) {
+  const mid = e.len / 2;
+  onWall(W, e, mid, 0, 0, () => {
+    W.box('flat', 0, 3.3, 1.3, e.len + 1.2, 0.26, 2.6, RC.canopy);
+    W.box('flat', 0, 3.17, 1.3, e.len + 1.0, 0.02, 2.4, color('#5b5f63'));
+  });
+  doorAt(W, e, mid, 1.9, 2.4, null, { glass: true, frameCol: RC.grid });
+  windowAt(W, e, mid, 2.75, 2.1, 0.5, { frame: RC.grid });
+  for (const f of [4.4, 8.8]) windowAt(W, e, mid, f + 2.2, e.len - 0.9, 2.7, { frame: RC.grid });
+}
+
+// The two ends: a plain wing with small square windows, a door and a fountain,
+// the entrance bay, and a wing with tall narrow windows (IMG_2344, IMG_2346, IMG_2354).
+function rEnd(W, e, h, north) {
+  const len = e.len;
+  if (len < 5) { rEntrance(W, e, h); return; }      // the recessed bay itself
+  // which wing is this? the one that touches the west face has the door and the small windows
+  const westWing = north ? e.bx < 40 : e.ax < 40;
+  reveals(W, e, 0.2, len - 0.2, h - 0.6);
+  if (westWing) {
+    const tw = north ? len - 3.2 : 3.2;             // near the building's west corner
+    for (const f of [4.4, 8.8]) windowAt(W, e, north ? len - 5.2 : 5.2, f + 2.4, 0.75, 0.7, { frame: RC.grid });
+    doorAt(W, e, north ? len - 5.2 : 5.2, 0.95, 2.3, null, { glass: true, frameCol: RC.grid });
+    windowAt(W, e, north ? len - 5.2 : 5.2, 2.75, 0.8, 0.45, { frame: RC.grid });
+    onWall(W, e, north ? len - 6.3 : 6.3, 0.6, 0.12, () => W.box('flat', 0, 0, 0, 0.45, 0.35, 0.25, color('#9ea3a8')));   // drinking fountain
+    doorAt(W, e, north ? len - 7.6 : 7.6, 0.9, 2.2, color('#e8dcc2'), { frameCol: color('#d9ccb0') });
+    for (const t of [tw, north ? len - 7.0 : 7.0]) sconce(W, e, t, 3.1);
+  } else {
+    const tn = north ? 3.8 : len - 3.8;
+    for (const f of R_FLOORS) windowAt(W, e, tn, f + 2.3, 0.7, 2.6, { frame: RC.grid });
+    if (north) {
+      // the big cream louver panel beside the north entrance (IMG_2357)
+      onWall(W, e, len - 1.9, 2.0, 0.03, () => { W.box('flat', 0, 0, 0, 2.3, 3.2, 0.1, RC.cap); W.box('louver', 0, 0, 0.06, 2.0, 2.9, 0.03, color('#f2ead8')); });
+    }
+    sconce(W, e, north ? len - 3.4 : 3.4, 3.1);
+  }
+}
+
+function rFace(W, b, e) {
+  const h = b.h;
+  if (e.len < 1.5) return;                         // the entrance bays' short sides
+  if (e.nz > 0.5) return rEnd(W, e, h, false);
+  if (e.nz < -0.5) return rEnd(W, e, h, true);
+  if (e.nx < -0.5) {
+    // the quad side, north to south: pier, bay, tower, bay, tower, the ASB Office's
+    // bay, tower, bay, tower, bay, tower, pier (IMG_2342, IMG_2350–2352)
+    const z0 = e.az, T = (z) => z - z0;
+    const TOWERS = [[-14.0, -11.8, [0, 2]], [-5.0, -2.8, [0, 2]], [6.4, 8.6, [0, 2]], [13.2, 15.4, [2]], [20.6, 22.8, [0, 2]]];
+    const BAYS = [[-20.5, -14.0], [-11.8, -5.0], [-2.8, 6.4, true], [8.6, 13.2], [15.4, 20.6]];
+    rPier(W, e, T(-22.9), T(-20.5), h, { narrow: T(-21.7) });
+    rPier(W, e, T(22.8), T(25.2), h, { narrow: T(24.0) });
+    for (const [a, c, lv] of TOWERS) rTower(W, e, T(a), T(c), h, lv);
+    for (const [a, c, sf] of BAYS) rBay(W, e, T(a), T(c), { storefront: !!sf });
+    return;
+  }
+  // the pool side: a sawtooth of grey towers with cream caps, the cream wall
+  // between with a few doors and lights (IMG_2356, IMG_2359–2361)
+  reveals(W, e, 0.2, e.len - 0.2, h - 0.6);
+  for (let t = 3.5, k = 0; t < e.len - 2; t += 7, k++) {
+    rTower(W, e, t - 0.9, t + 0.9, h, [], 0.9);
+    if (k % 2 === 0) sconce(W, e, t + 2.6, 3.1);
+    if (k % 3 === 1) doorAt(W, e, t + 3.5, 0.95, 2.3, color('#e8dcc2'), { frameCol: color('#d9ccb0') });
+  }
+}
+
 export function buildBuildings(W) {
   const R = rng(42);
   for (const b of BUILDINGS) {
@@ -244,6 +371,12 @@ export function buildBuildings(W) {
     for (const e of edges(b.poly)) kit(W, b, e, R);
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
+    // R's covered walkway down its pool side: a flat roof on slim steel posts (IMG_2359, IMG_2360)
+    if (b.style === 'r') {
+      const x0 = Math.max(...b.poly.map((p) => p[0])), zs = b.poly.map((p) => p[1]), z0 = Math.min(...zs), z1 = Math.max(...zs);
+      W.slab('flat', x0, z0, x0 + 3.0, z1, 3.2, 3.45, color('#cfd0cc'));
+      for (let z = z0 + 1; z <= z1 - 0.5; z += 4) W.cyl('flat', x0 + 2.75, 0, z, 0.08, 0.08, 3.2, 8, RC.canopy);
+    }
   }
 }
 

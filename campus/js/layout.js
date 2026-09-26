@@ -28,7 +28,10 @@ export const BUILDINGS = [
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(-17.8, -51, 0, -30.4) },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
-  { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, poly: rect(33.2, -22.9, 54.7, 25.2), floors: 3 },
+  // (Ethan's photos IMG_2342–2361): its two ends have an entrance bay set 1.2 m back
+  { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, floors: 3,
+    poly: [[33.2, -22.9], [42.0, -22.9], [42.0, -21.7], [46.0, -21.7], [46.0, -22.9], [54.7, -22.9],
+      [54.7, 25.2], [46.0, 25.2], [46.0, 24.0], [42.0, 24.0], [42.0, 25.2], [33.2, 25.2]] },
   // The P building (P100–P107): two rows of portable classrooms facing each other
   // across an open courtyard. Drawn by portables.js from photos, not by the kits here.
   { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-6.7, 41.1, 2.3, 70.3) },
