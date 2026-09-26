@@ -83,8 +83,8 @@ def query(url, sql):
 
 
 def setup():
-    print("Get the connection string from Supabase: your project → Connect (at the top) → Session pooler → URI.\n"
-          "Replace [YOUR-PASSWORD] in it with your database password.\n"
+    print("Get the connection string from Supabase: your project → Connect (at the top) → Direct → Session pooler.\n"
+          "Copy it as shown. You'll type the database password next.\n"
           "Forgot the password? Project Settings → Database → Reset database password. The website\n"
           "doesn't use it, so resetting it is safe.\n")
     url = input("Paste the connection string just as Supabase shows it, with [YOUR-PASSWORD] still in it:\n> ").strip()
