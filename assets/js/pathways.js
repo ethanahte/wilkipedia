@@ -89,7 +89,8 @@ export async function mount(el, s) {
   const { lanes, pos, height, levels, colW } = layout(data);
   const bySlug = Object.fromEntries(data.nodes.map((n) => [n.slug, n]));
   const out = {}, into = {};
-  for (const e of data.edges) { (out[e.from] ||= []).push(e.to); (into[e.to] ||= []).push(e.from); }
+  const exits = {};                               // EL Advanced and the classes it leads out into
+  for (const e of data.edges) { (out[e.from] ||= []).push(e.to); (into[e.to] ||= []).push(e.from); if (e.kind === 'exit') exits[e.from] = exits[e.to] = true; }
   const walk = (start, next) => { const seen = new Set(); const q = [start]; while (q.length) for (const n of next[q.shift()] || []) if (!seen.has(n)) { seen.add(n); q.push(n); } return seen; };
 
   // Lines leave a station after its name, so they never strike through a label
@@ -111,7 +112,7 @@ export async function mount(el, s) {
     ${lanes.map((l, i) => `<g class="pw-lane"><line x1="0" x2="${W}" y1="${l.y}" y2="${l.y}"/>${i === lanes.length - 1 ? `<line x1="0" x2="${W}" y1="${l.y + l.h}" y2="${l.y + l.h}"/>` : ''}
       <text x="0" y="${l.y + 22}">${esc(l.label)}</text></g>`).join('')}
     ${Array.from({ length: levels }, (_, i) => `<text class="pw-col" x="${GUTTER + colW * i + 4}" y="18">${i === 0 ? 'Where it starts' : `Step ${i + 1}`}</text>`).join('')}
-    <g class="pw-edges">${data.edges.map((e) => `<path class="pw-edge${laneOf(e.from) !== laneOf(e.to) ? ' far' : ''}${e.kind === 'sequence' ? ' seq' : ''}" data-from="${e.from}" data-to="${e.to}" style="--lv:${bySlug[e.from].level}" d="${edgePath(e.from, e.to)}" pathLength="1"/>`).join('')}</g>
+    <g class="pw-edges">${data.edges.map((e) => `<path class="pw-edge${laneOf(e.from) !== laneOf(e.to) ? ' far' : ''}${e.kind === 'sequence' ? ' seq' : e.kind === 'exit' ? ' seq exit' : ''}" data-from="${e.from}" data-to="${e.to}" style="--lv:${bySlug[e.from].level}" d="${edgePath(e.from, e.to)}" pathLength="1"/>`).join('')}</g>
     <g class="pw-nodes">${data.nodes.map((n) => `<a class="pw-node${n.linked ? '' : ' solo'}" href="${courseUrl(n.slug)}" data-slug="${n.slug}" style="--lv:${n.level}"
         transform="translate(${pos[n.slug].x} ${pos[n.slug].y})" aria-label="${esc(n.name)}${n.prereq ? `. Prerequisite: ${esc(n.prereq)}` : ''}">
         <circle r="5.5"/><text x="11" y="4">${esc(short(n.name))}</text></a>`).join('')}</g>
@@ -176,6 +177,7 @@ export async function mount(el, s) {
       <div><a class="pw-name" href="${courseUrl(slug)}">${esc(n.name)}</a>${n.grades ? `<span class="meta"> · grades ${esc(n.grades)}</span>` : ''}</div>
       ${n.prereq ? `<p><span class="pw-k">Catalog prerequisite</span> “${esc(n.prereq)}”</p>` : '<p><span class="pw-k">Catalog prerequisite</span> none listed</p>'}
       ${out[slug] ? `<p><span class="pw-k">Leads to</span> ${names(out[slug])}</p>` : ''}
+      ${exits[slug] ? '<p><span class="pw-k">Leaving EL</span> Finish EL Advanced to move into the English class for your grade.</p>' : ''}
       <a class="add-link" href="${courseUrl(slug)}">Open the class page →</a></div>`;
   }
 

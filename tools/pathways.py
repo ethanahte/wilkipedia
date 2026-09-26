@@ -75,8 +75,13 @@ SEQUENCES = [(a, b) for this, nxt in zip(ENGLISH_YEARS, ENGLISH_YEARS[1:]) for a
     ("el-beginning", "el-intermediate"), ("el-beginning-grammar-vocabulary-reading", "el-intermediate"),
     ("el-intermediate", "el-advanced"),
 ]
-# Left off the map (Ethan): the PRT classes and the BSC English classes
-HIDDEN = lambda c: c["name"].startswith("PRT ") or c["name"].startswith("BSC English")
+# Leaving EL (Ethan): you must finish EL Advanced to move into the regular English
+# class for your grade. Drawn only when one of these is pointed at, and left out of
+# the column count, since it can lead back to English 9.
+EL_EXIT = [("el-advanced", s) for s in ("english-9", "english-10", "english-11", "csu-expository-reading-and-writing")]
+
+# Left off the map (Ethan): the PRT and BSC classes
+HIDDEN = lambda c: c["name"].startswith(("PRT ", "BSC "))
 
 # "Completion of Level 2" in a language course means level 2 of that language
 LEVEL = re.compile(r"Level ([1-4])")
@@ -119,12 +124,15 @@ def build(catalog_courses):
         if (a, b) not in seen:
             seen.add((a, b))
             edges.append({"from": a, "to": b, "kind": "sequence"})
+    for a, b in EL_EXIT:
+        edges.append({"from": a, "to": b, "kind": "exit"})
     prereq = {c["slug"]: c["prerequisite"].strip() for c in catalog_courses if c.get("prerequisite")}
 
     # Columns: how many steps into a chain a class sits (0 = where a path starts)
     ins = {}
     for e in edges:
-        ins.setdefault(e["to"], []).append(e["from"])
+        if e.get("kind") != "exit":
+            ins.setdefault(e["to"], []).append(e["from"])
     level = {}
 
     def depth(s, stack=()):

@@ -156,7 +156,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     pathways.py: the order students take English (and EL) in, given by Ethan
     and drawn as gold `seq` lines, labelled as such, never as prerequisites.
     Any English class of one year leads to any of the next (`ENGLISH_YEARS`).
-    `HIDDEN` leaves the PRT and BSC English classes off the map (Ethan). The palette and previews skip
+    `EL_EXIT`: finishing EL Advanced moves you into the regular English class
+    for your grade. These are dashed gold `exit` lines shown only when pointed
+    at, and left out of the column depth.
+    `HIDDEN` leaves the PRT and BSC classes off the map (Ethan). The palette and previews skip
     a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search
     button open it; `/` too unless the page has an element with `data-slash`.

@@ -1112,6 +1112,8 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .pw-edge { fill: none; stroke: var(--muted); stroke-opacity: .38; stroke-width: 1.2; transition: stroke .2s, stroke-opacity .2s, stroke-width .2s; }
 .pw-edge.far { stroke-opacity: .16; }
 .pw-edge.seq { stroke: var(--gold-ink); stroke-opacity: .6; }   /* the order students take English in, not a catalog prerequisite */
+.pw-svg .pw-edge.exit:not(.lit) { stroke-opacity: 0; }   /* leaving EL: shown only when pointed at */
+.pw-svg.in .pw-edge.exit.lit { stroke-dasharray: .018 .012; animation: none; }
 .pw-legend i.seq { width: 16px; height: 0; border-radius: 0; background: none; border: 0; border-top: 2px solid var(--gold-ink); vertical-align: middle; }   /* lines between subjects stay quiet until lit */
 .pw-node { cursor: pointer; outline: none; }
 .pw-node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; transition: r .2s, fill .2s; }
