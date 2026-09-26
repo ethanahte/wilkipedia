@@ -347,3 +347,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   Keychain (service `wilkipedia-db`) and is set by Ethan himself with `--setup`:
   never ask for it, print it, or put it in a file. It needs `brew install libpq`.
   Remind Ethan to back up before any migration.
+- **Automatic backups are on**: `backup.py --schedule` installed the LaunchAgent
+  `~/Library/LaunchAgents/org.wilcoxwiki.backup.plist`. It runs `--auto` at 9pm and
+  at login, which backs up when the newest file is 6 or more days old. It sends a
+  macOS notification only once backups are 9 or more days overdue. The log is
+  `~/Wilkipedia-backups/backup.log`, and `--unschedule` turns it off. If the repo
+  moves, run `--schedule` again, because the plist stores the script's path.

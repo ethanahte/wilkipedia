@@ -4,6 +4,8 @@
     python3 tools/backup.py --setup   once: paste the database connection string
     python3 tools/backup.py           make a backup
     python3 tools/backup.py --list    see the backups you have
+    python3 tools/backup.py --schedule     back up automatically (see below)
+    python3 tools/backup.py --unschedule   stop that
 
 Each backup is one file in ~/Wilkipedia-backups/, OUTSIDE the repo, so it can
 never be pushed to GitHub: it holds members' email addresses. The folder and
@@ -22,6 +24,13 @@ point at). To restore into a fresh Supabase project:
     pg_restore --no-owner --no-privileges --clean --if-exists -d "<new connection string>" <file>
 Look inside one without restoring: pg_restore --list <file>
 
+Automatic backups: --schedule installs a macOS LaunchAgent that runs --auto
+every evening at 9 and at login. --auto makes a backup only when the newest is
+6+ days old, so there's one a week even if the Mac is often off at 9. A failure
+is retried the next time, and you get a notification only once backups are
+overdue (9+ days), so a Mac waking up offline doesn't nag. Log:
+~/Wilkipedia-backups/backup.log.
+
 Needs the Postgres client tools: brew install libpq
 """
 
@@ -30,6 +39,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
@@ -37,6 +47,9 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 OUT = Path.home() / "Wilkipedia-backups"
 KEYCHAIN = ["-a", "wilkipedia", "-s", "wilkipedia-db"]
 BIN = Path("/opt/homebrew/opt/libpq/bin")
+LABEL = "org.wilcoxwiki.backup"
+PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+EVERY_DAYS, OVERDUE_DAYS = 6, 9
 # What the summary counts after each backup: (label, query)
 COUNTS = [("members", "select count(*) from public.profiles"),
           ("published posts", "select count(*) from public.submissions where status = 'approved'"),
@@ -133,6 +146,56 @@ def backup():
     print("Keep it private: it has members' email addresses.")
 
 
+def age_days():
+    """Days since the newest backup, or None if there are none."""
+    files = list(OUT.glob("wilkipedia-*.dump")) if OUT.exists() else []
+    return (time.time() - max(f.stat().st_mtime for f in files)) / 86400 if files else None
+
+
+def auto():
+    """What the schedule runs."""
+    age = age_days()
+    if age is not None and age < EVERY_DAYS:
+        return
+    print(f"-- {datetime.now():%Y-%m-%d %H:%M} automatic backup", flush=True)
+    try:
+        backup()
+    except SystemExit as e:
+        if e.code not in (None, 0):
+            print(e.code, file=sys.stderr, flush=True)
+            if age is None or age >= OVERDUE_DAYS:
+                subprocess.run(["osascript", "-e", 'display notification "The automatic backup keeps failing. '
+                                'See Wilkipedia-backups/backup.log." with title "Wilkipedia backup"'])
+            sys.exit(1)
+
+
+def schedule():
+    import plistlib
+    OUT.mkdir(mode=0o700, exist_ok=True)
+    log = str(OUT / "backup.log")
+    PLIST.parent.mkdir(parents=True, exist_ok=True)
+    PLIST.write_bytes(plistlib.dumps({
+        "Label": LABEL,
+        "ProgramArguments": [sys.executable, str(Path(__file__).resolve()), "--auto"],
+        "StartCalendarInterval": {"Hour": 21, "Minute": 0},
+        "RunAtLoad": True,
+        "StandardOutPath": log, "StandardErrorPath": log,
+    }))
+    domain = f"gui/{os.getuid()}"
+    subprocess.run(["launchctl", "bootout", domain, str(PLIST)], capture_output=True)
+    r = subprocess.run(["launchctl", "bootstrap", domain, str(PLIST)], capture_output=True, text=True)
+    if r.returncode:
+        sys.exit(f"Couldn't turn on the schedule: {r.stderr.strip()}")
+    print(f"Automatic backups are on: checked every evening at 9 and at login, a new one each week.\n"
+          f"Log: {log}\nTurn off with:  python3 tools/backup.py --unschedule")
+
+
+def unschedule():
+    subprocess.run(["launchctl", "bootout", f"gui/{os.getuid()}", str(PLIST)], capture_output=True)
+    PLIST.unlink(missing_ok=True)
+    print("Automatic backups are off. Your existing backups are untouched.")
+
+
 def listing():
     files = sorted(OUT.glob("wilkipedia-*.dump")) if OUT.exists() else []
     if not files:
@@ -141,8 +204,10 @@ def listing():
         print(f"{f.name}  {f.stat().st_size / 1024:>7.0f} KB")
     if files:
         print(f"\n{len(files)} backup{'s' * (len(files) != 1)} in {OUT}")
+    print("Automatic backups: " + ("on (weekly)" if PLIST.exists() else "off (turn on with --schedule)"))
 
 
 if __name__ == "__main__":
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
-    {"--setup": setup, "--list": listing, "": backup}.get(arg, lambda: sys.exit(__doc__))()
+    {"--setup": setup, "--list": listing, "": backup, "--auto": auto,
+     "--schedule": schedule, "--unschedule": unschedule}.get(arg, lambda: sys.exit(__doc__))()

@@ -145,6 +145,7 @@ Everything students add lives in Supabase, so keep your own copies:
 python3 tools/backup.py --setup   # once: paste the Session pooler connection string (saved in Keychain)
 python3 tools/backup.py           # weekly, and before running any migration
 python3 tools/backup.py --list
+python3 tools/backup.py --schedule   # automatic: one a week, checked nightly at 9 and at login
 ```
 
 Backups go to `~/Wilkipedia-backups/`. They contain members' email addresses, so never
