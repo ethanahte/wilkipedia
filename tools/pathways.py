@@ -69,8 +69,8 @@ GRADE_YEARS = [
      ["english-11", "ap-english-language-and-composition", "honors-british-literature"],
      ["ap-english-literature-and-composition", "csu-expository-reading-and-writing"]],
     [["world-history", "ap-european-history"],
-     ["us-history", "ap-us-history"],
-     ["civics", "economics", "ap-us-government-and-politics", "ap-macroeconomics"]],
+     ["us-history", "ap-us-history", "ap-psychology"],
+     ["civics", "economics", "ap-us-government-and-politics", "ap-macroeconomics", "ap-psychology"]],   # AP Psych: 11th or 12th (Ethan)
 ]
 # By level: EL follows the catalog's beginning / intermediate / advanced
 # descriptions; Japanese 1 comes before Japanese 2 (Ethan; the catalog lists no
@@ -79,7 +79,14 @@ LEVELS = [
     ("el-beginning", "el-intermediate"), ("el-beginning-grammar-vocabulary-reading", "el-intermediate"),
     ("el-intermediate", "el-advanced"), ("japanese-1", "japanese-2"),
 ]
-SEQUENCES = [(a, b) for years in GRADE_YEARS for this, nxt in zip(years, years[1:]) for a in this for b in nxt] + LEVELS
+SEQUENCES = [(a, b) for years in GRADE_YEARS for this, nxt in zip(years, years[1:]) for a in this for b in nxt if a != b] + LEVELS
+# A class offered in two years (AP Psych) sits in its first: a link into it from
+# a class of that same year doesn't push it, or what follows it, a column along.
+FIRST_YEAR = {}
+for years in GRADE_YEARS:
+    for i, year in enumerate(years):
+        for s_ in year:
+            FIRST_YEAR.setdefault(s_, i)
 
 # Leaving EL (Ethan): you must finish EL Advanced to move into the regular English
 # class for your grade. Drawn only when one of these is pointed at, and left out of
@@ -129,7 +136,10 @@ def build(catalog_courses):
             raise SystemExit(f"pathways.py: sequence {a} -> {b} names a class that isn't on the map")
         if (a, b) not in seen:
             seen.add((a, b))
-            edges.append({"from": a, "to": b, "kind": "sequence"})
+            e = {"from": a, "to": b, "kind": "sequence"}
+            if a in FIRST_YEAR and b in FIRST_YEAR and FIRST_YEAR[b] <= FIRST_YEAR[a]:
+                e["loose"] = True
+            edges.append(e)
     for a, b in EL_EXIT:
         edges.append({"from": a, "to": b, "kind": "exit"})
     prereq = {c["slug"]: c["prerequisite"].strip() for c in catalog_courses if c.get("prerequisite")}
@@ -137,7 +147,7 @@ def build(catalog_courses):
     # Columns: how many steps into a chain a class sits (0 = where a path starts)
     ins = {}
     for e in edges:
-        if e.get("kind") != "exit":
+        if e.get("kind") != "exit" and not e.get("loose"):
             ins.setdefault(e["to"], []).append(e["from"])
     level = {}
 

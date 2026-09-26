@@ -101,6 +101,12 @@ export async function mount(el, s) {
   const labelEnd = {};
   const edgePath = (a, b) => {
     const p = pos[a], q = pos[b];
+    // two classes in the same column (AP Psych is an 11th- and a 12th-grade option):
+    // a small bow out to the left of the stations
+    if (bySlug[a].level === bySlug[b].level && Math.abs(q.x - p.x) < 1) {
+      const bow = 16 + Math.abs(q.y - p.y) * 0.15;
+      return `M${p.x - 7},${p.y} C${p.x - bow},${p.y} ${q.x - bow},${q.y} ${q.x - 7},${q.y}`;
+    }
     const x2 = q.x - 7;
     const x1 = labelEnd[a] && labelEnd[a] < x2 - 14 ? labelEnd[a] : p.x + 6;
     const dx = Math.max(24, (x2 - x1) * 0.5);
