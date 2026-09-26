@@ -77,6 +77,9 @@ function stage(W, R) {
   W.ring('flat', cx, cz, r - T, r, 0, h + WALL, concrete, 22, 0, A - gap);
   W.ring('flat', cx, cz, r - T, r, 0, h + WALL, concrete, 22, A + gap, Math.PI);
   W.ring('flat', cx, cz, r - T, r, 0, h, stageTop, 3, A - gap, A + gap);
+  // close the wall's two ends at the opening (ring() leaves its ends open)
+  W.quad('flat', P(r - T, A - gap, h), P(r, A - gap, h), P(r, A - gap, h + WALL), P(r - T, A - gap, h + WALL), concrete);
+  W.quad('flat', P(r, A + gap, h), P(r - T, A + gap, h), P(r - T, A + gap, h + WALL), P(r, A + gap, h + WALL), concrete);
   // square concrete blocks at both ends of the long steps, as tall as the wall
   for (const s of [-1, 1]) W.slab('flat', cx + (s > 0 ? r - 1.2 : -r), cz - 1.2, cx + (s > 0 ? r : -r + 1.2), cz, 0, h + WALL, concreteDark);
   // three long steps between them, a dark strip on each nosing
@@ -113,7 +116,11 @@ function stage(W, R) {
     W.quad('flat', P(lip, t0, 0), P(lip, t0, l0), P(lip, t1, l1), P(lip, t1, 0), concreteDark);
     W.quad('flat', P(ring, t0, y0), P(ring, t1, y1), P(ring, t1, l1), P(ring, t0, l0), concrete);
   }
-  W.quad('flat', P(ring, 0, 0), P(ring, 0, lipY(0)), P(lip, 0, lipY(0)), P(lip, 0, 0), concrete);   // the lip's square end
+  // at the ramp's foot the lip carries on straight past the corner, left of the
+  // long steps seen from the quad, with a short piece of bed behind it (Ethan; IMG_2328, IMG_2329)
+  const ext = 1.8;
+  W.slab('flat', cx + ring, cz - ext, cx + lip, cz, 0, lipY(0), concrete);
+  for (let i = 0; i < 6; i++) grassTuft(W, cx + lip + 0.35 + R() * (plant - lip - 0.7), cz - ext + 0.3 + R() * (ext - 0.5), R, { h: 0.6 + R() * 0.4, cols: GRASS });
 
   // the south stair: two steps up from the outer walk to the landing between two
   // cheek walls, a galvanised handrail each side (IMG_2324)
@@ -121,6 +128,8 @@ function stage(W, R) {
   for (const [a0, a1, y] of [[ring, s1, (2 * h) / 3], [s1, s2, h / 3]]) {
     W.with(cx + ux * (a0 + a1) / 2, 0, cz + uz * (a0 + a1) / 2, -A, () => W.box('flat', 0, y / 2, 0, a1 - a0, y, HW * 2, concrete));
   }
+  // the landing's front, above the top step
+  W.quad('flat', at(ring, HW, (2 * h) / 3), at(ring, -HW, (2 * h) / 3), at(ring, -HW, h), at(ring, HW, h), concrete);
   for (const s of [-1, 1]) {
     const from = s > 0 ? r : ring;             // the west one also closes the landing's side
     for (const [a0, a1, y] of [[from, s1, h + 0.2], [s1, plant, 0.45]]) {
@@ -155,6 +164,7 @@ function stage(W, R) {
   addHeight((x, z) => {
     const dx = x - cx, dz = z - cz, d = Math.hypot(dx, dz);
     if (z < cz) {
+      if (dx >= ring && dx <= plant && z >= cz - ext) return 50;   // the lip and bed past the ramp's foot
       if (z < cz - 1.2 || Math.abs(dx) > r) return null;
       if (Math.abs(dx) > r - 1.2) return 50;
       return (h / 3) * (Math.floor((z - (cz - 1.2)) / 0.4) + 1);
