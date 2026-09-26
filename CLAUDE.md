@@ -110,7 +110,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Everyday class names** live in `data/course-nicknames.json`, keyed by slug.
   `call` is what students say ("Biology" for Biology of the Living Earth). It's
   shown in schedules and as "Students call it …" on the class page. `also` holds
-  other accepted names ("AP Macro"). **Add only names Ethan confirms.** The build
+  other accepted names ("AP Macro"). `shared: true` lets a second class show the
+  same name (BSC Biology shows as "Biology") while typing it still means the other
+  class. **Add only names Ethan confirms.** The build
   rejects a name that already means another class. They reach the browser as
   `call` / `also` in courses.json, and search indexes them.
   `teacher_section.schedule` is `legacy: true`: hidden on new forms, still shown

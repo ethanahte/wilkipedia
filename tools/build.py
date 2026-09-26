@@ -95,16 +95,24 @@ def load():
     # every name means exactly one class
     nick = json.loads((DATA / "course-nicknames.json").read_text())
     nick.pop("_about", None)
+    # Typed names must each mean one class; a 'shared' call is shown only, so it
+    # may repeat another class's call (never a catalog name)
     seen = {c["name"].lower(): slug for slug, c in courses.items()}
-    for slug, v in nick.items():
+    for slug, v in sorted(nick.items(), key=lambda kv: bool(kv[1].get("shared"))):
         if slug not in courses:
             raise SystemExit(f"course-nicknames.json: no class with slug {slug!r}")
-        for n in ([v["call"]] if v.get("call") else []) + v.get("also", []):
+        typed = ([v["call"]] if v.get("call") and not v.get("shared") else []) + v.get("also", [])
+        for n in typed:
             if seen.get(n.lower(), slug) != slug:
                 raise SystemExit(f"course-nicknames.json: {n!r} already means {seen[n.lower()]}")
             seen[n.lower()] = slug
+        if v.get("shared"):
+            owner = seen.get(v.get("call", "").lower())
+            if not owner or courses[owner]["name"].lower() == v["call"].lower():
+                raise SystemExit(f"course-nicknames.json: shared {v.get('call')!r} on {slug} needs another class that is called that")
         courses[slug]["call"] = v.get("call")
         courses[slug]["also"] = v.get("also", [])
+        courses[slug]["shared"] = bool(v.get("shared")) or None
 
     depts = catalog["departments"]
     for d in depts:
@@ -932,7 +940,7 @@ def build_static():
 
 
 def build_data(depts, courses, teachers):
-    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers", "call", "also") if c.get(k) is not None}
+    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers", "call", "also", "shared") if c.get(k) is not None}
             for c in courses.values()]
     (DATA / "courses.json").write_text(json.dumps(
         {"departments": [{"slug": d["slug"], "name": short_dept(d["name"])} for d in depts], "courses": slim},

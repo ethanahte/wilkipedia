@@ -200,9 +200,11 @@ export const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/,
 // data/course-nicknames.json (`call`, `also`) that Ethan has confirmed. Nothing
 // else is guessed: any other text stays unlinked.
 const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+// Typed name → class. A 'shared' everyday name is shown only (BSC Biology shows
+// as "Biology", but typing "Biology" means Biology of the Living Earth).
 export function courseNames(list) {
   const m = new Map();
-  for (const c of list) for (const n of [c.name, c.call, ...(c.also || [])]) if (n) m.set(normName(n), c);
+  for (const c of list) for (const n of [c.name, c.shared ? null : c.call, ...(c.also || [])]) if (n) m.set(normName(n), c);
   return m;
 }
 export function courseMatcher(list) {
@@ -224,7 +226,7 @@ function periodOptions() {
   const m = courseNames(suggestions.courses || []);
   return ['<option value="Prep">', ...(suggestions.periods || []).map((n) => {
     const c = m.get(normName(n));
-    return c?.call ? `<option value="${esc(c.call)}">${esc(c.name)}</option>` : `<option value="${esc(n)}">`;
+    return c?.call && !c.shared ? `<option value="${esc(c.call)}">${esc(c.name)}</option>` : `<option value="${esc(n)}">`;
   })].join('');
 }
 export function refreshPeriodOptions() { const dl = $('#dl-periods'); if (dl) dl.innerHTML = periodOptions(); }
