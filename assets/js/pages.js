@@ -122,7 +122,7 @@ async function activities(kind) {
       const list = byGroup(grp), cx = cw * (gi % per) + cw / 2, cy = 100 + Math.floor(gi / per) * 190;
       list.forEach(([k, o], i) => {                               // a sunflower: tight, even, no overlaps
         const r = GAP * 0.62 * Math.sqrt(i + 0.5), a = i * 2.39996;
-        svg += `<a class="cf-dot${o.info ? ' has' : ''}" href="#${esc(k)}" data-k="${esc(k)}"><circle cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="${R}"/><title>${esc(o.name)}</title></a>`;
+        svg += `<a class="cf-dot${o.info ? ' has' : ''}" href="#${esc(k)}" data-k="${esc(k)}" data-name="${esc(o.name)}" aria-label="${esc(o.name)}"><circle cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="${R}"/></a>`;
       });
       svg += `<g class="cf-label" data-g="${esc(grp)}" role="button" tabindex="0"><text x="${cx}" y="${cy + 82}" text-anchor="middle">${esc(grp)}</text>
         <text class="n" x="${cx}" y="${cy + 99}" text-anchor="middle">${list.length} club${list.length === 1 ? '' : 's'}</text></g>`;
@@ -135,6 +135,24 @@ async function activities(kind) {
       const l = e.target.closest('.cf-label');
       if (l) pick(l.dataset.g);
     });
+    // the club's name, the moment the pointer (or keyboard focus) reaches its dot
+    const tip = document.createElement('div');
+    tip.className = 'cf-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.append(tip);
+    const showTip = (d) => {
+      if (!d) { tip.classList.remove('on'); return; }
+      tip.textContent = d.dataset.name;
+      const r = d.getBoundingClientRect();
+      const half = tip.offsetWidth / 2;                      // keep it on screen near the edges
+      tip.style.left = `${Math.min(Math.max(r.left + r.width / 2, half + 8), innerWidth - half - 8)}px`; tip.style.top = `${r.top - 8}px`;
+      tip.classList.add('on');
+    };
+    $('#act-viz').addEventListener('pointerover', (e) => showTip(e.target.closest('.cf-dot')));
+    $('#act-viz').addEventListener('pointerleave', () => showTip(null));
+    $('#act-viz').addEventListener('focusin', (e) => showTip(e.target.closest('.cf-dot')));
+    $('#act-viz').addEventListener('focusout', () => showTip(null));
+    addEventListener('scroll', () => showTip(null), { passive: true });
     $('#act-viz').addEventListener('keydown', (e) => { const l = e.target.closest('.cf-label'); if (l && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pick(l.dataset.g); } });
   }
 

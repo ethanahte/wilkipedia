@@ -843,6 +843,11 @@ a.res-card:hover b { text-decoration: underline 2px var(--gold); text-underline-
 .cf-label text.n { font: 12px var(--sans); fill: var(--muted); }
 .cf-label:hover text:first-child, .cf-label:focus-visible text:first-child { text-decoration: underline; }
 .cf-key { margin: 0; color: var(--muted); font-size: .82rem; }
+.cf-tip { position: fixed; z-index: 56; transform: translate(-50%, -100%) translateY(3px); pointer-events: none; white-space: nowrap;
+  padding: 5px 10px; background: var(--ink); color: var(--paper); font: 600 .84rem var(--sans); border-radius: 6px;
+  opacity: 0; transition: opacity .09s ease-out, transform .09s ease-out; }
+.cf-tip.on { opacity: 1; transform: translate(-50%, -100%); }
+@media (prefers-reduced-motion: reduce) { .cf-tip { transition: none; } }
 .cf-key i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.3px solid var(--ink); background: var(--paper); margin: 0 3px -1px 8px; }
 .cf-key i:first-child { margin-left: 0; }
 .cf-key i.has { background: var(--gold); border-color: var(--gold-ink); }
