@@ -243,17 +243,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
-  - **The quad's stage is `stage()` in `campus/js/quad.js`**, from Ethan's photos
-    IMG_2324–2331 (sizes in `STAGE`, layout.js). It has a half-disc platform
-    flush with its curved edge, three steps with dark nosings along the straight
-    north edge, and two galvanised handrails at the east end. A ring walk a step
-    lower runs round the curved side and comes down to the plaza at both ends
-    (`ringY`), with a low lip wall outside it. Outside that is a mulch bed:
-    grasses, California `poppies()`, crape myrtles on the east half and young
-    autumn-coloured trees on the west. The straight south stair (`STAIR_A`, placed
-    so the cedar is off to the right looking up it, as in IMG_2324) has cheek
-    walls, two steps and a landing, and two handrails, then two steps into a
-    notch in the platform.
+  - **The quad's stage is `stage()` in `campus/js/quad.js`**, from Ethan and his
+    photos IMG_2324–2331. Its sizes are in `STAGE` (layout.js), and `r` and `plant`
+    were re-measured off the satellite after Ethan said it was too small.
+    - A half-disc platform with a low wall round its curve.
+    - Three long steps with dark nosings along the straight north edge, between
+      two square concrete blocks as tall as the wall. Two galvanised handrails
+      sit by the east block, with trash cans in front.
+    - A straight stair up the very middle of the south side (`STAIR_A` = π/2),
+      with cheek walls, two steps and a landing level with the platform, which
+      you reach through a gap in the wall.
+    - A curved ramp round the EAST half only (`rampY`), from the plaza up to
+      that landing, with a low lip wall.
+    - Everything else is planting: outside the ramp on the east, and right up
+      to the wall on the west. Grasses, California `poppies()`, crape myrtles
+      and young autumn-coloured trees.
+    - The lamp with the US flag stands due north of the stage.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
     `campus/js/osm.js` (generated, don't hand-edit): every house footprint

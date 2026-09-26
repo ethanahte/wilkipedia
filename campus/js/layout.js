@@ -122,9 +122,10 @@ export const CARPORTS = [rect(-1.4, -81.8, 62.6, -67.8), rect(70, -81.8, 107.5, 
 
 // The quad, in detail.
 export const QUAD = { x0: -46, z0: -30, x1: 36, z1: 38 };
-// r: the platform; ring: the ring walk's outer edge; lip: the low wall round it;
-// plant: the bed's outer edge; walk: the paving round it all (IMG_2324–2331)
-export const STAGE = { x: -17.3, z: 14, r: 7.8, ring: 9.8, lip: 10.15, plant: 12.2, walk: 15.2, h: 0.75 };
+// r: the platform, to the outside of its low wall; ring: the east ramp's outer
+// edge; lip: the low wall along the ramp; plant: the planting's outer edge;
+// walk: the paving round it all (Ethan, IMG_2324–2331)
+export const STAGE = { x: -17.3, z: 14, r: 8.8, ring: 10.6, lip: 10.95, plant: 13.0, walk: 15.2, h: 0.5 };   // r and plant re-measured off the satellite
 export const LAWN_W = { box: [-37.5, 17.5, -22, 32.3] };             // minus the walk ring round the stage
 export const LAWN_E = [[-3.3, 14.5], [15.9, 11.2], [23.4, 23.8], [-11.2, 32.3]];
 export const CEDAR = { x: 0, z: 0, bed: 4.6 };
@@ -139,7 +140,7 @@ export const QUAD_SPOTS = [[-39.8, -23.1], [-39.2, 25.2], [-38.6, -13.9], [-36.9
   // the ring of umbrella tables just south of the cedar
   [-0.4, 8.6], [3.6, 8.4], [7.6, 8.6], [11.4, 8.3], [15, 8.8], [19, 8.4]];
 export const LAWN_TREES = [[2, 20], [9, 16.5], [15, 23.5], [4.5, 27], [-30, 25], [-26, 29.5]];
-export const LAMPS = [[-12, 1.3], [-27, 11.5], [-2, -13], [22, -8], [-38, -18], [26, 20], [-4, 30.8], [-30.5, 32], [-8, 18.6], [30, -24]];
+export const LAMPS = [[-12, 1.3], [-27, 11.5], [-2, -13], [22, -8], [-38, -18], [26, 20], [-4, 30.8], [-30.5, 32], [-18.3, 3.3], [30, -24]];   // [-18.3, 3.3]: the one with the flag, due north of the stage (IMG_2324, satellite)
 export const PICNIC = [[-31, 21, 0.3], [-34.5, 17.6, 0.3], [20, 30, -0.2], [26.5, 14, 1.3], [-8, -6, 0], [-26, 4, 1.57]];
 export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blue benches
 

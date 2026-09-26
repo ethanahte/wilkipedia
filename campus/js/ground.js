@@ -253,7 +253,8 @@ function quadPaint(p, g, W, H, Q) {
   g.globalAlpha = 1;
   g.restore();
   // planting ring round the stage
-  p.sector(cx, cz, STAGE.lip, STAGE.plant, 0, Math.PI, '#6f4f3a');
+  p.sector(cx, cz, STAGE.lip, STAGE.plant, 0, Math.PI / 2, '#6f4f3a');      // outside the east ramp
+  p.sector(cx, cz, STAGE.r, STAGE.plant, Math.PI / 2, Math.PI, '#6f4f3a');    // right up to the wall on the west
   // the cedar's bed
   p.circle(CEDAR.x, CEDAR.z, CEDAR.bed, '#5f4b3b');
   // mulch rings for the young trees
