@@ -1255,6 +1255,8 @@ html.pal-open { overflow: hidden; }
 /* ── Study guides graph (guides.js): Obsidian-style graph view, always dark ── */
 .gv { position: relative; margin: 22px 0 0; border-radius: 6px; overflow: hidden; background: #1e1e1e; color: #dcddde; }
 .gv-chart { height: 72vh; min-height: 460px; }
+.gv-canvas { display: block; cursor: grab; touch-action: none; }
+.gv-canvas.grabbing { cursor: grabbing; }
 .gv-bar { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 3; display: flex; align-items: center; gap: 12px; pointer-events: none; }
 .gv-bar > * { pointer-events: auto; }
 .gv-search input { width: 220px; max-width: 52vw; background: #2a2a2a; border: 1px solid #3a3a3a; color: #dcddde; border-radius: 4px; padding: 6px 10px; font-size: .88rem; }

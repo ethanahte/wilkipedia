@@ -191,12 +191,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   (`--accent` / Wilcox gold). One dark card per page. Every mark is one real
   class, club or day with a hover title. The semester chart covers only the
   dates bell.json has; extend it when spring dates are added, never guess.
-- **Study guides graph** (`guides/`, `guides.js`): Obsidian-style graph view
-  built from the lieflat-charts B2 "Force Graph, Dense" template (ECharts 5.5.1
-  from jsdelivr, loaded only on that page; the list below it is the fallback).
-  Links: guide→class hub, guide↔guide by shared title/note keywords (STOP list
-  filters study filler; "unit/ch N" only links inside one class), class↔class
-  by pathways.json prerequisites. ECharts links by `name`, so node name = id.
+- **Study guides graph** (`guides/`, `guides.js`): Obsidian's graph view,
+  hand-written on a canvas. It has no library; ECharts was dropped at Ethan's
+  request for Obsidian behaviour.
+  - Physics: a force simulation (repel, springs, centre pull, cooling alpha).
+    Node size grows with link count, dragging a dot pulls its neighbours, and
+    scroll or pinch zooms toward the pointer.
+  - Labels: titles fade smoothly as you zoom out (`smooth()` against the
+    "Text fade threshold" slider). Classes with no guides need a closer zoom.
+  - Hover: the pointed-at dot and its neighbours light up and label while
+    everything else fades back.
+  - Click opens the info card; double-click opens the guide or class.
+  - Links: guide→class hub, guide↔guide by shared title/note keywords (STOP
+    list filters study filler; "unit/ch N" only links inside one class), and
+    class↔class by catalog prerequisites only (pathways.json edges with no
+    `kind`; the grade-order lines are left out). The list below the graph is
+    the accessible version.
 - **Calendar** (`calendar/`, `assets/js/calendar.js`, `build_calendar` in
   build.py): the school year from Wilcox's OFFICIAL activities calendar (a
   Google Sheet the school links from its bell schedule page).
