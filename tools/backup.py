@@ -11,8 +11,8 @@ files are readable only by you.
 
 The connection string contains the database password. --setup keeps it in the
 macOS Keychain (service "wilkipedia-db"), never in a file and never in the repo.
-Get it from Supabase → your project → Connect → "Session pooler" → URI, with
-[YOUR-PASSWORD] replaced by the database password. (Forgot it? Project Settings →
+Get it from Supabase → your project → Connect → Direct → Session pooler. Paste it as
+shown and --setup asks for the password separately. (Forgot it? Project Settings →
 Database → Reset database password. The website doesn't use it, so resetting is
 safe.)
 
@@ -32,7 +32,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import unquote, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 OUT = Path.home() / "Wilkipedia-backups"
 KEYCHAIN = ["-a", "wilkipedia", "-s", "wilkipedia-db"]
@@ -87,7 +87,10 @@ def setup():
           "Replace [YOUR-PASSWORD] in it with your database password.\n"
           "Forgot the password? Project Settings → Database → Reset database password. The website\n"
           "doesn't use it, so resetting it is safe.\n")
-    url = getpass.getpass("Paste the connection string (it won't show on screen), then press Return: ").strip()
+    url = input("Paste the connection string just as Supabase shows it, with [YOUR-PASSWORD] still in it:\n> ").strip()
+    if "[YOUR-PASSWORD]" in url:
+        pw = getpass.getpass("Database password (it won't show on screen): ")
+        url = url.replace("[YOUR-PASSWORD]", quote(pw, safe=""))
     try:
         query(url, "select 1")
     except RuntimeError as e:
