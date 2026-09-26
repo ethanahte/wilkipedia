@@ -287,6 +287,21 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       onto the last triangle's south slanted edge (`bench(W, x, z, rot)`).
       There are also two big trees in the southern triangles, one long green
       picnic table, and white square pots plus a clay one by the ASB Office.
+  - **The cafeteria's quad side is `cafFront()` in buildings.js**, from Ethan's
+    photos IMG_2362–2371. The `caf` kit skips south faces.
+    - The tall dining hall (`CAF`) stands 2.4 m back behind a one-storey front
+      (`CAF-front`), as the satellite shows. Its front carries the clerestory:
+      20 units, white panels over a glass strip.
+    - The front has the storefront under the covered walkway: six groups of
+      `storefront()` bays between cream piers. A bay is glass over a solid
+      lower panel with a transom row, or glass doors. There's a SNACK BAR
+      plaque by the second group's door.
+    - West wing: a notice board, yellow doors, windows, a white ice machine
+      and a dark door. East wing: a yellow door, the cream box fountain with
+      two bubblers, a fire bell and a sign, and a pair of dark doors.
+    - The walkway (landmarks.js) stands on grey steel posts.
+    - Young trees' beds near the cafeteria (z < -12) are low green groundcover.
+      The fire hydrant in its ring guard sits by R's north end.
   - **Room plates are hidden for now (Ethan)** except the P building's door
     plates. A hidden plate keeps its slot in the mesh as a collapsed quad, so
     `rooms[faceIndex / 2]` picking still lines up.

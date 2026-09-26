@@ -142,7 +142,7 @@ const KITS = {
   },
   r() {},                                       // buildR() draws R whole
   caf(W, b, e, R) {
-    if (e.len < 4) return;
+    if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
     const tall = b.h > 6;
     for (const { i, t } of bays(e.len, 4.2, 1.5)) {
       if (e.nz > 0.5 && i % 3 === 1) doorAt(W, e, t, 1.8, 2.3, C.door);
@@ -507,6 +507,93 @@ function buildR(W, b) {
   }
 }
 
+// ── the cafeteria's quad side ──
+// From Ethan's photos IMG_2362–2371: under the covered walkway a one-storey front of
+// dark-framed storefront (glass over a solid lower panel, a transom row, glass
+// doors) in groups between cream piers; the tall dining hall set 2.4 m back above
+// it with a band of clerestory windows, white panels over glass; the lower wings
+// either side plain cream with yellow doors, a notice board and a box fountain.
+const CC = { frame: color('#5d6166'), panel: color('#ebe7dc'), pier: color('#ece3cc'), white: color('#f4f3ee') };
+const southWall = (x0, x1, z) => rWall(x0, z, x1, z, 0, 1);        // t = x - x0
+
+// A run of storefront along a south-facing wall from x0 to x1. parts: 'p' a window
+// bay, 'd' a pair of glass doors, 's' a single glass door; they stretch to fit.
+function storefront(W, z, x0, x1, parts, top = 3.1) {
+  const want = { p: 1.35, d: 1.9, s: 1.0 };
+  const k = (x1 - x0) / [...parts].reduce((a, c) => a + want[c], 0);
+  onWall(W, southWall(x0, x1, z), 0, 0, 0.03, () => {
+    W.box('flat', (x1 - x0) / 2, top / 2, 0, x1 - x0, top, 0.06, CC.frame);
+    let t = 0;
+    for (const c of parts) {
+      const w = want[c] * k, a = t + 0.05, b = t + w - 0.05;
+      const glass = (y0, y1, col = pane()) => W.quad('glass', [a, y0, 0.05], [b, y0, 0.05], [b, y1, 0.05], [a, y1, 0.05], col, [[0, 0], [b - a, 0], [b - a, y1 - y0], [0, y1 - y0]]);
+      if (c === 'p') {
+        W.box('flat', (a + b) / 2, 0.43, 0.05, b - a, 0.82, 0.03, CC.panel);           // solid lower panel
+        glass(0.9, 2.2); glass(2.28, top - 0.06);
+        for (const y of [0.87, 2.24]) W.box('flat', (a + b) / 2, y, 0.07, b - a, 0.06, 0.04, CC.frame);
+      } else {
+        const leaves = c === 'd' ? 2 : 1, lw = (b - a) / leaves;
+        for (let i = 0; i < leaves; i++) {
+          const la = a + i * lw + 0.02, lb = la + lw - 0.04;
+          W.box('flat', (la + lb) / 2, 1.12, 0.05, lb - la, 2.24, 0.04, CC.frame);
+          for (const [y0, y1] of [[0.25, 1.0], [1.2, 2.1]]) W.quad('glass', [la + 0.1, y0, 0.075], [lb - 0.1, y0, 0.075], [lb - 0.1, y1, 0.075], [la + 0.1, y1, 0.075], DARK, 'auto');
+          W.box('flat', leaves === 2 && i === 0 ? lb - 0.14 : la + 0.14, 1.05, 0.1, 0.05, 0.3, 0.05, color('#c9ccd0'));   // pull
+        }
+        glass(2.32, top - 0.06);                                                     // transom
+      }
+      W.box('flat', t, top / 2, 0.07, 0.07, top, 0.04, CC.frame);
+      t += w;
+    }
+    W.box('flat', t, top / 2, 0.07, 0.07, top, 0.04, CC.frame);
+  });
+}
+const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
+
+function cafFront(W) {
+  const z = -30.4, top = 3.1;
+  // the one-storey front (x 0–50): six groups between cream piers (IMG_2364, IMG_2368)
+  const groups = ['ppdpp', 'ppps', 'pdp', 'pppp', 'ppdpp', 'sppp'], P = 0.55, gw = (50 - P * (groups.length + 1)) / groups.length;
+  for (let i = 0; i <= groups.length; i++) cafPier(W, z, i * (gw + P), i * (gw + P) + P, 3.5);
+  groups.forEach((g, i) => storefront(W, z, P + i * (gw + P), P + i * (gw + P) + gw, g, top));
+  // "SNACK BAR C-123" beside the second group's single door
+  const snack = P + (gw + P) + gw + 0.3;
+  onWall(W, southWall(snack - 0.3, snack + 0.3, z + 0.14), 0.3, 1.55, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
+  // the tall hall's clerestory, set back above the front's roof: white panels over glass (IMG_2362–2364)
+  const ce = southWall(0, 50, -32.8), units = 20, uw = 49.6 / units;
+  onWall(W, ce, 0, 0, 0.03, () => {
+    W.box('flat', 25, 5.15, 0, 49.6, 2.36, 0.08, CC.frame);
+    for (let i = 0; i < units; i++) {
+      const a = 0.2 + i * uw + 0.05, b = 0.2 + (i + 1) * uw - 0.05;
+      W.quad('flat', [a, 4.86, 0.045], [b, 4.86, 0.045], [b, 6.25, 0.045], [a, 6.25, 0.045], CC.white);
+      W.quad('glass', [a, 4.05, 0.045], [b, 4.05, 0.045], [b, 4.8, 0.045], [a, 4.8, 0.045], pane(), [[0, 0], [b - a, 0], [b - a, 0.75], [0, 0.75]]);
+      W.box('flat', 0.2 + i * uw, 5.15, 0.06, 0.07, 2.3, 0.04, CC.frame);
+    }
+    W.box('flat', 49.8, 5.15, 0.06, 0.07, 2.3, 0.04, CC.frame);
+    W.box('flat', 25, 4.83, 0.06, 49.6, 0.06, 0.04, CC.frame);
+  });
+  // the west wing (IMG_2371): a notice board, a yellow door, windows, a yellow door,
+  // a white ice machine and a dark door
+  const ww = southWall(-17.8, 0, z), wt = (x) => x + 17.8;
+  onWall(W, ww, wt(-15.4), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
+  doorAt(W, ww, wt(-12.6), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  storefront(W, z, -10.8, -5.4, 'pppp', 2.9);
+  doorAt(W, ww, wt(-4.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  W.box('flat', -2.9, 0.95, z + 0.4, 0.9, 1.9, 0.7, color('#eef0ee'));
+  doorAt(W, ww, wt(-1.3), 0.95, 2.2, color('#4f5459'), { frameCol: CC.frame, plain: true });
+  // the east wing (IMG_2365, IMG_2367): a yellow door, the fountain box with its two
+  // bubblers, a fire bell and a sign, then blank wall to a pair of dark doors
+  const ew = southWall(50, 62.6, z), et = (x) => x - 50;
+  doorAt(W, ew, et(51.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  onWall(W, ew, et(53.9), 0, 0.02, () => {
+    W.box('stucco', 0, 0.68, 0.14, 0.78, 1.36, 0.28, RC.wall);                      // the cream pedestal
+    for (const [y, x] of [[0.78, -0.12], [1.0, -0.12]]) W.box('flat', x - 0.26, y, 0.22, 0.32, 0.12, 0.3, RC.steel);
+    W.box('flat', -0.12, 0.9, 0.29, 0.1, 0.36, 0.02, RC.steel);
+  });
+  onWall(W, ew, et(52.6), 3.0, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
+  onWall(W, ew, et(52.6), 1.7, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.26, 0.02, color('#e2b43b')));
+  doorAt(W, ew, et(60.6), 1.8, 2.3, color('#4f5459'), { frameCol: CC.frame, plain: true });
+}
+
 export function buildBuildings(W) {
   const R = rng(42);
   for (const b of BUILDINGS) {
@@ -524,6 +611,7 @@ export function buildBuildings(W) {
     const kit = KITS[b.style] || KITS.plain;
     for (const e of edges(b.poly)) kit(W, b, e, R);
     if (b.style === 'r') buildR(W, b);
+    if (b.id === 'CAF') cafFront(W);
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
 

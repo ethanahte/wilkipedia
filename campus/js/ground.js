@@ -258,7 +258,8 @@ function quadPaint(p, g, W, H, Q) {
   // the cedar's bed
   p.circle(CEDAR.x, CEDAR.z, CEDAR.bed, '#74492f');                 // reddish bark mulch (IMG_2334)
   // mulch rings for the young trees
-  for (const [x, z] of treeSpots()) p.circle(x, z, 1.15, '#7d5f47');
+  // round beds for the young trees; near the cafeteria they're planted with groundcover (IMG_2362, IMG_2366)
+  for (const [x, z] of treeSpots()) p.circle(x, z, z < -12 ? 1.5 : 1.15, z < -12 ? '#6d8446' : '#7d5f47');
   for (const [x, z] of LAWN_TREES) p.circle(x, z, 0.7, '#7d5f47');
 }
 

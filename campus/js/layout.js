@@ -23,8 +23,11 @@ export const BUILDINGS = [
   // Front office: single storey at the north end, the sign wall faces Monroe Street.
   { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-46.8, -74.3, -26.2, -55.6) },
   { id: 'ADMIN-link', name: 'Front office', style: 'plain', h: 4.4, poly: rect(-54.7, -78.5, -46.8, -62) },
-  // Cafeteria: north side of the quad, covered walkway on its quad side.
-  { id: 'CAF', name: 'Cafeteria', style: 'caf', h: 7.0, poly: rect(0, -52.8, 50, -30.4) },
+  // Cafeteria: north side of the quad, covered walkway on its quad side. The tall
+  // dining hall stands 2.4 m back behind a one-storey front that holds the glass
+  // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
+  { id: 'CAF', name: 'Cafeteria', style: 'caf', h: 7.2, poly: rect(0, -52.8, 50, -32.8) },
+  { id: 'CAF-front', name: 'Cafeteria', style: 'caf', h: 3.8, poly: rect(0, -32.8, 50, -30.4) },
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(-17.8, -51, 0, -30.4) },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.

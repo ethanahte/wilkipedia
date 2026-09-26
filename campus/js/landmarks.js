@@ -125,7 +125,7 @@ export function buildLandmarks(W, group, fontFamily) {
   for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', -17.8, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', -17.8, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
-  for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.1, wz1 - 0.3, x + 0.1, wz1 - 0.1, 0, 3.5, fin);
+  for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 
   // ── the Career Center's yellow awning on B, over its quad-side door ──
   awning(W, -54.7, 26.2, 31.2, 1.6, 2.7, color('#e8b930'), 'x');

@@ -50,7 +50,7 @@ function nearestWall(x, z, pool) {
 
 const OWNER = {
   B: ['B', 'B-south', 'B-south2', 'LIB', 'ADMIN'], R: ['R'], S: ['S-top', 'S-west', 'S-mid', 'S-inner', 'S-lecture'],
-  M: ['M100', 'M'], N: ['N'], C: ['CAF', 'CAF-w', 'CAF-e'], T: ['T-lobby', 'T-nw', 'T-house'],
+  M: ['M100', 'M'], N: ['N'], C: ['CAF', 'CAF-front', 'CAF-w', 'CAF-e'], T: ['T-lobby', 'T-nw', 'T-house'],
   G: ['GYM-n', 'MAINGYM', 'AUXGYM', 'GYM-girls', 'GYM-dance', 'GYM-boys', 'GYM-lobby'],
   P: ['P-w', 'P-e', 'P108', 'P115', 'P111', 'P117', 'P119'],
 };

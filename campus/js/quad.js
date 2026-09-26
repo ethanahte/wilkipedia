@@ -48,10 +48,13 @@ export function buildQuad(W, decals) {
     if (!nearCedar && (i % 5 === 0 || i % 5 === 2 || i % 5 === 3)) {
       youngTree(W, x, z, R, { h: 4.2 + R() * 1.4, stake: R() < 0.6 });
       addCircle(x, z, 0.25);
+      // near the cafeteria the beds are planted with low groundcover (IMG_2362, IMG_2366)
+      if (z < -12) for (let k = 0; k < 9; k++) { const a = R() * Math.PI * 2, d = 0.4 + R() * 0.95; W.blob('flat', x + Math.cos(a) * d, 0.06, z + Math.sin(a) * d, 0.28 + R() * 0.12, 0.13, 0.28 + R() * 0.12, G.leaf[k % 4], 0); }
     } else umbrellaTable(W, x, z, R);
   });
   for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true }); addCircle(x, z, 0.25); }
   frontOfR(W, R);
+  hydrant(W, 38.0, -24.9);
 
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
@@ -336,6 +339,17 @@ function bench(W, x, z, rot = 0) {
     }
   });
   addOBB(x + 0.02, z, 0.5, 1.85, rot);
+}
+
+// A red fire hydrant inside a galvanised guard: two rings on three posts (IMG_2365).
+function hydrant(W, x, z) {
+  const red = color('#c9342c');
+  W.cyl('flat', x, 0, z, 0.13, 0.13, 0.62, 10, red);
+  W.cyl('flat', x, 0.62, z, 0.15, 0.08, 0.14, 10, red);
+  for (const a of [0, Math.PI / 2]) W.cyl('flat', x + Math.cos(a) * 0.14, 0.42, z + Math.sin(a) * 0.14, 0.06, 0.06, 0.1, 6, red);
+  for (let k = 0; k < 3; k++) { const a = (k * Math.PI * 2) / 3; W.cyl('flat', x + Math.cos(a) * 0.55, 0, z + Math.sin(a) * 0.55, 0.035, 0.035, 0.85, 6, galv); }
+  for (const y of [0.3, 0.8]) W.ring('flat', x, z, 0.52, 0.58, y, y + 0.06, galv, 18);
+  addCircle(x, z, 0.62);
 }
 
 function can(W, x, z) {
