@@ -9,7 +9,7 @@
 // `mode` is always 'plan' now (an aerial photo view was tried and removed).
 // room contents come from approved teacher sections whose "room" field matches.
 
-import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root, normRoom, collectSchedules, scheduleBlock } from './ui.js';
+import { initHeader, courses, dataUrl, slugify, $, $$, esc, courseUrl, root, normRoom, collectSchedules, scheduleBlock, courseMatcher } from './ui.js';
 import { todaysLunch, sortedCats, itemHtml } from './menu.js';
 
 const s = await initHeader();
@@ -32,8 +32,8 @@ const roomById = Object.fromEntries(map.rooms.map((r) => [r.id, r]));
 
 
 // A class name typed into a schedule links to its page when it matches one
-const courseByName = Object.fromEntries(data.courses.map((c) => [c.name.toLowerCase(), c.slug]));
-const classLink = (name) => (courseByName[name.toLowerCase()] ? `<a href="${courseUrl(courseByName[name.toLowerCase()])}">${esc(name)}</a>` : esc(name));
+const matchCourse = courseMatcher(data.courses);
+const classLink = (name) => (matchCourse(name) ? `<a href="${courseUrl(matchCourse(name))}">${esc(name)}</a>` : esc(name));
 
 // ── room contents from approved teacher sections and room schedules ──
 let byRoom = {};
@@ -69,7 +69,7 @@ async function loadRooms() {
       const t = entry(id, teacher);
       // classes named in this room's newest schedule count as taught here
       for (const name of Object.values(t.schedules[0]?.periods || {})) {
-        const slug = courseByName[String(name).toLowerCase()];
+        const slug = matchCourse(name);
         if (slug && !t.courses.includes(slug)) t.courses.push(slug);
       }
     }
@@ -231,11 +231,16 @@ function panelHtml(r) {
   }
   return `${head}${list.map((t) => `<section class="mp-teacher">
       <h3>${teacherSlug[t.teacher] ? `<a href="${root}teachers/${teacherSlug[t.teacher]}/">${esc(t.teacher)}</a>` : esc(t.teacher)}</h3>
-      <ul class="course-list compact">${t.courses.map((slug) => {
+      ${(() => {
+        // The schedule already names its classes; list only the ones it doesn't
+        const shown = new Set(Object.values(t.schedules[0]?.periods || {}).map(matchCourse).filter(Boolean));
+        const rest = t.courses.filter((slug) => !shown.has(slug));
+        return rest.length ? `${shown.size ? '<div class="label mp-also">Also teaches</div>' : ''}<ul class="course-list compact">${rest.map((slug) => {
         const c = course[slug];
         return c ? `<li class="course-row"><a href="${courseUrl(slug)}"><span class="c-name">${esc(c.name)}</span>
           <span class="c-meta">${c.grades ? `Grades ${esc(c.grades)}` : ''}</span></a><span class="c-badges">${badges(c)}</span></li>` : '';
-      }).join('')}</ul>
+      }).join('')}</ul>` : '';
+      })()}
       ${scheduleBlock(t.schedules, { add: add(t.teacher), link: classLink })}
     </section>`).join('')}${clubHtml}
     <p class="meta mp-foot">Wrong, missing or a new school year? <a href="${add()}">Add a schedule for this room</a></p>`;

@@ -1401,3 +1401,4 @@ ol.periods .pn { flex: none; width: 2em; font: 700 .8rem var(--sans); color: var
 .sched-past { margin-top: 10px; }
 .sched-past summary { cursor: pointer; color: var(--accent); font-size: .9rem; width: max-content; }
 .sched-past .sched-head { margin-top: 12px; }
+.mp-also { margin: 2px 0 4px; }

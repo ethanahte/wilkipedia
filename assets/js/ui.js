@@ -196,6 +196,20 @@ function paintThemeToggle() {
 // "Room b-204" / "b204" / "B 204" all mean B204
 export const normRoom = (v) => String(v || '').toUpperCase().replace(/^ROOM\s*/, '').replace(/[\s-]+/g, '');
 
+// Finds the class a schedule names: the exact catalog name, or a short form that
+// starts exactly one class's name ("AP Macro" → AP Macroeconomics). Anything
+// less certain stays unlinked rather than guessed.
+export function courseMatcher(list) {
+  const exact = Object.fromEntries(list.map((c) => [c.name.toLowerCase(), c.slug]));
+  return (name) => {
+    const n = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (exact[n]) return exact[n];
+    if (n.length < 4) return null;
+    const hits = list.filter((c) => c.name.toLowerCase().startsWith(n));
+    return hits.length === 1 ? hits[0].slug : null;
+  };
+}
+
 // One teacher's schedules, newest year first: [{year, periods} | {year, text}].
 // Shows this school year's (or the newest, labelled as older), with the rest
 // under "Past years". `link(name)` turns a class name into a link where it can.
