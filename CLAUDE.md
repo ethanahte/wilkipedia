@@ -145,9 +145,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   Translate `googtrans` cookie, set only when someone picks a language.
 - **Interaction layer** (the "impressive but not AI" pass):
   - Home **pathways map** (`pathways.js`, data from `tools/pathways.py` →
-    `data/pathways.json`): prerequisite chains drawn as a transit map. Every
-    link comes from catalog wording via the ALIASES table; the map quotes it.
-    Never add a link by guessing. Alias ORDER matters (specific before general).
+    `data/pathways.json`): every catalog class as a station on a transit map,
+    with its subject as the row. Linked classes sit in columns by chain step.
+    Every link comes from catalog wording via the ALIASES table, and the map
+    quotes it. Never add a link by guessing. Alias ORDER matters (specific
+    before general). A class the catalog links to nothing is a hollow `solo`
+    station in a row below its subject's columns, in grade order. That covers
+    all of English, social science and SVCTE, whose prerequisites never name a
+    class. Don't draw grade sequences as links. The palette and previews skip
+    a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search
     button open it; `/` too unless the page has an element with `data-slash`.
   - **Hover previews** on class links (`peek.js`), fine pointers only.

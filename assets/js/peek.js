@@ -16,7 +16,7 @@ async function prime(store) {
   if (p) {
     pw = { out: {}, prereq: {} };
     for (const e of p.edges) (pw.out[e.from] ||= []).push(e.to);
-    for (const n of p.nodes) if (n.prereq) pw.prereq[n.slug] = n.prereq;
+    for (const n of p.nodes) if (n.prereq && !/^none\.?$/i.test(n.prereq.trim())) pw.prereq[n.slug] = n.prereq;   // the catalog sometimes just says "None"
   }
   store?.contentIndex?.().then((h) => { has = h; }).catch(() => {});
 }

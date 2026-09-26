@@ -1,6 +1,8 @@
-// The home page's pathways map: every class that the course catalog links by a
-// prerequisite, laid out like a transit map. Rows are subjects, columns are how
-// far along a chain a class sits. Point at a class and its whole path lights
+// The home page's pathways map: every class in the course catalog, laid out like
+// a transit map. Rows are subjects; a class the catalog links to another by a
+// prerequisite sits in a column for how far along its chain it is, and one it
+// links to nothing (all of English, for one) is a hollow station in a row below,
+// in grade order, with no line: nothing here is invented. Point at a class and its whole path lights
 // up (what leads to it, and what it leads to), a tip beside it quotes its
 // prerequisite, and the catalog's own wording sits underneath; click and the
 // map flies into the class page.
@@ -10,9 +12,11 @@
 
 import { esc, dataUrl, courseUrl, lessMotion } from './ui.js';
 
-const LANES = [['math', 'Math'], ['science', 'Science'], ['world-language', 'World language'], ['visual-performing-arts', 'Arts'],
-               ['practical-arts', 'Practical arts'], ['physical-education', 'PE'], ['electives', 'Electives']];
+const LANES = [['english', 'English'], ['math', 'Math'], ['science', 'Science'], ['social-science', 'Social science'],
+               ['world-language', 'World language'], ['visual-performing-arts', 'Arts'], ['practical-arts', 'Practical arts'],
+               ['physical-education', 'PE'], ['electives', 'Electives'], ['svcte', 'SVCTE']];
 const W = 1000, GUTTER = 104, TOP = 34, ROW = 27, LANE_PAD = 14;
+const HINT = 'Point at a class to see what leads to it and where it goes. Every line comes from a prerequisite in the course catalog; a hollow station is a class the catalog links to no other.';
 
 // Short names for the map only (the info bar and class pages use full names)
 const SHORT = {
@@ -24,11 +28,23 @@ const SHORT = {
   'Unified Physical Education': 'Unified PE', 'Principles of Financial Literacy': 'Financial Literacy',
   'AP Computer Science Principles': 'AP CS Principles', 'AP Computer Science A': 'AP CS A', 'Exploring Computer Science': 'Exploring CS',
   'Anatomy and Physiology': 'Anatomy & Physiology', 'Honors Human Physiology': 'H. Human Physiology',
+  'AP English Language and Composition': 'AP English Lang.', 'AP English Literature and Composition': 'AP English Lit.',
+  'CSU Expository Reading and Writing': 'CSU Expository Reading', 'AP US Government & Politics': 'AP US Gov. & Politics',
+  'Heating, Ventilation, & Air Conditional (HVAC)': 'HVAC', 'Medical Science/ Health Careers': 'Medical Science',
+  'Mobile App Design and Computer Coding': 'Mobile App Design', 'Fire Science/First Responder': 'Fire Science',
+  'Spanish for Native Speakers 1': 'Spanish Native Sp. 1', 'Spanish for Native Speakers 2': 'Spanish Native Sp. 2',
+  'Marketing, Sales & Service': 'Marketing & Sales', 'Physical Education Athletics': 'PE Athletics',
 };
 const short = (n) => SHORT[n] || n.replace(/^ROP /, '').replace(/Fashion Design & Marketing/, 'Fashion Design').replace(/ and /g, ' & ');
 
+// Where a hollow station's grades start, for ordering them: "11-12" → 11
+const firstGrade = (n) => +(String(n.grades || '').match(/\d+/)?.[0] || 99);
+// then the special programmes grouped after the regular classes: BSC, PRT, EL
+const programme = (n) => ({ BSC: 1, PRT: 2, EL: 3 })[n.name.split(' ')[0]] || 0;
+const labelW = (n) => 11 + short(n.name).length * 5.8 + 26;      // circle, label, gap
+
 function layout(data) {
-  const levels = Math.max(...data.nodes.map((n) => n.level)) + 1;
+  const levels = Math.max(...data.nodes.filter((n) => n.linked).map((n) => n.level)) + 1;
   const colW = (W - GUTTER - 20) / levels;
   const byDept = new Map(LANES.map(([d]) => [d, []]));
   for (const n of data.nodes) (byDept.get(n.dept) || byDept.set(n.dept, []).get(n.dept)).push(n);
@@ -41,7 +57,7 @@ function layout(data) {
     const list = byDept.get(dept);
     if (!list?.length) continue;
     const cols = Array.from({ length: levels }, () => []);
-    list.forEach((n) => cols[n.level].push(n));
+    list.filter((n) => n.linked).forEach((n) => cols[n.level].push(n));
     // Order each column by where its parents sit, so lines cross less
     cols.forEach((col, lv) => {
       if (lv === 0) col.sort((a, b) => a.name.localeCompare(b.name));
@@ -49,7 +65,18 @@ function layout(data) {
       col.forEach((n, i) => { pos[n.slug] = { x: GUTTER + colW * lv + 10, y: y + LANE_PAD + ROW * i + ROW / 2 }; });
     });
     function avgY(n) { const ps = (parents[n.slug] || []).map((p) => pos[p]?.y ?? 0); return ps.length ? ps.reduce((a, b) => a + b) / ps.length : 0; }
-    const h = LANE_PAD * 2 + ROW * Math.max(...cols.map((c) => c.length));
+    // the classes it links to nothing, flowed in rows under the columns, in grade order
+    const top = Math.max(0, ...cols.map((c) => c.length));
+    const solo = list.filter((n) => !n.linked).sort((a, b) => programme(a) - programme(b) || firstGrade(a) - firstGrade(b) || a.name.localeCompare(b.name));
+    let row = top, x = GUTTER + 10;
+    for (const n of solo) {
+      const w = labelW(n);
+      if (x + w > W && x > GUTTER + 10) { row += 1; x = GUTTER + 10; }
+      pos[n.slug] = { x, y: y + LANE_PAD + ROW * row + ROW / 2 };
+      x += w;
+    }
+    const rows = solo.length ? row + 1 : top;
+    const h = LANE_PAD * 2 + ROW * Math.max(1, rows);
     lanes.push({ dept, label, y, h });
     y += h;
   }
@@ -85,13 +112,13 @@ export async function mount(el, s) {
       <text x="0" y="${l.y + 22}">${esc(l.label)}</text></g>`).join('')}
     ${Array.from({ length: levels }, (_, i) => `<text class="pw-col" x="${GUTTER + colW * i + 4}" y="18">${i === 0 ? 'Where it starts' : `Step ${i + 1}`}</text>`).join('')}
     <g class="pw-edges">${data.edges.map((e) => `<path class="pw-edge${laneOf(e.from) !== laneOf(e.to) ? ' far' : ''}" data-from="${e.from}" data-to="${e.to}" style="--lv:${bySlug[e.from].level}" d="${edgePath(e.from, e.to)}" pathLength="1"/>`).join('')}</g>
-    <g class="pw-nodes">${data.nodes.map((n) => `<a class="pw-node" href="${courseUrl(n.slug)}" data-slug="${n.slug}" style="--lv:${n.level}"
+    <g class="pw-nodes">${data.nodes.map((n) => `<a class="pw-node${n.linked ? '' : ' solo'}" href="${courseUrl(n.slug)}" data-slug="${n.slug}" style="--lv:${n.level}"
         transform="translate(${pos[n.slug].x} ${pos[n.slug].y})" aria-label="${esc(n.name)}${n.prereq ? `. Prerequisite: ${esc(n.prereq)}` : ''}">
         <circle r="5.5"/><text x="11" y="4">${esc(short(n.name))}</text></a>`).join('')}</g>
   </svg>`;
 
   el.innerHTML = `<div class="pw-scroll">${svg}</div>
-    <div class="pw-info" aria-live="polite"><p class="pw-hint">Point at a class to see what leads to it and where it goes. Every line comes from a prerequisite in the course catalog.</p></div>`;
+    <div class="pw-info" aria-live="polite"><p class="pw-hint">${HINT}</p></div>`;
   const root = $('.pw-svg', el), info = $('.pw-info', el);
   for (const a of root.querySelectorAll('.pw-node')) {
     const w = a.querySelector('text').getComputedTextLength();
@@ -143,7 +170,7 @@ export async function mount(el, s) {
       const lit = slug && ((to === slug || up.has(to)) && (from === slug || up.has(from)) || (from === slug || down.has(from)) && (to === slug || down.has(to)));
       p.classList.toggle('lit', !!lit);
     }
-    if (!slug) { info.innerHTML = '<p class="pw-hint">Point at a class to see what leads to it and where it goes. Every line comes from a prerequisite in the course catalog.</p>'; return; }
+    if (!slug) { info.innerHTML = `<p class="pw-hint">${HINT}</p>`; return; }
     const n = bySlug[slug];
     info.innerHTML = `<div class="pw-card">
       <div><a class="pw-name" href="${courseUrl(slug)}">${esc(n.name)}</a>${n.grades ? `<span class="meta"> · grades ${esc(n.grades)}</span>` : ''}</div>

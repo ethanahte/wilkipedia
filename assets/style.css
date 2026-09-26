@@ -1115,6 +1115,9 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .pw-node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; transition: r .2s, fill .2s; }
 .pw-node text { font-size: 10.5px; fill: var(--ink); transition: opacity .2s; }
 .pw-node.has circle { fill: var(--gold); stroke: var(--gold-ink); }
+.pw-node.solo circle { fill: var(--paper); stroke: var(--muted); stroke-dasharray: 2.2 1.8; }   /* linked to no other class */
+.pw-node.solo.has circle { fill: var(--gold); stroke: var(--gold-ink); stroke-dasharray: none; }
+.pw-legend i.solo { background: var(--paper); border: 1.5px dashed var(--muted); }
 .pw-node.has text { font-weight: 700; }
 .pw-node:hover circle, .pw-node.on circle, .pw-node:focus-visible circle { r: 8; }
 .pw-node:focus-visible text { text-decoration: underline; }

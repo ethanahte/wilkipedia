@@ -1,6 +1,8 @@
 """Prerequisite links between classes, read from the catalog's own wording.
 
-The home page's pathways map draws these. Every link must be traceable to a
+The home page's pathways map draws these, and every class in the catalog: one
+the catalog links to no other class (all of English, for one: its prerequisites
+say things like "a C or better", never a class) is a station with no lines. Every link must be traceable to a
 class name (or the catalog's shorthand for one) inside a course's
 "prerequisite" text; nothing is inferred. Each link keeps that sentence, and
 the map shows it word for word.
@@ -104,9 +106,10 @@ def build(catalog_courses):
         level[s] = 1 + max((depth(p, stack + (s,)) for p in ins.get(s, [])), default=-1)
         return level[s]
 
-    on_map = {e["from"] for e in edges} | {e["to"] for e in edges}
+    linked = {e["from"] for e in edges} | {e["to"] for e in edges}
     by_slug = {c["slug"]: c for c in catalog_courses}
     nodes = [{"slug": s, "name": by_slug[s]["name"].rstrip("*").strip(), "dept": by_slug[s]["department"],
-              "grades": by_slug[s].get("grades"), "level": depth(s), "prereq": prereq.get(s)}
-             for s in sorted(on_map)]
+              "grades": by_slug[s].get("grades"), "level": depth(s) if s in linked else 0, "linked": s in linked,
+              "prereq": prereq.get(s)}
+             for s in sorted(by_slug)]
     return {"nodes": nodes, "edges": edges, "total": len(catalog_courses)}

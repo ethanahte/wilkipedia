@@ -109,7 +109,7 @@ async function prime() {
   if (pw) {
     const out = {};
     for (const e of pw.edges) (out[e.from] ||= []).push(e.to);
-    pathways = { out, prereq: Object.fromEntries(pw.nodes.filter((n) => n.prereq).map((n) => [n.slug, n.prereq])) };
+    pathways = { out, prereq: Object.fromEntries(pw.nodes.filter((n) => n.prereq && !/^none\.?$/i.test(n.prereq.trim())).map((n) => [n.slug, n.prereq])) };
   }
   store?.contentIndex?.().then((h) => { hasInfo = h; paintActive(false); }).catch(() => {});
   addLive(store);
