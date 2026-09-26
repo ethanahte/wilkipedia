@@ -57,17 +57,21 @@ ALIASES = {
 }
 
 # The order Wilcox students take English in. The catalog names no class as a
-# prerequisite for any English class, so these come from Ethan (Wilkipedia's
-# founder, a Wilcox student), September 2026, and the map draws them as a
-# sequence in gold, never as a catalog prerequisite. The honours chain matches the
-# catalog's "sequentially designed Honors/AP English Program"; the EL order its
-# beginning / intermediate / advanced descriptions. Correct them only from him.
-SEQUENCES = [
-    ("english-9", "english-10"), ("english-10", "english-11"), ("english-11", "csu-expository-reading-and-writing"),
-    ("english-11", "ap-english-literature-and-composition"),
-    ("honors-english-9", "honors-english-10"), ("honors-english-10", "ap-english-language-and-composition"),
-    ("ap-english-language-and-composition", "ap-english-literature-and-composition"),
-    ("english-9", "honors-english-10"), ("honors-english-10", "honors-british-literature"),
+# prerequisite for any English class, so this comes from Ethan (Wilkipedia's
+# founder, a Wilcox student), September 2026: each year you can take any English
+# class offered for that year, whatever you took the year before (Honors 9, then
+# regular 10, British Literature in 11, ERWC in 12). So every class of one year
+# links to every class of the next. The map draws these in gold as the order
+# students take them in, never as a catalog prerequisite. The EL order follows the
+# catalog's beginning / intermediate / advanced descriptions. Correct them only
+# from Ethan.
+ENGLISH_YEARS = [
+    ["english-9", "honors-english-9"],
+    ["english-10", "honors-english-10"],
+    ["english-11", "ap-english-language-and-composition", "honors-british-literature"],
+    ["ap-english-literature-and-composition", "csu-expository-reading-and-writing"],
+]
+SEQUENCES = [(a, b) for this, nxt in zip(ENGLISH_YEARS, ENGLISH_YEARS[1:]) for a in this for b in nxt] + [
     ("el-beginning", "el-intermediate"), ("el-beginning-grammar-vocabulary-reading", "el-intermediate"),
     ("el-intermediate", "el-advanced"),
 ]

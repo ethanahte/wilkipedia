@@ -155,6 +155,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     Don't draw grade sequences as links. The one exception is `SEQUENCES` in
     pathways.py: the order students take English (and EL) in, given by Ethan
     and drawn as gold `seq` lines, labelled as such, never as prerequisites.
+    Any English class of one year leads to any of the next (`ENGLISH_YEARS`).
     `HIDDEN` leaves the PRT and BSC English classes off the map (Ethan). The palette and previews skip
     a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search
