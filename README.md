@@ -136,3 +136,16 @@ in `supabase/schema.sql` with row-level security:
 - users can change their display name but not their role
 
 Everything students type is escaped before it is shown (`esc()` / `prose()` in `ui.js`).
+
+## Backing up the database
+
+Everything students add lives in Supabase, so keep your own copies:
+
+```
+python3 tools/backup.py --setup   # once: paste the Session pooler connection string (saved in Keychain)
+python3 tools/backup.py           # weekly, and before running any migration
+python3 tools/backup.py --list
+```
+
+Backups go to `~/Wilkipedia-backups/`. They contain members' email addresses, so never
+put them in the repo or share them. Restore instructions are at the top of `tools/backup.py`.

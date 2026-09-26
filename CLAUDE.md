@@ -331,3 +331,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   page; the header bell shows the unread count.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.
+
+## Backups and migrations (student content lives only in Supabase)
+
+- Everything members add is in the Supabase database, not the repo. Code pushes and
+  `tools/build.py` never touch it. The only things that can lose it are SQL run in
+  Supabase, deleting the project, or changing the keys in `assets/js/config.js`.
+- **Migrations must only add.** No `drop`, `truncate`, `delete` or column type
+  changes. If one ever truly needs to remove something, say so plainly to Ethan
+  before he runs it, and have him back up first. Every migration is wrapped in
+  `begin; … commit;`, so a failed run changes nothing.
+- **Backups:** `python3 tools/backup.py` runs pg_dump (the public and auth schemas,
+  custom format) into `~/Wilkipedia-backups/`, outside the repo, with mode 600.
+  The files hold members' emails. The connection string lives in the macOS
+  Keychain (service `wilkipedia-db`) and is set by Ethan himself with `--setup`:
+  never ask for it, print it, or put it in a file. It needs `brew install libpq`.
+  Remind Ethan to back up before any migration.

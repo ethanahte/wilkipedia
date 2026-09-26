@@ -2,3 +2,5 @@
 *.pyc
 __pycache__/
 tools/catalog.txt
+*.dump
+*.partial
