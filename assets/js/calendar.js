@@ -123,25 +123,49 @@ function toolbar() {
     </div>`;
 }
 
+// The month grid, one row per week. Each week is its own 7-column grid: the day
+// cells fill every row of their column (they take the clicks), and events are
+// laid on top in lanes, so a multi-day event is ONE bar across its days (square
+// ends where it carries on into the next or previous week). Up to LANES lanes;
+// the rest show as "+N more" under their day.
+const LANES = 3;
 function month() {
   const y = shown.getFullYear(), m = shown.getMonth();
   const start = new Date(y, m, 1 - new Date(y, m, 1).getDay());         // the Sunday on or before the 1st
   const title = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  let cells = '';
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(start); d.setDate(start.getDate() + i);
-    if (i >= 35 && d.getMonth() !== m) break;                           // drop an empty sixth row
-    const k = iso(d), all = byDay.get(k) || [], evs = all.filter(visible);
-    const off = all.some((ev) => ev.cat === 'off' && !ev.hidden);
-    const cls = ['cal-day', d.getMonth() !== m && 'out', k === today && 'today', off && 'off', openDay === k && 'open', evs.length && 'has']
-      .filter(Boolean).join(' ');
-    cells += `<button type="button" class="${cls}" data-day="${k}" aria-label="${esc(fmtDay(k, { weekday: 'long', month: 'long', day: 'numeric' }))}${evs.length ? `, ${evs.length} event${evs.length > 1 ? 's' : ''}` : ''}">
-      <span class="cal-top"><span class="cal-n">${d.getDate()}</span>${off ? '<span class="cal-offtag">No school</span>' : ''}</span>
-      <span class="cal-chips">${evs.slice(0, 3).map((ev) => `<span class="cal-chip c-${esc(ev.cat)}${ev.src !== 'official' ? ' other' : ''}">${esc(ev.title)}</span>`).join('')}
-      ${evs.length > 3 ? `<span class="cal-more">+${evs.length - 3} more</span>` : ''}</span></button>`;
+  let weeks = '';
+  for (let w = 0; w < 6; w++) {
+    const days = [...Array(7)].map((_, i) => { const d = new Date(start); d.setDate(start.getDate() + w * 7 + i); return d; });
+    if (w > 0 && days[0].getMonth() !== m) break;                       // no empty trailing week
+    const keys = days.map(iso), k0 = keys[0], k6 = keys[6];
+    // this week's events, longest first, then by start, each clipped to the week
+    const evs = events.filter((ev) => visible(ev) && ev.start <= k6 && ev.end >= k0)
+      .map((ev) => ({ ev, a: Math.max(0, keys.indexOf(ev.start < k0 ? k0 : ev.start)), b: keys.indexOf(ev.end > k6 ? k6 : ev.end) }))
+      .sort((p, q) => (q.b - q.a) - (p.b - p.a) || p.a - q.a || (p.ev.cat !== 'off') - (q.ev.cat !== 'off'));
+    const lanes = [], more = Array(7).fill(0);
+    let bars = '';
+    for (const x of evs) {
+      let lane = lanes.findIndex((used) => used.slice(x.a, x.b + 1).every((u) => !u));
+      if (lane < 0) { lane = lanes.length; lanes.push(Array(7).fill(false)); }
+      if (lane >= LANES) { for (let i = x.a; i <= x.b; i++) more[i]++; continue; }
+      for (let i = x.a; i <= x.b; i++) lanes[lane][i] = true;
+      const ev = x.ev, cl = ev.start < keys[x.a], cr = ev.end > keys[x.b];
+      const out = days.slice(x.a, x.b + 1).every((d) => d.getMonth() !== m);
+      bars += `<span class="cal-bar-ev c-${esc(ev.cat)}${ev.src !== 'official' ? ' other' : ''}${x.b > x.a ? ' multi' : ''}${cl ? ' cont-l' : ''}${cr ? ' cont-r' : ''}${out ? ' out' : ''}"
+        style="grid-column:${x.a + 1} / ${x.b + 2};grid-row:${lane + 2}" title="${esc(ev.title)}${ev.start !== ev.end ? ` · ${esc(when(ev))}` : ''}">${esc(ev.title)}</span>`;
+    }
+    const cells = days.map((d, i) => {
+      const k = keys[i], all = byDay.get(k) || [], n = all.filter(visible).length;
+      const off = all.some((ev) => ev.cat === 'off' && !ev.hidden);
+      const cls = ['cal-day', d.getMonth() !== m && 'out', k === today && 'today', off && 'off', openDay === k && 'open', n && 'has'].filter(Boolean).join(' ');
+      return `<button type="button" class="${cls}" style="grid-column:${i + 1}" data-day="${k}" aria-label="${esc(fmtDay(k, { weekday: 'long', month: 'long', day: 'numeric' }))}${n ? `, ${n} event${n > 1 ? 's' : ''}` : ''}">
+        <span class="cal-top"><span class="cal-n">${d.getDate()}</span>${off ? '<span class="cal-offtag">No school</span>' : ''}</span></button>`;
+    }).join('');
+    const moreHtml = more.map((c, i) => (c ? `<span class="cal-more" style="grid-column:${i + 1};grid-row:${LANES + 2}">+${c} more</span>` : '')).join('');
+    weeks += `<div class="cal-week" style="--lanes:${Math.min(lanes.length, LANES)}">${cells}${bars}${moreHtml}</div>`;
   }
   return `<section class="cal-month" aria-label="${esc(title)}">
-    <div class="cal-grid"><div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>${cells}</div>
+    <div class="cal-grid"><div class="cal-dows" aria-hidden="true"><div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div></div>${weeks}</div>
   </section>`;
 }
 

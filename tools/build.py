@@ -202,6 +202,21 @@ def asset_versions():
 
 VERSIONS = {}
 
+
+def check_css(path):
+    """A stray or missing brace silently drops every rule after it (it once hid the
+    calendar's badges and admin dialog), so the build stops instead."""
+    import re
+    text = re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.S)
+    text = re.sub(r"\"[^\"\n]*\"|'[^'\n]*'", "", text)
+    depth = 0
+    for n, line in enumerate(text.split("\n"), 1):
+        depth += line.count("{") - line.count("}")
+        if depth < 0:
+            raise SystemExit(f"{path.name}: an extra '}}' around line {n}")
+    if depth:
+        raise SystemExit(f"{path.name}: {depth} unclosed '{{'")
+
 # Cookie settings (Settings → Cookies & storage). Runs first on every page,
 # the 3D campus included. It sorts each localStorage key into a group and quietly
 # drops writes to a group the reader has switched off, so no feature needs its
@@ -1203,6 +1218,8 @@ def build_calendar():
 
 
 def main():
+    for css in (ROOT / "assets" / "style.css", CAMPUS / "campus.css"):
+        check_css(css)                          # before anything is deleted
     for d in GENERATED_DIRS:
         shutil.rmtree(ROOT / d, ignore_errors=True)
     depts, courses, teachers = load()
