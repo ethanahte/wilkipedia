@@ -214,9 +214,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     conditioners on the backs. The courtyard is open to the sky, raised 0.45 m
     (`FLOOR`, walkable through addHeight), with shade trees in wooden bench
     surrounds and umbrella tables. At the ball-field end are the W · H · S
-    planters with two flights of steps. Not photographed yet: the ramps, the
-    drinking fountains, and how the courtyard meets the quad (drawn as a slope).
-    The other P clusters (P108–P120) still use the old `p` kit.
+    planters with two flights of steps. At the quad end, per Ethan: two steps
+    up from the quad. Facing in from the quad, the ramp is on the left (along
+    the east row's end wall) and two drinking fountains are on the right
+    (against the west row's). The other P clusters (P108–P120) look different
+    (Ethan) and still use the old `p` kit until there are photos of them.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
     `campus/js/osm.js` (generated, don't hand-edit): every house footprint

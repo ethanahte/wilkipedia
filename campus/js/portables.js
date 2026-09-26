@@ -14,8 +14,9 @@
 //     trees down the middle in wooden bench surrounds, umbrella tables, and at
 //     the ball-field end three black planters lettered W · H · S with steps
 //     and grey pipe handrails between them
-// Not yet photographed, so left out: exactly where the ramps and the drinking
-// fountains are, and how the courtyard meets the quad (drawn as a gentle slope).
+// At the quad end (from Ethan): two steps up from the quad; facing in from the
+// quad, the ramp is on the left (along the east row's end wall) and the two
+// drinking fountains on the right (against the west row's end wall).
 
 import * as THREE from 'three';
 import { color, rng } from './geo.js';
@@ -34,7 +35,7 @@ const C = {
 };
 const LIT = color('#ffffff'), DARK = color('#b9bec8');
 
-export const FLOOR = 0.45;                  // the courtyard terrace, above the driveway
+export const FLOOR = 0.4;                   // the courtyard terrace: two steps above the quad
 const Z = [41.1, 50.225, 59.35, 68.475, 77.6];                     // module edges, north → south
 const COURT = { x0: 2.3, x1: 14 };
 const ROWS = [
@@ -154,9 +155,32 @@ function courtyard(W, group, R) {
   W.slab('flat', x0, zN, x1, zS, 0, FLOOR, C.concrete);
   for (let z = zN + 3; z < zS; z += 3) W.slab('flat', x0, z - 0.015, x1, z + 0.015, FLOOR, FLOOR + 0.006, C.joint);
   W.slab('flat', xm - 0.015, zN, xm + 0.015, zS, FLOOR, FLOOR + 0.006, C.joint);
-  // up from the quad: a gentle slope over the last 3.5 m (not yet photographed)
-  const zq = zN - 3.5;
-  W.quad('flat', [x1, 0.004, zq], [x0, 0.004, zq], [x0, FLOOR, zN], [x1, FLOOR, zN], C.concrete, 'auto');
+  // the quad end (Ethan: two steps up from the quad; the ramp on the left and
+  // the drinking fountains on the right, facing in from the quad)
+  const RAMP = { x0: 16, x1: 21.2, z0: 39.3, z1: 40.9 }, landX = 12.2;
+  W.slab('flat', x0, zN - 0.6, landX, zN, 0, FLOOR / 2, C.concrete);                  // the lower step
+  // the ramp's top landing, in front of the east row's end wall, then the ramp
+  // running east along that wall down to the quad
+  W.slab('flat', landX, RAMP.z0, RAMP.x0, zN, 0, FLOOR, C.concrete);
+  const rise = (x) => FLOOR * (RAMP.x1 - x) / (RAMP.x1 - RAMP.x0);
+  W.quad('flat', [RAMP.x0, FLOOR, RAMP.z1], [RAMP.x1, 0.004, RAMP.z1], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], C.concrete, 'auto');
+  W.quad('flat', [RAMP.x0, 0, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x1, 0, RAMP.z0], C.concrete, 'auto');   // its side
+  for (const z of [RAMP.z0 + 0.06, RAMP.z1 - 0.02]) {                                    // grey pipe rails both sides
+    W.rod('flat', [landX + 0.1, FLOOR + 0.9, z], [RAMP.x0, FLOOR + 0.9, z], 0.05, C.rail);
+    W.rod('flat', [RAMP.x0, FLOOR + 0.9, z], [RAMP.x1 + 0.3, 0.9, z], 0.05, C.rail);
+    for (const x of [RAMP.x0, (RAMP.x0 + RAMP.x1) / 2, RAMP.x1 + 0.3]) {
+      const y = x <= RAMP.x0 ? FLOOR : rise(Math.min(x, RAMP.x1));
+      W.box('flat', x, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
+    }
+  }
+  W.rod('flat', [landX + 0.1, FLOOR + 0.9, RAMP.z0 + 0.06], [landX + 0.1, FLOOR + 0.9, zN - 0.05], 0.05, C.rail);
+  addBox(RAMP.x0, RAMP.z0 - 0.1, RAMP.x1 + 0.3, RAMP.z0 + 0.1);                          // the outer rail
+  // two drinking fountains against the west row's end wall
+  for (const x of [-2.6, -0.9]) fountain(W, x, zN - 0.02);
+  // a U-shaped pipe barrier standing out from the wall beside them (photo IMG_2322)
+  W.rod('flat', [-3.5, 0.9, zN - 0.12], [-3.5, 0.9, zN - 0.95], 0.05, C.rail);
+  for (const z of [zN - 0.12, zN - 0.95]) W.rod('flat', [-3.5, 0, z], [-3.5, 0.9, z], 0.05, C.rail);
+  addBox(-3.55, zN - 0.95, -3.45, zN);
 
   // the ball-field end: W · H · S planters with two flights of steps between them
   const P = [['W', x0, x0 + 2.4], ['H', xm - 1.15, xm + 1.15], ['S', x1 - 2.4, x1]];
@@ -171,8 +195,8 @@ function courtyard(W, group, R) {
   for (let k = 0; k < 3; k++) grassTuft(W, x0 + 0.6 + k * 0.6, zS + 0.8 + R() * 0.4, R, { y: top - 0.1, h: 0.5 });   // W's plants
   const flights = [[x0 + 2.4, xm - 1.15], [xm + 1.15, x1 - 2.4]];
   for (const [a, b] of flights) {
-    W.slab('flat', a, zS, b, zS + 0.6, 0, 0.3, C.concrete);
-    W.slab('flat', a, zS + 0.6, b, zS + 1.2, 0, 0.15, C.concrete);
+    W.slab('flat', a, zS, b, zS + 0.6, 0, FLOOR * 2 / 3, C.concrete);
+    W.slab('flat', a, zS + 0.6, b, zS + 1.2, 0, FLOOR / 3, C.concrete);
     for (const x of [a + 0.14, b - 0.14]) {
       W.rod('flat', [x, FLOOR + 0.9, zS - 0.4], [x, 0.9, zS + 1.5], 0.05, C.rail);
       for (const [zz, y] of [[zS - 0.4, FLOOR], [zS + 1.5, 0]]) W.box('flat', x, y + 0.45, zz, 0.05, 0.9, 0.05, C.rail);
@@ -191,14 +215,26 @@ function courtyard(W, group, R) {
   // umbrella tables (on the terrace)
   W.with(0, FLOOR, 0, 0, () => { for (const [x, z] of [[4.8, 44.5], [11.4, 54.2], [4.9, 64.3]]) umbrellaTable(W, x, z, R); });
 
-  // walking: the terrace, the slope up from the quad, the two flights of steps
+  // walking: the terrace, the two steps and the ramp up from the quad, the flights at the far end
   addHeight((x, z) => {
-    if (x < x0 || x > x1) return null;
-    if (z >= zN && z <= zS) return FLOOR;
-    if (z >= zq && z < zN) return FLOOR * (z - zq) / (zN - zq);
-    if (z > zS && z <= zS + 1.2) return z <= zS + 0.6 ? 0.3 : 0.15;
+    if (x >= x0 && x <= x1 && z >= zN && z <= zS) return FLOOR;
+    if (x >= x0 && x < landX && z >= zN - 0.6 && z < zN) return FLOOR / 2;
+    if (x >= landX && x <= RAMP.x0 && z >= RAMP.z0 && z < zN) return FLOOR;
+    if (x > RAMP.x0 && x <= RAMP.x1 && z >= RAMP.z0 && z <= RAMP.z1) return rise(x);
+    if (x >= x0 && x <= x1 && z > zS && z <= zS + 1.2) return z <= zS + 0.6 ? FLOOR * 2 / 3 : FLOOR / 3;
     return null;
   });
+}
+
+// A galvanised pedestal drinking fountain against a wall at z (it stands north of it).
+function fountain(W, x, z) {
+  const galv = color('#a3a8ad'), steel = color('#d7dade');
+  W.slab('flat', x - 0.17, z - 0.36, x + 0.17, z - 0.02, 0, 0.95, galv);
+  W.slab('flat', x - 0.26, z - 0.5, x + 0.26, z - 0.02, 0.95, 1.08, galv);                // the top bowl's housing
+  W.slab('flat', x - 0.2, z - 0.44, x + 0.2, z - 0.08, 1.081, 1.09, steel);
+  W.slab('flat', x + 0.17, z - 0.46, x + 0.5, z - 0.1, 0.7, 0.82, galv);                   // the lower bowl, to one side
+  W.cyl('flat', x, 1.09, z - 0.12, 0.025, 0.025, 0.07, 6, steel);
+  addBox(x - 0.26, z - 0.5, x + 0.5, z);
 }
 
 // A big yellow block letter on a planter's face.
