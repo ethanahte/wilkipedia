@@ -122,7 +122,9 @@ export const CARPORTS = [rect(-1.4, -81.8, 62.6, -67.8), rect(70, -81.8, 107.5, 
 
 // The quad, in detail.
 export const QUAD = { x0: -46, z0: -30, x1: 36, z1: 38 };
-export const STAGE = { x: -17.3, z: 14, r: 8.4, wall: 8.9, plant: 12.2, walk: 15.2, h: 0.8 };
+// r: the platform; ring: the ring walk's outer edge; lip: the low wall round it;
+// plant: the bed's outer edge; walk: the paving round it all (IMG_2324–2331)
+export const STAGE = { x: -17.3, z: 14, r: 7.8, ring: 9.8, lip: 10.15, plant: 12.2, walk: 15.2, h: 0.75 };
 export const LAWN_W = { box: [-37.5, 17.5, -22, 32.3] };             // minus the walk ring round the stage
 export const LAWN_E = [[-3.3, 14.5], [15.9, 11.2], [23.4, 23.8], [-11.2, 32.3]];
 export const CEDAR = { x: 0, z: 0, bed: 4.6 };

@@ -243,6 +243,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
+  - **The quad's stage is `stage()` in `campus/js/quad.js`**, from Ethan's photos
+    IMG_2324–2331 (sizes in `STAGE`, layout.js). It has a half-disc platform
+    flush with its curved edge, three steps with dark nosings along the straight
+    north edge, and two galvanised handrails at the east end. A ring walk a step
+    lower runs round the curved side and comes down to the plaza at both ends
+    (`ringY`), with a low lip wall outside it. Outside that is a mulch bed:
+    grasses, California `poppies()`, crape myrtles on the east half and young
+    autumn-coloured trees on the west. The straight south stair (`STAIR_A`, placed
+    so the cedar is off to the right looking up it, as in IMG_2324) has cheek
+    walls, two steps and a landing, and two handrails, then two steps into a
+    notch in the platform.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
     `campus/js/osm.js` (generated, don't hand-edit): every house footprint

@@ -51,12 +51,12 @@ export function cards(W, cx, cy, cz, rx, ry, rz, col, R, n, size, { variant = 0,
 const darker = (col, k = 0.72) => col.clone().multiplyScalar(k);
 
 // Young street/quad tree (the ornamental pears): thin trunk, upright oval crown, a stake.
-export function youngTree(W, x, z, R, { h = 4.4, stake = true, y = 0 } = {}) {
+export function youngTree(W, x, z, R, { h = 4.4, stake = true, y = 0, cols = G.leaf } = {}) {
   const trunkH = h * 0.4;
   W.cyl('flat', x, y, z, 0.09, 0.07, trunkH + 0.6, 6, G.bark);
   if (stake) W.beam('flat', x + 0.28, z, x + 0.3, z + 0.05, y, y + 1.7, 0.06, G.stake);
   const cy = y + trunkH + (h - trunkH) * 0.5, rx = 0.95, ry = (h - trunkH) * 0.55;
-  const col = pick(G.leaf, R);
+  const col = pick(cols, R);
   W.blob('flat', x, cy, z, rx * 0.62, ry * 0.66, rx * 0.62, darker(col, 0.62));
   cards(W, x, cy, z, rx, ry, rx, col, R, 80, 1.3);
 }

@@ -1,7 +1,10 @@
 // The quad: the most photographed place on campus, so the most detailed.
 // The big deodar cedar in its mulch bed; the half-round stage south-west of it
-// (raised platform, three steps along its straight north edge, a curved seat
-// wall, a ring of grasses and crape myrtles, side steps with a handrail); the
+// (from Ethan's photos IMG_2324–2331: a raised platform flush with its edge,
+// three steps along its straight north edge with two handrails at the east end,
+// a ring walk a step lower round the curved side with a low lip wall, then a
+// mulch bed of grasses, poppies, crape myrtles and young trees, and a straight
+// stair up from the outer walk on the south side); the
 // two lawns; young staked trees and umbrella tables in the spots the satellite
 // shows; green picnic tables, the one red/yellow/blue table; black lamp posts
 // on concrete bases; trash cans.
@@ -13,9 +16,12 @@ import { addCircle, addOBB, addBox, addHeight } from './collide.js';
 import { LIGHTS } from './lights.js';
 
 const concrete = color('#d9d5cd'), concreteDark = color('#c4bfb6'), black = color('#26282b'),
+  stageTop = color('#dcd8cf'), nosing = color('#55585c'),
+  GRASS = ['#8a9a5c', '#9aa465', '#7f8f55', '#a8a06a'].map(color), POPPY = [color('#f29a1d'), color('#f5b52a')],
+  AUTUMN = ['#c9a13a', '#d98a32', '#9aa03e', '#c0702f'].map(color),
   green = color('#3f7d4f'), greenDark = color('#2f5f3c'), galv = color('#a9aeb3'), lampLight = color('#fff4cf');
 
-export const STAIR_A = 2.05;   // where the side steps cut through the stage's planting (radians)
+export const STAIR_A = 1.7;    // where the south stair comes up through the planting (radians; IMG_2324: the cedar is off to the right)
 
 export function buildQuad(W) {
   const R = rng(2024);
@@ -51,63 +57,139 @@ export function buildQuad(W) {
 }
 
 function stage(W, R) {
-  const { x: cx, z: cz, r, wall, plant, h } = STAGE;
-  const half = (r0, a0 = 0, a1 = Math.PI, n = 28) => {
-    const pts = [[cx + r0, cz]];
-    for (let i = 1; i < n; i++) { const a = a0 + ((a1 - a0) * i) / n; pts.push([cx + Math.cos(a) * r0, cz + Math.sin(a) * r0]); }
-    pts.push([cx - r0, cz]);
-    return pts;
-  };
-  // the raised half-disc
-  W.prism('flat', half(r), 0, h, color('#dcd8cf'));
-  // three steps along the straight north edge
-  for (let i = 0; i < 3; i++) W.slab('flat', cx - r, cz - 1.2 + i * 0.4, cx + r, cz, 0, (h / 3) * (i + 1), i % 2 ? concrete : concreteDark);
-  // the curved wall: retaining face outside, seat on top, with a gap for the side steps
-  const gap = 0.16;
-  W.ring('flat', cx, cz, r, wall, 0, h + 0.45, concrete, 20, 0, STAIR_A - gap);
-  W.ring('flat', cx, cz, r, wall, 0, h + 0.45, concrete, 12, STAIR_A + gap, Math.PI);
-  // concrete blocks at both ends of the straight edge
-  for (const s of [-1, 1]) W.slab('flat', cx + s * (r + 0.1) - 0.6, cz - 0.4, cx + s * (r + 0.1) + 0.6, cz + 2.0, 0, 1.0, concreteDark);
-  // side steps through the planting, with a handrail
-  const ux = Math.cos(STAIR_A), uz = Math.sin(STAIR_A);
-  for (let i = 0; i < 3; i++) {
-    const d0 = plant - i * 1.1, d1 = d0 - 1.1, y = (h / 3) * (i + 1);
-    W.with(cx + ux * (d0 + d1) / 2, 0, cz + uz * (d0 + d1) / 2, -STAIR_A, () => W.box('flat', 0, y / 2, 0, 1.1, y, 2.2, concreteDark));
-  }
-  for (const s of [-1, 1]) {
-    const px = -uz * 1.2 * s, pz = ux * 1.2 * s;
-    const a = [cx + ux * plant + px, cz + uz * plant + pz], b = [cx + ux * wall + px, cz + uz * wall + pz];
-    W.rod('flat', [a[0], 0.95, a[1]], [b[0], 0.95 + h, b[1]], 0.05, black);
-    W.cyl('flat', a[0], 0, a[1], 0.03, 0.03, 0.98, 6, black);
-    W.cyl('flat', b[0], h, b[1], 0.03, 0.03, 1.0, 6, black);
-  }
-  // planting ring: grasses and crape myrtles
-  for (let i = 0; i < 70; i++) {
-    const a = R() * Math.PI, d = wall + 0.4 + R() * (plant - wall - 0.7);
-    if (Math.abs(a - STAIR_A) < 0.2) continue;
-    grassTuft(W, cx + Math.cos(a) * d, cz + Math.sin(a) * d, R, { h: 0.6 + R() * 0.5 });
-  }
-  for (const a of [0.35, 0.9, 1.5, 2.55, 2.95]) crapeMyrtle(W, cx + Math.cos(a) * (plant - 1.4), cz + Math.sin(a) * (plant - 1.4), R, { h: 3.4 + R() });
-  for (const a of [0.6, 1.2, 2.3, 2.75]) shrub(W, cx + Math.cos(a) * (wall + 1.2), cz + Math.sin(a) * (wall + 1.2), R, { s: 0.9 });
+  const { x: cx, z: cz, r, ring, lip, plant, h } = STAGE;
+  const RING_H = 0.3;                          // the ring walk's height, all but its ends
+  // the ring walk comes down to the plaza at both ends of the straight edge
+  const ringY = (a) => { const t = Math.min(1, Math.min(a, Math.PI - a) / 0.55); return RING_H * t * t * (3 - 2 * t); };
+  const lipY = (a) => Math.max(ringY(a) + 0.2, 0.45);
+  const P = (d, a, y) => [cx + Math.cos(a) * d, y, cz + Math.sin(a) * d];
+  const A = STAIR_A, ux = Math.cos(A), uz = Math.sin(A), px = -uz, pz = ux;
+  const HW = 1.15;                             // half the south stair's width
+  const at = (along, across, y = 0) => [cx + ux * along + px * across, y, cz + uz * along + pz * across];
+  const onStair = (a, d) => Math.cos(a - A) > 0 && Math.abs(Math.sin(a - A) * d) < HW + 0.3;
 
-  // walking rules: platform, steps, blocked planting, the side stair
+  // the platform: a half-disc, notched on the south where the stair comes up
+  const del = Math.asin(HW / r), rc = r * Math.cos(del), n = 40, plat = [];
+  let notched = false;
+  for (let i = 0; i <= n; i++) {
+    const a = (Math.PI * i) / n;
+    if (!notched && a >= A - del) {
+      notched = true;
+      for (const [al, ac] of [[r, -HW], [rc - 0.8, -HW], [rc - 0.8, HW], [r, HW]]) {
+        const q = al === r ? P(r, A + Math.sign(ac) * del, 0) : at(al, ac);
+        plat.push([q[0], q[2]]);
+      }
+    }
+    if (a > A - del && a < A + del) continue;
+    plat.push([cx + Math.cos(a) * r, cz + Math.sin(a) * r]);
+  }
+  W.prism('flat', plat, 0, h, stageTop);
+  // two steps up from the ring walk into the notch (the platform's edge is the third)
+  const dH = h - RING_H;
+  for (const [a0, a1, y] of [[rc - 0.4, r + 0.05, RING_H + dH / 3], [rc - 0.8, rc - 0.4, RING_H + (2 * dH) / 3]]) {
+    W.with(cx + ux * (a0 + a1) / 2, 0, cz + uz * (a0 + a1) / 2, -A, () => W.box('flat', 0, y / 2, 0, a1 - a0, y, HW * 2, concrete));
+  }
+
+  // three steps along the straight north edge, a dark strip on each nosing
+  for (let i = 0; i < 3; i++) {
+    const z0 = cz - 1.2 + i * 0.4, y = (h / 3) * (i + 1);
+    W.slab('flat', cx - r, z0, cx + r, cz, 0, y, concrete);
+    W.slab('flat', cx - r, z0, cx + r, z0 + 0.06, y, y + 0.004, nosing);
+  }
+  // two handrails down them near the east end (IMG_2328, IMG_2330)
+  for (const x of [cx + r - 1.3, cx + r - 2.8]) {
+    W.rod('flat', [x, 0.9, cz - 1.6], [x, 0.9, cz - 1.25], 0.05, galv);
+    W.rod('flat', [x, 0.9, cz - 1.25], [x, h + 0.9, cz + 0.05], 0.05, galv);
+    W.rod('flat', [x, h + 0.9, cz + 0.05], [x, h + 0.9, cz + 0.4], 0.05, galv);
+    for (const [z, y] of [[cz - 1.6, 0], [cz + 0.4, h]]) W.cyl('flat', x, y, z, 0.03, 0.03, 0.9, 6, galv);
+    addBox(x - 0.05, cz - 1.6, x + 0.05, cz + 0.4);
+  }
+  // galvanised trash cans at both corners
+  for (const s of [-1, 1]) {
+    const x = cx + s * (r + 0.7), z = cz - 0.8;
+    W.cyl('flat', x, 0, z, 0.3, 0.32, 0.9, 12, galv);
+    W.cyl('flat', x, 0.9, z, 0.33, 0.33, 0.05, 12, galv);
+    addCircle(x, z, 0.36);
+  }
+
+  // the ring walk, a step below the platform, and the low lip wall round its outside
+  const m = 64;
+  for (let i = 0; i < m; i++) {
+    const t0 = (Math.PI * i) / m, t1 = (Math.PI * (i + 1)) / m, y0 = Math.max(0.012, ringY(t0)), y1 = Math.max(0.012, ringY(t1));
+    W.quad('flat', P(r, t0, y0), P(r, t1, y1), P(ring, t1, y1), P(ring, t0, y0), concrete);
+    const tm = (t0 + t1) / 2;
+    if (onStair(tm, (ring + lip) / 2)) continue;
+    const l0 = lipY(t0), l1 = lipY(t1);
+    W.quad('flat', P(ring, t0, l0), P(ring, t1, l1), P(lip, t1, l1), P(lip, t0, l0), concrete);
+    W.quad('flat', P(lip, t0, 0), P(lip, t0, l0), P(lip, t1, l1), P(lip, t1, 0), concreteDark);
+    W.quad('flat', P(ring, t0, y0), P(ring, t1, y1), P(ring, t1, l1), P(ring, t0, l0), concrete);
+  }
+  for (const a of [0, Math.PI]) W.quad('flat', P(ring, a, 0), P(ring, a, lipY(a)), P(lip, a, lipY(a)), P(lip, a, 0), concrete);   // the lip's square ends
+
+  // the south stair: up from the outer walk between two cheek walls, two steps and
+  // a landing on the ring walk, a galvanised handrail each side (IMG_2324)
+  W.with(cx + ux * (ring + 10.9) / 2, 0, cz + uz * (ring + 10.9) / 2, -A, () => W.box('flat', 0, RING_H / 2, 0, 10.9 - ring, RING_H, HW * 2, concrete));
+  W.with(cx + ux * 11.2, 0, cz + uz * 11.2, -A, () => W.box('flat', 0, RING_H / 4, 0, 0.6, RING_H / 2, HW * 2, concrete));
+  for (const s of [-1, 1]) {
+    for (const [a0, a1, y] of [[ring, 11.0, lipY(A) + 0.05], [11.0, plant, 0.4]]) {
+      W.with(cx + ux * (a0 + a1) / 2 + px * s * (HW + 0.15), 0, cz + uz * (a0 + a1) / 2 + pz * s * (HW + 0.15), -A,
+        () => W.box('flat', 0, y / 2, 0, a1 - a0, y, 0.3, concrete));
+    }
+    const lo = at(plant - 0.3, s * 0.8, 0.9), hi = at(10.9, s * 0.8, RING_H + 0.9), top = at(10.3, s * 0.8, RING_H + 0.9);
+    W.rod('flat', lo, hi, 0.05, galv);
+    W.rod('flat', hi, top, 0.05, galv);
+    W.cyl('flat', lo[0], 0, lo[2], 0.03, 0.03, 0.9, 6, galv);
+    W.cyl('flat', top[0], RING_H, top[2], 0.03, 0.03, 0.9, 6, galv);
+  }
+
+  // the bed: grasses all round, California poppies, crape myrtles on the east
+  // half, young trees turning colour on the west half
+  const inBed = (a, d) => !onStair(a, d) && d > lip + 0.3 && d < plant - 0.3;
+  for (let i = 0; i < 80; i++) {
+    const a = 0.05 + R() * (Math.PI - 0.1), d = lip + 0.4 + R() * (plant - lip - 0.8);
+    if (!inBed(a, d)) continue;
+    grassTuft(W, cx + Math.cos(a) * d, cz + Math.sin(a) * d, R, { h: 0.6 + R() * 0.5, cols: GRASS });
+  }
+  for (let i = 0; i < 26; i++) {
+    const a = A + 0.25 + R() * 1.1, d = lip + 0.5 + R() * (plant - lip - 1.0);
+    if (inBed(a, d)) poppies(W, cx + Math.cos(a) * d, cz + Math.sin(a) * d, R);
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = A - 0.2 - R() * 0.6, d = lip + 0.5 + R() * (plant - lip - 1.0);
+    if (inBed(a, d)) poppies(W, cx + Math.cos(a) * d, cz + Math.sin(a) * d, R);
+  }
+  const mid = (lip + plant) / 2;
+  for (const a of [0.3, 0.85, A - 0.3]) crapeMyrtle(W, cx + Math.cos(a) * mid, cz + Math.sin(a) * mid, R, { h: 3.6 + R() });
+  for (const a of [2.25, 2.85]) youngTree(W, cx + Math.cos(a) * mid, cz + Math.sin(a) * mid, R, { h: 5 + R(), stake: false, cols: AUTUMN });
+
+  // walking: the platform, its steps, the ring walk, the south stair; the lip and bed are solid
   addHeight((x, z) => {
     const dx = x - cx, dz = z - cz, d = Math.hypot(dx, dz);
     if (z < cz) {
       if (Math.abs(dx) <= r && z >= cz - 1.2) return (h / 3) * (Math.floor((z - (cz - 1.2)) / 0.4) + 1);
       return null;
     }
-    if (d <= r) return h;
     if (d > plant) return null;
-    const a = Math.atan2(dz, dx);
-    const across = Math.abs(Math.sin(a - STAIR_A)) * d;
-    if (Math.abs(a - STAIR_A) < 0.5 && across < 1.05) {
-      if (d <= wall) return h;
-      return (h / 3) * Math.min(3, Math.floor((plant - d) / 1.1) + 1);
+    const a = Math.atan2(dz, dx), along = Math.cos(a - A) * d, across = Math.abs(Math.sin(a - A) * d);
+    const stair = Math.cos(a - A) > 0 && across < HW;
+    if (d <= r) {
+      if (stair && along > rc - 0.8) return along > rc - 0.4 ? RING_H + dH / 3 : RING_H + (2 * dH) / 3;
+      return h;
     }
-    return 50;   // the seat wall and the planting
+    if (d <= ring) return ringY(a);
+    if (stair) return along < 10.9 ? RING_H : along < 11.5 ? RING_H / 2 : 0;
+    return 50;
   });
-  for (const s of [-1, 1]) addBox(cx + s * (r + 0.1) - 0.6, cz - 0.4, cx + s * (r + 0.1) + 0.6, cz + 2.0);
+}
+
+// A low mound of California poppies: blue-green leaves dotted with orange cups.
+function poppies(W, x, z, R) {
+  const s = 0.35 + R() * 0.25;
+  W.blob('flat', x, 0.1, z, s, s * 0.45, s, color('#7f9a6a'));
+  for (let k = 0; k < 7; k++) {
+    const a = R() * Math.PI * 2, d = R() * s * 0.85;
+    W.blob('flat', x + Math.cos(a) * d, 0.12 + s * 0.35 * (1 - d / s), z + Math.sin(a) * d, 0.06, 0.04, 0.06, POPPY[k % 2]);
+  }
 }
 
 export function umbrellaTable(W, x, z, R) {
