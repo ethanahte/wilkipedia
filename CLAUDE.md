@@ -177,8 +177,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   zoom-bombing). Re-run it when the school updates the sheet. The page is a
   "Coming up", one toolbar (month, arrows, Today, Month/List: phones start on List,
   a choice is kept in localStorage `wilkipedia-cal-view`), light filters, a roomy
-  month grid (no-school days tinted and labelled, chips wrap to 2 lines) and a
-  day-by-day list. The page runs wider (1232px, `main.wrap:has(> .cal-app)`), and
+  month grid and a day-by-day list. In the grid each week is its own 7-column
+  CSS grid: the day buttons span every row and take the clicks, and events sit on
+  top in up to 3 lanes (`LANES`) with `pointer-events: none`. A multi-day event is
+  one bar with square ends where it continues, and anything past 3 lanes is
+  '+N more'. No-school days are tinted and labelled. On phones, bars are thin lines
+  and dots. `build.py` refuses to build if a stylesheet's braces don't balance. The page runs wider (1232px, `main.wrap:has(> .cal-app)`), and
   the whole list is in the HTML for no-JS,
   and a `.ics` to add everything to a phone calendar (built in the browser from
   what's shown, so it includes admin edits). The spring no-school days and June
