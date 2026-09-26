@@ -1,6 +1,9 @@
-// The Calendar page: the school year at a glance. A "Coming up" strip, a month
-// view (no-school days shaded, today ringed, each event a coloured chip), and
-// filters by kind of event. Click a day to see everything on it.
+// The Calendar page: the school year at a glance. A "Coming up" strip, one
+// toolbar (month, arrows, Today, Month/List), light filters by kind of event, and
+// two views of the shown month: a Month grid (no-school days tinted, today
+// ringed, events as coloured chips that wrap; click a day for its details) and a
+// List (one row per day with a date block). Phones start on List; an explicit
+// choice is remembered.
 //
 // Where events come from, in layers:
 //   data/calendar.json        Wilcox's official activities calendar (tools/school_calendar.py)
@@ -68,6 +71,9 @@ if (shown < first || shown > last) shown = new Date(first);
 shown = new Date(shown.getFullYear(), shown.getMonth(), 1);
 const on = new Set(ORDER);
 let openDay = null;
+const VIEW_KEY = 'wilkipedia-cal-view';
+let view = (() => { try { return localStorage.getItem(VIEW_KEY); } catch { return null; } })()
+  || (matchMedia('(max-width: 700px)').matches ? 'list' : 'month');
 
 const fmtDay = (s, opts = { weekday: 'short', month: 'short', day: 'numeric' }) => parse(s).toLocaleDateString('en-US', opts);
 const when = (ev) => (ev.start === ev.end ? fmtDay(ev.start) : `${fmtDay(ev.start)} – ${fmtDay(ev.end)}`);
@@ -94,17 +100,33 @@ function comingUp() {
 function filters() {
   const counts = {};
   for (const ev of events) counts[ev.cat] = (counts[ev.cat] || 0) + 1;
-  return `<div class="cal-filters" role="group" aria-label="Show">${ORDER.filter((c) => counts[c]).map((c) =>
-    `<button type="button" class="chip cal-f c-${c}" data-cat="${c}" aria-pressed="${on.has(c)}"><i></i>${esc(cal.labels[c])}</button>`).join('')}
+  const cats = ORDER.filter((c) => counts[c]);
+  return `<div class="cal-filters" role="group" aria-label="Show these kinds of events"><span class="cal-f-label">Show</span>${cats.map((c) =>
+    `<button type="button" class="cal-f c-${c}" data-cat="${c}" aria-pressed="${on.has(c)}"><i></i>${esc(cal.labels[c])}</button>`).join('')}
+    ${cats.some((c) => !on.has(c)) ? '<button type="button" class="cal-f-all" data-all>Show all</button>' : ''}
     ${isAdmin ? '<button type="button" class="btn small cal-add" data-act="new">＋ Add event</button>' : ''}</div>`;
+}
+
+// One bar: which month, the arrows, Today, and Month / List
+function toolbar() {
+  const y = shown.getFullYear(), m = shown.getMonth();
+  const title = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const canBack = new Date(y, m, 0) >= new Date(first.getFullYear(), first.getMonth(), 1);
+  const canFwd = new Date(y, m + 1, 1) <= last;
+  return `<div class="cal-bar">
+      <div class="cal-bar-month"><button type="button" class="cal-nav" data-go="-1" aria-label="Previous month" ${canBack ? '' : 'disabled'}>‹</button>
+        <h2 aria-live="polite">${esc(title)}</h2>
+        <button type="button" class="cal-nav" data-go="1" aria-label="Next month" ${canFwd ? '' : 'disabled'}>›</button></div>
+      <button type="button" class="btn ghost small cal-today" data-go="0">Today</button>
+      <div class="seg cal-views" role="radiogroup" aria-label="View">${[['month', 'Month'], ['list', 'List']].map(([v, l]) =>
+        `<button type="button" role="radio" aria-checked="${view === v}" data-view="${v}">${l}</button>`).join('')}</div>
+    </div>`;
 }
 
 function month() {
   const y = shown.getFullYear(), m = shown.getMonth();
   const start = new Date(y, m, 1 - new Date(y, m, 1).getDay());         // the Sunday on or before the 1st
   const title = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const canBack = new Date(y, m, 0) >= new Date(first.getFullYear(), first.getMonth(), 1);
-  const canFwd = new Date(y, m + 1, 1) <= last;
   let cells = '';
   for (let i = 0; i < 42; i++) {
     const d = new Date(start); d.setDate(start.getDate() + i);
@@ -114,15 +136,11 @@ function month() {
     const cls = ['cal-day', d.getMonth() !== m && 'out', k === today && 'today', off && 'off', openDay === k && 'open', evs.length && 'has']
       .filter(Boolean).join(' ');
     cells += `<button type="button" class="${cls}" data-day="${k}" aria-label="${esc(fmtDay(k, { weekday: 'long', month: 'long', day: 'numeric' }))}${evs.length ? `, ${evs.length} event${evs.length > 1 ? 's' : ''}` : ''}">
-      <span class="cal-n">${d.getDate()}</span>
+      <span class="cal-top"><span class="cal-n">${d.getDate()}</span>${off ? '<span class="cal-offtag">No school</span>' : ''}</span>
       <span class="cal-chips">${evs.slice(0, 3).map((ev) => `<span class="cal-chip c-${esc(ev.cat)}${ev.src !== 'official' ? ' other' : ''}">${esc(ev.title)}</span>`).join('')}
       ${evs.length > 3 ? `<span class="cal-more">+${evs.length - 3} more</span>` : ''}</span></button>`;
   }
   return `<section class="cal-month" aria-label="${esc(title)}">
-    <div class="cal-head"><button type="button" class="cal-nav" data-go="-1" aria-label="Previous month" ${canBack ? '' : 'disabled'}>‹</button>
-      <h2>${esc(title)}</h2>
-      <button type="button" class="cal-nav" data-go="1" aria-label="Next month" ${canFwd ? '' : 'disabled'}>›</button>
-      <button type="button" class="chip cal-today" data-go="0">Today</button></div>
     <div class="cal-grid"><div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>${cells}</div>
   </section>`;
 }
@@ -140,26 +158,44 @@ function dayPanel() {
   const evs = (byDay.get(openDay) || []).filter((ev) => on.has(ev.cat) && (!ev.hidden || isAdmin));
   return `<section class="cal-dayview" aria-live="polite"><div class="cal-dayhead"><h3>${esc(fmtDay(openDay, { weekday: 'long', month: 'long', day: 'numeric' }))}</h3>
     ${isAdmin ? `<button type="button" class="btn ghost small" data-act="new" data-on="${openDay}">＋ Add on this day</button>` : ''}</div>
-    ${evs.length ? `<ul>${evs.map((ev) => `<li class="c-${esc(ev.cat)}${ev.hidden ? ' is-hidden' : ''}"><i></i><div><b>${esc(ev.title)}</b>${extraLine(ev) ? `<small>${esc(extraLine(ev))}</small>` : ''}
-      ${ev.start !== ev.end ? `<small>${esc(when(ev))}</small>` : ''}<span class="cal-kind">${esc(cal.labels[ev.cat])}</span>${tag(ev)}
-      ${SOURCES[ev.src]?.url && ev.src !== 'official' ? `<a class="cal-from" href="${esc(SOURCES[ev.src].url)}" target="_blank" rel="noopener">From ${esc(SOURCES[ev.src].from)}</a>` : ''}
-      ${adminActions(ev)}</div></li>`).join('')}</ul>`
+    ${evs.length ? `<ul class="cal-evs">${evs.map((ev) => eventHtml(ev)).join('')}</ul>`
       : '<p class="meta">Nothing on the calendar this day.</p>'}</section>`;
 }
 
-function monthList() {
-  // everything in the shown month, as a list (what the grid is too small to spell out)
+// One event in full: what, when, where, which kind, where it's from
+function eventHtml(ev, { range = true } = {}) {
+  const lines = [range && ev.start !== ev.end ? when(ev) : '', extraLine(ev)].filter(Boolean).join(' · ');
+  return `<li class="cal-ev c-${esc(ev.cat)}${ev.hidden ? ' is-hidden' : ''}"><i aria-hidden="true"></i><div>
+      <b>${esc(ev.title)}</b>${tag(ev)}
+      ${lines ? `<small>${esc(lines)}</small>` : ''}
+      <span class="cal-kind">${esc(cal.labels[ev.cat])}</span>
+      ${SOURCES[ev.src]?.url && ev.src !== 'official' ? `<a class="cal-from" href="${esc(SOURCES[ev.src].url)}" target="_blank" rel="noopener">From ${esc(SOURCES[ev.src].from)}</a>` : ''}
+      ${adminActions(ev)}</div></li>`;
+}
+
+// The shown month as a list: one row per day that has something, a date block
+// on the left. A multi-day event is listed once, on its first day in this month.
+function listView() {
   const y = shown.getFullYear(), m = shown.getMonth();
-  const key = `${y}-${pad(m + 1)}`;
-  const evs = events.filter((ev) => visible(ev) && (ev.start.startsWith(key) || (ev.start < `${key}-01` && ev.end >= `${key}-01`)));
-  return `<section class="cal-month-list"><h2>All of ${esc(shown.toLocaleDateString('en-US', { month: 'long' }))}</h2>
-    ${evs.length ? `<ul class="cal-rows">${evs.map((ev) => `<li class="cal-row c-${esc(ev.cat)}"><span class="cal-when">${esc(when(ev))}</span>
-      <span class="cal-what">${esc(ev.title)} ${tag(ev)}${extraLine(ev) ? `<small>${esc(extraLine(ev))}</small>` : ''}</span></li>`).join('')}</ul>`
-      : '<p class="meta">Nothing listed this month.</p>'}</section>`;
+  const key = `${y}-${pad(m + 1)}`, first1 = `${key}-01`;
+  const days = new Map();
+  for (const ev of events) {
+    if (!(visible(ev) || (isAdmin && ev.hidden && on.has(ev.cat)))) continue;
+    if (!(ev.start.startsWith(key) || (ev.start < first1 && ev.end >= first1))) continue;
+    const k = ev.start < first1 ? first1 : ev.start;
+    (days.get(k) || days.set(k, []).get(k)).push(ev);
+  }
+  if (!days.size) return '<p class="meta cal-empty">Nothing on the calendar this month with these filters.</p>';
+  return `<ol class="cal-list">${[...days].sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, evs]) => {
+    const d = parse(k), off = evs.some((ev) => ev.cat === 'off');
+    return `<li class="cal-lday${k === today ? ' today' : ''}${k < today ? ' past' : ''}${off ? ' off' : ''}" id="d-${k}">
+      <div class="cal-date"><span>${d.toLocaleDateString('en-US', { weekday: 'short' })}</span><b>${d.getDate()}</b>${k === today ? '<em>Today</em>' : ''}</div>
+      <ul class="cal-evs">${evs.map((ev) => eventHtml(ev)).join('')}</ul></li>`;
+  }).join('')}</ol>`;
 }
 
 function draw() {
-  app.innerHTML = comingUp() + filters() + month() + dayPanel() + monthList();
+  app.innerHTML = comingUp() + `<div class="cal-main">${toolbar()}${filters()}${view === 'list' ? listView() : month() + dayPanel()}</div>`;
   refreshIcs();
 }
 
@@ -227,6 +263,15 @@ const find = (id) => events.find((e) => e.id === id);
 app.addEventListener('click', async (e) => {
   const f = e.target.closest('.cal-f');
   if (f) { const c = f.dataset.cat; on.has(c) ? on.delete(c) : on.add(c); draw(); return; }
+  if (e.target.closest('[data-all]')) { ORDER.forEach((c) => on.add(c)); draw(); return; }
+  const v = e.target.closest('[data-view]');
+  if (v) {
+    view = v.dataset.view;
+    try { localStorage.setItem(VIEW_KEY, view); } catch { /* storage blocked */ }
+    draw();
+    if (view === 'list') document.getElementById(`d-${today}`)?.scrollIntoView({ block: 'center' });
+    return;
+  }
   const a = e.target.closest('[data-act]');
   if (a) {
     const ev = a.dataset.id ? find(a.dataset.id) : null;
@@ -248,7 +293,9 @@ app.addEventListener('click', async (e) => {
     const step = +g.dataset.go;
     if (step === 0) { const t = new Date(); shown = new Date(t.getFullYear(), t.getMonth(), 1); openDay = today; }
     else { shown = new Date(shown.getFullYear(), shown.getMonth() + step, 1); openDay = null; }
-    draw(); return;
+    draw();
+    if (step === 0 && view === 'list') document.getElementById(`d-${today}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
   }
   const d = e.target.closest('[data-day]');
   if (d) {

@@ -175,7 +175,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   exports it to `data/calendar.json`: multi-day rows expanded, a category per
   event from its own wording, Zoom links dropped (reposting them invites
   zoom-bombing). Re-run it when the school updates the sheet. The page is a
-  month view + "Coming up" + filters, the whole list in the HTML for no-JS,
+  "Coming up", one toolbar (month, arrows, Today, Month/List: phones start on List,
+  a choice is kept in localStorage `wilkipedia-cal-view`), light filters, a roomy
+  month grid (no-school days tinted and labelled, chips wrap to 2 lines) and a
+  day-by-day list. The page runs wider (1232px, `main.wrap:has(> .cal-app)`), and
+  the whole list is in the HTML for no-JS,
   and a `.ics` to add everything to a phone calendar (built in the browser from
   what's shown, so it includes admin edits). The spring no-school days and June
   finals in bell.json came from the same sheet.
