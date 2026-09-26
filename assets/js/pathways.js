@@ -16,7 +16,7 @@ const LANES = [['english', 'English'], ['math', 'Math'], ['science', 'Science'],
                ['world-language', 'World language'], ['visual-performing-arts', 'Arts'], ['practical-arts', 'Practical arts'],
                ['physical-education', 'PE'], ['electives', 'Electives'], ['svcte', 'SVCTE']];
 const W = 1000, GUTTER = 104, TOP = 34, ROW = 27, LANE_PAD = 14;
-const HINT = 'Point at a class to see what leads to it and where it goes. Every line comes from a prerequisite in the course catalog; a hollow station is a class the catalog links to no other.';
+const HINT = 'Point at a class to see what leads to it and where it goes. Grey lines are prerequisites quoted from the course catalog; gold lines are the order Wilcox students take English in; a hollow station is a class linked to no other.';
 
 // Short names for the map only (the info bar and class pages use full names)
 const SHORT = {
@@ -29,7 +29,7 @@ const SHORT = {
   'AP Computer Science Principles': 'AP CS Principles', 'AP Computer Science A': 'AP CS A', 'Exploring Computer Science': 'Exploring CS',
   'Anatomy and Physiology': 'Anatomy & Physiology', 'Honors Human Physiology': 'H. Human Physiology',
   'AP English Language and Composition': 'AP English Lang.', 'AP English Literature and Composition': 'AP English Lit.',
-  'CSU Expository Reading and Writing': 'CSU Expository Reading', 'AP US Government & Politics': 'AP US Gov. & Politics',
+  'CSU Expository Reading and Writing': 'CSU ERWC', 'EL Beginning-Grammar/Vocabulary/Reading': 'EL Beginning Grammar', 'AP US Government & Politics': 'AP US Gov. & Politics',
   'Heating, Ventilation, & Air Conditional (HVAC)': 'HVAC', 'Medical Science/ Health Careers': 'Medical Science',
   'Mobile App Design and Computer Coding': 'Mobile App Design', 'Fire Science/First Responder': 'Fire Science',
   'Spanish for Native Speakers 1': 'Spanish Native Sp. 1', 'Spanish for Native Speakers 2': 'Spanish Native Sp. 2',
@@ -111,7 +111,7 @@ export async function mount(el, s) {
     ${lanes.map((l, i) => `<g class="pw-lane"><line x1="0" x2="${W}" y1="${l.y}" y2="${l.y}"/>${i === lanes.length - 1 ? `<line x1="0" x2="${W}" y1="${l.y + l.h}" y2="${l.y + l.h}"/>` : ''}
       <text x="0" y="${l.y + 22}">${esc(l.label)}</text></g>`).join('')}
     ${Array.from({ length: levels }, (_, i) => `<text class="pw-col" x="${GUTTER + colW * i + 4}" y="18">${i === 0 ? 'Where it starts' : `Step ${i + 1}`}</text>`).join('')}
-    <g class="pw-edges">${data.edges.map((e) => `<path class="pw-edge${laneOf(e.from) !== laneOf(e.to) ? ' far' : ''}" data-from="${e.from}" data-to="${e.to}" style="--lv:${bySlug[e.from].level}" d="${edgePath(e.from, e.to)}" pathLength="1"/>`).join('')}</g>
+    <g class="pw-edges">${data.edges.map((e) => `<path class="pw-edge${laneOf(e.from) !== laneOf(e.to) ? ' far' : ''}${e.kind === 'sequence' ? ' seq' : ''}" data-from="${e.from}" data-to="${e.to}" style="--lv:${bySlug[e.from].level}" d="${edgePath(e.from, e.to)}" pathLength="1"/>`).join('')}</g>
     <g class="pw-nodes">${data.nodes.map((n) => `<a class="pw-node${n.linked ? '' : ' solo'}" href="${courseUrl(n.slug)}" data-slug="${n.slug}" style="--lv:${n.level}"
         transform="translate(${pos[n.slug].x} ${pos[n.slug].y})" aria-label="${esc(n.name)}${n.prereq ? `. Prerequisite: ${esc(n.prereq)}` : ''}">
         <circle r="5.5"/><text x="11" y="4">${esc(short(n.name))}</text></a>`).join('')}</g>

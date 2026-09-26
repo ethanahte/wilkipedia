@@ -56,11 +56,30 @@ ALIASES = {
     r"AP Language": "ap-spanish-language-and-culture",
 }
 
+# The order Wilcox students take English in. The catalog names no class as a
+# prerequisite for any English class, so these come from Ethan (Wilkipedia's
+# founder, a Wilcox student), September 2026, and the map draws them as a
+# sequence in gold, never as a catalog prerequisite. The honours chain matches the
+# catalog's "sequentially designed Honors/AP English Program"; the EL order its
+# beginning / intermediate / advanced descriptions. Correct them only from him.
+SEQUENCES = [
+    ("english-9", "english-10"), ("english-10", "english-11"), ("english-11", "csu-expository-reading-and-writing"),
+    ("english-11", "ap-english-literature-and-composition"),
+    ("honors-english-9", "honors-english-10"), ("honors-english-10", "ap-english-language-and-composition"),
+    ("ap-english-language-and-composition", "ap-english-literature-and-composition"),
+    ("english-9", "honors-english-10"), ("honors-english-10", "honors-british-literature"),
+    ("el-beginning", "el-intermediate"), ("el-beginning-grammar-vocabulary-reading", "el-intermediate"),
+    ("el-intermediate", "el-advanced"),
+]
+# Left off the map (Ethan): the PRT classes and the BSC English classes
+HIDDEN = lambda c: c["name"].startswith("PRT ") or c["name"].startswith("BSC English")
+
 # "Completion of Level 2" in a language course means level 2 of that language
 LEVEL = re.compile(r"Level ([1-4])")
 
 
 def build(catalog_courses):
+    catalog_courses = [c for c in catalog_courses if not HIDDEN(c)]
     slugs = {c["slug"] for c in catalog_courses}
     edges, seen = [], set()
     patterns = list(ALIASES.items())       # in order: specific phrasings come before general ones
@@ -90,6 +109,12 @@ def build(catalog_courses):
                 continue
             seen.add((src, c["slug"]))
             edges.append({"from": src, "to": c["slug"]})
+    for a, b in SEQUENCES:
+        if a not in slugs or b not in slugs:
+            raise SystemExit(f"pathways.py: sequence {a} -> {b} names a class that isn't on the map")
+        if (a, b) not in seen:
+            seen.add((a, b))
+            edges.append({"from": a, "to": b, "kind": "sequence"})
     prereq = {c["slug"]: c["prerequisite"].strip() for c in catalog_courses if c.get("prerequisite")}
 
     # Columns: how many steps into a chain a class sits (0 = where a path starts)

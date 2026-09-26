@@ -380,7 +380,7 @@ def build_home(depts):
 
 <section class="home-sec pw-sec" aria-labelledby="pw-h">
   <h2 id="pw-h">How classes connect</h2>
-  <p class="sec-sub">Every class in the {e(CATALOG_SOURCE)}, joined by the prerequisites it lists. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span> <span class="pw-legend"><i class="solo"></i> linked to no other class</span></p>
+  <p class="sec-sub">Every class in the {e(CATALOG_SOURCE)}, joined by the prerequisites it lists. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span> <span class="pw-legend"><i class="seq"></i> the order students take English in</span> <span class="pw-legend"><i class="solo"></i> linked to no other class</span></p>
   <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div>
 </section>
 

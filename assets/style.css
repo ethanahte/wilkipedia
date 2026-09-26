@@ -1110,7 +1110,9 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
 .pw-lane text { font: 500 14px var(--serif); fill: var(--ink); }
 .pw-col { font-size: 10px; fill: var(--muted); letter-spacing: .02em; }
 .pw-edge { fill: none; stroke: var(--muted); stroke-opacity: .38; stroke-width: 1.2; transition: stroke .2s, stroke-opacity .2s, stroke-width .2s; }
-.pw-edge.far { stroke-opacity: .16; }   /* lines between subjects stay quiet until lit */
+.pw-edge.far { stroke-opacity: .16; }
+.pw-edge.seq { stroke: var(--gold-ink); stroke-opacity: .6; }   /* the order students take English in, not a catalog prerequisite */
+.pw-legend i.seq { width: 16px; height: 0; border-radius: 0; background: none; border: 0; border-top: 2px solid var(--gold-ink); vertical-align: middle; }   /* lines between subjects stay quiet until lit */
 .pw-node { cursor: pointer; outline: none; }
 .pw-node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; transition: r .2s, fill .2s; }
 .pw-node text { font-size: 10.5px; fill: var(--ink); transition: opacity .2s; }

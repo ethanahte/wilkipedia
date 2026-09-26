@@ -151,8 +151,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     quotes it. Never add a link by guessing. Alias ORDER matters (specific
     before general). A class the catalog links to nothing is a hollow `solo`
     station in a row below its subject's columns, in grade order. That covers
-    all of English, social science and SVCTE, whose prerequisites never name a
-    class. Don't draw grade sequences as links. The palette and previews skip
+    all of social science and SVCTE, whose prerequisites never name a class.
+    Don't draw grade sequences as links. The one exception is `SEQUENCES` in
+    pathways.py: the order students take English (and EL) in, given by Ethan
+    and drawn as gold `seq` lines, labelled as such, never as prerequisites.
+    `HIDDEN` leaves the PRT and BSC English classes off the map (Ethan). The palette and previews skip
     a prerequisite that is just "None".
   - **⌘K palette** (`palette.js`): the header search box and phone search
     button open it; `/` too unless the page has an element with `data-slash`.
