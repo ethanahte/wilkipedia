@@ -143,11 +143,11 @@ export const CEDAR = { x: 0, z: 0, bed: 4.2 };
 // pointing at the quad. Umbrella tables sit in the notches between the triangles;
 // the two benches back onto the last triangle's south slanted edge, by the ASB Office.
 export const R_FRONT = {
-  back: 30.1, front: 27.9, z0: -18.6, z1: 13.2, teeth: 3, tip: 25.3,
+  back: 30.1, front: 27.5, z0: -18.6, z1: 13.2, teeth: 3, tip: 23.8,
   trees: [[28.6, -2.7], [28.6, 7.9]],                                                    // the two big trees (IMG_2350)
-  tables: [[26.0, -19.9], [24.0, -16.3], [25.3, -8.0], [25.3, 2.6]],
-  longTable: [23.3, -2.7, Math.PI / 2, 2.8],                                              // x, z, rot, length: the one long green table
-  cans: [[23.4, -9.3], [23.6, 4.0], [28.6, -19.9]],
+  tables: [[26.0, -19.9], [23.6, -16.6], [24.3, -8.0], [24.3, 2.6]],
+  longTable: [22.2, -2.7, Math.PI / 2, 2.8],                                              // x, z, rot, length: the one long green table
+  cans: [[22.6, -9.4], [22.8, 4.0], [28.6, -19.9]],
   benches: [1.6, 3.9],                                                                   // metres along the last triangle's south edge from its tip
   pots: [[32.55, 15.6, 'white'], [32.55, 17.8, 'white'], [32.6, 19.7, 'clay']],          // IMG_2342
 };
@@ -170,7 +170,7 @@ export const QUAD_SPOTS = [[-39.8, -23.1], [-39.2, 25.2], [-38.6, -13.9], [-36.9
   [-0.4, 8.6], [7.6, 8.6], [11.4, 8.3], [15, 8.8], [19, 8.4]];
 export const LAWN_TREES = [[2, 20], [9, 16.5], [15, 23.5], [4.5, 27], [-30, 25], [-26, 29.5]];
 export const LAMPS = [[-12, 1.3], [-27, 11.5], [-2, -13], [22, -8], [-38, -18], [26, 20], [-4, 30.8], [-30.5, 32], [-18.3, 3.3], [30, -24], [3.3, -3.6]];   // [-18.3, 3.3]: the one with the flag, due north of the stage (IMG_2324, satellite); [3.3, -3.6]: at the cedar's bed (IMG_2335)
-export const PICNIC = [[-31, 21, 0.3], [-34.5, 17.6, 0.3], [20, 30, -0.2], [26.5, 14, 1.3], [-8, -6, 0], [-26, 4, 1.57]];
+export const PICNIC = [[-31, 21, 0.3], [-34.5, 17.6, 0.3], [20, 30, -0.2], [-8, -6, 0], [-26, 4, 1.57]];
 export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blue benches
 
 // Front of the school: the sign wall, planter, palms and flag.

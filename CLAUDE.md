@@ -282,7 +282,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       layout.js): a bed shaped like a Toblerone bar seen from the side (Ethan).
       A straight strip runs along the building with a paved walk between
       (back at x 30.1, the blocks at 31.6). Identical symmetric triangles stand
-      side by side on its front, pointing at the quad (`teeth`, `tip`). Umbrella
+      side by side on its front, pointing at the quad (`teeth`, `tip`; Ethan wanted them sharp). Umbrella
       tables sit in the notches between the triangles. The two benches back
       onto the last triangle's south slanted edge (`bench(W, x, z, rot)`).
       There are also two big trees in the southern triangles, one long green
