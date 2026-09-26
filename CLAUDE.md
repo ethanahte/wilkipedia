@@ -261,6 +261,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - The lamp with the US flag stands due north of the stage.
     - The east bed ends in a low wall along the straight edge, facing the quad.
       The south stair's cheek walls are one flat height.
+    - Flat pieces lying on the ground must stand at least 5 cm tall. The
+      ground's painted detail layer is at 2 cm and pulled forward in depth
+      (`plane()` in ground.js), so it hides anything lower.
     - Walking: every part has its real height in `addHeight` (no 50 m "solid"
       values), so the low walls, blocks and lip can be stepped or jumped over
       (a jump clears about 1.1 m) and the planting can be walked through (Ethan).
