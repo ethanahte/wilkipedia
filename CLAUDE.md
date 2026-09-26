@@ -271,9 +271,20 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       The north end also has the big louver panel.
     - Pool face: a sawtooth of grey towers. There is no walkway behind.
     - The triangular wall lamps (`sconce()`) glow and add to `LIGHTS`.
-    - In front, on the quad side (`R_FRONT`, built in quad.js): beds in the bays
-      and in front of some blocks, two big trees, black mesh benches, tables,
-      and white pots by the ASB door.
+    - The entrances' recesses are 3.1 m wide. Their big windows are narrow
+      side lights either side of a wide middle, in four rows (`gridWindow`).
+    - The ASB Office's front is `asbFront()`, from IMG_2342 and IMG_2350: side
+      light, glass door with notices, then five columns: a transom row, a
+      middle row with blinds and posters, small service windows over a white
+      counter on two legs, and a cream knee wall. Its awning is rounded
+      (`roundAwning` in landmarks.js).
+    - In front, on the quad side (`frontOfR()` in quad.js, `R_FRONT` in
+      layout.js): a bed shaped like a handsaw's edge. Its straight back is 0.6 m
+      off the blocks and reaches into the window bays; its teeth point at the
+      quad, each long on the north and short on the south (Ethan, the
+      satellite). Umbrella tables sit in the notches. Also: two big trees in
+      the southern teeth, one long green picnic table, two benches and white
+      square pots plus a clay one by the ASB Office.
   - **Room plates are hidden for now (Ethan)** except the P building's door
     plates. A hidden plate keeps its slot in the mesh as a collapsed quad, so
     `rooms[faceIndex / 2]` picking still lines up.

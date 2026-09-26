@@ -219,7 +219,7 @@ const WALL = {
 // position rather than by a repeating rhythm. The numbers match R's outline in
 // layout.js: the quad face at x 33.2, the thick blocks out to 31.6, the step at
 // x 41.1, the pool face at 54.7, the narrow ends at z -21.6 / 25.2, the wide ends
-// at -23.75 / 27.3 with their entrances set 0.9 m in between x 43.1 and 46.9.
+// at -23.75 / 27.3 with their entrances set 0.9 m in between x 43.1 and 46.2.
 const RC = {
   reveal: color('#d2c6ab'), tower: color('#a4a8aa'), towerLine: color('#8e9294'), panel: color('#eef0eb'),
   grid: color('#7c8186'), teal: color('#a9dcd6'), canopy: color('#8a8f94'), sconce: color('#6f7378'), cap: color('#ece0c4'),
@@ -227,7 +227,7 @@ const RC = {
 };
 const R_FLOORS = [0, 4.4, 8.8];
 const RD = 0.22;             // the precast skin laid over R's end walls: its openings are set this far in
-const RQ = 33.2, RF = 31.6, RS = 41.1, RE = 54.7, RN = -21.6, RNW = -23.75, RSN = 25.2, RSW = 27.3, RX0 = 43.1, RX1 = 46.9, RIN = 0.9;
+const RQ = 33.2, RF = 31.6, RS = 41.1, RE = 54.7, RN = -21.6, RNW = -23.75, RSN = 25.2, RSW = 27.3, RX0 = 43.1, RX1 = 46.2, RIN = 0.9;
 
 // The precast's reveals: a groove every 1.2 m up and every 2.7 m along.
 function reveals(W, e, t0, t1, top, off = 0) {
@@ -282,6 +282,17 @@ function rSkin(W, e, t0, t1, top, holes = []) {
 }
 // An opening for a window drawn by windowAt at (t, y, w, h).
 const winHole = (t, y, w, h) => [t - w / 2 - 0.08, t + w / 2 + 0.08, y - h / 2 - 0.08, y + h / 2 + 0.08];
+// A window with its mullions where they really are: cols are the columns' shares
+// of the width, rows equal.
+function gridWindow(W, e, t, y, w, h, cols, rows) {
+  onWall(W, e, t, y, 0.03, () => {
+    W.box('flat', 0, 0, 0, w + 0.14, h + 0.14, 0.1, RC.grid);
+    W.quad('glass', [-w / 2, -h / 2, 0.06], [w / 2, -h / 2, 0.06], [w / 2, h / 2, 0.06], [-w / 2, h / 2, 0.06], pane(), [[0, 0], [w, 0], [w, h], [0, h]]);
+    let x = -w / 2;
+    for (const c of cols.slice(0, -1)) { x += c * w; W.box('flat', x, 0, 0.08, 0.06, h, 0.05, RC.grid); }
+    for (let k = 1; k < rows; k++) W.box('flat', 0, -h / 2 + (k * h) / rows, 0.08, w, 0.05, 0.05, RC.grid);
+  });
+}
 
 // A bay of white panels on a grey grid, a row of teal glass at the head of each
 // floor and a strip of glass up one side (IMG_2350, IMG_2352).
@@ -300,15 +311,48 @@ function rBay(W, e, t0, t1, { storefront = false } = {}) {
       for (const x of [w / 2 - 0.82, w / 2 - 0.23]) W.box('flat', x, (y0 + y1) / 2, 0.04, 0.05, y1 - y0, 0.03, RC.grid);
     });
   });
-  if (storefront) {
-    // the ASB Office's glass front under its awning (landmarks.js draws the awning)
-    onWall(W, e, mid, 1.45, 0.03, () => {
-      W.box('flat', 0, 0, 0, w - 0.3, 2.8, 0.08, RC.grid);
-      W.quad('glass', [-w / 2 + 0.3, -1.3, 0.05], [w / 2 - 0.3, -1.3, 0.05], [w / 2 - 0.3, 1.3, 0.05], [-w / 2 + 0.3, 1.3, 0.05], LIT, 'auto');
-      for (let x = -w / 2 + 0.3; x <= w / 2 - 0.29; x += (w - 0.6) / 7) W.box('flat', x, 0, 0.07, 0.06, 2.6, 0.03, RC.grid);
-      W.box('flat', 0, 0.55, 0.07, w - 0.6, 0.05, 0.03, RC.grid);
-    });
-  }
+  if (storefront) asbFront(W, e, t0 + 0.3, t1 - 0.3);
+}
+
+// The ASB Office's front under its awning (IMG_2342, IMG_2350; landmarks.js draws
+// the awning). North to south: a glass side light, the glass door, then five
+// columns of windows: a transom row, a middle row (blinds, posters), a row of
+// small service windows over a white counter on two legs, and a cream knee wall.
+function asbFront(W, e, t0, t1) {
+  const H = 2.95, frame = RC.grid, glass = (x0, x1, y0, y1, col = DARK) =>
+    W.quad('glass', [x0, y0, 0.05], [x1, y0, 0.05], [x1, y1, 0.05], [x0, y1, 0.05], col, [[0, 0], [x1 - x0, 0], [x1 - x0, y1 - y0], [0, y1 - y0]]);
+  const bar = (x, y, w, h) => W.box('flat', x, y, 0.07, w, h, 0.06, frame);
+  onWall(W, e, 0, 0, 0.03, () => {
+    W.box('flat', (t0 + t1) / 2, H / 2, 0, t1 - t0, H, 0.06, frame);          // the frame behind it all
+    const sl = t0 + 0.55, dr = sl + 1.0;
+    // side light and door, each with a transom
+    glass(t0 + 0.06, sl - 0.04, 0.12, 2.3); glass(t0 + 0.06, sl - 0.04, 2.38, H - 0.06);
+    glass(sl + 0.08, dr - 0.08, 0.1, 2.25); glass(sl + 0.04, dr - 0.04, 2.38, H - 0.06);
+    W.box('flat', dr - 0.2, 1.0, 0.1, 0.04, 0.3, 0.05, color('#c9ccd0'));      // the door's handle
+    W.box('flat', (t0 + sl) / 2, 1.25, 0.08, 0.3, 0.38, 0.005, color('#f4f2ea'));   // notices taped up
+    W.box('flat', (sl + dr) / 2, 1.55, 0.08, 0.22, 0.28, 0.005, color('#f4f2ea'));
+    for (const x of [sl, dr]) bar(x, H / 2, 0.08, H);
+    bar((t0 + dr) / 2, 2.34, dr - t0, 0.07);
+    // the windows: five columns
+    const n = 5, cw = (t1 - dr) / n;
+    for (let k = 0; k < n; k++) {
+      const x0 = dr + k * cw, x1 = x0 + cw;
+      glass(x0 + 0.04, x1 - 0.04, 2.38, H - 0.06);                               // transom
+      glass(x0 + 0.04, x1 - 0.04, 1.48, 2.3, k % 2 ? LIT : DARK);                  // middle row
+      if (k >= 2) W.box('louver', (x0 + x1) / 2, 1.9, 0.06, cw - 0.12, 0.78, 0.01, color('#e9e6dc'));   // blinds
+      for (const j of [0, 1]) glass(x0 + 0.04 + (j * cw) / 2, x0 + ((j + 1) * cw) / 2 - 0.04, 0.9, 1.42);   // service windows
+      W.box('stucco', (x0 + x1) / 2, 0.43, 0.06, cw - 0.06, 0.8, 0.05, RC.wall);  // knee wall
+      bar(x1, H / 2, 0.07, H);
+    }
+    bar((dr + t1) / 2, 2.34, t1 - dr, 0.07); bar((dr + t1) / 2, 1.45, t1 - dr, 0.06); bar((dr + t1) / 2, 0.86, t1 - dr, 0.06);
+    // posters in the windows (IMG_2342)
+    const poster = (x, y, w, h, col) => W.box('flat', x, y, 0.075, w, h, 0.005, col);
+    poster(dr + cw * 0.5, 1.9, 0.42, 0.55, color('#5da0c9')); poster(dr + cw * 0.3, 1.15, 0.36, 0.44, color('#6fb3a4'));
+    poster(dr + cw * 0.12, 1.95, 0.2, 0.26, color('#e2b43b')); poster(dr + cw * 1.3, 1.1, 0.32, 0.4, color('#8fc2df'));
+    // the service counter under the small windows, on two legs
+    W.box('flat', (dr + cw + t1) / 2, 0.9, 0.25, t1 - dr - cw - 0.4, 0.06, 0.4, color('#f1efe8'));
+    for (const x of [dr + cw + 0.3, t1 - 0.3]) W.box('flat', x, 0.44, 0.35, 0.08, 0.88, 0.08, color('#e8e5dc'));
+  });
 }
 
 // A single glass door with a panel over it: a grey louver (the ends' side doors)
@@ -410,8 +454,8 @@ function rEnd(W, h, north) {
   for (const [y, hh] of [[1.55, 2.95], [5.85, 2.75], [9.75, 2.55]]) { windowAt(W, wE, wx(nx), y, 0.7, hh, { frame: RC.grid }); wholes.push(winHole(wx(nx), y, 0.7, hh)); }
   if (north) {
     // the big cream louver panel beside the north entrance (IMG_2357)
-    onWall(W, wE, wx(48.4), 2.05, 0.03, () => { W.box('flat', 0, 0, 0, 2.3, 3.5, 0.1, RC.cap); W.box('louver', 0, 0, 0.06, 2.0, 3.2, 0.03, color('#f2ead8')); });
-    wholes.push([...span(wE, [47.25, zW], [49.55, zW]), 0.3, 3.8]);
+    onWall(W, wE, wx(47.75), 2.05, 0.03, () => { W.box('flat', 0, 0, 0, 2.3, 3.5, 0.1, RC.cap); W.box('louver', 0, 0, 0.06, 2.0, 3.2, 0.03, color('#f2ead8')); });
+    wholes.push([...span(wE, [46.6, zW], [48.9, zW]), 0.3, 3.8]);
   } else sconce(W, wE, wx(49.2), 3.1, RD);
   sconce(W, wE, wx(54.0), 3.1, RD);
   rSkin(W, wE, ...span(wE, [RX1, zW], [RE, zW]), h, wholes);
@@ -424,12 +468,10 @@ function rEnd(W, h, north) {
   });
   LIGHTS.push([bE.ax + bE.dx * bm + bE.nx * 1.2, bE.az + bE.dz * bm + bE.nz * 1.2, 3.1, 4.5]);
   doorAt(W, bE, bm, 1.9, 2.4, null, { glass: true, frameCol: RC.grid });
-  for (const d of [-1.45, 1.45]) windowAt(W, bE, bm + d, 1.25, 0.7, 2.35, { frame: RC.grid });
-  windowAt(W, bE, bm, 2.85, 3.4, 0.5, { frame: RC.grid });
-  for (const [y, hh] of [[6.4, 3.0], [10.1, 2.6]]) {
-    windowAt(W, bE, bm, y, 3.3, hh, { frame: RC.grid });
-    for (const k of [-1, 1]) onWall(W, bE, bm, y + (k * hh) / 6, 0.03, () => W.box('flat', 0, 0, 0.09, 3.3, 0.06, 0.05, RC.grid));
-  }
+  for (const d of [-1.18, 1.18]) windowAt(W, bE, bm + d, 1.25, 0.45, 2.35, { frame: RC.grid });
+  windowAt(W, bE, bm, 2.85, bE.len - 0.3, 0.5, { frame: RC.grid });
+  // the big windows: narrow side lights either side of a wide middle, four rows (IMG_2345)
+  for (const [y, hh] of [[5.8, 3.2], [9.9, 2.8]]) gridWindow(W, bE, bm, y, bE.len - 0.3, hh, [0.16, 0.68, 0.16], 4);
   for (const [x, n] of [[RX0, 1], [RX1, -1]]) reveals(W, rWall(x, zR, x, zW, n, 0), 0, RIN, 12.2);
   W.slab('stucco', RX0, Math.min(zR, zW + s * RD), RX1, Math.max(zR, zW + s * RD), 12.2, h, RC.wall);
   onWall(W, wE, (wx(RX0) + wx(RX1)) / 2, h + 0.04, RD / 2, () => W.box('flat', 0, 0, 0, RX1 - RX0, 0.08, RD + 0.06, C.fin));

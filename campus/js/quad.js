@@ -14,7 +14,7 @@ import * as THREE from 'three';
 import { STAGE, CEDAR, R_FRONT, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
 import { canvasTex, decalMat } from './toon.js';
 import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, flax, G } from './nature.js';
-import { addCircle, addOBB, addBox, addHeight } from './collide.js';
+import { addCircle, addOBB, addBox, addHeight, addPoly } from './collide.js';
 import { LIGHTS } from './lights.js';
 
 const concrete = color('#d9d5cd'), concreteDark = color('#c4bfb6'), black = color('#26282b'),
@@ -51,28 +51,7 @@ export function buildQuad(W, decals) {
     } else umbrellaTable(W, x, z, R);
   });
   for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true }); addCircle(x, z, 0.25); }
-  // in front of Building R: beds of red-tipped shrubs, flax and grasses along its
-  // base, two big leafy trees, benches along the beds, a few tables (IMG_2349–2352)
-  for (const [x0, z0, x1, z1] of R_FRONT.beds) {
-    W.slab('flat', x0, z0, x1, z1, 0, 0.06, color('#6b4a35'));
-    for (let z = z0 + 0.6; z < z1 - 0.4; z += 1.3 + R() * 0.6) {
-      const x = x0 + 0.4 + R() * Math.max(0.1, x1 - x0 - 0.8), k = R();
-      if (k < 0.45) shrub(W, x, z, R, { s: 0.9 + R() * 0.4, cols: RED_TIPS });
-      else if (k < 0.7) flax(W, x, z, R, { h: 1.2 + R() * 0.4 });
-      else grassTuft(W, x, z, R, { h: 0.7 + R() * 0.3, cols: GRASS });
-    }
-    addBox(x0, z0, x1, z1);
-  }
-  const bedX = 30.4;
-  for (const [x, z] of R_FRONT.trees) {
-    W.cyl('flat', x, 0, z, 1.7, 1.7, 0.05, 18, color('#6b4a35'));
-    shadeTree(W, x, z, R, { h: 9.5 + R(), cols: G.leaf });
-    addCircle(x, z, 0.5);
-  }
-  for (const z of R_FRONT.benches) bench(W, bedX - 0.45, z);
-  for (const [x, z] of R_FRONT.tables) umbrellaTable(W, x, z, R);
-  for (const [x, z, rot] of R_FRONT.picnic) picnic(W, x, z, rot, green, green, green);
-  for (const [x, z] of R_FRONT.pots) { W.cyl('flat', x, 0, z, 0.26, 0.2, 0.5, 12, color('#f1f0ea')); shrub(W, x, z, R, { s: 0.55, y: 0.45 }); addCircle(x, z, 0.3); }
+  frontOfR(W, R);
 
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
@@ -242,19 +221,19 @@ export function umbrellaTable(W, x, z, R) {
   addCircle(x, z, 1.05);
 }
 
-function picnic(W, x, z, rot, top, benchA, benchB, frame = greenDark) {
+function picnic(W, x, z, rot, top, benchA, benchB, frame = greenDark, len = 1.85) {
   W.with(x, 0, z, rot, () => {
-    W.box('flat', 0, 0.76, 0, 1.85, 0.05, 0.78, top);
-    W.box('flat', 0, 0.45, 0.66, 1.85, 0.04, 0.3, benchA);
-    W.box('flat', 0, 0.45, -0.66, 1.85, 0.04, 0.3, benchB);
-    for (const sx of [-0.72, 0.72]) {
+    W.box('flat', 0, 0.76, 0, len, 0.05, 0.78, top);
+    W.box('flat', 0, 0.45, 0.66, len, 0.04, 0.3, benchA);
+    W.box('flat', 0, 0.45, -0.66, len, 0.04, 0.3, benchB);
+    for (const sx of len > 2.2 ? [-len / 2 + 0.2, 0, len / 2 - 0.2] : [-0.72, 0.72]) {
       W.box('flat', sx, 0.38, 0, 0.05, 0.05, 1.7, frame);
       for (const s of [-1, 1]) {
         W.with(sx, 0.38, s * 0.42, 0, () => W.box('flat', 0, 0, 0, 0.05, 0.8, 0.05, frame));
       }
     }
   });
-  addOBB(x, z, 2.0, 1.9, rot);
+  addOBB(x, z, len + 0.15, 1.9, rot);
 }
 
 // A quad lamp (IMG_2332, IMG_2335): a black pole on a round concrete base, a
@@ -296,6 +275,48 @@ const banner = (lines) => {
 };
 const BANNERS = [banner(['CHARGER', 'STRONG']), banner(['WILCOX', 'CHARGERS'])];
 
+
+// In front of Building R (R_FRONT in layout.js): the handsaw bed with its plants
+// and two big trees, the umbrella tables in its notches, the long green table,
+// benches and pots by the ASB Office.
+function frontOfR(W, R) {
+  const F = R_FRONT, BX = F.back, mulch = color('#5e4231');
+  const inTooth = (x, z, [z0, z1, tx, tz]) => {
+    const side = (ax, az, bx, bz) => (bx - ax) * (z - az) - (bz - az) * (x - ax);
+    const a = side(BX, z0, tx, tz), b = side(tx, tz, BX, z1), c = side(BX, z1, BX, z0);
+    return (a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0);
+  };
+  const inBed = (x, z) => F.teeth.some((t) => inTooth(x, z, t)) || F.bays.some(([z0, z1]) => x >= BX && x <= 32.6 && z >= z0 && z <= z1);
+  for (const [z0, z1, tx, tz] of F.teeth) {
+    W.prism('flat', [[BX, z0], [tx, tz], [BX, z1]], 0, 0.06, mulch);
+    addPoly([[BX, z0], [tx, tz], [BX, z1]]);
+  }
+  for (const [z0, z1] of F.bays) { W.slab('flat', BX - 0.05, z0, 32.6, z1, 0, 0.06, mulch); addBox(BX, z0, 32.6, z1); }
+  // plants on a jittered grid: fountain grasses, red-tipped shrubs, flax (IMG_2351)
+  const clear = (x, z) => !F.trees.some(([a, b]) => Math.hypot(x - a, z - b) < 1.0);
+  for (let z = -18.4; z < 11.2; z += 1.05) {
+    for (let x = 25.9; x < 32.4; x += 1.1) {
+      const px = x + (R() - 0.5) * 0.6, pz = z + (R() - 0.5) * 0.6;
+      if (!inBed(px, pz) || !inBed(px + 0.35, pz) || !inBed(px - 0.35, pz) || !clear(px, pz)) continue;
+      const k = R();
+      if (k < 0.55) { const hh = 1.0 + R() * 0.6; grassTuft(W, px, pz, R, { h: hh, cols: GRASS }); grassTuft(W, px + 0.12, pz - 0.1, R, { h: hh * 0.9, cols: GRASS }); }
+      else if (k < 0.75) shrub(W, px, pz, R, { s: 0.8 + R() * 0.4, cols: RED_TIPS });
+      else if (k < 0.9) flax(W, px, pz, R, { h: 1.1 + R() * 0.4 });
+      else shrub(W, px, pz, R, { s: 0.7 + R() * 0.3 });
+    }
+  }
+  for (const [x, z] of F.trees) { shadeTree(W, x, z, R, { h: 10 + R(), cols: G.leaf }); addCircle(x, z, 0.5); }
+  for (const [x, z] of F.tables) umbrellaTable(W, x, z, R);
+  const [lx, lz, lrot, llen] = F.longTable;
+  picnic(W, lx, lz, lrot, green, green, green, greenDark, llen);
+  for (const [x, z] of F.cans) can(W, x, z);
+  for (const z of F.benches) bench(W, 29.2, z);
+  for (const [x, z, kind] of F.pots) {
+    if (kind === 'white') { W.box('flat', x, 0.29, z, 0.5, 0.58, 0.5, color('#f3f2ed')); shrub(W, x, z, R, { s: 0.42, y: 0.56, cols: G.leaf }); }
+    else { W.cyl('flat', x, 0, z, 0.2, 0.15, 0.4, 12, color('#b86b45')); shrub(W, x, z, R, { s: 0.4, y: 0.38, cols: G.leaf }); }
+    addCircle(x, z, 0.3);
+  }
+}
 
 // A black mesh bench with a back, facing the quad (-x) (IMG_2349).
 function bench(W, x, z) {

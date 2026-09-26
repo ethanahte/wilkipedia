@@ -132,7 +132,7 @@ export function buildLandmarks(W, group, fontFamily) {
 
   // ── Building R: the ASB Office awning on the quad side ──
   const asbZ0 = 13.8, asbZ1 = 20.1;            // the southernmost bay (Ethan: "on the very right side")
-  awning(W, 33.2, asbZ0, asbZ1, 1.5, 3.0, color('#c4a34f'), 'x');
+  roundAwning(W, 33.2, asbZ0, asbZ1, 1.5, 3.0, color('#ecc75a'));
   const asbTex = textCanvas(1024, 96, (g, w, h) => {
     g.fillStyle = '#16181b'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#e8c547'; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -220,6 +220,21 @@ function awning(W, x, z0, z1, depth, y, col) {
   W.slab('flat', Math.min(x, xo), z0, Math.max(x, xo), z0 + 0.04, y + 0.25, y + 0.9, col);
   W.slab('flat', Math.min(x, xo), z1 - 0.04, Math.max(x, xo), z1, y + 0.25, y + 0.9, col);
   W.slab('flat', xo - 0.03, z0, xo + 0.03, z1, y - 0.2, y + 0.25, color('#1b1d20'));   // valance
+}
+
+// A rounded fabric awning against a west-facing wall at x (the ASB Office's,
+// IMG_2342): a quarter-round of yellow over a dark valance.
+function roundAwning(W, x, z0, z1, depth, y, col) {
+  const n = 8, P = (k) => { const a = (k / n) * Math.PI / 2; return [x - Math.sin(a) * depth, y + 0.25 + Math.cos(a) * 0.72]; };
+  for (let k = 0; k < n; k++) {
+    const [xa, ya] = P(k), [xb, yb] = P(k + 1);
+    W.quad('flat', [xa, ya, z1], [xa, ya, z0], [xb, yb, z0], [xb, yb, z1], col);
+    for (const [z, flip] of [[z0, false], [z1, true]]) {
+      const tri = [[x, y + 0.25, z], [xa, ya, z], [xb, yb, z]];
+      W.quad('flat', ...(flip ? [tri[0], tri[2], tri[1], tri[1]] : [tri[0], tri[1], tri[2], tri[2]]), col);
+    }
+  }
+  W.slab('flat', x - depth - 0.03, z0, x - depth + 0.03, z1, y - 0.2, y + 0.25, color('#1b1d20'));   // valance
 }
 
 // Rows of tilted solar panels between two corners at height y.
