@@ -207,9 +207,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **The P building (P100–P107) is `campus/js/portables.js`**, drawn from Ethan's
     photos of September 2026, not by a facade kit (layout style `portable`, which
     buildings.js skips). It has two rows of four portable modules (one per room,
-    in official-map order), each a standard 24 × 40 ft portable with its 7.3 m
-    short side to the courtyard (`MOD`, `DEPTH`; measured off IMG_2303 after Ethan
-    said they were too wide). The rows start at the quad (z 41.1) and end at 70.3;
+    in official-map order), each 7.3 m along the courtyard and 9 m deep
+    (`MOD`, `DEPTH`: door spacing in IMG_2303, the end wall in IMG_2311, after
+    Ethan said twice they were too wide; OSM's 14.7 m roof outlines are too deep).
+    The end walls are blank except a window on the west row's ball-field end. The rows start at the quad (z 41.1) and end at 70.3;
     layout.js's P-w/P-e footprints and P_XFORM must match. The roof is one level along a row, with yellow fascia.
     Each classroom has its own cantilevered canopy over the courtyard, with bare
     wall between one canopy and the next (an E in plan). There's
@@ -228,7 +229,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     umbrella tables sit on the centre line between the three trees. At the quad
     end, per Ethan: two steps up from the quad, split in two by a small (1.8 m) black planter
     with a tree and painted rocks (a handrail beside it), and a plain square
-    black planter, no tree, beside P100. Facing in from the quad, the ramp is on the left (along
+    black planter, no tree, beside P100 (both planters 1.8 m square). Facing in from the quad, the ramp is on the left (along
     the east row's end wall) and two drinking fountains are on the right,
     out by the far west corner of the west row's end wall, with a U-shaped
     barrier just to their left (IMG_2322). A picket

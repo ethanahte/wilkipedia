@@ -31,8 +31,8 @@ export const BUILDINGS = [
   { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, poly: rect(33.2, -22.9, 54.7, 25.2), floors: 3 },
   // The P building (P100–P107): two rows of portable classrooms facing each other
   // across an open courtyard. Drawn by portables.js from photos, not by the kits here.
-  { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-9.9, 41.1, 2.3, 70.3) },
-  { id: 'P-e', name: 'P building', style: 'portable', h: 3.6, poly: rect(14, 41.1, 26.2, 70.3) },
+  { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-6.7, 41.1, 2.3, 70.3) },
+  { id: 'P-e', name: 'P building', style: 'portable', h: 3.6, poly: rect(14, 41.1, 23, 70.3) },
   { id: 'AUXGYM', name: 'Small gym (Auxiliary Gym)', style: 'gym', h: 9, poly: rect(44.4, 36, 79.5, 61.2) },
   // Gym complex
   { id: 'GYM-n', name: 'Wrestling, weight and locker rooms', style: 'gym', h: 5.5, poly: rect(74.8, -47.7, 115.4, -31.4) },
@@ -188,7 +188,7 @@ export const ROOM_XFORM = {
 };
 // P rooms sit in four separate clusters, so each cluster has its own box.
 export const P_XFORM = [
-  { ids: ['P100', 'P101', 'P102', 'P103', 'P104', 'P105', 'P106', 'P107'], map: [808, 550, 940, 715], world: [-9.9, 41.1, 26.2, 70.3] },
+  { ids: ['P100', 'P101', 'P102', 'P103', 'P104', 'P105', 'P106', 'P107'], map: [808, 550, 940, 715], world: [-6.7, 41.1, 23, 70.3] },
   { ids: ['P108', 'P109', 'P110'], map: [1420, 262, 1515, 312], world: [168.3, -40.7, 188.4, -25.2] },
   { ids: ['P116', 'P115'], map: [1385, 352, 1440, 462], world: [149.6, -17.3, 165, 13.6] },
   { ids: ['P111', 'P112', 'P113'], map: [1463, 352, 1515, 472], world: [170.6, -17.3, 188.4, 13.6] },

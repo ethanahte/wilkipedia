@@ -39,9 +39,10 @@ const C = {
 const LIT = color('#ffffff'), DARK = color('#b9bec8');
 
 export const FLOOR = 0.4;                   // the courtyard terrace: two steps above the quad
-// Each classroom is a standard 24 × 40 ft portable, its short side to the courtyard
-// (7.3 m: measured off the door spacing in IMG_2303; Ethan: "not that wide").
-const MOD = 7.3, DEPTH = 12.2;
+// Each classroom is 7.3 m along the courtyard (measured off the door spacing in
+// IMG_2303) and 9 m deep (the end wall in IMG_2311, by perspective: 8.6–9.2 m).
+// Ethan, twice: "not that wide".
+const MOD = 7.3, DEPTH = 9;
 const Z = [0, 1, 2, 3, 4].map((k) => 41.1 + k * MOD);                // module edges, north → south
 const COURT = { x0: 2.3, x1: 14 };
 const ROWS = [
@@ -103,9 +104,8 @@ function module(W, group, row, i, pane) {
   LIGHTS.push([inner + dir * 0.3, doorZ + left * 0.95, FLOOR + 2.4, 3.5]);
   face(inner + dir * 0.03, FLOOR + 1.75, winZ, () => yellowWindow(W, 2.3, 1.25, pane()));
 
-  // the east row's end wall facing the quad has a window too (IMG_2321)
-  if (first && dir < 0) W.with(x0 + 4.2, 2.25, z0 - 0.03, Math.PI, () => yellowWindow(W, 2.0, 1.15, pane()));
-  // and the west row's ball-field end has one near its back corner (IMG_2307)
+  // the end walls are blank (IMG_2311, IMG_2313) except the west row's ball-field
+  // end, which has a window near its back corner (IMG_2307)
   if (last && dir > 0) W.with(x0 + 1.7, 2.25, z1 + 0.03, 0, () => yellowWindow(W, 2.0, 1.15, pane()));
 
   // the back: a window and a wall-hung air conditioner, with its conduit and a downspout
@@ -203,7 +203,7 @@ function courtyard(W, group, R) {
   // two black planters at the top of the two steps: a plain square one right beside
   // P100, and one splitting the steps in two, with a tree and painted rocks in it
   // (Ethan, and IMG_2321, which is taken from the quad just north of that one)
-  const NQ = { x0: 2.4, x1: 5.0, z0: zN - 1.9, z1: zN + 0.7 }, pTop = 0.55;
+  const NQ = { x0: 2.4, x1: 4.2, z0: zN - 1.5, z1: zN + 0.3 }, pTop = 0.55;   // both 1.8 m square (Ethan)
   const hx = (NQ.x1 + landX) / 2;
   const MQ = { x0: hx - 0.9, x1: hx + 0.9, z0: zN - 1.5, z1: zN + 0.3 };   // smaller (Ethan)
   for (const b of [NQ, MQ]) {
