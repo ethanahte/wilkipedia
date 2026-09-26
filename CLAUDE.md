@@ -217,11 +217,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     surrounds and umbrella tables. At the ball-field end are the W · H · S
     planters (2.1 m wide) with two 2.7 m flights of steps between them. Two
     umbrella tables sit on the centre line between the three trees. At the quad
-    end, per Ethan: two steps up from the quad, with one handrail up the middle
-    and a square black planter (tree, painted rocks) beside P100. Facing in from the quad, the ramp is on the left (along
+    end, per Ethan: two steps up from the quad, split in two by a black planter
+    with a tree and painted rocks (a handrail beside it), and a plain square
+    black planter, no tree, beside P100. Facing in from the quad, the ramp is on the left (along
     the east row's end wall) and two drinking fountains are on the right
-    (against the west row's, to the right of a U-shaped barrier). The ramp's
-    rails run only down the slope. The other P clusters (P108–P120) look different
+    (against the west row's, to the right of a U-shaped barrier). A picket
+    fence runs in an L down the ramp's outer side, across the landing's front and
+    back along the side of the steps (`guard()`); a pipe handrail runs down the
+    wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes

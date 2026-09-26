@@ -15,9 +15,10 @@
 //     trees down the middle in wooden bench surrounds, umbrella tables, and at
 //     the ball-field end three black planters lettered W · H · S with steps
 //     and grey pipe handrails between them
-// At the quad end (from Ethan): two steps up from the quad, a square planter
-// beside P100; facing in from the quad, the ramp is on the left (along the east
-// row's end wall) and the drinking fountains on the right (against the west
+// At the quad end (from Ethan): two steps up from the quad, split by a planter
+// with a tree, and a plain square planter beside P100; facing in from the quad,
+// the ramp is on the left (along the east row's end wall, fenced in an L round
+// its outside and the side of the steps) and the drinking fountains on the right (against the west
 // row's end wall, to the right of a U-shaped barrier).
 
 import * as THREE from 'three';
@@ -176,41 +177,52 @@ function courtyard(W, group, R) {
   // the quad end (Ethan: two steps up from the quad; the ramp on the left and
   // the drinking fountains on the right, facing in from the quad)
   const RAMP = { x0: 16, x1: 21.2, z0: 39.3, z1: 40.9 }, landX = 12.2;
-  // a square black planter right beside P100, a tree and painted rocks in it (IMG_2321)
-  const NQ = { x0: 2.4, x1: 5.0, z0: zN - 1.9, z1: zN + 0.7 }, nqTop = 0.55;
-  W.slab('flat', NQ.x0, NQ.z0, NQ.x1, NQ.z1, 0, nqTop, C.planter);
-  W.slab('flat', NQ.x0 + 0.13, NQ.z0 + 0.13, NQ.x1 - 0.13, NQ.z1 - 0.13, nqTop - 0.08, nqTop - 0.02, C.soil);
-  const nqx = (NQ.x0 + NQ.x1) / 2 + 0.3, nqz = (NQ.z0 + NQ.z1) / 2 - 0.2;
-  shadeTree(W, nqx, nqz, R, { h: 8.5, y: nqTop - 0.05, cols: G.leaf });
+  // two black planters at the top of the two steps: a plain square one right beside
+  // P100, and one splitting the steps in two, with a tree and painted rocks in it
+  // (Ethan, and IMG_2321, which is taken from the quad just north of that one)
+  const NQ = { x0: 2.4, x1: 5.0, z0: zN - 1.9, z1: zN + 0.7 }, pTop = 0.55;
+  const hx = (NQ.x1 + landX) / 2;
+  const MQ = { x0: hx - 1.3, x1: hx + 1.3, z0: NQ.z0, z1: NQ.z1 };
+  for (const b of [NQ, MQ]) {
+    W.slab('flat', b.x0, b.z0, b.x1, b.z1, 0, pTop, C.planter);
+    W.slab('flat', b.x0 + 0.13, b.z0 + 0.13, b.x1 - 0.13, b.z1 - 0.13, pTop - 0.08, pTop - 0.02, C.soil);
+    addBox(b.x0, b.z0, b.x1, b.z1);
+  }
+  const mqx = hx + 0.3, mqz = (MQ.z0 + MQ.z1) / 2 - 0.2;
+  shadeTree(W, mqx, mqz, R, { h: 8.5, y: pTop - 0.05, cols: G.leaf });
   const ROCKS = ['#d65a5a', '#e0b73d', '#6a9ed8', '#8fc46a', '#b58ad6', '#f0efe8', '#e98f4f'].map(color);
   for (let k = 0; k < 16; k++) {
-    const rx = NQ.x0 + 0.3 + R() * (NQ.x1 - NQ.x0 - 0.6), rz = NQ.z0 + 0.3 + R() * (NQ.z1 - NQ.z0 - 0.6);
-    if (Math.hypot(rx - nqx, rz - nqz) < 0.45) continue;
-    W.blob('flat', rx, nqTop - 0.01, rz, 0.07 + R() * 0.04, 0.045, 0.06 + R() * 0.03, ROCKS[k % ROCKS.length], 0);
+    const rx = MQ.x0 + 0.3 + R() * (MQ.x1 - MQ.x0 - 0.6), rz = MQ.z0 + 0.3 + R() * (MQ.z1 - MQ.z0 - 0.6);
+    if (Math.hypot(rx - mqx, rz - mqz) < 0.45) continue;
+    W.blob('flat', rx, pTop - 0.01, rz, 0.07 + R() * 0.04, 0.045, 0.06 + R() * 0.03, ROCKS[k % ROCKS.length], 0);
   }
-  addBox(NQ.x0, NQ.z0, NQ.x1, NQ.z1);
   W.slab('flat', NQ.x1, zN - 0.6, landX, zN, 0, FLOOR / 2, C.concrete);                // the lower step
-  // one handrail up the middle of the two steps
-  const hx = (NQ.x1 + landX) / 2;
-  W.rod('flat', [hx, 0.9, zN - 1.0], [hx, FLOOR + 0.9, zN + 0.1], 0.05, C.rail);
-  W.rod('flat', [hx, FLOOR + 0.9, zN + 0.1], [hx, FLOOR + 0.9, zN + 0.5], 0.05, C.rail);
-  for (const [z, y] of [[zN - 1.0, 0], [zN + 0.5, FLOOR]]) W.box('flat', hx, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
-  addBox(hx - 0.05, zN - 1.0, hx + 0.05, zN + 0.5);
+  // a handrail up the steps on the east side of the middle planter
+  const hr = MQ.x1 + 0.25;
+  W.rod('flat', [hr, 0.9, zN - 1.0], [hr, FLOOR + 0.9, zN + 0.1], 0.05, C.rail);
+  W.rod('flat', [hr, FLOOR + 0.9, zN + 0.1], [hr, FLOOR + 0.9, zN + 0.5], 0.05, C.rail);
+  for (const [z, y] of [[zN - 1.0, 0], [zN + 0.5, FLOOR]]) W.box('flat', hr, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
+  addBox(hr - 0.05, zN - 1.0, hr + 0.05, zN + 0.5);
   // the ramp's top landing, in front of the east row's end wall, then the ramp
   // running east along that wall down to the quad
   W.slab('flat', landX, RAMP.z0, RAMP.x0, zN, 0, FLOOR, C.concrete);
   const rise = (x) => FLOOR * (RAMP.x1 - x) / (RAMP.x1 - RAMP.x0);
   W.quad('flat', [RAMP.x0, FLOOR, RAMP.z1], [RAMP.x1, 0.004, RAMP.z1], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], C.concrete, 'auto');
   W.quad('flat', [RAMP.x0, 0, RAMP.z0], [RAMP.x0, FLOOR, RAMP.z0], [RAMP.x1, 0.004, RAMP.z0], [RAMP.x1, 0, RAMP.z0], C.concrete, 'auto');   // its side
-  // grey pipe rails down both sides of the slope only: its top opens onto the landing
-  for (const z of [RAMP.z0 + 0.06, RAMP.z1 - 0.02]) {
-    W.rod('flat', [RAMP.x0, FLOOR + 0.9, z], [RAMP.x1 + 0.3, 0.9, z], 0.05, C.rail);
-    for (const x of [RAMP.x0, (RAMP.x0 + RAMP.x1) / 2, RAMP.x1 + 0.3]) {
-      const y = x <= RAMP.x0 ? FLOOR : rise(Math.min(x, RAMP.x1));
-      W.box('flat', x, y + 0.45, z, 0.05, 0.9, 0.05, C.rail);
-    }
+  // a picket fence in an L round the outside: down the ramp's outer side, along the
+  // landing's front and back along the side of the two steps. Only the ramp's top,
+  // where it meets the landing, and the landing's courtyard side are open.
+  const fz = RAMP.z0 + 0.06, fx = landX + 0.06;
+  guard(W, [[fx, FLOOR, zN], [fx, FLOOR, fz], [RAMP.x0, FLOOR, fz], [RAMP.x1 + 0.3, 0, fz]]);
+  addBox(fx - 0.1, fz - 0.1, fx + 0.1, zN);
+  addBox(fx - 0.1, fz - 0.1, RAMP.x1 + 0.3, fz + 0.1);
+  // and a pipe handrail down the wall side of the slope
+  const iz = RAMP.z1 - 0.02;
+  W.rod('flat', [RAMP.x0, FLOOR + 0.9, iz], [RAMP.x1 + 0.3, 0.9, iz], 0.05, C.rail);
+  for (const x of [RAMP.x0, (RAMP.x0 + RAMP.x1) / 2, RAMP.x1 + 0.3]) {
+    const y = x <= RAMP.x0 ? FLOOR : rise(Math.min(x, RAMP.x1));
+    W.box('flat', x, y + 0.45, iz, 0.05, 0.9, 0.05, C.rail);
   }
-  addBox(RAMP.x0, RAMP.z0 - 0.1, RAMP.x1 + 0.3, RAMP.z0 + 0.1);                          // the outer rail
   // a U-shaped pipe barrier standing out from the west row's end wall, and to its
   // right (facing the wall from the quad) the two drinking fountains (IMG_2322)
   const ux = -0.3;
@@ -262,6 +274,25 @@ function courtyard(W, group, R) {
     if (x >= x0 && x <= x1 && z > zS && z <= zS + 1.2) return z <= zS + 0.6 ? FLOOR * 2 / 3 : FLOOR / 3;
     return null;
   });
+}
+
+// A grey picket fence along a polyline of [x, groundY, z] points: posts, a top
+// and bottom rail, and pickets every 14 cm that follow the ground (so a ramp's fence slopes).
+function guard(W, pts) {
+  const h = 0.95;
+  for (let i = 1; i < pts.length; i++) {
+    const [ax, ay, az] = pts[i - 1], [bx, by, bz] = pts[i];
+    const L = Math.hypot(bx - ax, bz - az);
+    W.rod('flat', [ax, ay + h, az], [bx, by + h, bz], 0.05, C.rail);
+    W.rod('flat', [ax, ay + 0.12, az], [bx, by + 0.12, bz], 0.035, C.rail);
+    const n = Math.max(1, Math.round(L / 0.14));
+    for (let k = i === 1 ? 0 : 1; k <= n; k++) {
+      const t = k / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t, z = az + (bz - az) * t;
+      const post = k === 0 || k === n || k % 13 === 0;
+      if (post) W.box('flat', x, y + h / 2, z, 0.06, h, 0.06, C.rail);
+      else W.box('flat', x, y + 0.12 + (h - 0.12) / 2, z, 0.022, h - 0.12, 0.022, C.rail);
+    }
+  }
 }
 
 // A galvanised pedestal drinking fountain against a wall at z (it stands north of it).
