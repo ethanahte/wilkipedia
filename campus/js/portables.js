@@ -34,7 +34,7 @@ const C = {
   doorFrame: color('#3d4046'), soffit: color('#efe9da'), roof: color('#cfd2d4'), mullion: color('#5c6065'),
   hvac: color('#ecebe4'), hvacDark: color('#4b4f54'), fixture: color('#2f3236'), concrete: color('#d8d4cb'),
   joint: color('#bdb8ae'), planter: color('#26282b'), soil: color('#5b4636'), rail: color('#a9aeb3'),
-  wood: color('#9c7b58'), ivy: color('#3f6a36'), can: color('#8e9398'), mulch: color('#6b4a35'), hedgeCore: color('#2c4f28'),
+  wood: color('#9c7b58'), ivy: color('#3f6a36'), can: color('#8e9398'), mulch: color('#6b4a35'), bench: color('#46714f'), hedgeCore: color('#2c4f28'),
 };
 const LIT = color('#ffffff'), DARK = color('#b9bec8');
 
@@ -161,9 +161,12 @@ export function portableDoors() {
 // back window, and three trees, not evenly spaced (Ethan): one by the corner at
 // the quad, one outside P101's window and one by the ball-field corner. Its
 // ball-field end is mulch with two round shrubs (IMG_2302).
-// East row, the small-gym side (IMG_2306, 2308–2312): groundcover with flax and
-// the odd shrub, and one tree, outside P104 near the ball-field end (Ethan). Its
-// ball-field end has a clipped hedge on bark mulch (IMG_2304, IMG_2307).
+// East row, the small-gym side (IMG_2306, 2308–2312): a bed with a curving edge,
+// not a rectangle (Ethan), wider round the one tree outside P104 (Ethan). Outside
+// P106 and P107 it is bark mulch with flax and grasses, a low clipped mound at the
+// corner and two long green benches along its front with a trash can (IMG_2309);
+// further south it is groundcover with flax and the odd shrub. Its ball-field end
+// has a clipped hedge on bark mulch (IMG_2304, IMG_2307).
 function beds(W, row, R) {
   const { dir } = row, outer = dir > 0 ? row.x0 : row.x1, s = -dir, zE = Z[4];
   const tree = (x, z) => { shadeTree(W, x, z, R, { h: 7.5 + R() * 2, cols: G.leaf }); addCircle(x, z, 0.3); };
@@ -184,12 +187,41 @@ function beds(W, row, R) {
     }
     return;
   }
-  const bx0 = outer, bx1 = outer + 2.6;
-  W.slab('flat', bx0, Z[0] + 0.4, bx1, zE - 0.4, 0, 0.06, C.ivy);
-  for (let z = Z[0] + 2; z < zE - 1; z += 3.4 + R() * 1.6) {
-    const x = outer + s * (0.9 + R() * 1.0), k = R();
-    if (k < 0.45) shrub(W, x, z, R, { s: 0.8 + R() * 0.4 });
-    else if (k < 0.8) flax(W, x, z, R, { h: 1.4 + R() * 0.4 });
+  // the bed's outer edge: its width out from the wall at points down the row
+  // (metres south of the quad-end corner), eased between them
+  const EDGE = [[0.2, 0.9], [1.2, 2.1], [3, 2.6], [7, 2.7], [11, 2.5], [15, 2.2], [19, 2.4], [22, 3.1], [24.4, 3.6], [27, 3.0], [28.7, 2.3], [30.1, 1.4], [30.7, 0.2]];
+  const width = (z) => {
+    const d = z - Z[0];
+    let k = 1;
+    while (k < EDGE.length - 1 && EDGE[k][0] < d) k++;
+    const [d0, w0] = EDGE[k - 1], [d1, w1] = EDGE[k], t = Math.min(1, Math.max(0, (d - d0) / (d1 - d0)));
+    return w0 + (w1 - w0) * (1 - Math.cos(Math.PI * t)) / 2;
+  };
+  const zone = (za, zb, y, col) => {
+    const pts = [[outer, za], [outer, zb]];
+    for (let z = zb; z > za + 0.2; z -= 0.4) pts.push([outer + width(z), z]);
+    pts.push([outer + width(za), za]);
+    W.prism('flat', pts, 0, y, col);
+  };
+  const zSplit = Z[0] + 14.1;                   // mulch to the north, groundcover to the south
+  zone(Z[0] + 0.2, zSplit, 0.05, C.mulch);
+  zone(zSplit, Z[0] + 30.7, 0.06, C.ivy);
+  // the mulch: flax against the wall with grasses between, and a low mound at the corner
+  hedge(W, outer + 1.1, Z[0] + 0.5, outer + 1.1, Z[0] + 2.4, R, { h: 0.5, d: 1.5 });
+  for (let z = Z[0] + 3.4; z < zSplit - 0.8; z += 2.3 + R() * 0.5) {
+    flax(W, outer + 0.9 + R() * 0.3, z, R, { h: 1.5 + R() * 0.4 });
+    grassTuft(W, outer + 1.1 + R() * 0.4, z + 1.15, R, { h: 0.6 });
+  }
+  // two long green benches along the front, and a trash can by the north one
+  bench(W, outer + 2.05, Z[0] + 4.5, Z[0] + 8.0);
+  bench(W, outer + 2.05, Z[0] + 9.5, Z[0] + 13.1);
+  W.cyl('flat', outer + 2.1, 0, Z[0] + 3.9, 0.3, 0.32, 0.9, 12, C.can);
+  addCircle(outer + 2.1, Z[0] + 3.9, 0.35);
+  // the groundcover: flax and the odd shrub, clear of the bed's edge
+  for (let z = zSplit + 1.2; z < zE - 0.8; z += 2.6 + R() * 1.2) {
+    const x = outer + 0.8 + R() * Math.max(0.2, width(z) - 1.6), k = R();
+    if (k < 0.35) shrub(W, x, z, R, { s: 0.8 + R() * 0.4 });
+    else if (k < 0.85) flax(W, x, z, R, { h: 1.4 + R() * 0.4 });
     else grassTuft(W, x, z, R, { h: 0.7 });
   }
   tree(outer + 2.0, Z[3] + 2.5);
@@ -325,6 +357,17 @@ function guard(W, pts) {
       else W.box('flat', x, y + 0.12 + (h - 0.12) / 2, z, 0.022, h - 0.12, 0.022, C.rail);
     }
   }
+}
+
+// A long, low green bench along z: one plank on two posts (IMG_2309).
+function bench(W, x, z0, z1) {
+  const y = 0.45;
+  W.slab('flat', x - 0.14, z0, x + 0.14, z1, y - 0.06, y, C.bench);
+  for (const z of [z0 + 0.55, z1 - 0.55]) {
+    W.slab('flat', x - 0.035, z - 0.05, x + 0.035, z + 0.05, 0, y - 0.06, C.bench);
+    W.slab('flat', x - 0.12, z - 0.07, x + 0.12, z + 0.07, 0, 0.03, C.bench);          // its foot
+  }
+  addBox(x - 0.16, z0, x + 0.16, z1);
 }
 
 // A clipped hedge along a straight line: a dark core boxed by leaf cards, flat-topped

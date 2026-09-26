@@ -222,8 +222,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     these rooms. Planting (Ethan + photos): the west row's back
     (library side) has ivy, a round shrub under each back window and three
     unevenly spaced trees (by the quad corner, outside P101, by the ball-field
-    corner); the east row's back (small-gym side) has groundcover, flax and ONE
-    tree, outside P104. The west row's ball-field end has two round shrubs, the
+    corner); the east row's back (small-gym side) has a curving bed, not a
+    rectangle (`EDGE` widths, eased): bark mulch with flax, grasses, two long
+    green `bench()`es and a trash can outside P106–P107 (IMG_2309), then
+    groundcover with flax and ONE tree, outside P104, where the bed bulges. The west row's ball-field end has two round shrubs, the
     east row's a clipped `hedge()` (IMG_2307 is looking west along it). Seen
     from outside, each back wall has its window at the left-hand end, the air
     conditioner to its right. The courtyard is open to the sky, raised 0.45 m
