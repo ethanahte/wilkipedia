@@ -116,11 +116,10 @@ function stage(W, R) {
     W.quad('flat', P(lip, t0, 0), P(lip, t0, l0), P(lip, t1, l1), P(lip, t1, 0), concreteDark);
     W.quad('flat', P(ring, t0, y0), P(ring, t1, y1), P(ring, t1, l1), P(ring, t0, l0), concrete);
   }
-  // at the ramp's foot the lip carries on straight past the corner, left of the
-  // long steps seen from the quad, with a short piece of bed behind it (Ethan; IMG_2328, IMG_2329)
-  const ext = 1.8;
-  W.slab('flat', cx + ring, cz - ext, cx + lip, cz, 0, lipY(0), concrete);
-  for (let i = 0; i < 6; i++) grassTuft(W, cx + lip + 0.35 + R() * (plant - lip - 0.7), cz - ext + 0.3 + R() * (ext - 0.5), R, { h: 0.6 + R() * 0.4, cols: GRASS });
+  // the east bed's end: a low wall along the stage's straight edge, in line with
+  // the long steps and facing the quad, closing the bed and the lip (Ethan)
+  const endT = 0.35;
+  W.slab('flat', cx + ring, cz - endT, cx + plant, cz, 0, lipY(0), concrete);
 
   // the south stair: two steps up from the outer walk to the landing between two
   // cheek walls, a galvanised handrail each side (IMG_2324)
@@ -132,10 +131,10 @@ function stage(W, R) {
   W.quad('flat', at(ring, HW, (2 * h) / 3), at(ring, -HW, (2 * h) / 3), at(ring, -HW, h), at(ring, HW, h), concrete);
   for (const s of [-1, 1]) {
     const from = s > 0 ? r : ring;             // the west one also closes the landing's side
-    for (const [a0, a1, y] of [[from, s1, h + 0.2], [s1, plant, 0.45]]) {
-      W.with(cx + ux * (a0 + a1) / 2 + px * s * (HW + 0.15), 0, cz + uz * (a0 + a1) / 2 + pz * s * (HW + 0.15), -A,
-        () => W.box('flat', 0, y / 2, 0, a1 - a0, y, T, concrete));
-    }
+    // one flat low wall each side, not stepped (Ethan)
+    const y = h + 0.15;
+    W.with(cx + ux * (from + plant) / 2 + px * s * (HW + 0.15), 0, cz + uz * (from + plant) / 2 + pz * s * (HW + 0.15), -A,
+      () => W.box('flat', 0, y / 2, 0, plant - from, y, T, concrete));
     const lo = at(plant - 0.5, s * 0.8, 0.9), hi = at(ring, s * 0.8, h + 0.9), top = at(ring - 0.5, s * 0.8, h + 0.9);
     W.rod('flat', lo, hi, 0.05, galv);
     W.rod('flat', hi, top, 0.05, galv);
@@ -159,24 +158,27 @@ function stage(W, R) {
   for (const a of [2.05, 2.5, 2.95]) youngTree(W, cx + Math.cos(a) * wMid, cz + Math.sin(a) * wMid, R, { h: 5 + R(), stake: false, cols: AUTUMN });
   crapeMyrtle(W, cx + Math.cos(2.75) * (r + 1.3), cz + Math.sin(2.75) * (r + 1.3), R, { h: 3.4 });
 
-  // walking: the steps, the platform, the ramp and landing, the south stair.
-  // The wall, the blocks, the lip and the planting are solid.
+  // walking: every surface at its real height, so the low walls, the blocks and
+  // the lip can be stepped or jumped over and the planting crossed (Ethan)
   addHeight((x, z) => {
     const dx = x - cx, dz = z - cz, d = Math.hypot(dx, dz);
     if (z < cz) {
-      if (dx >= ring && dx <= plant && z >= cz - ext) return 50;   // the lip and bed past the ramp's foot
+      if (dx >= ring && dx <= plant && z >= cz - endT) return lipY(0);   // the east bed's end wall
       if (z < cz - 1.2 || Math.abs(dx) > r) return null;
-      if (Math.abs(dx) > r - 1.2) return 50;
+      if (Math.abs(dx) > r - 1.2) return h + WALL;                       // the square blocks
       return (h / 3) * (Math.floor((z - (cz - 1.2)) / 0.4) + 1);
     }
     if (d > plant) return null;
     if (d <= r - T) return h;
     const a = Math.atan2(dz, dx), along = Math.cos(a - A) * d, across = Math.sin(a - A) * d;
-    const stair = Math.cos(a - A) > 0 && Math.abs(across) < HW;
-    if (d <= r) return stair ? h : 50;
+    const ahead = Math.cos(a - A) > 0, stair = ahead && Math.abs(across) < HW;
+    if (d <= r) return stair ? h : h + WALL;                              // the low wall, or the opening
     if (d <= ring && a <= aEnd && (a < A || stair)) return rampY(a);
     if (stair) return along < s1 ? (2 * h) / 3 : along < s2 ? h / 3 : 0;
-    return 50;
+    const cheek = ahead && Math.abs(across) <= HW + T && along <= plant && (across > 0 ? along >= r : along >= ring);
+    if (cheek) return h + 0.15;
+    if (a < A && d <= lip) return lipY(a);
+    return null;                                                          // the planting
   });
 }
 

@@ -259,6 +259,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       to the wall on the west. Grasses, California `poppies()`, crape myrtles
       and young autumn-coloured trees.
     - The lamp with the US flag stands due north of the stage.
+    - The east bed ends in a low wall along the straight edge, facing the quad.
+      The south stair's cheek walls are one flat height.
+    - Walking: every part has its real height in `addHeight` (no 50 m "solid"
+      values), so the low walls, blocks and lip can be stepped or jumped over
+      (a jump clears about 1.1 m) and the planting can be walked through (Ethan).
   - **Everything off campus comes from OpenStreetMap**: `tools/osm_campus.py`
     (stdlib; `--cache FILE` to avoid re-hitting Overpass) writes
     `campus/js/osm.js` (generated, don't hand-edit): every house footprint

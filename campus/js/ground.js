@@ -254,7 +254,6 @@ function quadPaint(p, g, W, H, Q) {
   g.restore();
   // planting ring round the stage
   p.sector(cx, cz, STAGE.lip, STAGE.plant, 0, Math.PI / 2, '#6f4f3a');      // outside the east ramp
-  p.rect(cx + STAGE.lip, cz - 1.8, cx + STAGE.plant, cz, '#6f4f3a');        // and its short straight piece past the corner
   p.sector(cx, cz, STAGE.r, STAGE.plant, Math.PI / 2, Math.PI, '#6f4f3a');    // right up to the wall on the west
   // the cedar's bed
   p.circle(CEDAR.x, CEDAR.z, CEDAR.bed, '#5f4b3b');
