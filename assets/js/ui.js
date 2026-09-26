@@ -204,7 +204,7 @@ const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' '
 // as "Biology", but typing "Biology" means Biology of the Living Earth).
 export function courseNames(list) {
   const m = new Map();
-  for (const c of list) for (const n of [c.name, c.shared ? null : c.call, ...(c.also || [])]) if (n) m.set(normName(n), c);
+  for (const c of list) for (const n of [c.name, c.shared ? null : c.call, ...(c.also || []), ...(c.sections || [])]) if (n) m.set(normName(n), c);
   return m;
 }
 export function courseMatcher(list) {
@@ -217,6 +217,9 @@ export function classLinker(list) {
   const m = courseNames(list);
   return (name) => {
     const c = m.get(normName(name));
+    // a section (Chamber Orchestra) keeps its own name; it links to the course it's listed under
+    const section = c?.sections?.find((x) => normName(x) === normName(name));
+    if (section) return `<a href="${courseUrl(c.slug)}" title="Listed in the catalog as ${esc(c.name)}">${esc(section)}</a>`;
     return c ? `<a href="${courseUrl(c.slug)}"${c.call ? ` title="${esc(c.name)}"` : ''}>${esc(c.call || c.name)}</a>` : esc(name);
   };
 }
@@ -226,6 +229,7 @@ function periodOptions() {
   const m = courseNames(suggestions.courses || []);
   return ['<option value="Prep">', ...(suggestions.periods || []).map((n) => {
     const c = m.get(normName(n));
+    if (c?.sections?.some((x) => normName(x) === normName(n))) return `<option value="${esc(n)}">Listed as ${esc(c.name)}</option>`;
     return c?.call && !c.shared ? `<option value="${esc(c.call)}">${esc(c.name)}</option>` : `<option value="${esc(n)}">`;
   })].join('');
 }
@@ -528,7 +532,7 @@ export async function openEditor(store, sub, onSaved) {
   document.body.append(wrap);
   if (KINDS[sub.kind]?.fields.some((f) => f.type === 'periods') && !suggestions.periods?.length) {
     suggestions.courses = (await courses()).courses;
-    suggestions.periods = suggestions.courses.map((c) => c.name);
+    suggestions.periods = suggestions.courses.flatMap((c) => [c.name, ...(c.sections || [])]);
   }
   const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
   const close = () => wrap.remove();
@@ -661,10 +665,11 @@ export function renderFields(el, kind, preset = {}) {
       ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;
   }).join('');
   // Period boxes take a class's catalog name or an approved everyday name, or
-  // "Prep", and save the catalog name
+  // "Prep", and save the catalog name. A section (Chamber Orchestra) is its own
+  // class, so it keeps its own name.
   const canon = () => {
     const m = new Map([['prep', 'Prep'], ...(suggestions.periods || []).map((n) => [n.toLowerCase(), n])]);
-    for (const [k, c] of courseNames(suggestions.courses || [])) m.set(k, c.name);
+    for (const [k, c] of courseNames(suggestions.courses || [])) m.set(k, c.sections?.find((x) => normName(x) === k) || c.name);
     return m;
   };
   const periodsOf = (f) => {

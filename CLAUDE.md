@@ -112,7 +112,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   shown in schedules and as "Students call it …" on the class page. `also` holds
   other accepted names ("AP Macro"). `shared: true` lets a second class show the
   same name (BSC Biology shows as "Biology") while typing it still means the other
-  class. **Add only names Ethan confirms.** The build
+  class. `sections` lists separate classes Wilcox runs under one catalog
+  course: String Orchestra's "Chamber Orchestra" (Mr. Aduan's 4th period, from a
+  student's feedback, approved by Ethan). A section is accepted when typed,
+  saved and shown by its own name, linked to the course it's listed under,
+  offered in the Period suggestions, and noted on that course's page. **Add only names Ethan confirms.** The build
   rejects a name that already means another class. They reach the browser as
   `call` / `also` in courses.json, and search indexes them.
   `teacher_section.schedule` is `legacy: true`: hidden on new forms, still shown

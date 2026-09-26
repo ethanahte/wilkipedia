@@ -1,11 +1,36 @@
 {
-  "_about": "What Wilcox students actually call a class, keyed by catalog slug. Only names Ethan has confirmed go here: nothing is guessed. 'call' is the everyday name shown in room schedules and as 'Students call it …' on the class page (leave it out to keep the catalog name). Typing a 'call' name in a form means that class. 'shared': true lets a second class SHOW the same name (BSC Biology is also 'Biology') while typing it still means the other class; the shared one is picked by its full name. 'also' lists other names accepted when typed (never shown). No name may be another class's catalog name. Edit, then run tools/build.py.",
-  "biology-of-the-living-earth": { "call": "Biology" },
-  "bsc-biology-of-the-living-earth": { "call": "Biology", "shared": true },
-  "chemistry-in-the-earth-system": { "call": "Chemistry" },
-  "honors-chemistry-in-the-earth-system": { "call": "Honors Chemistry" },
-  "physics-in-the-universe": { "call": "Physics" },
-  "bsc-physics-in-the-universe": { "call": "Physics", "shared": true },
-  "principles-of-financial-literacy": { "call": "Financial Literacy" },
-  "ap-macroeconomics": { "also": ["AP Macro"] }
+  "_about": "What Wilcox students actually call a class, keyed by catalog slug. Only names Ethan has confirmed go here: nothing is guessed. 'call' is the everyday name shown in room schedules and as 'Students call it …' on the class page (leave it out to keep the catalog name). Typing a 'call' name in a form means that class. 'shared': true lets a second class SHOW the same name (BSC Biology is also 'Biology') while typing it still means the other class; the shared one is picked by its full name. 'also' lists other names accepted when typed (never shown). No name may be another class's catalog name. Edit, then run tools/build.py. 'sections' lists separate classes Wilcox runs under this catalog course (String Orchestra's 'Chamber Orchestra'): accepted when typed, SHOWN by their own name in schedules, linked to this class, and offered in the Period suggestions.",
+  "biology-of-the-living-earth": {
+    "call": "Biology"
+  },
+  "bsc-biology-of-the-living-earth": {
+    "call": "Biology",
+    "shared": true
+  },
+  "chemistry-in-the-earth-system": {
+    "call": "Chemistry"
+  },
+  "honors-chemistry-in-the-earth-system": {
+    "call": "Honors Chemistry"
+  },
+  "physics-in-the-universe": {
+    "call": "Physics"
+  },
+  "bsc-physics-in-the-universe": {
+    "call": "Physics",
+    "shared": true
+  },
+  "principles-of-financial-literacy": {
+    "call": "Financial Literacy"
+  },
+  "ap-macroeconomics": {
+    "also": [
+      "AP Macro"
+    ]
+  },
+  "string-orchestra": {
+    "sections": [
+      "Chamber Orchestra"
+    ]
+  }
 }

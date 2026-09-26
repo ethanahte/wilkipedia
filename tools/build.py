@@ -101,7 +101,7 @@ def load():
     for slug, v in sorted(nick.items(), key=lambda kv: bool(kv[1].get("shared"))):
         if slug not in courses:
             raise SystemExit(f"course-nicknames.json: no class with slug {slug!r}")
-        typed = ([v["call"]] if v.get("call") and not v.get("shared") else []) + v.get("also", [])
+        typed = ([v["call"]] if v.get("call") and not v.get("shared") else []) + v.get("also", []) + v.get("sections", [])
         for n in typed:
             if seen.get(n.lower(), slug) != slug:
                 raise SystemExit(f"course-nicknames.json: {n!r} already means {seen[n.lower()]}")
@@ -113,6 +113,7 @@ def load():
         courses[slug]["call"] = v.get("call")
         courses[slug]["also"] = v.get("also", [])
         courses[slug]["shared"] = bool(v.get("shared")) or None
+        courses[slug]["sections"] = v.get("sections") or None
 
     depts = catalog["departments"]
     for d in depts:
@@ -452,6 +453,7 @@ def build_courses(depts, courses):
 <header class="entry-head">
   <div class="entry-title"><h1>{e(c['name'])}</h1><div class="c-badges">{course_badges(c)}</div></div>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}
+  {f'<p class="aka">Wilcox also runs {" and ".join(f"<b>{e(n)}</b>" for n in c["sections"])} as a separate class under this course</p>' if c.get("sections") else ''}
   <dl class="facts">{stats_html}</dl>
   {f'<p class="prereq"><b>Prerequisite.</b> {e(prereq)}</p>' if prereq else ''}
   {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
@@ -958,7 +960,7 @@ def build_static():
 
 
 def build_data(depts, courses, teachers):
-    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers", "call", "also", "shared") if c.get(k) is not None}
+    slim = [{k: c.get(k) for k in ("slug", "name", "department", "grades", "ucCsu", "teachers", "call", "also", "shared", "sections") if c.get(k) is not None}
             for c in courses.values()]
     (DATA / "courses.json").write_text(json.dumps(
         {"departments": [{"slug": d["slug"], "name": short_dept(d["name"])} for d in depts], "courses": slim},
@@ -1015,7 +1017,7 @@ def build_search_index(depts, courses, teachers):
     for c in courses.values():
         idx.append({"t": "c", "n": c["name"], "u": f"courses/{c['slug']}/",
                     "d": " · ".join(x for x in [dept[c["department"]], f"Grades {c['grades']}" if c.get("grades") else ""] if x),
-                    "k": " ".join([c.get("call") or "", " ".join(c.get("also") or []), dept[c["department"]], " ".join(c["teachers"]), c.get("courseNumber") or "",
+                    "k": " ".join([c.get("call") or "", " ".join(c.get("also") or []), " ".join(c.get("sections") or []), dept[c["department"]], " ".join(c["teachers"]), c.get("courseNumber") or "",
                                    words(c.get("description"))])})
     for t in teachers:
         idx.append({"t": "t", "n": t["name"], "s": t["slug"], "u": f"teachers/{t['slug']}/",

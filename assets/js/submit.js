@@ -18,9 +18,11 @@ const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
 const allTeachers = [...new Set(data.courses.flatMap((c) => c.teachers || []))].sort((a, b) => a.localeCompare(b));
 // The Period grid suggests the chosen teacher's classes first, then every class
 function periodSuggestions() {
-  const mine = data.courses.filter((c) => state.teacher && (c.teachers || []).includes(state.teacher)).map((c) => c.name);
+  // each class followed by any separate sections Wilcox runs under it (String Orchestra, Chamber Orchestra)
+  const names = (list) => list.flatMap((c) => [c.name, ...(c.sections || [])]);
+  const mine = names(data.courses.filter((c) => state.teacher && (c.teachers || []).includes(state.teacher)));
   suggestions.courses = data.courses;
-  suggestions.periods = [...mine, ...data.courses.map((c) => c.name).filter((n) => !mine.includes(n))];
+  suggestions.periods = [...mine, ...names(data.courses).filter((n) => !mine.includes(n))];
   refreshPeriodOptions();
 }
 let bounties = [];
