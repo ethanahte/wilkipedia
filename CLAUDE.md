@@ -210,7 +210,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     in official-map order), each 7.3 m along the courtyard and 9 m deep
     (`MOD`, `DEPTH`: door spacing in IMG_2303, the end wall in IMG_2311, after
     Ethan said twice they were too wide; OSM's 14.7 m roof outlines are too deep).
-    The end walls are blank except a window on the west row's ball-field end. The rows start at the quad (z 41.1) and end at 70.3;
+    The end walls are all blank. The rows start at the quad (z 41.1) and end at 70.3;
     layout.js's P-w/P-e footprints and P_XFORM must match. The roof is one level along a row, with yellow fascia.
     Each classroom has its own cantilevered canopy over the courtyard, with bare
     wall between one canopy and the next (an E in plan). There's
@@ -219,10 +219,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     conditioners on the backs. The rooms' clickable number plates sit on the
     wall between each door and its window at eye height: `portableDoors()`
     feeds rooms.js, which skips its usual nearest-wall-at-the-eave placement for
-    these rooms. The east row's back has groundcover, flax and trees (IMG_2306,
-    2308). The west row's back has bark mulch and a clipped `hedge()` that wraps
-    round its ball-field end (IMG_2307), and the east row's ball-field end has a
-    hedge too. The courtyard is open to the sky, raised 0.45 m
+    these rooms. Planting (Ethan + photos): the west row's back
+    (library side) has ivy, a round shrub under each back window and three
+    unevenly spaced trees (by the quad corner, outside P101, by the ball-field
+    corner); the east row's back (small-gym side) has groundcover, flax and ONE
+    tree, outside P104. The west row's ball-field end has two round shrubs, the
+    east row's a clipped `hedge()` (IMG_2307 is looking west along it). Seen
+    from outside, each back wall has its window at the left-hand end, the air
+    conditioner to its right. The courtyard is open to the sky, raised 0.45 m
     (`FLOOR`, walkable through addHeight), with shade trees in wooden bench
     surrounds and umbrella tables. At the ball-field end are the W · H · S
     planters (2.1 m wide) with two 2.7 m flights of steps between them. Two

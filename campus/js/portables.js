@@ -104,22 +104,22 @@ function module(W, group, row, i, pane) {
   LIGHTS.push([inner + dir * 0.3, doorZ + left * 0.95, FLOOR + 2.4, 3.5]);
   face(inner + dir * 0.03, FLOOR + 1.75, winZ, () => yellowWindow(W, 2.3, 1.25, pane()));
 
-  // the end walls are blank (IMG_2311, IMG_2313) except the west row's ball-field
-  // end, which has a window near its back corner (IMG_2307)
-  if (last && dir > 0) W.with(x0 + 1.7, 2.25, z1 + 0.03, 0, () => yellowWindow(W, 2.0, 1.15, pane()));
+  // the end walls are all blank (IMG_2302, IMG_2311, IMG_2313)
 
-  // the back: a window and a wall-hung air conditioner, with its conduit and a downspout
+  // the back: seen from outside, a window at the left-hand end of each classroom, a
+  // wall-hung air conditioner to its right with its conduit, and a downspout at the
+  // right-hand end (IMG_2296–2300, IMG_2306, IMG_2308)
   const back = -dir;
   const bface = (d, y, fn) => W.with(outer + back * 0.02, y, zm + d, back > 0 ? Math.PI / 2 : -Math.PI / 2, fn);
-  bface(dir > 0 ? 1.8 : -1.8, 2.0, () => yellowWindow(W, 2.2, 1.2, pane()));
-  bface(dir > 0 ? -1.6 : 1.6, 0, () => {
+  bface(-dir * 2.1, 2.0, () => yellowWindow(W, 2.2, 1.2, pane()));
+  bface(dir * 1.25, 0, () => {
     W.box('flat', 0, 2.15, 0.22, 1.08, 1.9, 0.44, C.hvac);
     W.quad('louver', [-0.44, 1.35, 0.445], [0.44, 1.35, 0.445], [0.44, 2.0, 0.445], [-0.44, 2.0, 0.445], color('#ffffff'), [[0, 0], [0.88, 0], [0.88, 0.65], [0, 0.65]]);
     W.box('flat', 0, 2.55, 0.445, 0.5, 0.12, 0.01, C.hvacDark);                          // the vent above
     W.box('flat', 0.62, 0.9, 0.05, 0.05, 1.3, 0.05, C.hvac);                             // conduit
     W.box('flat', 0.62, 0.95, 0.07, 0.24, 0.3, 0.1, C.hvac);                             // its box
   });
-  bface(dir > 0 ? -(z1 - z0) / 2 + 0.15 : (z1 - z0) / 2 - 0.15, 0, () => W.box('flat', 0, H / 2, 0.06, 0.09, H, 0.09, C.siding));   // downspout
+  bface(dir * ((z1 - z0) / 2 - 0.15), 0, () => W.box('flat', 0, H / 2, 0.06, 0.09, H, 0.09, C.siding));   // downspout
 }
 
 // A flat roof piece: cream soffit, metal top (seams running across the row), and
@@ -157,37 +157,45 @@ export function portableDoors() {
 }
 
 // ── the planting beds along the backs ──
-// East row (IMG_2306, IMG_2308): groundcover with flax, shrubs and a few trees.
-// West row (IMG_2307): bark mulch and a clipped hedge along the wall, which
-// carries on round the ball-field end; the east row's end has a hedge too (IMG_2304).
+// West row, the library side (IMG_2296–2302): ivy, a round clipped shrub under each
+// back window, and three trees, not evenly spaced (Ethan): one by the corner at
+// the quad, one outside P101's window and one by the ball-field corner. Its
+// ball-field end is mulch with two round shrubs (IMG_2302).
+// East row, the small-gym side (IMG_2306, 2308–2312): groundcover with flax and
+// the odd shrub, and one tree, outside P104 near the ball-field end (Ethan). Its
+// ball-field end has a clipped hedge on bark mulch (IMG_2304, IMG_2307).
 function beds(W, row, R) {
-  const zE = Z[4];
-  if (row.dir > 0) {
-    const bx = row.x0;
-    W.slab('flat', bx - 1.8, Z[0] + 0.4, bx, zE + 1.8, 0, 0.05, C.mulch);
-    W.slab('flat', bx, zE, row.x1 - 1.2, zE + 1.8, 0, 0.05, C.mulch);
-    hedge(W, bx - 0.75, Z[0] + 1.2, bx - 0.75, zE + 0.75, R);
-    hedge(W, bx - 0.75, zE + 0.75, row.x1 - 1.6, zE + 0.75, R);
-    addBox(bx - 1.3, Z[0] + 1.2, bx, zE + 1.3);
-    addBox(bx - 1.3, zE, row.x1 - 1.6, zE + 1.3);
+  const { dir } = row, outer = dir > 0 ? row.x0 : row.x1, s = -dir, zE = Z[4];
+  const tree = (x, z) => { shadeTree(W, x, z, R, { h: 7.5 + R() * 2, cols: G.leaf }); addCircle(x, z, 0.3); };
+  if (dir > 0) {
+    W.slab('flat', outer - 2.2, Z[0], outer, zE, 0, 0.06, C.ivy);
+    for (let i = 0; i < 4; i++) {
+      const x = outer - 0.75, z = (Z[i] + Z[i + 1]) / 2 - 2.1 + (R() - 0.5) * 0.5;
+      shrub(W, x, z, R, { s: 1.15 + R() * 0.25 });
+      addCircle(x, z, 0.5);
+    }
+    tree(outer - 1.3, Z[0] + 0.6);
+    tree(outer - 1.6, Z[1] + 1.2);
+    tree(outer - 1.4, zE - 0.4);
+    W.slab('flat', outer - 2.2, zE, row.x1 - 0.6, zE + 1.4, 0, 0.05, C.mulch);
+    for (const [x, sz] of [[outer + 2.0, 1.3], [row.x1 - 0.9, 1.1]]) {
+      shrub(W, x, zE + 0.7, R, { s: sz });
+      addCircle(x, zE + 0.7, sz * 0.45);
+    }
     return;
   }
-  W.slab('flat', row.x0 + 0.1, zE, row.x1, zE + 1.5, 0, 0.05, C.mulch);
-  hedge(W, row.x0 + 0.5, zE + 0.7, row.x1 - 0.3, zE + 0.7, R);
-  addBox(row.x0 + 0.1, zE, row.x1, zE + 1.25);
-  const outer = row.dir > 0 ? row.x0 : row.x1, s = -row.dir, bx0 = Math.min(outer, outer + s * 2.6), bx1 = Math.max(outer, outer + s * 2.6);
-  W.slab('flat', bx0, Z[0] + 0.4, bx1, Z[4] - 0.4, 0, 0.06, C.ivy);
-  for (let z = Z[0] + 2; z < Z[4] - 1; z += 3.4 + R() * 1.6) {
+  const bx0 = outer, bx1 = outer + 2.6;
+  W.slab('flat', bx0, Z[0] + 0.4, bx1, zE - 0.4, 0, 0.06, C.ivy);
+  for (let z = Z[0] + 2; z < zE - 1; z += 3.4 + R() * 1.6) {
     const x = outer + s * (0.9 + R() * 1.0), k = R();
     if (k < 0.45) shrub(W, x, z, R, { s: 0.8 + R() * 0.4 });
     else if (k < 0.8) flax(W, x, z, R, { h: 1.4 + R() * 0.4 });
     else grassTuft(W, x, z, R, { h: 0.7 });
   }
-  for (const z of [Z[0] + 5, Z[2] + 1.5, Z[3] + 4]) {
-    const x = outer + s * 1.7;
-    shadeTree(W, x, z, R, { h: 7.5 + R() * 2, cols: G.leaf });
-    addCircle(x, z, 0.3);
-  }
+  tree(outer + 2.0, Z[3] + 2.5);
+  W.slab('flat', row.x0 + 0.1, zE, row.x1, zE + 1.5, 0, 0.05, C.mulch);
+  hedge(W, row.x0 + 0.5, zE + 0.7, row.x1 - 0.3, zE + 0.7, R);
+  addBox(row.x0 + 0.1, zE, row.x1, zE + 1.25);
 }
 
 // ── the courtyard ──
