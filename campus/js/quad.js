@@ -127,8 +127,9 @@ function stage(W, R) {
   for (const [a0, a1, y] of [[ring, s1, (2 * h) / 3], [s1, s2, h / 3]]) {
     W.with(cx + ux * (a0 + a1) / 2, 0, cz + uz * (a0 + a1) / 2, -A, () => W.box('flat', 0, y / 2, 0, a1 - a0, y, HW * 2, concrete));
   }
-  // the concrete pad at the foot of the steps, between the cheek walls (not mulch)
-  W.with(cx + ux * (s2 + plant) / 2, 0, cz + uz * (s2 + plant) / 2, -A, () => W.box('flat', 0, 0.01, 0, plant - s2, 0.02, HW * 2, concrete));
+  // the concrete pad at the foot of the steps, between the cheek walls (not mulch).
+  // 5 cm up: the ground's painted detail layer lies at 2 cm and is pulled forward, so it hides anything lower
+  W.with(cx + ux * (s2 + plant) / 2, 0, cz + uz * (s2 + plant) / 2, -A, () => W.box('flat', 0, 0.025, 0, plant - s2, 0.05, HW * 2, concrete));
   // the landing's front, above the top step
   W.quad('flat', at(ring, HW, (2 * h) / 3), at(ring, -HW, (2 * h) / 3), at(ring, -HW, h), at(ring, HW, h), concrete);
   for (const s of [-1, 1]) {
