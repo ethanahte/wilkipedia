@@ -28,10 +28,10 @@ export const BUILDINGS = [
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(-17.8, -51, 0, -30.4) },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
-  // (Ethan's photos IMG_2342–2361): its two ends have an entrance bay set 1.2 m back
+  // (Ethan, his photos IMG_2342–2361, the satellite): a 凸 in plan. The narrow block
+  // faces the quad; the back block is 2.1 m wider at each end, stepping out 7.9 m back.
   { id: 'R', name: 'Classroom Building R', style: 'r', h: 13.6, floors: 3,
-    poly: [[33.2, -22.9], [42.0, -22.9], [42.0, -21.7], [46.0, -21.7], [46.0, -22.9], [54.7, -22.9],
-      [54.7, 25.2], [46.0, 25.2], [46.0, 24.0], [42.0, 24.0], [42.0, 25.2], [33.2, 25.2]] },
+    poly: [[33.2, -21.6], [41.1, -21.6], [41.1, -23.75], [54.7, -23.75], [54.7, 27.3], [41.1, 27.3], [41.1, 25.2], [33.2, 25.2]] },
   // The P building (P100–P107): two rows of portable classrooms facing each other
   // across an open courtyard. Drawn by portables.js from photos, not by the kits here.
   { id: 'P-w', name: 'P building', style: 'portable', h: 3.6, poly: rect(-6.7, 41.1, 2.3, 70.3) },
@@ -132,6 +132,16 @@ export const STAGE = { x: -17.3, z: 14, r: 8.8, ring: 10.6, lip: 10.95, plant: 1
 export const LAWN_W = { box: [-37.5, 17.5, -22, 32.3] };             // minus the walk ring round the stage
 export const LAWN_E = [[-3.3, 14.5], [15.9, 11.2], [23.4, 23.8], [-11.2, 32.3]];
 export const CEDAR = { x: 0, z: 0, bed: 4.2 };
+// In front of Building R on the quad side (IMG_2349–2352): planting beds along its
+// base, two big leafy trees, black mesh benches along the beds, a few tables.
+export const R_FRONT = {
+  beds: [[-19.0, -9.6], [-6.9, 0.3], [3.0, 10.2]],            // z ranges, from the wall out to x 30.9
+  trees: [[28.8, -3.2], [28.8, 6.2]],
+  benches: [-12.4, -4.6, 1.6, 7.8],                              // z, facing the quad
+  tables: [[27.0, -15.5], [26.8, 10.6]],
+  picnic: [[27.2, -8.8, 0]],
+  pots: [[32.6, 15.0], [32.6, 17.8]],                            // the white planters by the ASB Office door
+};
 // Round the cedar (Ethan's photos IMG_2332–2335): a light-blue and a green picnic
 // table at the bed's west edge with grey cans beside them, and black mesh tables
 // with chairs under umbrellas round the rest, under the edge of the crown.

@@ -11,9 +11,9 @@
 
 import { color, rng } from './geo.js';
 import * as THREE from 'three';
-import { STAGE, CEDAR, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
+import { STAGE, CEDAR, R_FRONT, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
 import { canvasTex, decalMat } from './toon.js';
-import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, G } from './nature.js';
+import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, flax, G } from './nature.js';
 import { addCircle, addOBB, addBox, addHeight } from './collide.js';
 import { LIGHTS } from './lights.js';
 
@@ -21,6 +21,7 @@ const concrete = color('#d9d5cd'), concreteDark = color('#c4bfb6'), black = colo
   stageTop = color('#dcd8cf'), nosing = color('#55585c'),
   GRASS = ['#8a9a5c', '#9aa465', '#7f8f55', '#a8a06a'].map(color), POPPY = [color('#f29a1d'), color('#f5b52a')],
   AUTUMN = ['#c9a13a', '#d98a32', '#9aa03e', '#c0702f'].map(color),
+  RED_TIPS = ['#8e3a33', '#7a4a3a', '#5f6b3a', '#a0473c'].map(color),
   green = color('#3f7d4f'), greenDark = color('#2f5f3c'), galv = color('#a9aeb3'), lampLight = color('#fff4cf');
 
 export const STAIR_A = Math.PI / 2;   // the south stair, in the very middle of the curve (Ethan)
@@ -50,9 +51,28 @@ export function buildQuad(W, decals) {
     } else umbrellaTable(W, x, z, R);
   });
   for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true }); addCircle(x, z, 0.25); }
-  // the big leafy tree in front of Building R
-  shadeTree(W, 27.5, 3, R, { h: 10.5, cols: G.leaf });
-  addCircle(27.5, 3, 0.5);
+  // in front of Building R: beds of red-tipped shrubs, flax and grasses along its
+  // base, two big leafy trees, benches along the beds, a few tables (IMG_2349–2352)
+  const RX = 33.2, bedX = 30.9;
+  for (const [z0, z1] of R_FRONT.beds) {
+    W.slab('flat', bedX, z0, RX, z1, 0, 0.06, color('#6b4a35'));
+    for (let z = z0 + 0.7; z < z1 - 0.5; z += 1.3 + R() * 0.6) {
+      const x = bedX + 0.5 + R() * 1.4, k = R();
+      if (k < 0.45) shrub(W, x, z, R, { s: 0.9 + R() * 0.4, cols: RED_TIPS });
+      else if (k < 0.7) flax(W, x, z, R, { h: 1.2 + R() * 0.4 });
+      else grassTuft(W, x, z, R, { h: 0.7 + R() * 0.3, cols: GRASS });
+    }
+    addBox(bedX, z0, RX, z1);
+  }
+  for (const [x, z] of R_FRONT.trees) {
+    W.cyl('flat', x, 0, z, 1.7, 1.7, 0.05, 18, color('#6b4a35'));
+    shadeTree(W, x, z, R, { h: 9.5 + R(), cols: G.leaf });
+    addCircle(x, z, 0.5);
+  }
+  for (const z of R_FRONT.benches) bench(W, bedX - 0.45, z);
+  for (const [x, z] of R_FRONT.tables) umbrellaTable(W, x, z, R);
+  for (const [x, z, rot] of R_FRONT.picnic) picnic(W, x, z, rot, green, green, green);
+  for (const [x, z] of R_FRONT.pots) { W.cyl('flat', x, 0, z, 0.26, 0.2, 0.5, 12, color('#f1f0ea')); shrub(W, x, z, R, { s: 0.55, y: 0.45 }); addCircle(x, z, 0.3); }
 
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
@@ -276,6 +296,17 @@ const banner = (lines) => {
 };
 const BANNERS = [banner(['CHARGER', 'STRONG']), banner(['WILCOX', 'CHARGERS'])];
 
+
+// A black mesh bench with a back, facing the quad (-x) (IMG_2349).
+function bench(W, x, z) {
+  W.box('flat', x, 0.45, z, 0.42, 0.04, 1.8, black);
+  W.box('flat', x + 0.23, 0.72, z, 0.04, 0.42, 1.8, black);
+  for (const s of [-1, 1]) {
+    W.box('flat', x, 0.22, z + s * 0.75, 0.36, 0.45, 0.05, black);
+    W.box('flat', x + 0.23, 0.5, z + s * 0.75, 0.04, 0.5, 0.05, black);
+  }
+  addBox(x - 0.22, z - 0.92, x + 0.26, z + 0.92);
+}
 
 function can(W, x, z) {
   W.cyl('flat', x, 0, z, 0.3, 0.32, 0.9, 12, galv);

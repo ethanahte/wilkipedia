@@ -243,22 +243,34 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
-  - **Building R is `rFace()` in buildings.js** (style `r`), laid out face by face
-    from Ethan's photos IMG_2342–2361, not by a repeating rhythm:
+  - **Building R is `rFace()` in buildings.js** (style `r`), from Ethan and his
+    photos IMG_2342–2361:
+    - It is a 凸 in plan (layout.js; the step was measured off the satellite).
+      The narrow block faces the quad; the back block is 2.1 m wider at each
+      end, stepping out 7.9 m back from the quad face. Drinking fountains sit
+      in the inside corners.
     - Everything is cream precast with reveals every 1.2 m up and 2.7 m along.
-    - The quad (west) face runs, north to south: corner pier with narrow
-      windows, then bays and grey concrete towers alternating, with the ASB
-      Office's glass front under its awning (landmarks.js) in the middle bay.
-      Bays are white panels on a grey grid, with a teal glass row at each floor's
-      head and a glass strip up one side. The towers have louvers on the
-      chosen floors.
-    - Both ends have a real entrance bay set 1.2 m back in the footprint
-      (layout.js). It has a grey canopy, glass doors and big gridded windows
-      above. One wing has small square windows, a glass door, a fountain and a
-      service door; the other has tall narrow windows. The north end has the
-      big louver panel.
-    - The pool (east) face is a sawtooth of grey towers with cream caps, with a
-      covered walkway on steel posts along it.
+    - The quad face runs, north to south: corner pier, then grey towers
+      (louvers top and bottom) alternating with bays of white panels, each bay
+      with a teal glass row at each floor's head and a glass strip up one
+      side. The ASB Office's glass front is the southernmost bay ("on the
+      very right side"; the awning is in landmarks.js), then a corner pier
+      with a glass door.
+    - Each wide end has its entrance right beside the step: grey canopy, glass
+      doors, big gridded windows above. Tall narrow windows sit further
+      along, and the north end has the big louver panel. The narrow ends have
+      a glass door with small windows above it. The south step face has a
+      service door.
+    - The pool face is a sawtooth of grey towers with cream caps. There is no
+      walkway behind the building (Ethan).
+    - The triangular wall lamps (`sconce()`) glow underneath and add to
+      `LIGHTS`.
+    - In front, on the quad side (`R_FRONT` in layout.js, built in quad.js):
+      beds of red-tipped shrubs, flax and grasses, two big trees, black mesh
+      benches, a few tables, and white pots by the ASB door.
+  - **Room plates are hidden for now (Ethan)** except the P building's door
+    plates. A hidden plate keeps its slot in the mesh as a collapsed quad, so
+    `rooms[faceIndex / 2]` picking still lines up.
   - **The quad's cedar and its seating** (`cedar()` in nature.js, `buildQuad` in
     quad.js, lists in layout.js), from Ethan's photos IMG_2332–2342:
     - The tree has a short trunk forking into three leaning leaders about 3 m

@@ -114,6 +114,10 @@ function plates() {
   tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso;
   const pos = [], nor = [], uv = [];
   rooms.forEach((r, i) => {
+    // Ethan: no room numbers for now, except the P building's plates by its doors.
+    // Hidden plates collapse to nothing but keep their slot, so a hit's face index
+    // still finds its room (main.js).
+    if (!r.stand) { for (let k = 0; k < 6; k++) { pos.push(r.x, -50, r.z); nor.push(0, 1, 0); uv.push(0, 0); } return; }
     const w = r.kind === 'classroom' ? 1.3 : 1.9, h = w * (SLOT_H / SLOT_W);
     const tx = Math.cos(r.rot), tz = -Math.sin(r.rot);      // along the wall
     const u0 = (i % COLS) / COLS, u1 = u0 + 1 / COLS, v1 = 1 - Math.floor(i / COLS) / Math.max(1, rows), v0 = v1 - 1 / Math.max(1, rows);
