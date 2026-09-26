@@ -157,41 +157,50 @@ export function palm(W, x, z, R, { h = 15, y = 0 } = {}) {
 // The deodar cedar in the middle of the quad: about 21 m tall and nearly as
 // wide at the bottom, with a clear trunk to ~3 m, and broad, uneven, drooping
 // shelves of blue-green foliage that thin out toward a nodding tip.
+// The quad's big cedar (Ethan's photos IMG_2332–2337): a short, thick trunk that
+// forks about 3 m up into three leaning leaders, and a broad, irregular crown of
+// flat, layered sprays held high enough for picnic tables to sit underneath:
+// about 15 m across (the satellite) and 17 m tall.
 export function cedar(W, x, z, R) {
-  const H = 21.5;
-  W.cyl('flat', x, 0, z, 0.8, 0.3, H - 2.5, 10, G.barkDark);
-  W.cyl('flat', x, 0, z, 1.1, 0.8, 0.8, 10, G.barkDark);
-  // a few bare limbs reaching out under the lowest shelf
-  for (let i = 0; i < 6; i++) {
-    const a = R() * Math.PI * 2, y = 2.6 + R() * 1.2, L = 3 + R() * 2;
-    W.rod('flat', [x, y, z], [x + Math.cos(a) * L, y + 0.9, z + Math.sin(a) * L], 0.22, G.barkDark);
+  const FORK = 3.1, TOP = 17;
+  W.cyl('flat', x, 0, z, 0.95, 0.62, 0.6, 12, G.barkDark);                  // root flare
+  W.cyl('flat', x, 0.5, z, 0.62, 0.52, FORK - 0.4, 12, G.barkDark);
+  const a0 = R() * Math.PI * 2, leaders = [];
+  for (let i = 0; i < 3; i++) {
+    const a = a0 + (i * Math.PI * 2) / 3 + (R() - 0.5) * 0.5, lean = 0.22 + R() * 0.18, L = 10 + R() * 3;
+    const mid = [x + Math.cos(a) * Math.sin(lean) * L * 0.45, FORK + Math.cos(lean) * L * 0.45, z + Math.sin(a) * Math.sin(lean) * L * 0.45];
+    const tip = [x + Math.cos(a) * Math.sin(lean) * L * 0.8, FORK + Math.cos(lean) * L, z + Math.sin(a) * Math.sin(lean) * L * 0.8];
+    W.rod('flat', [x, FORK - 0.3, z], mid, 0.36, G.barkDark);
+    W.rod('flat', mid, tip, 0.2, G.barkDark);
+    leaders.push({ a, mid, tip });
   }
-  const tiers = 9;
-  for (let t = 0; t < tiers; t++) {
-    const k = t / tiers;
-    const y = 3.4 + t * 1.85 + (R() - 0.5) * 0.5;
-    const Rt = (8.4 * Math.pow(1 - k, 0.85) + 0.9) * (0.85 + R() * 0.3);
-    const n = Math.max(3, Math.round(Rt * 0.95 + R() * 2));
+  // the crown's outline: widest in its lowest tiers, tapering to a rounded top
+  const span = (y) => 8.2 * Math.pow(Math.max(0, 1 - (y - 4) / (TOP - 3.4)), 0.72) + 0.7;
+  const SPRAY = [...G.cedar, color('#7d9660'), color('#6b8a57'), color('#86a063')];
+  W.blob('flat', x, 12.5, z, 2.2, 1.6, 2.2, darker(G.cedar[3], 0.62));        // a small dark heart up top
+  // flat, layered tiers with sky between them; the outer sprays droop at their tips
+  const TIERS = [4.3, 5.9, 7.5, 9.1, 10.8, 12.6, 14.4, 16.0];
+  TIERS.forEach((ty, t) => {
+    const sp = span(ty), n = Math.max(3, Math.round(sp * 1.35)), off = R() * Math.PI * 2;
     for (let i = 0; i < n; i++) {
-      const a = R() * Math.PI * 2;
-      const d = Rt * (0.35 + R() * 0.35);
-      // one shelf = a broad upper pad and a smaller, lower, further-out droop
-      for (const [out, down, sc] of [[0, 0, 1], [0.55, 0.75, 0.62]]) {
-        const dd = d + Rt * out * 0.5;
-        const m = new THREE.Matrix4().makeTranslation(x + Math.cos(a) * dd, y - down - R() * 0.4, z + Math.sin(a) * dd)
-          .multiply(new THREE.Matrix4().makeRotationY(-a + (R() - 0.5) * 0.5))
-          .multiply(new THREE.Matrix4().makeRotationZ(-0.22 - R() * 0.2));
-        const col = G.cedar[Math.floor(R() * G.cedar.length)];
-        W.withM(m, () => {
-          W.blob('flat', 0, 0, 0, Rt * 0.36 * sc + 0.4, (0.6 + R() * 0.4) * sc, (Rt * 0.26 + 0.4) * sc, darker(col, 0.66));
-          cards(W, 0, 0.1, 0, Rt * 0.45 * sc + 0.6, (0.9 + R() * 0.4) * sc, Rt * 0.33 * sc + 0.6, col, R, Math.round(10 + Rt * 2.6 * sc), 1.9, { variant: 1, droop: 0.6 });
-        });
-      }
+      const a = off + ((i + (R() - 0.5) * 0.6) * Math.PI * 2) / n;
+      const d = sp * (0.55 + R() * 0.4), y = ty + (R() - 0.5) * 0.7;
+      const px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d, sc = (0.8 + R() * 0.4) * (t < 5 ? 1 : 0.8);
+      const col = SPRAY[Math.floor(R() * SPRAY.length)];
+      const m = new THREE.Matrix4().makeTranslation(px, y, pz)
+        .multiply(new THREE.Matrix4().makeRotationY(-a + (R() - 0.5) * 0.6))
+        .multiply(new THREE.Matrix4().makeRotationZ(-0.15 - R() * 0.15));
+      W.withM(m, () => {
+        W.blob('flat', 0, 0, 0, 1.3 * sc, 0.32 * sc, 1.0 * sc, darker(col, 0.66));
+        cards(W, 0, 0.08, 0, 2.2 * sc, 0.55 * sc, 1.6 * sc, col, R, Math.round(24 * sc), 1.8, { variant: 1, droop: 0.7 });
+      });
+      // every spray hangs off a limb from the nearest leader
+      const L = leaders.reduce((b, l) => (Math.cos(l.a - a) > Math.cos(b.a - a) ? l : b));
+      const tt = Math.min(1, Math.max(0, (y - FORK) / (L.tip[1] - FORK)));
+      const from = tt < 0.45 ? [x + (L.mid[0] - x) * tt / 0.45, FORK + (L.mid[1] - FORK) * tt / 0.45, z + (L.mid[2] - z) * tt / 0.45]
+        : [L.mid[0] + (L.tip[0] - L.mid[0]) * (tt - 0.45) / 0.55, L.mid[1] + (L.tip[1] - L.mid[1]) * (tt - 0.45) / 0.55, L.mid[2] + (L.tip[2] - L.mid[2]) * (tt - 0.45) / 0.55];
+      W.rod('flat', from, [px - Math.cos(a) * 0.9, y - 0.1, pz - Math.sin(a) * 0.9], Math.max(0.06, 0.16 - t * 0.012), G.barkDark);
     }
-    if (t > 2) W.blob('flat', x + (R() - 0.5), y, z + (R() - 0.5), Rt * 0.38, 1.1, Rt * 0.38, G.cedar[Math.floor(R() * 5)]);
-  }
-  // the leader nods over at the top, as deodars do
-  W.blob('flat', x + 0.3, H - 1.8, z, 0.55, 1.1, 0.55, darker(G.cedar[2], 0.66));
-  cards(W, x + 0.3, H - 1.6, z, 0.9, 1.6, 0.9, G.cedar[2], R, 16, 1.4, { variant: 1, droop: 0.3 });
-  cards(W, x + 0.9, H - 0.4, z + 0.2, 0.5, 0.8, 0.5, G.cedar[4], R, 6, 1.0, { variant: 1 });
+  });
+
 }

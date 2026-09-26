@@ -104,7 +104,7 @@ async function boot() {
   const decals = new THREE.Group(); scene.add(decals);
   steps.push(['Hanging the signs', () => buildLandmarks(W, decals, fontFamily)]);
   steps.push(['Setting down the portables', () => buildPortables(W, decals)]);
-  steps.push(['Planting the cedar', () => buildQuad(W)]);
+  steps.push(['Planting the cedar', () => buildQuad(W, decals)]);
   steps.push(['Filling in the neighbourhood', () => buildProps(W, scene, quality, M)]);
   let sky, clouds, birds, flags, leaves, rain, ripples, pools, cones;
   steps.push(['Letting the clouds in', () => {

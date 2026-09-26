@@ -243,6 +243,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     back along the side of the steps (`guard()`); a pipe handrail runs down the
     wall side. Only the ramp's top and the landing's courtyard side are open. The other P clusters (P108–P120) look different
     (Ethan) and still use the old `p` kit until there are photos of them.
+  - **The quad's cedar and its seating** (`cedar()` in nature.js, `buildQuad` in
+    quad.js, lists in layout.js), from Ethan's photos IMG_2332–2342:
+    - The tree has a short trunk forking into three leaning leaders about 3 m
+      up. Its crown is flat, layered tiers, widest low down and tapering, with
+      sky between them: about 15 m across (satellite) and 17 m tall.
+    - Its bed is bark mulch painted flush on the ground, with no curb and no
+      plants.
+    - A light-blue and a green picnic table sit at the bed's west edge, with
+      grey cans (`CEDAR_PICNIC`, `CEDAR_CANS`).
+    - Black mesh round tables have four chairs with backs under dark-topped,
+      white-bottomed umbrellas (`umbrellaTable`, `CEDAR_TABLES`).
+    - Quad lamps are black poles on concrete bases with a round head in a
+      yoke. Each carries a banner on two arms, alternating CHARGER STRONG and
+      WILCOX CHARGERS, drawn as plain lettering (not the crest). The banners
+      are meshes in the `decals` group, which `buildQuad(W, decals)` takes.
+    - `QUAD_SPOTS` still decides trees against tables by index, except near
+      the cedar. The satellite tiles here are offset about 1 m from the spots,
+      so colour-sampling them does not classify reliably.
   - **The quad's stage is `stage()` in `campus/js/quad.js`**, from Ethan and his
     photos IMG_2324–2331. Its sizes are in `STAGE` (layout.js), and `r` and `plant`
     were re-measured off the satellite after Ethan said it was too small.

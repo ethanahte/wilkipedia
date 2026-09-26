@@ -10,7 +10,9 @@
 // on concrete bases; trash cans.
 
 import { color, rng } from './geo.js';
-import { STAGE, CEDAR, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
+import * as THREE from 'three';
+import { STAGE, CEDAR, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
+import { canvasTex, decalMat } from './toon.js';
 import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, G } from './nature.js';
 import { addCircle, addOBB, addBox, addHeight } from './collide.js';
 import { LIGHTS } from './lights.js';
@@ -23,18 +25,21 @@ const concrete = color('#d9d5cd'), concreteDark = color('#c4bfb6'), black = colo
 
 export const STAIR_A = Math.PI / 2;   // the south stair, in the very middle of the curve (Ethan)
 
-export function buildQuad(W) {
+export function buildQuad(W, decals) {
   const R = rng(2024);
   stage(W, R);
 
-  // the cedar, its mulch bed and a low concrete curb
+  // the cedar in a round bed of bark mulch, flush with the paving: no curb, no
+  // planting (IMG_2334). The mulch is painted on the ground (ground.js).
   cedar(W, CEDAR.x, CEDAR.z, R);
-  W.ring('flat', CEDAR.x, CEDAR.z, CEDAR.bed - 0.22, CEDAR.bed, 0, 0.2, concrete, 40);
-  for (let i = 0; i < 14; i++) {
-    const a = R() * Math.PI * 2, d = 1.6 + R() * 2.4;
-    W.blob('flat', Math.cos(a) * d, 0.05, Math.sin(a) * d, 0.7 + R() * 0.4, 0.22, 0.6 + R() * 0.3, G.leaf[i % 4], 0);
+  addCircle(CEDAR.x, CEDAR.z, 0.9);
+  for (const [x, z, rot, kind] of CEDAR_PICNIC) {
+    if (kind === 'blue') picnic(W, x, z, rot, color('#7fb2de'), color('#7fb2de'), color('#7fb2de'), color('#5f93c4'));
+    else picnic(W, x, z, rot, green, green, green);
   }
-  addCircle(CEDAR.x, CEDAR.z, 1.1);
+  for (const [x, z] of CEDAR_CANS) can(W, x, z);
+  for (const [x, z] of CEDAR_TABLES) umbrellaTable(W, x, z, R);
+  for (const [x, z] of CEDAR_TREES) { youngTree(W, x, z, R, { h: 4.4 + R() * 1.2, stake: R() < 0.5 }); addCircle(x, z, 0.25); }
 
   // trees and umbrella tables where the satellite shows them
   QUAD_SPOTS.forEach(([x, z], i) => {
@@ -51,7 +56,7 @@ export function buildQuad(W) {
 
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
-  for (const [x, z] of LAMPS) lamp(W, x, z);
+  LAMPS.forEach(([x, z], i) => lamp(W, decals, x, z, i, R));
   for (const [x, z] of LAMPS) LIGHTS.push([x, z, 4.6, 6.5]);
   [[-24, -1], [-9, -4], [18, 12], [-29, 18], [5, -17], [-36, -8], [23, 26]].forEach(([x, z]) => trash(W, x, z, R));
 }
@@ -199,11 +204,16 @@ export function umbrellaTable(W, x, z, R) {
   const rot = R() * Math.PI;
   W.cyl('flat', x, 0, z, 0.06, 0.06, 0.74, 6, black);
   W.cyl('flat', x, 0.72, z, 0.62, 0.62, 0.05, 16, black);
+  // four black mesh chairs with backs, joined to the table's frame (IMG_2334, IMG_2339)
   for (let i = 0; i < 4; i++) {
     const a = rot + (i * Math.PI) / 2, sx = x + Math.cos(a) * 0.95, sz = z + Math.sin(a) * 0.95;
     W.beam('flat', x, z, sx, sz, 0.1, 0.16, 0.05, black);
-    W.cyl('flat', sx, 0.42, sz, 0.22, 0.22, 0.04, 10, black);
     W.cyl('flat', sx, 0.1, sz, 0.03, 0.03, 0.34, 5, black);
+    W.with(sx, 0, sz, -a, () => {
+      W.box('flat', 0.02, 0.45, 0, 0.44, 0.04, 0.44, black);                      // seat
+      W.box('flat', 0.25, 0.7, 0, 0.04, 0.44, 0.44, black);                       // back, on the outside
+      W.box('flat', 0.25, 0.47, 0, 0.03, 0.08, 0.03, black);
+    });
   }
   // the umbrella: dark on top, white underneath, as in the photos
   W.cyl('flat', x, 0.74, z, 0.03, 0.03, 1.7, 6, black);
@@ -212,27 +222,65 @@ export function umbrellaTable(W, x, z, R) {
   addCircle(x, z, 1.05);
 }
 
-function picnic(W, x, z, rot, top, benchA, benchB) {
+function picnic(W, x, z, rot, top, benchA, benchB, frame = greenDark) {
   W.with(x, 0, z, rot, () => {
     W.box('flat', 0, 0.76, 0, 1.85, 0.05, 0.78, top);
     W.box('flat', 0, 0.45, 0.66, 1.85, 0.04, 0.3, benchA);
     W.box('flat', 0, 0.45, -0.66, 1.85, 0.04, 0.3, benchB);
     for (const sx of [-0.72, 0.72]) {
-      W.box('flat', sx, 0.38, 0, 0.05, 0.05, 1.7, greenDark);
+      W.box('flat', sx, 0.38, 0, 0.05, 0.05, 1.7, frame);
       for (const s of [-1, 1]) {
-        W.with(sx, 0.38, s * 0.42, 0, () => W.box('flat', 0, 0, 0, 0.05, 0.8, 0.05, greenDark));
+        W.with(sx, 0.38, s * 0.42, 0, () => W.box('flat', 0, 0, 0, 0.05, 0.8, 0.05, frame));
       }
     }
   });
   addOBB(x, z, 2.0, 1.9, rot);
 }
 
-function lamp(W, x, z) {
+// A quad lamp (IMG_2332, IMG_2335): a black pole on a round concrete base, a
+// round head held up in a yoke, and a school banner on two arms. The banners
+// alternate between CHARGER STRONG and WILCOX CHARGERS.
+function lamp(W, decals, x, z, i, R) {
   W.cyl('flat', x, 0, z, 0.3, 0.26, 0.55, 10, concrete);
-  W.cyl('flat', x, 0.55, z, 0.075, 0.055, 4.1, 8, black);
-  W.cyl('flat', x, 4.62, z, 0.42, 0.34, 0.14, 14, black);
-  W.cyl('glow', x, 4.6, z, 0.3, 0.3, 0.02, 14, lampLight, { top: false, bottom: true });
+  W.cyl('flat', x, 0.55, z, 0.075, 0.055, 3.9, 8, black);
+  for (const s of [-1, 1]) W.rod('flat', [x, 4.35, z], [x + s * 0.34, 4.75, z], 0.03, black);
+  W.cyl('flat', x, 4.72, z, 0.4, 0.4, 0.12, 16, black);
+  W.cyl('glow', x, 4.71, z, 0.3, 0.3, 0.02, 14, lampLight, { top: false, bottom: true });
   addCircle(x, z, 0.35);
+  if (!decals) return;
+  const a = R() * Math.PI * 2, ux = Math.cos(a), uz = Math.sin(a), arm = 0.8;
+  for (const y of [2.7, 3.85]) W.rod('flat', [x, y, z], [x + ux * arm, y, z + uz * arm], 0.018, black);
+  const tex = BANNERS[i % 2]();
+  for (const side of [0, Math.PI]) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.05), decalMat(tex, { transparent: false }));
+    m.position.set(x + ux * (arm / 2 + 0.06), 3.26, z + uz * (arm / 2 + 0.06));
+    m.rotation.y = -a + side;                    // hangs along its arm; the two faces back to back
+    m.position.x += Math.sin(m.rotation.y) * 0.004; m.position.z += Math.cos(m.rotation.y) * 0.004;
+    decals.add(m);
+  }
+}
+
+// The two banners, drawn once each: black over yellow with a yellow W, in the
+// Chargers' colours. Plain lettering, not the school's crest.
+const banner = (lines) => {
+  let tex = null;
+  return () => tex || (tex = canvasTex(160, 272, (g, w, h) => {
+    g.fillStyle = '#1c1d20'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#f2b91f'; g.fillRect(0, h * 0.55, w, h * 0.45);
+    g.beginPath(); g.moveTo(0, h * 0.55); g.lineTo(w / 2, h * 0.5); g.lineTo(w, h * 0.55); g.fill();
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = 'italic 900 92px Georgia, "Times New Roman", serif'; g.fillText('W', w / 2, h * 0.27);
+    g.fillStyle = '#1c1d20'; g.font = 'italic 800 25px "Helvetica Neue", Arial, sans-serif';
+    lines.forEach((t, k) => g.fillText(t, w / 2, h * (0.69 + k * 0.14)));
+  }, { mips: true }));
+};
+const BANNERS = [banner(['CHARGER', 'STRONG']), banner(['WILCOX', 'CHARGERS'])];
+
+
+function can(W, x, z) {
+  W.cyl('flat', x, 0, z, 0.3, 0.32, 0.9, 12, galv);
+  W.cyl('flat', x, 0.9, z, 0.33, 0.33, 0.05, 12, galv);
+  addCircle(x, z, 0.36);
 }
 
 function trash(W, x, z, R) {
@@ -250,5 +298,5 @@ export function treeSpots() {
     const nearCedar = Math.hypot(x, z - 8.5) < 12 && z > 7;
     if (!nearCedar && (i % 5 === 0 || i % 5 === 2 || i % 5 === 3)) out.push([x, z]);
   });
-  return out;
+  return out.concat(CEDAR_TREES);
 }
