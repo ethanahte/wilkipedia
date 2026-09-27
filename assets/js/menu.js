@@ -65,11 +65,47 @@ export async function todaysLunch() {
 }
 
 // ── the next meal, for the home page ──
-// Today's menu until lunch is over, then the next school day's. Breakfast shows
-// until the first bell. If the menu service has nothing for that day (a day off
-// the bell data doesn't know about), the next day it does have is shown.
+// Today's menu until lunch is over, then the next school day's, with tabs for the
+// next few menu days (all from one fetch). Most of the menu repeats daily (the
+// halal sandwich, cheese pizza, bagels, cereal…), so each day's changing entrées
+// lead as tiles and the regulars follow in one short line. A regular is worked
+// out from the data: on at least 70% of the menu days fetched (two weeks ahead).
 const mins = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3));
 const dayOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const REGULAR = 0.7;
+const DIET = { V: 'Vegetarian', VG: 'Vegan', GF: 'Gluten-free' };
+
+// A food icon from the dish's name so a row of dishes scans at a glance. First match wins.
+const FOOD = [
+  [/smoothie/i, '🥤'], [/pancake/i, '🥞'], [/waffle/i, '🧇'], [/french toast/i, '🍞'], [/muffin|cupcake/i, '🧁'],
+  [/bagel/i, '🥯'], [/cereal|oatmeal|granola/i, '🥣'], [/egg roll|spring roll|dumpling|potsticker/i, '🥟'],
+  [/\beggs?\b|omelet/i, '🍳'], [/burrito/i, '🌯'], [/taco|quesadilla|nacho|enchilada/i, '🌮'],
+  [/gyro|pita|falafel|shawarma/i, '🥙'], [/burger/i, '🍔'], [/hot ?dog|corn ?dog/i, '🌭'], [/pizza|flatbread/i, '🍕'],
+  [/salad/i, '🥗'], [/mac(aroni)? (and|&|n) cheese/i, '🧀'], [/pasta|lasagna|spaghetti|ziti|penne|alfredo|ravioli/i, '🍝'],
+  [/noodle|ramen|lo mein|chow mein/i, '🍜'], [/sandwich|melt|\bsub\b|wrap|hoagie|panini|grilled cheese|slider/i, '🥪'],
+  [/soup|chili|stew/i, '🍲'], [/rice|bowl/i, '🍚'], [/tofu|teriyaki/i, '🍱'], [/fish|salmon|shrimp/i, '🐟'],
+  [/chicken|wing|nugget|tender|strip/i, '🍗'], [/beef|steak|meatball/i, '🥩'],
+  [/bosco|breadstick|stick|pretzel|bread|roll|toast/i, '🥖'], [/fries|potato|tots/i, '🍟'], [/yogurt|parfait/i, '🍨'],
+  [/fruit|apple/i, '🍎'],
+];
+const foodIcon = (name) => FOOD.find(([re]) => re.test(name))?.[1] || '🍽️';
+const entrees = (d) => (d ? d.Entrees || d[sortedCats(d)[0]] || [] : []);
+// "Nature's Path Organic Choco Cereal (GF)" → {name: 'Choco Cereal', tags: ['GF']}
+function dish(it) {
+  const tags = [];
+  const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, x) => { tags.push(x); return ''; })
+    .replace(/^Nature's Path Organic /, '').replace(/\s{2,}/g, ' ').trim();
+  return { raw: it.name, name, tags, icon: foodIcon(name) };
+}
+const diet = (tags) => tags.map((x) => `<span class="diet d-${x.toLowerCase()}" title="${DIET[x]}">${x}</span>`).join(' ');
+function regularsIn(days) {
+  const lists = Object.values(days).map((d) => new Set(entrees(d).map((i) => i.name)));
+  if (lists.length < 4) return new Set();             // too little to tell
+  const n = {};
+  lists.forEach((s) => s.forEach((x) => { n[x] = (n[x] || 0) + 1; }));
+  return new Set(Object.keys(n).filter((x) => n[x] >= REGULAR * lists.length));
+}
+const span = (n) => (n >= 60 ? `${Math.floor(n / 60)} hr${n % 60 ? ` ${n % 60} min` : ''}` : `${n} min`);
 
 export async function mountNextMeal(el) {
   try {
@@ -79,53 +115,101 @@ export async function mountNextMeal(el) {
     const lunchOf = (plan) => plan?.periods?.find(([n]) => /^Lunch/.test(n)) || null;
     const today = dayPlan(bell, now);
     const lunchEnd = lunchOf(today) ? mins(lunchOf(today)[2]) : 13 * 60 + 30;   // adjusted days: assume 1:30
-    let day = (today.periods || today.adjusted) && m < lunchEnd ? dayOnly(now) : nextSchoolDay(bell, now)[0];
-    if (!day) { el.hidden = true; return; }
-    const end = new Date(day); end.setDate(end.getDate() + 14);
-    const [lunch, breakfast] = await Promise.all([fetchMenu('lunch', day, end), fetchMenu('breakfast', day, end)]);
-    // the first day from `day` on that has a lunch posted
-    for (let i = 0; i < 15 && !lunch[key(day)]; i++) day.setDate(day.getDate() + 1);
-    if (!lunch[key(day)]) { el.hidden = true; return; }
-
-    const isToday = key(day) === key(now);
-    const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
-    const when = isToday ? 'Today' : key(day) === key(tomorrow) ? 'Tomorrow'
-      : day.toLocaleDateString('en-US', { weekday: 'long' });
-    const plan = dayPlan(bell, day);
-    const firstBell = plan.periods?.[0]?.[1];
-    const showBreakfast = breakfast[key(day)] && !(isToday && firstBell && m >= mins(firstBell));
-    const lunchTime = lunchOf(plan);
-    // Phones show the first 6 entrées and a "+N more" chip (CSS), one meal at a time
-    const chips = (d) => {
-      const list = d.Entrees || d[sortedCats(d)[0]];
-      return `<ul class="nm-items">${list.map((it) => {
-        const tags = [];
-        const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, x) => { tags.push(x); return ''; });
-        return `<li>${esc(name)}${tags.map((x) => ` <span class="diet d-${x.toLowerCase()}">${x}</span>`).join('')}</li>`;
-      }).join('')}${list.length > 6 ? `<li class="nm-more"><a href="${root}menu/">+${list.length - 6} more</a></li>` : ''}</ul>`;
+    const start = (today.periods || today.adjusted) && m < lunchEnd ? dayOnly(now) : nextSchoolDay(bell, now)[0];
+    if (!start) { el.hidden = true; return; }
+    const end = new Date(start); end.setDate(end.getDate() + 14);
+    const [lunch, breakfast] = await Promise.all([fetchMenu('lunch', start, end), fetchMenu('breakfast', start, end)]);
+    // Up to 5 days from `start` that have a lunch posted (skips days off the bell data doesn't know)
+    const days = [];
+    for (let d = new Date(start), i = 0; i < 15 && days.length < 5; i++, d.setDate(d.getDate() + 1)) {
+      if (entrees(lunch[key(d)]).length) days.push(new Date(d));
+    }
+    if (!days.length) { el.hidden = true; return; }
+    const regL = regularsIn(lunch);
+    const regB = regularsIn(breakfast);
+    const tmr = new Date(now); tmr.setDate(tmr.getDate() + 1);
+    const tab = (d) => (key(d) === key(now) ? 'Today' : key(d) === key(tmr) ? 'Tomorrow'
+      : `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${d.getDate()}`);
+    const sep = '<i class="nm-sep" aria-hidden="true">·</i>';
+    const inline = (x) => `<span class="nm-dish"><span class="nm-i" aria-hidden="true">${x.icon}</span>&#8288;${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span>`;
+    // The day's dishes, changing ones first; if everything is a regular, show it all as changing
+    const split = (list, reg) => {
+      const all = list.map(dish);
+      const fresh = all.filter((x) => !reg.has(x.raw));
+      return fresh.length ? [fresh, all.filter((x) => reg.has(x.raw))] : [all, []];
     };
-    const meal = (which, label, time, d) => `<div class="nm-meal" data-meal="${which}"><h3>${label}${time ? ` <small>${time}</small>` : ''}</h3>${chips(d)}</div>`;
-    el.innerHTML = `<div class="bell-top">
-        <div class="bell-text"><span class="bell-day">Cafeteria menu · ${when === 'Today' ? 'Today' : `${when}, ${day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}</span>
-          <span class="bell-status"><b>${showBreakfast ? `${when === 'Today' ? 'Today’s' : `${when}’s`} breakfast and lunch` : `Lunch ${when === 'Today' ? 'today' : when === 'Tomorrow' ? 'tomorrow' : `on ${when}`}`}</b></span></div>
-        <a class="bell-more" href="${root}menu/">Full menu</a></div>
-      ${showBreakfast ? `<div class="seg nm-seg" role="radiogroup" aria-label="Meal">
-        <button type="button" role="radio" data-show="breakfast" aria-checked="true">Breakfast</button>
-        <button type="button" role="radio" data-show="lunch" aria-checked="false">Lunch</button></div>` : ''}
-      <div class="nm-meals" data-show="${showBreakfast ? 'breakfast' : 'lunch'}">
-        ${showBreakfast ? meal('breakfast', 'Breakfast', 'before school', breakfast[key(day)]) : ''}
-        ${meal('lunch', 'Lunch', lunchTime ? `${clock(lunchTime[1])}–${clock(lunchTime[2])}` : '', lunch[key(day)])}
-      </div>`;
-    el.querySelector('.nm-seg')?.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-show]');
+
+    el.innerHTML = `<div class="nm-top">
+        <span class="nm-title">Cafeteria</span>
+        <div class="nm-days" role="tablist" aria-label="Day">${days.map((d, i) =>
+          `<button type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" tabindex="${i ? -1 : 0}">${tab(d)}</button>`).join('')}</div>
+        <a class="nm-full" href="${root}menu/">Full menu <span aria-hidden="true">→</span></a></div>
+      <div class="nm-body" role="tabpanel"></div>`;
+    const body = el.querySelector('.nm-body');
+
+    const paint = (i) => {
+      const d = days[i];
+      const k = key(d);
+      const isToday = k === key(now);
+      const plan = dayPlan(bell, d);
+      const lp = lunchOf(plan);
+      const firstBell = plan.periods?.[0]?.[1];
+      const [lFresh, lReg] = split(entrees(lunch[k]), regL);
+      const bList = entrees(breakfast[k]);
+      const showB = bList.length && !(isToday && firstBell && m >= mins(firstBell));   // breakfast is over once class starts
+      const [bFresh, bReg] = split(bList, regB);
+      let when = '';
+      if (isToday && lp) {
+        const a = mins(lp[1]);
+        const b = mins(lp[2]);
+        when = m < a ? `in ${span(a - m)}` : m < b ? 'on now' : '';
+      }
+      body.innerHTML = `
+        ${showB ? `<div class="nm-row nm-bfast"><span class="nm-label">Breakfast</span>
+          <span class="nm-list">${bFresh.map(inline).join(sep)}</span>
+          ${bReg.length ? `<button type="button" class="nm-more" aria-expanded="false">+${bReg.length} regulars</button>
+            <span class="nm-list nm-extra" hidden>${bReg.map(inline).join(sep)}</span>` : ''}</div>` : ''}
+        <div class="nm-row nm-lhead"><span class="nm-label">Lunch</span>
+          ${lp ? `<span class="nm-time">${clock(lp[1])}–${clock(lp[2])}</span>` : ''}
+          ${when ? `<span class="nm-when${when === 'on now' ? ' now' : ''}">${when}</span>` : ''}
+          ${lReg.length ? `<button type="button" class="nm-more nm-more-l" aria-expanded="false">+${lReg.length} regulars</button>` : ''}</div>
+        <ul class="nm-tiles">${lFresh.map((x, j) => `<li class="nm-tile" style="--i:${j}">
+          <span class="nm-ic" aria-hidden="true">${x.icon}</span><span class="nm-name">${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span></li>`).join('')}</ul>
+        ${lReg.length ? `<div class="nm-row nm-regulars" title="On the menu most days"><span class="nm-label">Regulars</span>
+          <span class="nm-list">${lReg.map(inline).join(sep)}</span></div>` : ''}`;
+    };
+    paint(0);
+
+    const tabs = [...el.querySelectorAll('.nm-days [role=tab]')];
+    const pick = (i, focus) => {
+      tabs.forEach((b, j) => { b.setAttribute('aria-selected', j === i); b.tabIndex = j === i ? 0 : -1; });
+      if (focus) tabs[i].focus();
+      paint(i);
+    };
+    el.querySelector('.nm-days').addEventListener('click', (e) => {
+      const b = e.target.closest('[role=tab]');
+      if (b) pick(Number(b.dataset.i));
+    });
+    el.querySelector('.nm-days').addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(document.activeElement);
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (i < 0 || !step) return;
+      e.preventDefault();
+      pick((i + step + tabs.length) % tabs.length, true);
+    });
+    // "+N regulars": breakfast's are listed inline after the button; lunch's line is
+    // always shown on wide screens and folded behind the button on phones (CSS)
+    body.addEventListener('click', (e) => {
+      const b = e.target.closest('.nm-more');
       if (!b) return;
-      el.querySelector('.nm-meals').dataset.show = b.dataset.show;
-      el.querySelectorAll('.nm-seg [data-show]').forEach((x) => x.setAttribute('aria-checked', x === b));
+      if (b.classList.contains('nm-more-l')) body.querySelector('.nm-regulars')?.classList.add('open');
+      else b.nextElementSibling.hidden = false;
+      b.remove();
     });
   } catch (e) {
     console.error(e);
-    el.innerHTML = `<div class="bell-top"><div class="bell-text"><span class="bell-day">Cafeteria menu</span>
-      <span class="bell-status">Couldn’t load the menu right now.</span></div><a class="bell-more" href="${root}menu/">Full menu</a></div>`;
+    el.innerHTML = `<div class="nm-top"><span class="nm-title">Cafeteria</span>
+      <span class="nm-time">Couldn’t load the menu right now.</span><a class="nm-full" href="${root}menu/">Full menu <span aria-hidden="true">→</span></a></div>`;
   }
 }
 
