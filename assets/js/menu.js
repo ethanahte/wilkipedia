@@ -2,8 +2,9 @@
 // (schoolnutritionandfitness.com, which allows other sites to read it).
 // Nothing is copied into this repo, so the page is always the current menu.
 //
-// Used two ways: the Menu page (when #menu-app exists) and the Cafeteria
-// panel on the campus map (todaysLunch()).
+// Used three ways: the Menu page (when #menu-app exists), the home page's
+// next-meal card (mountNextMeal) and the Cafeteria panel on the campus map
+// (todaysLunch()). Photos, nutrition and allergens are the district's own data.
 
 import { initHeader, $, $$, esc, root } from './ui.js';
 import { loadBell, dayPlan, nextSchoolDay, clock } from './bell.js';
@@ -22,14 +23,46 @@ const HIDE = ['Condiment', 'Condiments'];
 const mdy = (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
 const key = (d) => `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;   // the API's date format
 
-// → { 'M/D/YYYY': { Entrees: [{name, calories}], ... } }
-export async function fetchMenu(which, start, end) {
+// Nutrition fields the district fills in (the same ones its own menu app shows),
+// as [label, field, unit, indent]. Allergens come as "1" (contains), "0" (doesn't)
+// or null (not listed). Never read null as "free of".
+export const FACTS = [
+  ['Total fat', 'prod_total_fat', 'g', 0], ['Saturated fat', 'prod_sat_fat', 'g', 1], ['Trans fat', 'prod_trans_fat', 'g', 1],
+  ['Cholesterol', 'prod_cholesterol', 'mg', 0], ['Sodium', 'prod_sodium', 'mg', 0],
+  ['Carbohydrates', 'prod_carbs', 'g', 0], ['Fiber', 'prod_dietary_fiber', 'g', 1], ['Sugars', 'sugar', 'g', 1], ['Added sugars', 'added_sugar', 'g', 2],
+  ['Protein', 'prod_protein', 'g', 0],
+  ['Calcium', 'prod_calcium', 'mg', 0], ['Iron', 'prod_iron', 'mg', 0], ['Vitamin C', 'prod_vitc', 'mg', 0], ['Potassium', 'prod_potassium', 'mg', 0],
+];
+export const ALLERGENS = { dairy: 'Dairy', egg: 'Egg', fish: 'Fish', shellfish: 'Shellfish', peanut: 'Peanuts', treenuts: 'Tree nuts',
+                           soy: 'Soy', sesame: 'Sesame', wheat: 'Wheat', gluten: 'Gluten', pork: 'Pork' };
+const BASIC = 'id name category prod_calories';
+const FULL = `${BASIC} image_url1 portion_size portion_size_unit ${FACTS.map((f) => f[1]).join(' ')} allergen_milk ${
+  Object.keys(ALLERGENS).map((a) => `allergen_${a}`).join(' ')}`;
+
+// One dish: {id, name, calories, image, serving, nut: {field: number}, allergens: {dairy: true|false, …}}
+// (a key is missing from `allergens` when the district doesn't say)
+function toDish(p) {
+  const n = (v) => (v === null || v === undefined || v === '' || Number.isNaN(Number(v)) ? null : Number(v));
+  const allergens = {};
+  for (const a of Object.keys(ALLERGENS)) if (p[`allergen_${a}`] != null) allergens[a] = p[`allergen_${a}`] === '1';
+  if (p.allergen_milk === '1') allergens.dairy = true;             // the district uses both for milk
+  return {
+    id: String(p.id), name: p.name, calories: p.prod_calories ? Math.round(p.prod_calories) : null,
+    image: /^https:\/\//.test(p.image_url1 || '') ? p.image_url1 : null,
+    serving: p.portion_size ? `${p.portion_size} ${p.portion_size_unit || ''}`.trim() : null,
+    nut: Object.fromEntries(FACTS.map(([, f]) => [f, n(p[f])]).filter(([, v]) => v !== null)),
+    allergens,
+  };
+}
+
+// → { 'M/D/YYYY': { Entrees: [dish], ... } }. `full` adds photos, nutrition and allergens.
+export async function fetchMenu(which, start, end, { full = false } = {}) {
   const res = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       query: `query m($t: String!, $s: String!, $e: String!) { menuType(id: $t) {
-        items(start_date: $s, end_date: $e) { date product { name category prod_calories } } } }`,
+        items(start_date: $s, end_date: $e) { date product { ${full ? FULL : BASIC} } } } }`,
       variables: { t: MENUS[which].type, s: mdy(start), e: mdy(end) },
     }),
   });
@@ -41,7 +74,7 @@ export async function fetchMenu(which, start, end) {
     if (!p?.name || HIDE.includes(p.category)) continue;
     const day = (days[it.date] ??= {});
     const cat = p.category || 'Other';
-    (day[cat] ??= []).push({ name: p.name, calories: p.prod_calories ? Math.round(p.prod_calories) : null });
+    (day[cat] ??= []).push(toDish(p));
   }
   return days;
 }
@@ -72,6 +105,8 @@ export async function todaysLunch() {
 // out from the data: on at least 70% of the menu days fetched (two weeks ahead).
 const mins = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3));
 const dayOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const pad2 = (n) => String(n).padStart(2, '0');
+const iso = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;   // for #links
 const REGULAR = 0.7;
 const DIET = { V: 'Vegetarian', VG: 'Vegan', GF: 'Gluten-free' };
 
@@ -85,20 +120,22 @@ const FOOD = [
   [/noodle|ramen|lo mein|chow mein/i, '🍜'], [/sandwich|melt|\bsub\b|wrap|hoagie|panini|grilled cheese|slider/i, '🥪'],
   [/soup|chili|stew/i, '🍲'], [/rice|bowl/i, '🍚'], [/tofu|teriyaki/i, '🍱'], [/fish|salmon|shrimp/i, '🐟'],
   [/chicken|wing|nugget|tender|strip/i, '🍗'], [/beef|steak|meatball/i, '🥩'],
+  [/carrot/i, '🥕'], [/\bcorn\b/i, '🌽'], [/broccoli/i, '🥦'],
   [/bosco|breadstick|stick|pretzel|bread|roll|toast/i, '🥖'], [/fries|potato|tots/i, '🍟'], [/yogurt|parfait/i, '🍨'],
-  [/fruit|apple/i, '🍎'],
+  [/milk/i, '🥛'], [/juice/i, '🧃'], [/\borange/i, '🍊'],
+  [/peach/i, '🍑'], [/banana/i, '🍌'], [/melon/i, '🍉'], [/grape/i, '🍇'], [/pear\b/i, '🍐'], [/berr/i, '🍓'], [/fruit|apple/i, '🍎'],
 ];
-const foodIcon = (name) => FOOD.find(([re]) => re.test(name))?.[1] || '🍽️';
+export const foodIcon = (name) => FOOD.find(([re]) => re.test(name))?.[1] || '🍽️';
 const entrees = (d) => (d ? d.Entrees || d[sortedCats(d)[0]] || [] : []);
 // "Nature's Path Organic Choco Cereal (GF)" → {name: 'Choco Cereal', tags: ['GF']}
-function dish(it) {
+export function dish(it) {
   const tags = [];
   const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, x) => { tags.push(x); return ''; })
     .replace(/^Nature's Path Organic /, '').replace(/\s{2,}/g, ' ').trim();
-  return { raw: it.name, name, tags, icon: foodIcon(name) };
+  return { id: it.id, raw: it.name, name, tags, icon: foodIcon(name) };
 }
-const diet = (tags) => tags.map((x) => `<span class="diet d-${x.toLowerCase()}" title="${DIET[x]}">${x}</span>`).join(' ');
-function regularsIn(days) {
+export const diet = (tags) => tags.map((x) => `<span class="diet d-${x.toLowerCase()}" title="${DIET[x]}">${x}</span>`).join(' ');
+export function regularsIn(days) {
   const lists = Object.values(days).map((d) => new Set(entrees(d).map((i) => i.name)));
   if (lists.length < 4) return new Set();             // too little to tell
   const n = {};
@@ -131,7 +168,8 @@ export async function mountNextMeal(el) {
     const tab = (d) => (key(d) === key(now) ? 'Today' : key(d) === key(tmr) ? 'Tomorrow'
       : `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${d.getDate()}`);
     const sep = '<i class="nm-sep" aria-hidden="true">·</i>';
-    const inline = (x) => `<span class="nm-dish"><span class="nm-i" aria-hidden="true">${x.icon}</span>&#8288;${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span>`;
+    const link = (which, d, x) => `${root}menu/#${which}/${iso(d)}/${encodeURIComponent(x.id)}`;
+    const inline = (x, href) => `<${href ? `a href="${href}"` : 'span'} class="nm-dish"><span class="nm-i" aria-hidden="true">${x.icon}</span>&#8288;${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</${href ? 'a' : 'span'}>`;
     // The day's dishes, changing ones first; if everything is a regular, show it all as changing
     const split = (list, reg) => {
       const all = list.map(dish);
@@ -166,17 +204,17 @@ export async function mountNextMeal(el) {
       }
       body.innerHTML = `
         ${showB ? `<div class="nm-row nm-bfast"><span class="nm-label">Breakfast</span>
-          <span class="nm-list">${bFresh.map(inline).join(sep)}</span>
+          <span class="nm-list">${bFresh.map((x) => inline(x, link('breakfast', d, x))).join(sep)}</span>
           ${bReg.length ? `<button type="button" class="nm-more" aria-expanded="false">+${bReg.length} regulars</button>
-            <span class="nm-list nm-extra" hidden>${bReg.map(inline).join(sep)}</span>` : ''}</div>` : ''}
+            <span class="nm-list nm-extra" hidden>${bReg.map((x) => inline(x)).join(sep)}</span>` : ''}</div>` : ''}
         <div class="nm-row nm-lhead"><span class="nm-label">Lunch</span>
           ${lp ? `<span class="nm-time">${clock(lp[1])}–${clock(lp[2])}</span>` : ''}
           ${when ? `<span class="nm-when${when === 'on now' ? ' now' : ''}">${when}</span>` : ''}
           ${lReg.length ? `<button type="button" class="nm-more nm-more-l" aria-expanded="false">+${lReg.length} regulars</button>` : ''}</div>
-        <ul class="nm-tiles">${lFresh.map((x, j) => `<li class="nm-tile" style="--i:${j}">
-          <span class="nm-ic" aria-hidden="true">${x.icon}</span><span class="nm-name">${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span></li>`).join('')}</ul>
+        <ul class="nm-tiles">${lFresh.map((x, j) => `<li><a class="nm-tile" style="--i:${j}" href="${link('lunch', d, x)}">
+          <span class="nm-ic" aria-hidden="true">${x.icon}</span><span class="nm-name">${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span></a></li>`).join('')}</ul>
         ${lReg.length ? `<div class="nm-row nm-regulars" title="On the menu most days"><span class="nm-label">Regulars</span>
-          <span class="nm-list">${lReg.map(inline).join(sep)}</span></div>` : ''}`;
+          <span class="nm-list">${lReg.map((x) => inline(x)).join(sep)}</span></div>` : ''}`;
     };
     paint(0);
 
@@ -214,50 +252,290 @@ export async function mountNextMeal(el) {
 }
 
 // ── the Menu page ──
+// A strip of the week's days (each with its headline dish), then the chosen day:
+// the changing dishes as photo cards, the regulars as a compact row, and the sides.
+// Any dish opens a panel with its photo, nutrition and allergens (a side drawer on
+// wide screens, a bottom sheet on phones). Hover only previews; tap/click is the
+// real way in, so phones and keyboards get everything too.
+// Links: #lunch/2026-09-30 opens that day, #lunch/2026-09-30/<dish id> that dish.
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+function mondayOf(d) {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = m.getDay();                        // weekends show the coming week
+  m.setDate(m.getDate() + (dow === 0 ? 1 : dow === 6 ? 2 : 1 - dow));
+  return m;
+}
+const num = (v) => (v >= 10 ? Math.round(v) : Math.round(v * 10) / 10);
+const DIETS = [['V', 'Vegetarian'], ['VG', 'Vegan'], ['GF', 'Gluten-free']];
+
 if ($('#menu-app')) {
   await initHeader();
-  const state = { which: 'lunch', monday: mondayOf(new Date()) };
+  const todayK = key(new Date());
+  const fromIso = (s) => { const [y, mo, d] = s.split('-').map(Number); return new Date(y, mo - 1, d); };
+  const state = { which: new Date().getHours() < 10 ? 'breakfast' : 'lunch',   // before 10 AM, breakfast is what people want
+                  monday: mondayOf(new Date()), day: null, diet: new Set(), avoid: new Set() };
+  const [hWhich, hDay, hDish] = decodeURIComponent(location.hash.slice(1)).split('/');
+  if (MENUS[hWhich]) state.which = hWhich;
+  if (/^\d{4}-\d\d-\d\d$/.test(hDay || '')) { const d = fromIso(hDay); state.monday = mondayOf(d); state.day = key(d); }
+  let wantDish = hDish || null;
+  const bell = await loadBell().catch(() => null);
+  const cache = {};
+  let week = [];
+  let data = {};
+  let regs = new Set();
+  let byId = {};
+  let served = {};                               // dish id → the days this week it's on
 
-  function mondayOf(d) {
-    const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const dow = m.getDay();                        // weekends show the coming week
-    m.setDate(m.getDate() + (dow === 0 ? 1 : dow === 6 ? 2 : 1 - dow));
-    return m;
-  }
-  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-  const today = key(new Date());
+  const dayOf = (k) => week.find((d) => key(d) === k);
+  const setHash = (dishId) => history.replaceState(null, '', `#${state.which}/${iso(dayOf(state.day) || state.monday)}${dishId ? `/${encodeURIComponent(dishId)}` : ''}`);
+  const pic = (x) => (x.image
+    ? `<img src="${esc(x.image)}" alt="" loading="lazy" decoding="async" data-ic="${foodIcon(dish(x).name)}">`
+    : `<span class="mn-emoji" aria-hidden="true">${foodIcon(dish(x).name)}</span>`);
+  // A photo that won't load becomes the dish's icon
+  $('#menu-app').addEventListener('error', (e) => {
+    if (e.target.tagName !== 'IMG' || !e.target.dataset.ic) return;
+    e.target.outerHTML = `<span class="mn-emoji" aria-hidden="true">${e.target.dataset.ic}</span>`;
+  }, true);
 
-  async function draw() {
-    const week = [0, 1, 2, 3, 4].map((i) => addDays(state.monday, i));
+  async function load() {
+    week = [0, 1, 2, 3, 4].map((i) => addDays(state.monday, i));
     $('#week-label').textContent = `${week[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${week[4].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     $('#official').href = MENUS[state.which].official;
     $$('#menu-which [data-which]').forEach((b) => b.setAttribute('aria-checked', b.dataset.which === state.which));
-    $('#menu-days').innerHTML = '<div class="meta">Loading the menu…</div>';
+    $('#mn-view').innerHTML = `<div class="mn-cards">${'<div class="mn-card mn-skel"><span class="mn-photo"></span><span class="mn-name">&nbsp;</span></div>'.repeat(5)}</div>`;
+    const ck = `${state.which}:${key(state.monday)}`;
     try {
-      const days = await fetchMenu(state.which, week[0], week[4]);
-      $('#menu-days').innerHTML = week.map((d) => {
-        const day = days[key(d)];
-        const isToday = key(d) === today;
-        return `<article class="menu-day${isToday ? ' today' : ''}" ${isToday ? 'id="today"' : ''}>
-          <h2>${d.toLocaleDateString('en-US', { weekday: 'long' })} <span class="meta">${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-            ${isToday ? '<span class="tag today-tag">Today</span>' : ''}</h2>
-          ${day ? sortedCats(day).map((c) => `<div class="menu-cat"><div class="label">${esc(c)}</div>
-            <ul>${day[c].map(itemHtml).join('')}</ul></div>`).join('')
-            : '<p class="meta">No menu posted. It may be a holiday or a day off.</p>'}</article>`;
-      }).join('');
+      data = cache[ck] || (cache[ck] = await fetchMenu(state.which, week[0], week[4], { full: true }));
     } catch (e) {
       console.error(e);
-      $('#menu-days').innerHTML = `<div class="empty">Couldn’t load the menu right now. <a href="${MENUS[state.which].official}" target="_blank" rel="noopener">Open the official menu</a>.</div>`;
+      $('#mn-week').innerHTML = '';
+      $('#mn-filters').innerHTML = '';
+      $('#mn-view').innerHTML = `<div class="empty">Couldn’t load the menu right now. <a href="${MENUS[state.which].official}" target="_blank" rel="noopener">Open the official menu</a>.</div>`;
+      return;
+    }
+    regs = regularsIn(data);
+    byId = {};
+    served = {};
+    for (const [k, day] of Object.entries(data)) {
+      for (const list of Object.values(day)) {
+        for (const x of list) { byId[x.id] = x; (served[x.id] ??= []).includes(k) || served[x.id].push(k); }
+      }
+    }
+    if (!dayOf(state.day) || !data[state.day]) {
+      state.day = key(dayOf(todayK) && data[todayK] ? dayOf(todayK) : week.find((d) => data[key(d)]) || week[0]);
+    }
+    paintWeek();
+    paintFilters();
+    paintDay();
+    if (wantDish && byId[wantDish]) openDish(wantDish);
+    wantDish = null;
+  }
+
+  // The day's dishes: [changing, regulars]. If every dish is a regular, they all count as changing.
+  const splitDay = (k) => {
+    const list = entrees(data[k]);
+    const fresh = list.filter((x) => !regs.has(x.name));
+    return fresh.length ? [fresh, list.filter((x) => regs.has(x.name))] : [list, []];
+  };
+
+  function paintWeek() {
+    $('#mn-week').innerHTML = week.map((d) => {
+      const k = key(d);
+      const [fresh] = splitDay(k);
+      const star = fresh.find((x) => x.image) || fresh[0];
+      return `<button type="button" role="tab" class="mn-day${k === todayK ? ' today' : ''}" data-k="${k}"
+          aria-selected="${k === state.day}" tabindex="${k === state.day ? 0 : -1}" ${data[k] ? '' : 'disabled'}>
+        <span class="mn-dow">${k === todayK ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+        <span class="mn-date">${d.getDate()}</span>
+        <span class="mn-thumb">${star ? pic(star) : ''}</span>
+        <span class="mn-star">${star ? esc(dish(star).name) : 'No menu'}</span></button>`;
+    }).join('');
+  }
+
+  function paintFilters() {
+    const marked = Object.keys(ALLERGENS).filter((a) => Object.values(byId).some((x) => x.allergens[a]));
+    const chip = (kind, v, label) => `<button type="button" class="chip" data-f="${kind}" data-v="${v}" aria-pressed="${state[kind].has(v)}">${label}</button>`;
+    $('#mn-filters').innerHTML = !Object.keys(byId).length ? '' : `
+      <span class="mn-flabel">Show</span>${DIETS.map(([v, l]) => chip('diet', v, l)).join('')}
+      ${marked.length ? `<span class="mn-flabel">Avoid</span>${marked.map((a) => chip('avoid', a, ALLERGENS[a])).join('')}` : ''}`;
+  }
+
+  // Filters dim what doesn't fit rather than hiding it, so the day never jumps around.
+  // Diet marks come from the dish names (V, VG, GF), so they apply to main dishes only.
+  function applyFilters() {
+    let shown = 0;
+    let total = 0;
+    let dashed = 0;
+    $$('#mn-view [data-id]').forEach((el) => {
+      const x = byId[el.dataset.id];
+      const tags = dish(x).tags;
+      const main = el.classList.contains('mn-card');
+      const dietOk = !main || [...state.diet].every((t) => (t === 'V' ? tags.includes('V') || tags.includes('VG') : tags.includes(t)));
+      const has = [...state.avoid].filter((a) => x.allergens[a]);
+      const unknown = [...state.avoid].filter((a) => !(a in x.allergens));
+      const off = !dietOk || has.length > 0;
+      el.classList.toggle('off', off);
+      el.classList.toggle('unk', !off && unknown.length > 0);
+      el.title = has.length ? `Contains ${has.map((a) => ALLERGENS[a]).join(', ')}`
+        : !off && unknown.length ? `${unknown.map((a) => ALLERGENS[a]).join(', ')}: not listed for this dish` : '';
+      if (main) { total++; if (!off) shown++; }
+      if (!off && unknown.length) dashed++;
+    });
+    const note = $('#mn-fnote');
+    if (note) {
+      note.textContent = !state.diet.size && !state.avoid.size ? ''
+        : `${shown} of ${total} dishes fit.${dashed ? ' Dashed: the district doesn’t list that allergen for it.' : ''}${
+          state.avoid.size ? ' If you have a food allergy, check with the cafeteria staff.' : ''}`;
     }
   }
+
+  const card = (x, i) => {
+    const v = dish(x);
+    const n = x.nut;
+    const peek = [n.prod_carbs != null && `${num(n.prod_carbs)}g carbs`, n.prod_total_fat != null && `${num(n.prod_total_fat)}g fat`,
+                  n.prod_sodium != null && `${num(n.prod_sodium)}mg sodium`].filter(Boolean).join(' · ');
+    return `<button type="button" class="mn-card" data-id="${esc(x.id)}" style="--i:${i}">
+      <span class="mn-photo">${pic(x)}${peek ? `<span class="mn-peek">${peek}</span>` : ''}</span>
+      <span class="mn-name">${esc(v.name)}${v.tags.length ? ` ${diet(v.tags)}` : ''}</span>
+      <span class="mn-kcal">${x.calories ? `<b>${x.calories}</b> cal` : ''}${n.prod_protein != null ? `${x.calories ? ' · ' : ''}${num(n.prod_protein)}g protein` : ''}</span></button>`;
+  };
+  const side = (x) => {
+    const v = dish(x);
+    return `<button type="button" class="mn-side" data-id="${esc(x.id)}"><span aria-hidden="true">${v.icon}</span>${esc(v.name)}${
+      x.calories ? `<small>${x.calories} cal</small>` : ''}</button>`;
+  };
+
+  function paintDay() {
+    const k = state.day;
+    const d = dayOf(k);
+    const day = data[k];
+    $$('#mn-week [role=tab]').forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+    const plan = bell && d ? dayPlan(bell, d) : null;
+    const lp = plan?.periods?.find(([name]) => /^Lunch/.test(name));
+    const head = `<div class="mn-dayhead"><h2>${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
+      ${k === todayK ? '<span class="tag today-tag">Today</span>' : ''}
+      ${state.which === 'lunch' && lp ? `<span class="mn-when">Lunch ${clock(lp[1])}–${clock(lp[2])}</span>` : ''}</div>`;
+    if (!day) {
+      $('#mn-view').innerHTML = `${head}<p class="empty">No ${state.which} menu posted for this day. It may be a holiday or a day off.</p>`;
+      return;
+    }
+    const [mains, regulars] = splitDay(k);
+    const sides = sortedCats(day).filter((c) => c !== 'Entrees' && day[c].length);
+    $('#mn-view').innerHTML = `${head}
+      <div class="mn-cards">${mains.map(card).join('')}</div>
+      ${regulars.length ? `<h3 class="mn-h">Regulars <span>on the menu most days</span></h3>
+        <div class="mn-cards mn-small">${regulars.map((x, i) => card(x, i + mains.length)).join('')}</div>` : ''}
+      ${sides.length ? `<h3 class="mn-h">On the side</h3><div class="mn-sides">${sides.map((c) =>
+        `<div class="mn-side-group"><span class="mn-side-label">${esc(c)}</span>${day[c].map(side).join('')}</div>`).join('')}</div>` : ''}`;
+    applyFilters();
+  }
+
+  // ── the dish panel ──
+  const sheet = document.createElement('div');
+  sheet.className = 'mn-sheet';
+  sheet.hidden = true;
+  sheet.innerHTML = '<div class="mn-scrim" data-close></div><aside class="mn-panel" role="dialog" aria-modal="true" aria-labelledby="mn-d-name"></aside>';
+  document.body.append(sheet);
+  const panel = $('.mn-panel', sheet);
+  let back = null;
+
+  function openDish(id, from) {
+    const x = byId[id];
+    if (!x) return;
+    const v = dish(x);
+    const n = x.nut;
+    // Where the calories come from: 4 kcal per gram of protein and carbs, 9 per gram of fat
+    const parts = [['Protein', n.prod_protein, 4, 'p'], ['Carbs', n.prod_carbs, 4, 'c'], ['Fat', n.prod_total_fat, 9, 'f']];
+    const known = parts.every(([, g]) => g != null);
+    const sum = known ? parts.reduce((s, [, g, per]) => s + g * per, 0) : 0;
+    const bar = known && sum ? `<div class="mn-split" role="img" aria-label="Calories from ${parts.map(([l, g, per]) => `${l.toLowerCase()} ${Math.round(g * per / sum * 100)}%`).join(', ')}">
+        ${parts.map(([, g, per, c]) => `<i class="s-${c}" style="width:${(g * per / sum * 100).toFixed(1)}%"></i>`).join('')}</div>
+      <div class="mn-legend">${parts.map(([l, g, per, c]) => `<span><i class="s-${c}"></i>${l} <b>${num(g)}g</b> <small>${Math.round(g * per / sum * 100)}%</small></span>`).join('')}</div>` : '';
+    const rows = FACTS.filter(([, f]) => n[f] != null).map(([label, f, unit, ind]) =>
+      `<tr class="in${ind}"><td>${label}</td><td>${num(n[f])} ${unit}</td></tr>`).join('');
+    const has = Object.keys(ALLERGENS).filter((a) => x.allergens[a]);
+    const said = Object.keys(x.allergens).length;
+    const days = (served[id] || []).filter((k) => k !== state.day).map((k) => (k === todayK ? 'today'
+      : dayOf(k).toLocaleDateString('en-US', { weekday: 'long' })));
+    panel.innerHTML = `
+      <button type="button" class="mn-x icon-btn" data-close aria-label="Close">✕</button>
+      <div class="mn-hero">${x.image ? `<img class="bg" src="${esc(x.image)}" alt=""><img class="fg" src="${esc(x.image)}" alt="${esc(v.name)}">`
+        : `<span class="mn-emoji">${v.icon}</span>`}</div>
+      <h2 id="mn-d-name">${esc(v.name)}</h2>
+      <p class="mn-d-sub">${v.tags.map((t) => `${diet([t])} ${DIET[t]}`).join(' · ')}${v.tags.length && x.serving ? ' · ' : ''}${x.serving ? `Serving: ${esc(x.serving)}` : ''}</p>
+      ${x.calories ? `<p class="mn-d-cal"><b>${x.calories}</b> calories</p>` : ''}
+      ${bar}
+      ${rows ? `<table class="mn-facts"><caption>Nutrition per serving</caption><tbody>${rows}</tbody></table>` : '<p class="meta">The district hasn’t listed nutrition for this one.</p>'}
+      <div class="mn-allergy ${has.length ? 'has' : ''}"><b>Allergens</b>
+        ${has.length ? `Contains ${has.map((a) => ALLERGENS[a]).join(', ')}.` : said ? 'None marked by the district.' : 'Not listed by the district.'}</div>
+      ${days.length ? `<p class="mn-d-also">Also on the menu ${days.join(', ')} this week.</p>` : ''}
+      <p class="meta mn-d-src">Photo, nutrition and allergens from Santa Clara Unified Nutrition Services. Recipes can change,
+        so if you have a food allergy, check with the cafeteria staff.</p>`;
+    back = from || document.activeElement;
+    sheet.hidden = false;
+    document.documentElement.classList.add('mn-locked');
+    void panel.offsetWidth;                        // lay it out closed first, so the slide-in runs
+    sheet.classList.add('open');
+    $('.mn-x', panel).focus({ preventScroll: true });
+    panel.scrollTop = 0;
+    setHash(id);
+  }
+  function closeDish() {
+    if (sheet.hidden) return;
+    sheet.classList.remove('open');
+    document.documentElement.classList.remove('mn-locked');
+    setTimeout(() => { if (!sheet.classList.contains('open')) sheet.hidden = true; }, 260);
+    back?.focus?.({ preventScroll: true });
+    setHash();
+  }
+  sheet.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeDish(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDish();
+    if (e.key === 'Tab' && !sheet.hidden) {               // keep Tab inside the panel while it's open
+      const f = [...panel.querySelectorAll('button, a[href]')];
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f.at(-1).focus(); }
+      else if (!e.shiftKey && document.activeElement === f.at(-1)) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+
+  // ── controls ──
+  $('#mn-view').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-id]');
+    if (b) openDish(b.dataset.id, b);
+  });
+  const pickDay = (k, focus) => {
+    state.day = k;
+    paintDay();
+    setHash();
+    if (focus) $(`#mn-week [data-k="${k}"]`)?.focus();
+  };
+  $('#mn-week').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-k]');
+    if (b && !b.disabled) pickDay(b.dataset.k);
+  });
+  $('#mn-week').addEventListener('keydown', (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const open = week.map(key).filter((k) => data[k]);
+    const i = open.indexOf(state.day);
+    pickDay(open[(i + step + open.length) % open.length], true);
+  });
+  $('#mn-filters').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-f]');
+    if (!b) return;
+    const set = state[b.dataset.f];
+    set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
+    b.setAttribute('aria-pressed', set.has(b.dataset.v));
+    applyFilters();
+  });
   $('#menu-which').addEventListener('click', (e) => {
     const b = e.target.closest('[data-which]');
-    if (b) { state.which = b.dataset.which; draw(); }
+    if (b && b.dataset.which !== state.which) { state.which = b.dataset.which; load().then(() => setHash()); }
   });
-  $('#prev-week').onclick = () => { state.monday = addDays(state.monday, -7); draw(); };
-  $('#next-week').onclick = () => { state.monday = addDays(state.monday, 7); draw(); };
-  $('#this-week').onclick = () => { state.monday = mondayOf(new Date()); draw(); };
-  const h = new Date().getHours();
-  if (h < 10) state.which = 'breakfast';   // before 10 AM, breakfast is what people want
-  draw();
+  const toWeek = (m) => { state.monday = m; state.day = null; load().then(() => setHash()); };
+  $('#prev-week').onclick = () => toWeek(addDays(state.monday, -7));
+  $('#next-week').onclick = () => toWeek(addDays(state.monday, 7));
+  $('#this-week').onclick = () => toWeek(mondayOf(new Date()));
+  load();
 }

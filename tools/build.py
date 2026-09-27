@@ -793,7 +793,7 @@ def build_static():
 
     page("menu/", "Cafeteria menu", """
 <h1>Cafeteria menu</h1>
-<p class="lede">Breakfast and lunch at Wilcox this week, straight from the district’s menu.</p>
+<p class="lede">Breakfast and lunch at Wilcox, with photos, nutrition and allergens, straight from the district’s menu.</p>
 <div id="menu-app">
   <div class="menu-bar">
     <div class="seg" id="menu-which" role="radiogroup" aria-label="Meal">
@@ -804,11 +804,16 @@ def build_static():
       <b id="week-label"></b><button type="button" class="week-btn" id="next-week" aria-label="Next week">›</button>
       <button type="button" class="chip" id="this-week">This week</button></div>
   </div>
-  <div id="menu-days" class="menu-days"></div>
-  <p class="meta">Menus can change. <b>(V)</b> vegetarian · <b>(VG)</b> vegan · <b>(GF)</b> gluten-free. For allergens and nutrition, see the
-    <a id="official" href="#" target="_blank" rel="noopener">official menu ↗</a>. Menu data: Santa Clara Unified Nutrition Services.</p>
+  <div id="mn-week" class="mn-week" role="tablist" aria-label="Day"></div>
+  <div id="mn-filters" class="mn-filters" role="group" aria-label="Filter dishes"></div>
+  <p id="mn-fnote" class="mn-fnote" aria-live="polite"></p>
+  <div id="mn-view" class="mn-view" role="tabpanel"></div>
+  <p class="meta mn-foot">Tap or click any dish for its nutrition and allergens. Menus can change. <b>V</b> vegetarian · <b>VG</b> vegan ·
+    <b>GF</b> gluten-free, as the district marks them. Allergen marks are the district’s: if you have a food allergy, check with
+    the cafeteria staff. Menu, photos and nutrition: Santa Clara Unified Nutrition Services ·
+    <a id="official" href="#" target="_blank" rel="noopener">official menu ↗</a></p>
 </div>""", active="menu/", script="menu.js", data={"page": "menu"},
-         desc="This week’s breakfast and lunch menu at Wilcox High School.")
+         desc="This week’s breakfast and lunch at Wilcox High School, with photos, nutrition and allergens for each dish.")
 
     page("clubs/", "Clubs", """
 <h1>Clubs</h1>

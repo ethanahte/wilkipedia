@@ -527,6 +527,31 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Cafeteria menu** (`assets/js/menu.js`) is read live in the browser from the
   district's menu service (api.schoolnutritionandfitness.com GraphQL; it allows
   our origin). Menu-type ids live in `MENUS`. Never copy menu data into the repo.
+  - **Fields.** GraphQL introspection is off. The field names (`FULL`: image_url1,
+    portion_size, prod_* nutrients, sugar, allergen_*) come from the district's own
+    webmenus2 app bundle. `fetchMenu(…, {full: true})` asks for them. The home card
+    and map ask only for `BASIC`, to stay light. The service refuses Python's
+    default user agent (403), so test it with curl.
+  - **Allergens** are "1"/"0"/null strings. Only "1" means contains, and null
+    means the district doesn't say. Never show null as "free of". allergen_milk is
+    folded into dairy. The panel says "Contains …", "None marked by the district"
+    or "Not listed by the district", always with "check with the cafeteria staff".
+  - **Menu page.** A week strip (each day's headline dish photo). The day's
+    changing dishes are photo cards and the regulars (`regularsIn`, ≥70% of the
+    week) a compact row. The other categories are "On the side" chips.
+    Show/Avoid filters dim rather than hide. Diet marks come from names
+    (V/VG/GF) and apply to main dishes only. An avoid-allergen the district
+    doesn't list for a dish gets a dashed border.
+  - **Dish panel.** Hover only previews (carbs · fat · sodium on the photo).
+    Tap/click opens the panel: a right-side drawer, or a bottom sheet under 640px.
+    It shows the photo, calories, a protein/carbs/fat calorie split
+    (4/4/9 kcal per g), the nutrition table (`FACTS`), allergens, and the other
+    days this week it's served.
+  - **Links.** `menu/#lunch/2026-09-30[/<dish id>]` opens a day or a dish. The
+    home card's tiles and breakfast dishes link this way.
+  - **Photos** are the district's 200px thumbnails (docs.isitesoftware.com): fine
+    on cards, never shown large. A photo that fails to load becomes the dish's
+    `FOOD` icon.
   The home page's "next meal" card (`mountNextMeal`, under the bell strip):
   - It shows today until that day's Lunch period ends (from `data/bell.json`),
     then the next school day. Tabs cover the next 5 menu days, all from one
