@@ -15,9 +15,10 @@ create table public.profiles (
   school_verified boolean not null default false,       -- signed in with an @scusd.net account
   -- Profile pictures come from a fixed set of icons + colours, never uploads.
   -- Keys must match AVATARS / AVATAR_COLORS in assets/js/ui.js.
+  -- tiger and ball are retired from the picker but stay allowed (migration 015 added rose, bulb, bird)
   avatar       text check (avatar in ('fox', 'panda', 'tiger', 'owl', 'turtle', 'octopus',
                'frog', 'penguin', 'cat', 'dog', 'koala', 'bee', 'bolt', 'rocket', 'books', 'flask',
-               'palette', 'music', 'ball', 'star')),
+               'palette', 'music', 'ball', 'star', 'rose', 'bulb', 'bird')),
   avatar_color text not null default 'green' check (avatar_color in
                ('green', 'blue', 'purple', 'red', 'orange', 'teal', 'pink', 'gray')),
   grad_year    int check (grad_year between 2020 and 2040),

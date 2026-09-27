@@ -505,7 +505,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   device setting. The dark palette lives in two blocks in style.css; edit both.
 - **Profile pictures are icons + colours, never uploads** (no moderation load, no
   student photos). Keys are in `AVATARS`/`AVATAR_COLORS` (ui.js) and in the SQL
-  check constraints; keep them in sync.
+  check constraints; keep them in sync. A new icon needs a migration that widens
+  profiles_avatar_check (like 015).
+  - **Looks.** Each icon is a one-line drawing (`AVATAR_LINES`,
+    `assets/js/avatar-art.js`): one continuous cursive stroke, a single `M`. Ethan
+    asked for loops and crossings and no unneeded sharp corners (only the star keeps
+    its points).
+  - **Emoji option.** `avatarHtml` renders both the drawing and the emoji;
+    html[data-avatars] shows one. That is the 'avatars' pref, default 'lines', set
+    in Settings → Appearance → Profile pictures.
+  - **On the page.** The line is the member's colour mixed toward --ink, so it reads
+    in day and night mode. Picking an icon on the Account page draws it (the `.draw`
+    class).
+  - **Adding one.** The drawings were designed as gesture points smoothed into
+    curves (centripetal Catmull-Rom). To add one, draw a single path in a 64×64 box.
+  - **Retired.** tiger and ball left the picker (nobody had them). The constraint
+    still allows them, and such a profile shows the member's initial. Migration 015
+    added rose, bulb and bird. Until it runs, saving one of those shows a
+    "needs migration 015" message.
 - **Map** (`assets/js/map.js`) reads `data/map.json`: 126 room boxes traced off the
   school's campus map (`assets/map/campus-map.png`, pixel coordinates). (An
   aerial photo view was tried and removed at Ethan's request.) The camera is the SVG viewBox. A room's

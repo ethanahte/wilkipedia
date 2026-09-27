@@ -188,6 +188,18 @@ body:not(.signed-in) .members-only, body.signed-in .guests-only { display: none 
 .av-md.has-icon { font-size: 1.3rem; }
 .av-lg { width: 72px; height: 72px; font-size: 1.8rem; }
 .av-lg.has-icon { font-size: 2.3rem; }
+/* One-line drawings (avatar-art.js). The line is the member's colour pulled toward the
+   text colour, so it stays readable on the tinted circle in day and night mode. */
+.avatar .av-line { width: 80%; height: 80%; fill: none; stroke: color-mix(in srgb, var(--av) 72%, var(--ink));
+  stroke-width: 3.8; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.av-sm .av-line { stroke-width: 4.9; }
+.av-lg .av-line { stroke-width: 2.9; }
+.avatar .av-emoji { display: none; }
+html[data-avatars="emoji"] .avatar .av-line { display: none; }
+html[data-avatars="emoji"] .avatar .av-emoji { display: inline; }
+/* Picking an icon on the Account page draws it, one stroke, start to finish */
+@keyframes av-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.avatar.draw .av-line path { stroke-dasharray: 1; animation: av-draw 1.3s cubic-bezier(.45, .05, .3, 1) both; }
 .nav-review { font: 600 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); text-decoration: none; }
 .nav-review:hover { color: var(--bar-ink); }
 .hsearch input { background: #1f1f1f; border-color: #333; color: var(--bar-ink); }

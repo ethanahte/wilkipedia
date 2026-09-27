@@ -439,7 +439,9 @@ const pages = {
               <div class="hint">Shown on everything you write. Your first name, or a name people know you by.</div>
               <input id="dn" value="${esc(me.name)}" maxlength="40" required></div>
             <div class="field"><span class="flabel">Profile picture</span>
-              <div class="hint">Pick an icon and a colour. Photos aren’t allowed, to keep everyone’s privacy.</div>
+              <div class="hint">Pick an icon and a colour. Photos aren’t allowed, to keep everyone’s privacy. ${getPref('avatars') === 'emoji'
+                ? 'You’re seeing the emoji icons. <a href="' + root + 'settings/#appearance">Switch to the one-line drawings</a>.'
+                : 'Each icon is drawn in one continuous line. Prefer the original emoji? <a href="' + root + 'settings/#appearance">Switch in Settings</a>.'}</div>
               <div class="av-grid" id="av-grid" role="radiogroup" aria-label="Profile icon">
                 <button type="button" role="radio" data-av="" aria-checked="${!me.avatar}" title="Your initial">${avatarHtml({ ...me, avatar: null }, 'md')}</button>
                 ${Object.keys(AVATARS).map((k) => `<button type="button" role="radio" data-av="${k}" aria-checked="${me.avatar === k}" title="${k}">${avatarHtml({ ...me, avatar: k }, 'md')}</button>`).join('')}
@@ -479,6 +481,7 @@ const pages = {
           });
           $$('#swatches [data-color]').forEach((b) => b.setAttribute('aria-checked', b.dataset.color === pick.color));
           $('.profile-head .avatar').outerHTML = avatarHtml({ name: me.name, ...pick }, 'lg');
+          $('.profile-head .avatar').classList.add('draw');        // the new icon draws itself
         };
         $('#av-grid').onclick = (e) => { const b = e.target.closest('[data-av]'); if (b) { pick.avatar = b.dataset.av || null; repaint(); } };
         $('#swatches').onclick = (e) => { const b = e.target.closest('[data-color]'); if (b) { pick.color = b.dataset.color; repaint(); } };
@@ -548,6 +551,7 @@ const pages = {
           row('Class colour', classNote(me), classSeg(me), true),
           row('Text size', 'Makes all text on the site bigger.', seg('set-text', 'Text size', getPref('text'), [['normal', 'Default'], ['large', 'Large'], ['larger', 'Larger']])),
           row('Motion', 'Turn off animations like the night-mode circle and the moving planets.', seg('set-motion', 'Motion', getPref('motion'), [['system', 'Match my device'], ['reduce', 'Reduce'], ['full', 'Full']])),
+          row('Profile pictures', 'How everyone’s profile icons look to you: one-line drawings, or the original emoji.', seg('set-avatars', 'Profile pictures', getPref('avatars'), [['lines', 'Line drawings'], ['emoji', 'Emoji']])),
         ].join('')],
         ['language', 'Language', row('Language', 'Menus and buttons use our own translations. Everything else is translated by Google.',
           `<select id="set-lang" class="set-select">${LANGS.map(([code, native, english]) => `<option value="${code}" ${code === currentLang() ? 'selected' : ''}>${esc(native)}${native !== english ? ` · ${esc(english)}` : ''}</option>`).join('')}</select>`)],
@@ -611,6 +615,7 @@ const pages = {
       }); };
       segWire('set-text', (v) => setPref('text', v));
       segWire('set-motion', (v) => setPref('motion', v));
+      segWire('set-avatars', (v) => setPref('avatars', v));
       segWire('set-bview', (v) => ls.set('wilkipedia-bounty-view', v));
       $('#set-lang').onchange = (e) => setLanguage(e.target.value);
       $('#set-bell').onchange = (e) => setPref('bell', e.target.checked ? 'on' : 'off');

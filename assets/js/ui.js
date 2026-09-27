@@ -3,6 +3,7 @@
 
 import { store, MODE, REVIEWER_ROLES, TERMS_VERSION, canEditOwn } from './store.js';
 import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear } from './forms.js';
+import { AVATAR_LINES } from './avatar-art.js';
 
 export const root = document.body.dataset.root || './';
 export const $ = (sel, el = document) => el.querySelector(sel);
@@ -74,18 +75,24 @@ export const suggestLink = (st, sub) => (canEditOwn(sub) && sub.user_id && sub.u
 // A fixed set of icons and colours: nothing to moderate, no photos of students.
 // Keys must match the check constraints on profiles.avatar / avatar_color.
 export const AVATARS = {
-  fox: '🦊', panda: '🐼', tiger: '🐯', owl: '🦉', turtle: '🐢', octopus: '🐙', frog: '🐸',
-  penguin: '🐧', cat: '🐱', dog: '🐶', koala: '🐨', bee: '🐝', bolt: '⚡', rocket: '🚀',
-  books: '📚', flask: '🧪', palette: '🎨', music: '🎵', ball: '🏀', star: '⭐',
+  fox: '🦊', panda: '🐼', owl: '🦉', turtle: '🐢', octopus: '🐙', frog: '🐸', penguin: '🐧',
+  cat: '🐱', dog: '🐶', koala: '🐨', bee: '🐝', bolt: '⚡', rocket: '🚀', books: '📚',
+  flask: '🧪', palette: '🎨', music: '🎵', star: '⭐', rose: '🌹', bulb: '💡', bird: '🐦',
 };
+// Retired from the picker (nobody had them): tiger, ball. The database still accepts
+// them, and a profile that has one shows the member's initial instead.
 export const AVATAR_COLORS = {
   green: '#2f7a57', blue: '#3a6bb0', purple: '#7a5bb5', red: '#b8504a',
   orange: '#c7772a', teal: '#2a8582', pink: '#b85888', gray: '#6f746c',
 };
 // Accepts a User ({avatar, color, name}) or a row ({avatar, color, author}).
+// An icon carries both looks: the one-line drawing (default) and the emoji, and
+// html[data-avatars] (Settings → Appearance) decides which one shows.
 export function avatarHtml(p, size = 'sm') {
   const label = p.name ?? p.author ?? p.display_name ?? '?';
-  const glyph = AVATARS[p.avatar] || esc(label.trim().charAt(0).toUpperCase() || '?');
+  const glyph = AVATARS[p.avatar]
+    ? `${AVATAR_LINES[p.avatar] ? `<svg class="av-line" viewBox="0 0 64 64"><path pathLength="1" d="${AVATAR_LINES[p.avatar]}"/></svg>` : ''}<span class="av-emoji">${AVATARS[p.avatar]}</span>`
+    : esc(label.trim().charAt(0).toUpperCase() || '?');
   const bg = AVATAR_COLORS[p.color ?? p.avatar_color] || AVATAR_COLORS.gray;
   return `<span class="avatar av-${size}${AVATARS[p.avatar] ? ' has-icon' : ''}" style="--av:${bg}" aria-hidden="true">${glyph}</span>`;
 }
@@ -101,7 +108,7 @@ export function themePref() {
 // Each is stored as localStorage 'wilkipedia-<name>' and mirrored on
 // html[data-<name>] so CSS can react. THEME_BOOT in build.py applies them before
 // first paint. Defaults are stored as "nothing", so a reset is just removal.
-export const PREF_DEFAULTS = { text: 'normal', motion: 'system', bell: 'on', fab: 'on' };
+export const PREF_DEFAULTS = { text: 'normal', motion: 'system', bell: 'on', fab: 'on', avatars: 'lines' };
 export function getPref(name) {
   try { return localStorage.getItem('wilkipedia-' + name) || PREF_DEFAULTS[name]; } catch { return PREF_DEFAULTS[name]; }
 }

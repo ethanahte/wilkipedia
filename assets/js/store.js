@@ -120,7 +120,11 @@ async function live() {
     },
     async updateProfile(fields) {
       const row = Object.fromEntries(Object.entries(fields).filter(([k]) => PROFILE_FIELDS.includes(k)));
-      const data = ok(await sb.from('profiles').update(row).eq('id', me.id).select('*').single());
+      const res = await sb.from('profiles').update(row).eq('id', me.id).select('*').single();
+      if (res.error && /avatar_check/.test(res.error.message)) {         // before migration 015
+        throw new Error('The rose, light bulb and bird icons need migration 015 run in Supabase first.');
+      }
+      const data = ok(res);
       me = toUser(data);
       listeners.forEach((f) => f(me));
     },
