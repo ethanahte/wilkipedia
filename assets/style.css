@@ -122,6 +122,10 @@ header.site { background: var(--bar); color: var(--bar-ink); border-bottom: 3px 
 .icon-btn { background: none; border: 1px solid #3a3a3a; color: var(--bar-ink); width: 34px; height: 34px; border-radius: 50%;
   display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
 .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+.set-btn { text-decoration: none; }
+.set-btn svg { width: 17px; height: 17px; }
+/* Narrow phones have room for it only where the search button steps aside (home) */
+@media (max-width: 440px) { body:not(.home) .set-btn { display: none; } }
 
 /* "More" menu */
 .more { position: relative; }

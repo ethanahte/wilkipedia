@@ -297,6 +297,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div class="lang"><button type="button" class="icon-btn lang-btn" id="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false" title="Language / Idioma">{ICONS["globe"]}<span class="lang-code" translate="no"></span></button>
       <div class="lang-menu" id="lang-menu" role="menu" hidden></div></div>
     <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
+    <a class="icon-btn set-btn" href="{r}settings/" aria-label="Settings" title="Settings">{ICONS["settings"]}</a>
     <div id="auth" class="auth"></div>
   </div>
 </header>

@@ -22,7 +22,8 @@ const STEPS = (name) => [
     text: navigator.platform?.startsWith('Mac') ? 'Classes, teachers, rooms, clubs and more. Press ⌘K from any page.'
       : 'Classes, teachers, rooms, clubs and more. Press Ctrl K from any page.' },
   { sel: ['#lang-btn'], title: 'Language', text: 'Read Wilkipedia in 15 other languages.' },
-  { sel: ['#theme-toggle'], title: 'Night mode', text: 'Switch between day and night. Bigger text and other options are in Settings.' },
+  { sel: ['#theme-toggle'], title: 'Night mode', text: 'Switch between day and night.' },
+  { sel: ['.set-btn'], title: 'Settings', text: 'Text size, motion, language, class colour, cookies and the rest, all in one place.' },
   { sel: ['#contribute-fab'], title: 'Contribute',
     text: 'Know something about a class? Add info, a tip or a study guide. Reviewers check it, and you earn points on the Leaderboard.' },
   { sel: ['#bounty-tab'], title: 'Bounties', text: 'Pages that still need writing. Claim one and write it up.' },

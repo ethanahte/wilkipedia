@@ -58,6 +58,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - Schema changes: add a numbered file in `supabase/migrations/` for the live
   database AND fold the change into `schema.sql` for fresh setups.
 - **Navigation:** header = Map + Classes + a "More" panel grouped into columns (`NAV`/`MORE_GROUPS` in build.py).
+  The header's icon buttons are search (phones), language, night mode and a Settings
+  gear. On phones under 440px the gear shows only on the home page, where the
+  search button steps aside; otherwise "Sign in" wraps to a second line.
   The bounty board belongs to the review team: reviewers/admins see and claim
   bounties, only admins post/edit/close them (RLS since migration 008, plus
   `is-team` UI gating and the shared `openBountyEditor` in ui.js). Everyone
