@@ -916,6 +916,7 @@ a.res-card:hover b { text-decoration: underline 2px var(--gold); text-underline-
 .mn-side:hover { border-color: var(--ink); }
 .mn-side small { color: var(--muted); font-size: .74rem; }
 .mn-foot { margin-top: 28px; }
+.mn-src { margin: -6px 0 4px; font-size: .92rem; }
 /* the dish panel: a drawer on the right, a bottom sheet on phones */
 html.mn-locked { overflow: hidden; }
 .mn-sheet { position: fixed; inset: 0; z-index: 70; }

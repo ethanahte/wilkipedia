@@ -803,6 +803,7 @@ def build_static():
 <h1>Cafeteria menu</h1>
 <p class="lede">Breakfast and lunch at Wilcox, with photos, nutrition and allergens, straight from the district’s menu.</p>
 <div id="menu-app">
+  <p class="mn-src"><a class="official-link" href="https://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a7f7a63fe03f3701a08feef&amp;siteCode=2714" target="_blank" rel="noopener">View the original on the district’s menu site ↗</a></p>
   <div class="menu-bar">
     <div class="seg" id="menu-which" role="radiogroup" aria-label="Meal">
       <button type="button" role="radio" data-which="breakfast">Breakfast</button>
@@ -819,7 +820,7 @@ def build_static():
   <p class="meta mn-foot">Tap or click any dish for its nutrition and allergens. Menus can change. <b>V</b> vegetarian · <b>VG</b> vegan ·
     <b>GF</b> gluten-free, as the district marks them. Allergen marks are the district’s: if you have a food allergy, check with
     the cafeteria staff. Menu, photos and nutrition: Santa Clara Unified Nutrition Services ·
-    <a id="official" href="#" target="_blank" rel="noopener">official menu ↗</a></p>
+    <a id="official" class="official-link" href="https://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a7f7a63fe03f3701a08feef&amp;siteCode=2714" target="_blank" rel="noopener">official menu ↗</a></p>
 </div>""", active="menu/", script="menu.js", data={"page": "menu"},
          desc="This week’s breakfast and lunch at Wilcox High School, with photos, nutrition and allergens for each dish.")
 

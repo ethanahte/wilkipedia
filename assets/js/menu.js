@@ -300,7 +300,7 @@ if ($('#menu-app')) {
   async function load() {
     week = [0, 1, 2, 3, 4].map((i) => addDays(state.monday, i));
     $('#week-label').textContent = `${week[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${week[4].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    $('#official').href = MENUS[state.which].official;
+    $$('.official-link').forEach((a) => { a.href = MENUS[state.which].official; });   // the district's own page for this meal
     $$('#menu-which [data-which]').forEach((b) => b.setAttribute('aria-checked', b.dataset.which === state.which));
     $('#mn-view').innerHTML = `<div class="mn-cards">${'<div class="mn-card mn-skel"><span class="mn-photo"></span><span class="mn-name">&nbsp;</span></div>'.repeat(5)}</div>`;
     const ck = `${state.which}:${key(state.monday)}`;
@@ -470,7 +470,8 @@ if ($('#menu-app')) {
         ${has.length ? `Contains ${has.map((a) => ALLERGENS[a]).join(', ')}.` : said ? 'None marked by the district.' : 'Not listed by the district.'}</div>
       ${days.length ? `<p class="mn-d-also">Also on the menu ${days.join(', ')} this week.</p>` : ''}
       <p class="meta mn-d-src">Photo, nutrition and allergens from Santa Clara Unified Nutrition Services. Recipes can change,
-        so if you have a food allergy, check with the cafeteria staff.</p>`;
+        so if you have a food allergy, check with the cafeteria staff.
+        <a href="${MENUS[state.which].official}" target="_blank" rel="noopener">Original menu ↗</a></p>`;
     back = from || document.activeElement;
     sheet.hidden = false;
     document.documentElement.classList.add('mn-locked');
