@@ -350,12 +350,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       20 units, white panels over a glass strip.
     - The front has the storefront under the covered walkway: six groups of
       `storefront()` bays between cream piers. A bay is glass over a solid
-      lower panel with a transom row, or glass doors. There's a SNACK BAR
-      plaque by the second group's door.
-    - West wing: a notice board, yellow doors, windows, a white ice machine
-      and a dark door. East wing: a yellow door, the cream box fountain with
-      two bubblers, a fire bell and a sign, and a pair of dark doors.
-    - The walkway (landmarks.js) stands on grey steel posts.
+      lower panel with a transom row, or glass doors.
+    - West wing, west to east (IMG_2367/2368/2370/2371, Ethan):
+      - A solid block (`CAF-box`) stands 1.2 m out into the walkway, with the
+        notice board and a yellow door on its face.
+      - The snack bar is set 0.8 m back (a notch in `CAF-w`'s outline;
+        Ethan: 凹进去). It has three groups between piers (four panes; pane,
+        double doors, pane; panes and a single door with the SNACK BAR
+        plaque).
+      - Then the wall comes forward: a yellow door at the corner, the cream
+        box fountain with two bubblers, the fire bell and notices, and a dark
+        door.
+    - The fountain is on the west wing, not the east one (it was once drawn on
+      the east by mistake). East wing (IMG_2365): blank wall and a pair of dark
+      doors.
+    - The walkway (landmarks.js) stands on grey steel posts. It starts at the
+      block's east edge (x -11.2).
     - Young trees' beds near the cafeteria (z < -12) are low green groundcover.
       The fire hydrant in its ring guard sits by R's north end.
   - **Room plates are hidden for now (Ethan)** except the P building's door

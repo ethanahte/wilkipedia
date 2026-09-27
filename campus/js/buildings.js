@@ -551,13 +551,10 @@ const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, 
 
 function cafFront(W) {
   const z = -30.4, top = 3.1;
-  // the one-storey front (x 0–50): six groups between cream piers (IMG_2364, IMG_2368)
+  // the one-storey front (x 0–50): six groups between cream piers (IMG_2364)
   const groups = ['ppdpp', 'ppps', 'pdp', 'pppp', 'ppdpp', 'sppp'], P = 0.55, gw = (50 - P * (groups.length + 1)) / groups.length;
   for (let i = 0; i <= groups.length; i++) cafPier(W, z, i * (gw + P), i * (gw + P) + P, 3.5);
   groups.forEach((g, i) => storefront(W, z, P + i * (gw + P), P + i * (gw + P) + gw, g, top));
-  // "SNACK BAR C-123" beside the second group's single door
-  const snack = P + (gw + P) + gw + 0.3;
-  onWall(W, southWall(snack - 0.3, snack + 0.3, z + 0.14), 0.3, 1.55, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
   // the tall hall's clerestory, set back above the front's roof: white panels over glass (IMG_2362–2364)
   const ce = southWall(0, 50, -32.8), units = 20, uw = 49.6 / units;
   onWall(W, ce, 0, 0, 0.03, () => {
@@ -571,26 +568,41 @@ function cafFront(W) {
     W.box('flat', 49.8, 5.15, 0.06, 0.07, 2.3, 0.04, CC.frame);
     W.box('flat', 25, 4.83, 0.06, 49.6, 0.06, 0.04, CC.frame);
   });
-  // the west wing (IMG_2371): a notice board, a yellow door, windows, a yellow door,
-  // a white ice machine and a dark door
+  // The west wing, west to east (IMG_2367, IMG_2368, IMG_2370, IMG_2371; Ethan). The
+  // outline is in layout.js (CAF-w's notch, CAF-box).
+  //  · A solid block standing 1.2 m out into the walkway, with the notice board and a
+  //    yellow door on its face. The walkway's roof starts past it (landmarks.js).
+  const BZ = -29.2, bw = southWall(-17.8, -11.2, BZ), bt = (x) => x + 17.8;
+  onWall(W, bw, bt(-15.4), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
+  doorAt(W, bw, bt(-12.6), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  //  · The snack bar, set 0.8 m back (Ethan: 凹进去): three groups between cream piers —
+  //    four panes; a pane, glass double doors and a pane; panes and a single glass door
+  //    with the SNACK BAR plaque beside it (IMG_2368).
+  const RZ = -31.2, P2 = 0.35;
+  let rx = -11.2 + 0.025;
+  [[1.5, 'pppp'], [2.2, 'pdp'], [1.8, 'ppps']].forEach(([w, parts], i) => {
+    if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
+    storefront(W, RZ, rx, rx + w, parts, 3.0);
+    rx += w;
+  });
+  onWall(W, southWall(rx - 1.45, rx - 1.05, RZ + 0.14), 0.2, 1.55, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
+  //  · The wall comes forward again: a yellow door at the corner, the cream fountain box
+  //    with its two stainless bubblers, the red fire bell and a yellow notice above it,
+  //    a white notice to its right, then a dark door (IMG_2367).
   const ww = southWall(-17.8, 0, z), wt = (x) => x + 17.8;
-  onWall(W, ww, wt(-15.4), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
-  doorAt(W, ww, wt(-12.6), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  storefront(W, z, -10.8, -5.4, 'pppp', 2.9);
   doorAt(W, ww, wt(-4.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  W.box('flat', -2.9, 0.95, z + 0.4, 0.9, 1.9, 0.7, color('#eef0ee'));
-  doorAt(W, ww, wt(-1.3), 0.95, 2.2, color('#4f5459'), { frameCol: CC.frame, plain: true });
-  // the east wing (IMG_2365, IMG_2367): a yellow door, the fountain box with its two
-  // bubblers, a fire bell and a sign, then blank wall to a pair of dark doors
-  const ew = southWall(50, 62.6, z), et = (x) => x - 50;
-  doorAt(W, ew, et(51.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  onWall(W, ew, et(53.9), 0, 0.02, () => {
+  onWall(W, ww, wt(-2.9), 0, 0.02, () => {
     W.box('stucco', 0, 0.68, 0.14, 0.78, 1.36, 0.28, RC.wall);                      // the cream pedestal
     for (const [y, x] of [[0.78, -0.12], [1.0, -0.12]]) W.box('flat', x - 0.26, y, 0.22, 0.32, 0.12, 0.3, RC.steel);
     W.box('flat', -0.12, 0.9, 0.29, 0.1, 0.36, 0.02, RC.steel);
   });
-  onWall(W, ew, et(52.6), 3.0, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
-  onWall(W, ew, et(52.6), 1.7, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.26, 0.02, color('#e2b43b')));
+  onWall(W, ww, wt(-3.05), 2.95, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
+  onWall(W, ww, wt(-3.1), 1.75, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.26, 0.02, color('#e2b43b')));
+  onWall(W, ww, wt(-2.2), 1.75, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.3, 0.01, color('#f2f2ee')));
+  doorAt(W, ww, wt(-1.3), 0.95, 2.2, color('#4f5459'), { frameCol: CC.frame, plain: true });
+  // The east wing (IMG_2365): blank wall, then a pair of dark doors. (The fountain
+  // that used to be drawn here is the west wing's, in IMG_2367.)
+  const ew = southWall(50, 62.6, z), et = (x) => x - 50;
   doorAt(W, ew, et(60.6), 1.8, 2.3, color('#4f5459'), { frameCol: CC.frame, plain: true });
 }
 
