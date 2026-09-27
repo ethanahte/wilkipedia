@@ -520,6 +520,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Cafeteria menu** (`assets/js/menu.js`) is read live in the browser from the
   district's menu service (api.schoolnutritionandfitness.com GraphQL; it allows
   our origin). Menu-type ids live in `MENUS`. Never copy menu data into the repo.
+  The home page's "next meal" card (`mountNextMeal`, under the bell strip) shows
+  today's menu until that day's Lunch period ends (from `data/bell.json`), then
+  the next school day's. Breakfast shows until the first bell. It only lists
+  Entrees. Phones get a Breakfast/Lunch toggle and at most 6 items plus "+N more".
 - **Clubs & sports**: `data/activities.json` is the official list scraped from the
   Wilcox site (see its `sources`/`notes`); students add details as `club`/`sport`
   submissions (course_slug null, name in payload.name), matched by slugified name.

@@ -25,7 +25,7 @@ export function dayPlan(bell, d) {
   return { key, ...bell.schedules[key] };
 }
 
-function nextSchoolDay(bell, from) {
+export function nextSchoolDay(bell, from) {
   const d = new Date(from);
   for (let i = 0; i < 21; i++) {
     d.setDate(d.getDate() + 1);

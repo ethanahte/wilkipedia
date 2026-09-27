@@ -921,6 +921,22 @@ a.res-card:hover b { text-decoration: underline 2px var(--gold); text-underline-
 .bell-chips li.done { opacity: .5; }
 .bell-chips li.on { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); opacity: 1; font-weight: 600; }
 .bell-chips li.on small { color: inherit; }
+.next-meal { margin-top: 10px; }
+.next-meal a.bell-more { text-decoration: none; }
+.nm-meals { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 20px; margin-top: 10px; }
+.nm-meal h3 { font: 600 .78rem var(--sans); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 6px; }
+.nm-meal h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.nm-items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.nm-items li { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--rule); font-size: .88rem; background: var(--paper); }
+.nm-items li.nm-more, .nm-seg { display: none; }
+.nm-more a { text-decoration: none; font-weight: 600; }
+@media (max-width: 640px) {
+  .nm-seg { display: inline-flex; margin-top: 10px; }
+  .nm-meals[data-show="breakfast"] [data-meal="lunch"], .nm-meals[data-show="lunch"] [data-meal="breakfast"] { display: none; }
+  .nm-items li:nth-child(n+7):not(.nm-more) { display: none; }
+  .nm-items li.nm-more { display: block; }
+  .nm-items li { font-size: .84rem; padding: 2px 9px; }
+}
 .bell-full { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 10px; }
 .bell-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .bell-table h4 { font: 600 .8rem var(--sans); margin: 0 0 4px; }

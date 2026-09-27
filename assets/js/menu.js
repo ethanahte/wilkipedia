@@ -5,7 +5,8 @@
 // Used two ways: the Menu page (when #menu-app exists) and the Cafeteria
 // panel on the campus map (todaysLunch()).
 
-import { initHeader, $, $$, esc } from './ui.js';
+import { initHeader, $, $$, esc, root } from './ui.js';
+import { loadBell, dayPlan, nextSchoolDay, clock } from './bell.js';
 
 export const MENUS = {
   lunch: { type: '5654e429eabc8820748b4568', label: 'Lunch',
@@ -61,6 +62,71 @@ export async function todaysLunch() {
   const d = new Date();
   const days = await fetchMenu('lunch', d, d);
   return days[key(d)] || null;
+}
+
+// ── the next meal, for the home page ──
+// Today's menu until lunch is over, then the next school day's. Breakfast shows
+// until the first bell. If the menu service has nothing for that day (a day off
+// the bell data doesn't know about), the next day it does have is shown.
+const mins = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3));
+const dayOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+export async function mountNextMeal(el) {
+  try {
+    const bell = await loadBell();
+    const now = new Date();
+    const m = now.getHours() * 60 + now.getMinutes();
+    const lunchOf = (plan) => plan?.periods?.find(([n]) => /^Lunch/.test(n)) || null;
+    const today = dayPlan(bell, now);
+    const lunchEnd = lunchOf(today) ? mins(lunchOf(today)[2]) : 13 * 60 + 30;   // adjusted days: assume 1:30
+    let day = (today.periods || today.adjusted) && m < lunchEnd ? dayOnly(now) : nextSchoolDay(bell, now)[0];
+    if (!day) { el.hidden = true; return; }
+    const end = new Date(day); end.setDate(end.getDate() + 14);
+    const [lunch, breakfast] = await Promise.all([fetchMenu('lunch', day, end), fetchMenu('breakfast', day, end)]);
+    // the first day from `day` on that has a lunch posted
+    for (let i = 0; i < 15 && !lunch[key(day)]; i++) day.setDate(day.getDate() + 1);
+    if (!lunch[key(day)]) { el.hidden = true; return; }
+
+    const isToday = key(day) === key(now);
+    const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+    const when = isToday ? 'Today' : key(day) === key(tomorrow) ? 'Tomorrow'
+      : day.toLocaleDateString('en-US', { weekday: 'long' });
+    const plan = dayPlan(bell, day);
+    const firstBell = plan.periods?.[0]?.[1];
+    const showBreakfast = breakfast[key(day)] && !(isToday && firstBell && m >= mins(firstBell));
+    const lunchTime = lunchOf(plan);
+    // Phones show the first 6 entrées and a "+N more" chip (CSS), one meal at a time
+    const chips = (d) => {
+      const list = d.Entrees || d[sortedCats(d)[0]];
+      return `<ul class="nm-items">${list.map((it) => {
+        const tags = [];
+        const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, x) => { tags.push(x); return ''; });
+        return `<li>${esc(name)}${tags.map((x) => ` <span class="diet d-${x.toLowerCase()}">${x}</span>`).join('')}</li>`;
+      }).join('')}${list.length > 6 ? `<li class="nm-more"><a href="${root}menu/">+${list.length - 6} more</a></li>` : ''}</ul>`;
+    };
+    const meal = (which, label, time, d) => `<div class="nm-meal" data-meal="${which}"><h3>${label}${time ? ` <small>${time}</small>` : ''}</h3>${chips(d)}</div>`;
+    el.innerHTML = `<div class="bell-top">
+        <div class="bell-text"><span class="bell-day">Cafeteria menu · ${when === 'Today' ? 'Today' : `${when}, ${day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}</span>
+          <span class="bell-status"><b>${showBreakfast ? `${when === 'Today' ? 'Today’s' : `${when}’s`} breakfast and lunch` : `Lunch ${when === 'Today' ? 'today' : when === 'Tomorrow' ? 'tomorrow' : `on ${when}`}`}</b></span></div>
+        <a class="bell-more" href="${root}menu/">Full menu</a></div>
+      ${showBreakfast ? `<div class="seg nm-seg" role="radiogroup" aria-label="Meal">
+        <button type="button" role="radio" data-show="breakfast" aria-checked="true">Breakfast</button>
+        <button type="button" role="radio" data-show="lunch" aria-checked="false">Lunch</button></div>` : ''}
+      <div class="nm-meals" data-show="${showBreakfast ? 'breakfast' : 'lunch'}">
+        ${showBreakfast ? meal('breakfast', 'Breakfast', 'before school', breakfast[key(day)]) : ''}
+        ${meal('lunch', 'Lunch', lunchTime ? `${clock(lunchTime[1])}–${clock(lunchTime[2])}` : '', lunch[key(day)])}
+      </div>`;
+    el.querySelector('.nm-seg')?.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-show]');
+      if (!b) return;
+      el.querySelector('.nm-meals').dataset.show = b.dataset.show;
+      el.querySelectorAll('.nm-seg [data-show]').forEach((x) => x.setAttribute('aria-checked', x === b));
+    });
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = `<div class="bell-top"><div class="bell-text"><span class="bell-day">Cafeteria menu</span>
+      <span class="bell-status">Couldn’t load the menu right now.</span></div><a class="bell-more" href="${root}menu/">Full menu</a></div>`;
+  }
 }
 
 // ── the Menu page ──

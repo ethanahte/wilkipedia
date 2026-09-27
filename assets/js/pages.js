@@ -221,6 +221,7 @@ const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.
 const pages = {
   async home() {
     mountBellStrip($('#bell'));
+    import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
     import('./pathways.js').then((m) => m.mount($('#pathways'), s));
     attach($('#home-q'), $('#home-results'));
     addLive(s);

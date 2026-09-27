@@ -367,6 +367,7 @@ def build_home(depts):
                     for href, icon, label, sub in HOME_TILES)
     page("", "Wilkipedia", f"""
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
+<section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
 <section class="hero">
   <h1>Everything Wilcox, in one place.</h1>
   <p class="lede">Classes, teachers, rooms, the bell schedule, clubs and sports, written by Wilcox students for Wilcox students.</p>
