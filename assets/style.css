@@ -126,6 +126,8 @@ header.site { background: var(--bar); color: var(--bar-ink); border-bottom: 3px 
 .set-btn svg { width: 17px; height: 17px; }
 /* Narrow phones have room for it only where the search button steps aside (home) */
 @media (max-width: 440px) { body:not(.home) .set-btn { display: none; } }
+/* …and on mid-size screens the search box gives up the room the gear takes, so the bar wraps no sooner than before */
+@media (min-width: 761px) and (max-width: 1100px) { .hsearch input { width: 160px; } }
 
 /* "More" menu */
 .more { position: relative; }
@@ -226,6 +228,11 @@ textarea { resize: vertical; }
 .tag.warn, .tag.st-changes { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
 .tag.st-approved { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 .tag.st-rejected { color: var(--bad); border-color: var(--bad); }
+.tag.st-merged { color: var(--accent); border-color: var(--accent); }
+.tag.st-withdrawn { color: var(--muted); }
+.review .was { margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--rule); color: var(--muted); font-size: .9em; white-space: pre-line; }
+.review .upd-note { margin: 8px 0; }
+.subs .r-actions { margin-top: 8px; }
 
 /* ── home ── */
 .hero { padding: 28px 0 8px; }

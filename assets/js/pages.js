@@ -1,12 +1,12 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
 import { KINDS, staleness } from './forms.js';
-import { MODE, SIZE_POINTS, REVIEWER_ROLES } from './store.js';
+import { MODE, SIZE_POINTS, REVIEWER_ROLES, canEditOwn } from './store.js';
 
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
 
@@ -86,7 +86,7 @@ async function activities(kind) {
         + (o.coaches?.length ? field('Coach' + (o.coaches.length > 1 ? 'es' : ''), o.coaches.join(', ')) : '');
     const link = safeLink(p.link) || o.url;
     return `${body ? `<div class="kv-grid one">${body}</div>` : '<p class="meta">No details yet.</p>'}
-      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${o.info.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : ''}</span>` : ''}
+      <footer>${o.info ? `<span class="meta">Updated by ${byline(o.info.author, o.info.verified)} · ${esc(p.school_year || '')}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${o.info.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${o.info.id}">Unpublish</button>` : suggestLink(s, o.info)}</span>` : ''}
         <span class="act-links">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener nofollow">Page ↗</a>` : ''}
         <a href="${add}">${o.info ? 'Update' : 'Add info'}</a></span></footer>`;
   };
@@ -198,6 +198,8 @@ async function activities(kind) {
   $('#act-list').addEventListener('click', async (e) => {
     const ed = e.target.closest('[data-edit]');
     if (ed) { openEditor(s, subs.find((x) => String(x.id) === ed.dataset.edit), () => location.reload()); return; }
+    const sg = e.target.closest('[data-suggest]');
+    if (sg) { openEditor(s, subs.find((x) => String(x.id) === sg.dataset.suggest), null, 'author'); return; }
     const u = e.target.closest('[data-unpub]');
     if (u) {
       const note = prompt('Unpublish this info? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
@@ -354,12 +356,14 @@ const pages = {
         const stale = staleness(x);
         return `<article><h3>${icon(topic)}${esc(x.payload.title)}</h3>${prose(x.payload.text)}
           ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${x.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : ''}</div></article>`;
+          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${x.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : suggestLink(s, x)}</div></article>`;
       }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
     </section>`).join('');
     $('#school-list').addEventListener('click', async (e) => {
       const ed = e.target.closest('[data-edit]');
       if (ed) { openEditor(s, list.find((x) => String(x.id) === ed.dataset.edit), () => location.reload()); return; }
+      const sg = e.target.closest('[data-suggest]');
+      if (sg) { openEditor(s, list.find((x) => String(x.id) === sg.dataset.suggest), null, 'author'); return; }
       const u = e.target.closest('[data-unpub]');
       if (!u) return;
       const note = prompt('Unpublish this article? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
@@ -369,7 +373,8 @@ const pages = {
   },
 
   async account() {
-    const label = { pending: 'Waiting for review', approved: 'Published', changes: 'Needs changes', rejected: 'Not accepted' };
+    const label = { pending: 'Waiting for review', approved: 'Published', changes: 'Needs changes', rejected: 'Not accepted',
+                    withdrawn: 'Withdrawn', merged: 'Update published' };
     const thisYear = new Date().getFullYear();
     const years = Array.from({ length: 6 }, (_, i) => thisYear - 1 + i);
     const draw = async () => {
@@ -393,6 +398,18 @@ const pages = {
       } else {
         const [mine, data, notes] = await Promise.all([s.mySubmissions(), courses(), s.notifications ? s.notifications() : []]);
         const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
+        // What you can still do with your own work: edit or withdraw it before it's
+        // live, or send a change to live work (it stays up until that's approved)
+        const waiting = new Set(mine.filter((x) => x.replaces && ['pending', 'changes'].includes(x.status)).map((x) => x.replaces));
+        const ownActions = (x) => {
+          if (!canEditOwn(x)) return '';
+          const btn = (act, text, cls = '') => `<button type="button" class="btn ghost small ${cls}" data-own="${act}">${text}</button>`;
+          if (x.status === 'pending') return `<div class="r-actions">${btn('edit', 'Edit')}${btn('withdraw', 'Withdraw', 'danger')}</div>`;
+          if (x.status === 'changes') return `<div class="r-actions">${btn('edit', 'Make changes and resubmit')}${btn('withdraw', 'Withdraw', 'danger')}</div>`;
+          if (x.status === 'approved') return waiting.has(x.id) ? '<div class="meta">Your change to this is waiting for review.</div>'
+            : `<div class="r-actions">${btn('edit', 'Suggest a change')}</div>`;
+          return '';
+        };
         $('#account').innerHTML = `
           <section class="card" id="notifications"><h2>Notifications</h2>${notes.length ? `<ul class="notes">${notes.map((n) =>
             `<li class="${n.read ? '' : 'unread'}"><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
@@ -430,11 +447,12 @@ const pages = {
 
           ${themeCard}
 
-          <section><h2>Your submissions</h2>${mine.length ? `<ul class="subs">${mine.map((x) => `<li>
-            <span class="tag st-${x.status}">${label[x.status]}</span> ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}
+          <section><h2>Your submissions</h2>${mine.length ? `<ul class="subs" id="my-subs">${mine.map((x) => `<li data-sid="${x.id}">
+            <span class="tag st-${x.status}">${label[x.status] || esc(x.status)}</span> ${x.replaces ? `Update to your ${esc(KINDS[x.kind].label.toLowerCase())}` : esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}
             · ${(([w, h]) => `<a href="${h}">${esc(w)}</a>`)(placeOf(x, name))}
             <span class="meta">${ago(x.created_at)}</span>
-            ${x.review_note ? `<div class="note">Reviewer: ${esc(x.review_note)}</div>` : ''}</li>`).join('')}</ul>`
+            ${x.review_note ? `<div class="note">${x.status === 'pending' ? 'You were asked' : 'Reviewer'}: ${esc(x.review_note)}</div>` : ''}
+            ${ownActions(x)}</li>`).join('')}</ul>`
             : `<p class="meta">Nothing yet. <a href="${root}bounties/">Find a bounty</a>.</p>`}</section>
 
           <section class="card"><h2>Account</h2>
@@ -464,6 +482,14 @@ const pages = {
                                         show_on_leaderboard: $('#lb').checked }), 'Profile saved.');
         };
         $('#signout').onclick = () => guard(() => s.signOut());
+        $('#my-subs')?.addEventListener('click', async (e) => {
+          const b = e.target.closest('[data-own]');
+          const x = b && mine.find((y) => String(y.id) === b.closest('[data-sid]').dataset.sid);
+          if (!x) return;
+          if (b.dataset.own === 'edit') { openEditor(s, x, draw, 'author'); return; }
+          if (!confirm('Withdraw this? Reviewers won’t see it and it won’t be published. This can’t be undone.')) return;
+          if (await guard(() => s.withdraw(x.id), 'Withdrawn.')) draw();
+        });
         if (notes.some((n) => !n.read)) s.markAllRead().then(() => { const b = $('.note-bell'); if (b) b.hidden = true; });
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));

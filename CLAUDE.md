@@ -551,6 +551,26 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   edited_at, notifies the author). Status changes notify authors via the
   `on_status_notify` trigger. Users read their `notifications` on the account
   page; the header bell shows the unread count.
+- **Authors' own work** (migration 014). Authors never write to `submissions`
+  directly (only reviewers have an update policy):
+  - `edit_own_submission` edits your own work while it's 'pending' or 'changes'.
+    A sent-back one returns to 'pending' and keeps `review_note`, so the review
+    desk shows "Resubmitted. Last time a reviewer asked…". It doesn't touch
+    edited_at/edited_by, which mark changes made after publishing.
+  - `withdraw_submission` sets 'withdrawn'. Rows are never deleted.
+  - Live work is never edited in place by its author. "Suggest a change" inserts a
+    new row with `replaces` = the live id. The `submissions_replaces` trigger
+    checks it's your own approved work, copies its kind/course/teacher, and allows
+    one waiting update at a time. When a reviewer approves the update,
+    `on_review()` copies its payload onto the live row (old one kept in
+    `submission_edits`, `edited_by` = the author, so class pages say "updated"),
+    and the update row becomes 'merged'. So there's never a second live copy or
+    double points. If the live row was unpublished meanwhile, the update is
+    published on its own.
+  - The UI is on Account → Your submissions and a "Suggest a change" link on the
+    author's own live items (not for reviewers, who have Edit). `openEditor(…,
+    'author')` in ui.js is the pop-up. `canEditOwn()` (store.js) hides all of it
+    until the database has the `replaces` column.
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.
 

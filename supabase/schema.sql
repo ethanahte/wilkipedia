@@ -151,14 +151,17 @@ create table public.submissions (
                'club', 'sport', 'room_schedule')),
   teacher     text,
   payload     jsonb not null,
+  -- withdrawn = taken back by the author; merged = an approved update, copied onto `replaces`
   status      text not null default 'pending'
-              check (status in ('pending', 'approved', 'changes', 'rejected')),
+              check (status in ('pending', 'approved', 'changes', 'rejected', 'withdrawn', 'merged')),
+  replaces    bigint references public.submissions on delete set null,   -- an author's update to their live work
   review_note text,
   reviewed_by uuid references public.profiles on delete set null,
   reviewed_at timestamptz,
   created_at  timestamptz not null default now()
 );
 create index on public.submissions (course_slug, status);
+create index on public.submissions (replaces);
 
 alter table public.submissions enable row level security;
 create policy "approved is public, own and reviewers see all" on public.submissions for select
@@ -168,11 +171,28 @@ create policy "submit as yourself" on public.submissions for insert
               and reviewed_by is null and reviewed_at is null and review_note is null);
 create policy "reviewers review" on public.submissions for update using (public.is_reviewer());
 
--- Stamp the reviewer, and promote a contributor to trusted after 3 approvals.
+-- Stamp the reviewer, merge an approved update into the live submission, and
+-- promote a contributor to trusted after 3 approvals. Author actions
+-- (resubmitting, withdrawing) don't stamp a reviewer.
 create function public.on_review() returns trigger
 language plpgsql security definer set search_path = public as $$
+declare
+  orig public.submissions;
 begin
-  if new.status is distinct from old.status then
+  if new.status = 'approved' and old.status <> 'approved' and new.replaces is not null then
+    select * into orig from public.submissions where id = new.replaces for update;
+    if found and orig.status = 'approved' then
+      insert into public.submission_edits (submission_id, editor_id, old_payload, new_payload, note)
+      values (orig.id, auth.uid(), orig.payload, new.payload,
+              format('Update from the author (submission %s), approved by a reviewer', new.id));
+      update public.submissions
+         set payload = new.payload, edited_at = now(), edited_by = orig.user_id,
+             reviewed_by = auth.uid(), reviewed_at = now()
+       where id = orig.id;
+      new.status := 'merged';
+    end if;
+  end if;
+  if new.status is distinct from old.status and new.status in ('approved', 'changes', 'rejected', 'merged') then
     new.reviewed_by := auth.uid();
     new.reviewed_at := now();
   end if;
@@ -187,6 +207,33 @@ end $$;
 
 create trigger submissions_review before update on public.submissions
   for each row execute function public.on_review();
+
+-- An update must point at the author's own published work, copies where that
+-- work lives, and there is one waiting update per published submission at a time.
+create function public.on_submission_insert() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  orig public.submissions;
+begin
+  if new.replaces is not null then
+    select * into orig from public.submissions where id = new.replaces;
+    if not found or orig.user_id is distinct from auth.uid() or orig.status <> 'approved' then
+      raise exception 'You can only send an update for your own published work';
+    end if;
+    if exists (select 1 from public.submissions
+                where replaces = new.replaces and status in ('pending', 'changes')) then
+      raise exception 'You already have an update waiting for review. Edit that one instead.';
+    end if;
+    new.kind := orig.kind;
+    new.course_slug := orig.course_slug;
+    new.teacher := orig.teacher;
+    new.bounty_id := null;
+  end if;
+  return new;
+end $$;
+
+create trigger submissions_replaces before insert on public.submissions
+  for each row execute function public.on_submission_insert();
 
 -- ───────────────────────── comments ─────────────────────────
 create table public.comments (
@@ -446,6 +493,40 @@ begin
 end $$;
 grant execute on function public.edit_submission(bigint, jsonb, text) to authenticated;
 
+-- Authors edit, resubmit or withdraw their own work while it isn't live (migration 014)
+create function public.edit_own_submission(p_id bigint, p_payload jsonb) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  s public.submissions;
+begin
+  if jsonb_typeof(p_payload) is distinct from 'object' then raise exception 'Nothing to save'; end if;
+  select * into s from public.submissions where id = p_id for update;
+  if not found or s.user_id is distinct from auth.uid() then raise exception 'You can only edit your own submissions'; end if;
+  if s.status not in ('pending', 'changes') then
+    raise exception 'Only work that is waiting for review or was sent back can be edited';
+  end if;
+  insert into public.submission_edits (submission_id, editor_id, old_payload, new_payload, note)
+  values (p_id, auth.uid(), s.payload, p_payload,
+          case when s.status = 'changes' then 'Author made the changes and resubmitted' else 'Author edited before review' end);
+  -- edited_at/edited_by stay as they are: they mark changes made after publishing
+  update public.submissions set payload = p_payload, status = 'pending' where id = p_id;
+end $$;
+grant execute on function public.edit_own_submission(bigint, jsonb) to authenticated;
+
+create function public.withdraw_submission(p_id bigint) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  s public.submissions;
+begin
+  select * into s from public.submissions where id = p_id for update;
+  if not found or s.user_id is distinct from auth.uid() then raise exception 'You can only withdraw your own submissions'; end if;
+  if s.status not in ('pending', 'changes') then
+    raise exception 'Only work that is waiting for review or was sent back can be withdrawn';
+  end if;
+  update public.submissions set status = 'withdrawn' where id = p_id;
+end $$;
+grant execute on function public.withdraw_submission(bigint) to authenticated;
+
 -- Tell authors when a reviewer changes the status of their work
 create function public.on_status_notify() returns trigger
 language plpgsql security definer set search_path = public as $$
@@ -454,12 +535,14 @@ begin
     insert into public.notifications (user_id, message, link)
     values (new.user_id,
       case
+        when new.status = 'merged'   then format('Your update to your %s was approved and is live now. Thank you!', public.kind_label(new.kind))
         when new.status = 'approved' then format('Your %s was published. Thank you!', public.kind_label(new.kind))
         when new.status = 'changes'  then format('A reviewer asked for changes to your %s: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
         when old.status = 'approved' then format('Your %s was unpublished. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
+        when new.replaces is not null then format('Your update to your %s wasn''t accepted, so the live version stays as it was. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
         else format('Your %s wasn''t accepted. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
       end,
-      case when new.status = 'approved' then public.submission_link(new) else 'account/' end);
+      case when new.status in ('approved', 'merged') then public.submission_link(new) else 'account/' end);
   end if;
   return new;
 end $$;

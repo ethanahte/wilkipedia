@@ -13,13 +13,20 @@ const courseName = (slug) => bySlug[slug]?.name || slug || 'School-wide';
 let tab = (location.hash.slice(1) || 'submissions').replace('published-off', 'published');
 window.addEventListener('hashchange', () => { tab = location.hash.slice(1).replace('published-off', 'published') || 'submissions'; draw(); });
 
-function payloadHtml(kind, p) {
-  return KINDS[kind].fields.filter((f) => p[f.key]).map((f) => {
+// `before`: the live version an author's update would replace. Changed fields are
+// marked, with what's live now underneath.
+function payloadHtml(kind, p, before = null) {
+  const same = (k) => JSON.stringify(p[k] ?? '') === JSON.stringify(before[k] ?? '');
+  const plain = (v) => (typeof v === 'string' ? v : Object.entries(v || {}).map(([k, x]) => `${k}: ${x}`).join(' · '));
+  return KINDS[kind].fields.filter((f) => p[f.key] || (before && before[f.key])).map((f) => {
     const v = p[f.key];
-    const body = f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])
+    const body = !v ? '<span class="meta">(removed)</span>'
+      : f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])
       : f.type === 'url' ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span class="bad">${esc(v)}</span>`)
       : f.type === 'textarea' ? prose(v) : esc(v);
-    return `<div class="kv"><div class="k">${esc(f.label)}</div><div class="v">${body}</div></div>`;
+    const changed = before && !same(f.key);
+    return `<div class="kv${changed ? ' changed' : ''}"><div class="k">${esc(f.label)}${changed ? ' <span class="tag st-changes">changed</span>' : ''}</div>
+      <div class="v">${body}${changed && before[f.key] ? `<div class="was">Live now: ${esc(plain(before[f.key]))}</div>` : ''}</div></div>`;
   }).join('');
 }
 
@@ -34,7 +41,11 @@ const tabs = {
           ${x.teacher ? ` · ${esc(x.teacher)}` : ''}
           ${x.bounty_id ? ` · <span class="tag">${esc(x.bounty_id)}</span>` : ''}
           <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span></div>
-        ${payloadHtml(x.kind, x.payload)}
+        ${x.replaces ? `<p class="upd-note"><span class="tag st-changes">Update to live work</span> ${x.original?.status === 'approved'
+          ? 'The author wants to change something already on the site. Approving replaces the live version; it stays up until then.'
+          : 'The live version it was meant to update has been unpublished, so approving publishes this on its own.'}</p>` : ''}
+        ${x.review_note ? `<p class="upd-note meta">Resubmitted. Last time a reviewer asked: “${esc(x.review_note)}”</p>` : ''}
+        ${payloadHtml(x.kind, x.payload, x.original?.status === 'approved' ? x.original.payload : null)}
         <div class="checklist meta">Check: facts have a source · no real test questions or answer keys · nothing personal about a teacher · links work</div>
         <div class="r-actions">
           <button class="btn" data-act="approved">Approve</button>

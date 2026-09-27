@@ -1,7 +1,7 @@
 // Shared DOM helpers: escaping, the header's sign-in slot, toasts, and the
 // form renderer used by the submit page and the course page's quick-add.
 
-import { store, MODE, REVIEWER_ROLES, TERMS_VERSION } from './store.js';
+import { store, MODE, REVIEWER_ROLES, TERMS_VERSION, canEditOwn } from './store.js';
 import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear } from './forms.js';
 
 export const root = document.body.dataset.root || './';
@@ -66,6 +66,9 @@ export function courses() {
 export const badge = (verified) => (verified
   ? ' <span class="badge-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : '');
 export const byline = (name, verified) => esc(name) + badge(verified);
+// On live work: the author (not a reviewer, who has Edit) can send a change for review
+export const suggestLink = (st, sub) => (canEditOwn(sub) && sub.user_id && sub.user_id === st.user()?.id && !REVIEWER_ROLES.includes(st.user()?.role)
+  ? ` · <button class="linkish" data-suggest="${sub.id}">Suggest a change</button>` : '');
 
 // ── profile pictures ──
 // A fixed set of icons and colours: nothing to moderate, no photos of students.
@@ -515,19 +518,31 @@ export async function requireUser(s, why = 'to do that') {
 // ── reviewer editing ──
 // Opens the submission's own form, filled in, plus a required reason. Saving
 // keeps the old version and notifies the author (edit_submission in schema.sql).
-export async function openEditor(store, sub, onSaved) {
+// mode 'reviewer': edit anyone's work in place, with a reason the author sees.
+// mode 'author': your own work. Waiting or sent back: edit it (a sent-back one
+// goes back to the reviewers). Live: send a change for review; the live version
+// stays until it's approved.
+export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
+  const what = (KINDS[sub.kind]?.label || 'submission').toLowerCase();
+  const own = mode === 'author';
+  const live = own && sub.status === 'approved';
+  const [title, blurb, button] = !own
+    ? [`Edit ${esc(KINDS[sub.kind]?.label || 'submission')}`, `By ${esc(sub.author)}. They’ll get a notice with your reason, and the old version is kept.`, 'Save changes']
+    : live ? [`Suggest a change to your ${esc(what)}`, 'Your live version stays on the site until a reviewer approves the change.', 'Send for review']
+    : sub.status === 'changes' ? [`Fix your ${esc(what)}`, `A reviewer asked: “${esc(sub.review_note || 'for changes')}”. Saving sends it back to the reviewers.`, 'Resubmit']
+    : [`Edit your ${esc(what)}`, 'It’s still waiting for review, so reviewers will see the new version.', 'Save changes'];
   const wrap = document.createElement('div');
   wrap.className = 'modal';
   wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ed-title">
-      <div class="lang-top"><div><h2 id="ed-title">Edit ${esc(KINDS[sub.kind]?.label || 'submission')}</h2>
-        <p class="meta">By ${esc(sub.author)}. They’ll get a notice with your reason, and the old version is kept.</p></div>
+      <div class="lang-top"><div><h2 id="ed-title">${title}</h2>
+        <p class="meta">${blurb}</p></div>
         <button type="button" class="icon-btn lang-x" data-close aria-label="Close">✕</button></div>
       <div id="ed-fields"></div>
-      <div class="field"><label for="ed-note">What did you change, and why? <span class="req">*</span></label>
+      ${own ? '' : `<div class="field"><label for="ed-note">What did you change, and why? <span class="req">*</span></label>
         <div class="hint">The author sees this, e.g. “Fixed a typo in the grading weights”.</div>
-        <input id="ed-note" maxlength="500" required></div>
+        <input id="ed-note" maxlength="500" required></div>`}
       <p class="error" id="ed-err" hidden></p>
-      <div class="r-actions"><button class="btn">Save changes</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
+      <div class="r-actions"><button class="btn">${button}</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
     </form>`;
   document.body.append(wrap);
   if (KINDS[sub.kind]?.fields.some((f) => f.type === 'periods') && !suggestions.periods?.length) {
@@ -542,12 +557,21 @@ export async function openEditor(store, sub, onSaved) {
     const err = (m) => { $('#ed-err', wrap).textContent = m; $('#ed-err', wrap).hidden = false; };
     const missing = fields.check();
     if (missing) return err(missing);
+    const payload = { ...sub.payload, ...fields.values() };
+    if (own) {
+      if (sub.status !== 'changes' && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
+      const ok = await guard(() => (live ? store.proposeUpdate(sub, payload) : store.editOwn(sub.id, payload)),
+        live ? 'Sent for review. Your live version stays up until it’s approved.'
+          : sub.status === 'changes' ? 'Resubmitted. It’s back with the reviewers.' : 'Saved.');
+      if (ok) { close(); onSaved?.(); }
+      return;
+    }
     const note = $('#ed-note', wrap).value.trim();
     if (!note) return err('Please say what you changed and why.');
-    const ok = await guard(() => store.editSubmission(sub.id, { ...sub.payload, ...fields.values() }, note), 'Saved. The author has been notified.');
+    const ok = await guard(() => store.editSubmission(sub.id, payload, note), 'Saved. The author has been notified.');
     if (ok) { close(); onSaved?.(); }
   });
-  $('#ed-note', wrap).focus();
+  ($('#ed-note', wrap) || $('#ed-fields input, #ed-fields textarea, #ed-fields select', wrap))?.focus();
 }
 
 // ── bounty editor (admins) ──

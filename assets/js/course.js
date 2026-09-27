@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, drafts, openEditor, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, drafts, openEditor, suggestLink, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -17,8 +17,9 @@ const PROMPTS = ['General', 'What surprised you?', 'How much time did it take ea
 // Reviewers get an Unpublish link on everything students wrote
 const isMod = () => REVIEWER_ROLES.includes(s.user()?.role);
 let subsById = {};
-const unpub = (sub) => (isMod() ? ` · <button class="linkish" data-edit="${sub.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : '');
-const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">edited by a reviewer ${fmtDate(sub.edited_at)}</span>` : '');
+const unpub = (sub) => (isMod() ? ` · <button class="linkish" data-edit="${sub.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : suggestLink(s, sub));
+// edited_by is the author when their own update was approved (migration 014)
+const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">${sub.edited_by && sub.edited_by === sub.user_id ? 'updated' : 'edited by a reviewer'} ${fmtDate(sub.edited_at)}</span>` : '');
 
 function meta(sub, target) {
   const stale = staleness(sub);
@@ -184,6 +185,11 @@ document.addEventListener('click', async (e) => {
   if (t.dataset.edit) {
     e.preventDefault();
     openEditor(s, subsById[t.dataset.edit], draw);
+    return;
+  }
+  if (t.dataset.suggest) {
+    e.preventDefault();                       // it may sit inside a resource link
+    if (await requireUser(s, 'to suggest a change')) openEditor(s, subsById[t.dataset.suggest], null, 'author');
     return;
   }
   if (t.dataset.unpub) {
