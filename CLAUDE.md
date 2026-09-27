@@ -619,7 +619,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   card (`mountInbox` in pages.js) lists work sent back to you (it stays until it
   is resubmitted or withdrawn) and unread notifications. Its "Make changes"
   button links to `account/#edit-<id>`, which opens that submission's editor.
-  There are no emails yet: sending them would need a server-side function.
+  No email notifications, by decision (2026-09-27): authors are told on-site only.
 - **Authors' own work** (migration 014). Authors never write to `submissions`
   directly (only reviewers have an update policy):
   - `edit_own_submission` edits your own work while it's 'pending' or 'changes'.
