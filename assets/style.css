@@ -1253,16 +1253,22 @@ a.chip { text-decoration: none; }
 .modal-card { width: min(680px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; background: var(--card); color: var(--ink);
   border-radius: 16px; border-top: 5px solid var(--gold); padding: 20px 22px; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
 .modal-card .field { max-width: none; }
-/* home: a painted Wilcox courtyard across the top, fading into the page.
-   The cards after it overlap the faded edge. */
-.home-scene { height: clamp(210px, 34vw, 380px); margin: -28px calc(50% - 50vw) -56px;
-  background: url(img/home-scene.webp) center 66% / cover;
-  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent); }
-.home-scene ~ section { position: relative; }
-body:has(.home-scene) { overflow-x: clip; }            /* 100vw can include the scrollbar */
-@media (max-width: 700px) { .home-scene { background-image: url(img/home-scene-800.webp); } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .home-scene { filter: brightness(.7) saturate(.9); } }
-:root[data-theme="dark"] .home-scene { filter: brightness(.7) saturate(.9); }
+/* home: a painted Wilcox courtyard behind the whole page (fixed while you scroll).
+   Cards keep their solid backgrounds; bare text sits on frosted panels. */
+body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: url(img/home-scene.webp) center 60% / cover; }
+@media (max-width: 700px) { body.home::before { background-image: url(img/home-scene-800.webp); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.home::before { filter: brightness(.5) saturate(.85); } }
+:root[data-theme="dark"] body.home::before { filter: brightness(.5) saturate(.85); }
+body.home .hero, body.home .home-sec, body.home footer.site,
+body.home .bell, body.home .inbox, body.home .tile {
+  background: var(--paper); background: color-mix(in srgb, var(--paper) 70%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15); backdrop-filter: blur(12px) saturate(1.15); }
+body.home .nm-tile { background: color-mix(in srgb, var(--paper) 55%, transparent); }
+body.home .hero, body.home .home-sec { border-radius: 14px; padding: 22px 22px 24px; }
+body.home .hero { margin-top: 14px; }
+body.home footer.site { border-top: 0; }
+body.home .bell, body.home .inbox { box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
 
 /* home: "For you" (sent-back work + unread notifications) */
 .inbox { background: var(--card); border: 1px solid var(--rule); border-left: 4px solid var(--bad); border-radius: 12px;

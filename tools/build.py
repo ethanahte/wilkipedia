@@ -365,7 +365,6 @@ def build_home(depts):
     tiles = "".join(f'<a class="tile" href="{href}">{ICONS[icon]}<b>{e(label)}</b><span>{e(sub)}</span></a>'
                     for href, icon, label, sub in HOME_TILES)
     page("", "Wilkipedia", f"""
-<div class="home-scene" aria-hidden="true"></div>
 <section id="inbox" class="inbox" aria-label="Your notifications" hidden></section>
 <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
 <section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
