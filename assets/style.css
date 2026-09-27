@@ -1262,8 +1262,17 @@ a.chip { text-decoration: none; }
 body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: url(img/home-scene.webp) center 60% / cover; }
 @media (max-width: 700px) { body.home::before { background-image: url(img/home-scene-800.webp); } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.home::before { filter: brightness(.5) saturate(.85); } }
-:root[data-theme="dark"] body.home::before { filter: brightness(.5) saturate(.85); }
+/* night mode gets its own painting (the courtyard by moonlight), not a dimmed copy */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.home::before { background-image: url(img/home-scene-night.webp); }
+}
+:root[data-theme="dark"] body.home::before { background-image: url(img/home-scene-night.webp); }
+@media (max-width: 700px) {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body.home::before { background-image: url(img/home-scene-night-800.webp); }
+  }
+  :root[data-theme="dark"] body.home::before { background-image: url(img/home-scene-night-800.webp); }
+}
 body.home .hero, body.home .home-sec, body.home footer.site,
 body.home .bell, body.home .inbox, body.home .tile {
   background: var(--paper); background: color-mix(in srgb, var(--paper) 15%, transparent);
