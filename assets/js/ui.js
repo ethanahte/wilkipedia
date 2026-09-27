@@ -88,6 +88,16 @@ export const AVATAR_COLORS = {
 // Accepts a User ({avatar, color, name}) or a row ({avatar, color, author}).
 // An icon carries both looks: the one-line drawing (default) and the emoji, and
 // html[data-avatars] (Settings → Appearance) decides which one shows.
+// The red count on the header's profile picture (0 hides it)
+export function setNoteCount(n) {
+  const b = $('.auth .who-n'), who = $('.auth .who');
+  if (!b) return;
+  b.hidden = !n;
+  b.textContent = n > 9 ? '9+' : n || '';
+  who.title = n ? `Your account · ${n} new notification${n === 1 ? '' : 's'}` : 'Your account';
+  who.setAttribute('aria-label', who.title);
+}
+
 export function avatarHtml(p, size = 'sm') {
   const label = p.name ?? p.author ?? p.display_name ?? '?';
   const glyph = AVATARS[p.avatar]
@@ -423,21 +433,13 @@ export async function initHeader() {
     if (slot) {
       slot.innerHTML = u
         ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}
-           <a href="${root}account/#notifications" class="note-bell" hidden title="Notifications" aria-label="Notifications">
-             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n"></span></a>
-           <a href="${root}account/" class="who" title="Your account">${avatarHtml(u)}<span class="who-name">${esc(u.name)}</span></a>`
+           <a href="${root}account/" class="who" title="Your account"><span class="who-av">${avatarHtml(u)}<span class="who-n" hidden></span></span><span class="who-name">${esc(u.name)}</span></a>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
     }
-    // Unread notifications (edits, published, unpublished…)
-    if (u && s.unreadCount) {
-      s.unreadCount().then((n) => {
-        const b = $('.note-bell', slot);
-        if (!b) return;
-        b.hidden = !n;
-        $('.n', b).textContent = n > 9 ? '9+' : n;
-      }).catch(() => {});
-    }
+    // Unread notifications (published, sent back, edited…) show as a red count on
+    // your profile picture, so you notice without opening the account page.
+    if (u && s.unreadCount) s.unreadCount().then(setNoteCount).catch(() => {});
     // The bounty board belongs to the review team: its button only appears for them.
     const team = !!u && REVIEWER_ROLES.includes(u.role);
     document.body.classList.toggle('is-team', team);
