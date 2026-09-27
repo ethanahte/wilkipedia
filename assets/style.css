@@ -1266,9 +1266,9 @@ body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer
 :root[data-theme="dark"] body.home::before { filter: brightness(.5) saturate(.85); }
 body.home .hero, body.home .home-sec, body.home footer.site,
 body.home .bell, body.home .inbox, body.home .tile {
-  background: var(--paper); background: color-mix(in srgb, var(--paper) 45%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
-body.home .nm-tile { background: color-mix(in srgb, var(--paper) 35%, transparent); }
+  background: var(--paper); background: color-mix(in srgb, var(--paper) 25%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2); }
+body.home .nm-tile { background: color-mix(in srgb, var(--paper) 20%, transparent); }
 body.home .hero, body.home .home-sec { border-radius: 14px; padding: 22px 22px 24px; }
 body.home .hero { margin-top: 14px; }
 body.home footer.site { border-top: 0; }
