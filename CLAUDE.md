@@ -351,21 +351,26 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - The front has the storefront under the covered walkway: six groups of
       `storefront()` bays between cream piers. A bay is glass over a solid
       lower panel with a transom row, or glass doors.
-    - West wing, west to east (IMG_2367/2368/2370/2371, Ethan):
-      - A solid block (`CAF-box`) stands 1.2 m out into the walkway, with the
-        notice board and a yellow door on its face.
-      - The snack bar is set 0.8 m back (a notch in `CAF-w`'s outline;
-        Ethan: 凹进去). It has three groups between piers (four panes; pane,
-        double doors, pane; panes and a single door with the SNACK BAR
-        plaque).
-      - Then the wall comes forward: a yellow door at the corner, the cream
-        box fountain with two bubblers, the fire bell and notices, and a dark
-        door.
-    - The fountain is on the west wing, not the east one (it was once drawn on
-      the east by mistake). East wing (IMG_2365): blank wall and a pair of dark
+    - West side, west to east (IMG_2367/2368/2370/2371, Ethan):
+      - A low building (`CAF-nw`, style `caf-nw`: no kit windows, no rooftop
+        units) stands furthest back, at z -35.5 behind the end of B's canopy.
+        It carries the notice board, a blue accessibility sign and a yellow
+        door. Its west and north extent are a best reading of the satellite.
+      - The snack bar runs from the wing's west corner (x -17.8) to -4.95, set
+        0.8 m back (a notch in `CAF-w`; Ethan: 凹进去, twice as wide as first
+        drawn). It has three groups between piers: four panes; pane, double
+        doors, pane; panes and a single door with the SNACK BAR plaque.
+      - Then the wall comes forward: a yellow door at the corner, then the
+        drinking fountain (`cafFountain()`, from IMG_2367 close up). It has a
+        wide cream concrete base with a thick flat top, a steel back plate
+        left of centre, and two steel bowls reaching out toward the walkway
+        (a high one and a longer low one) with rounded tips, spouts and push
+        buttons. Then the fire bell and notices, and a dark door.
+    - The fountain is on the west side, not the east (it was once drawn on the
+      east by mistake). East wing (IMG_2365): blank wall and a pair of dark
       doors.
     - The walkway (landmarks.js) stands on grey steel posts. It starts at the
-      block's east edge (x -11.2).
+      wing's west corner, where B's canopy ends.
     - Young trees' beds near the cafeteria (z < -12) are low green groundcover.
       The fire hydrant in its ring guard sits by R's north end.
   - **Room plates are hidden for now (Ethan)** except the P building's door

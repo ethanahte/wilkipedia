@@ -28,12 +28,14 @@ export const BUILDINGS = [
   // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
   { id: 'CAF', name: 'Cafeteria', style: 'caf', h: 7.2, poly: rect(0, -52.8, 50, -32.8) },
   { id: 'CAF-front', name: 'Cafeteria', style: 'caf', h: 3.8, poly: rect(0, -32.8, 50, -30.4) },
-  // The west wing's quad face (IMG_2367/2368/2370/2371): the snack bar's glass front is set
-  // 0.8 m back between x -11.2 and -4.95 (Ethan: 凹进去), and a solid block stands out 1.2 m
-  // into the walkway at the west end (CAF-box). buildings.js cafFront() must match.
+  // The west wing's quad face (IMG_2367/2368/2371, Ethan): the snack bar's glass front runs from
+  // the wing's west corner to x -4.95, set 0.8 m back (Ethan: 凹进去; twice as wide as first drawn).
+  // West of it, the low building with the notice board and a yellow door stands further back
+  // still (CAF-nw, behind the end of B's canopy; its south edge is on the satellite). Its west
+  // and north extent are a best reading of the satellite. buildings.js cafFront() must match.
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6,
-    poly: [[-17.8, -51], [0, -51], [0, -30.4], [-4.95, -30.4], [-4.95, -31.2], [-11.2, -31.2], [-11.2, -30.4], [-17.8, -30.4]] },
-  { id: 'CAF-box', name: 'Cafeteria', style: 'caf', h: 3.45, poly: rect(-17.8, -30.4, -11.2, -29.2) },
+    poly: [[-17.8, -51], [0, -51], [0, -30.4], [-4.95, -30.4], [-4.95, -31.2], [-17.8, -31.2]] },
+  { id: 'CAF-nw', name: 'Cafeteria', style: 'caf-nw', h: 4.0, poly: rect(-25.5, -51, -17.8, -35.5) },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
   // (Ethan, his photos IMG_2342–2361, the satellite): a 凸 in plan. The narrow block

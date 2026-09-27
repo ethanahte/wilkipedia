@@ -122,12 +122,12 @@ export function buildLandmarks(W, group, fontFamily) {
 
   // ── the cafeteria's covered walkway along the quad ──
   const wz0 = -30.4, wz1 = -27.0;
-  // it starts past the west wing's solid block (x -11.2, IMG_2371), which stands out into it
-  const wx0 = -11.2;
-  for (let x = -6.5; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
+  // it starts at the west wing's corner, where B's canopy ends and the snack bar begins (IMG_2371)
+  const wx0 = -17.8;
+  for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', wx0, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', wx0, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
-  for (let x = -10; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
+  for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 
   // ── the Career Center's yellow awning on B, over its quad-side door ──
   awning(W, -54.7, 26.2, 31.2, 1.6, 2.7, color('#e8b930'), 'x');

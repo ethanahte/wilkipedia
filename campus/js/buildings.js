@@ -141,8 +141,10 @@ const KITS = {
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
   },
   r() {},                                       // buildR() draws R whole
+  'caf-nw'() {},                                // only its quad face is known (cafFront()); no invented windows
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
+    if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west end: the snack bar's return and CAF-nw's party wall (no photo)
     const tall = b.h > 6;
     for (const { i, t } of bays(e.len, 4.2, 1.5)) {
       if (e.nz > 0.5 && i % 3 === 1) doorAt(W, e, t, 1.8, 2.3, C.door);
@@ -211,7 +213,7 @@ const KITS = {
 const WALL = {
   b: C.cream, r: color('#ece0c4'), caf: color('#efe6d0'), p: color('#efe5cf'), library: color('#efe5cf'),
   admin: color('#efe8d6'), gym: color('#eee6d3'), gymlobby: color('#eee6d3'), plain: color('#efe5cf'), mn: color('#f1efe7'),
-  s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
+  'caf-nw': color('#efe6d0'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
 // ── Building R ──
@@ -549,6 +551,30 @@ function storefront(W, z, x0, x1, parts, top = 3.1) {
 }
 const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
 
+// The drinking fountain by the snack bar (IMG_2367, close up): a wide cream concrete base
+// against the wall with a thick flat top; a stainless back plate on its face, left of
+// centre; two stainless bowls sticking straight out toward the walkway, a high one and a
+// longer low one, each rounded at the tip with a bubbler spout on top and a round push
+// button on its end.
+function cafFountain(W, e, t) {
+  const base = color('#e7e0cf'), steel = color('#aeb3b8'), shade = color('#8e9398');
+  onWall(W, e, t, 0, 0.02, () => {
+    W.box('stucco', 0, 0.6, 0.15, 1.1, 1.2, 0.3, base);                  // the concrete base
+    W.box('stucco', 0, 1.25, 0.16, 1.14, 0.1, 0.34, base);               // its thick flat top
+    const px = -0.14, face = 0.3;
+    W.box('flat', px, 0.84, face + 0.01, 0.52, 0.62, 0.02, steel);       // back plate
+    // [height of the bowl's top, width along the wall, reach from the plate, thickness, x offset]
+    for (const [top, w, reach, th, dx] of [[1.06, 0.3, 0.4, 0.13, -0.07], [0.8, 0.4, 0.44, 0.15, 0.03]]) {
+      const x = px + dx, y = top - th / 2, r = w / 2, z0 = face + 0.02, z1 = z0 + reach - r;
+      W.box('flat', x, y, (z0 + z1) / 2, w, th, z1 - z0, steel);
+      W.with(0, 0, z1, 0, () => W.cyl('flat', x, top - th, 0, r, r, th, 14, steel, { bottom: true }));
+      W.box('flat', x, top - th - 0.005, (z0 + z1 + r) / 2, w * 0.8, 0.01, z1 - z0 + r * 0.8, shade);   // shadowed underside
+      W.with(0, 0, z1 + r * 0.55, 0, () => W.cyl('flat', x - r * 0.35, top, 0, 0.018, 0.014, 0.05, 8, steel));   // bubbler spout
+      W.box('flat', x, y, z1 + r + 0.005, 0.035, 0.035, 0.012, shade);  // push button
+    }
+  });
+}
+
 function cafFront(W) {
   const z = -30.4, top = 3.1;
   // the one-storey front (x 0–50): six groups between cream piers (IMG_2364)
@@ -568,37 +594,34 @@ function cafFront(W) {
     W.box('flat', 49.8, 5.15, 0.06, 0.07, 2.3, 0.04, CC.frame);
     W.box('flat', 25, 4.83, 0.06, 49.6, 0.06, 0.04, CC.frame);
   });
-  // The west wing, west to east (IMG_2367, IMG_2368, IMG_2370, IMG_2371; Ethan). The
-  // outline is in layout.js (CAF-w's notch, CAF-box).
-  //  · A solid block standing 1.2 m out into the walkway, with the notice board and a
-  //    yellow door on its face. The walkway's roof starts past it (landmarks.js).
-  const BZ = -29.2, bw = southWall(-17.8, -11.2, BZ), bt = (x) => x + 17.8;
-  onWall(W, bw, bt(-15.4), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
-  doorAt(W, bw, bt(-12.6), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  //  · The snack bar, set 0.8 m back (Ethan: 凹进去): three groups between cream piers —
-  //    four panes; a pane, glass double doors and a pane; panes and a single glass door
-  //    with the SNACK BAR plaque beside it (IMG_2368).
+  // The west side, west to east (IMG_2367, IMG_2368, IMG_2370, IMG_2371; Ethan). The
+  // outlines are in layout.js (CAF-nw, CAF-w's notch).
+  //  · The low building west of the wing, standing furthest back, behind the end of B's
+  //    canopy: the notice board, a small blue accessibility sign and a yellow door.
+  const nw = southWall(-25.5, -17.8, -35.5), nt = (x) => x + 25.5;
+  onWall(W, nw, nt(-23), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
+  onWall(W, nw, nt(-20.1), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));
+  doorAt(W, nw, nt(-19.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  //  · The snack bar, set 0.8 m back (Ethan: 凹进去), under the walkway from the wing's
+  //    west corner: three groups between cream piers — four panes; a pane, glass double
+  //    doors and a pane; panes and a single glass door with the SNACK BAR plaque (IMG_2368).
   const RZ = -31.2, P2 = 0.35;
-  let rx = -11.2 + 0.025;
-  [[1.5, 'pppp'], [2.2, 'pdp'], [1.8, 'ppps']].forEach(([w, parts], i) => {
+  let rx = -17.8 + 0.025;
+  [[3.3, 'pppp'], [4.84, 'pdp'], [3.96, 'ppps']].forEach(([w, parts], i) => {
     if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
     storefront(W, RZ, rx, rx + w, parts, 3.0);
     rx += w;
   });
-  onWall(W, southWall(rx - 1.45, rx - 1.05, RZ + 0.14), 0.2, 1.55, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
-  //  · The wall comes forward again: a yellow door at the corner, the cream fountain box
-  //    with its two stainless bubblers, the red fire bell and a yellow notice above it,
-  //    a white notice to its right, then a dark door (IMG_2367).
+  const door = 3.96 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
+  onWall(W, southWall(rx - door - 0.5, rx - door - 0.1, RZ + 0.14), 0.2, 1.5, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
+  //  · The wall comes forward again: a yellow door at the corner, the drinking fountain,
+  //    the red fire bell and a yellow notice above it, a white notice, then a dark door.
   const ww = southWall(-17.8, 0, z), wt = (x) => x + 17.8;
   doorAt(W, ww, wt(-4.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  onWall(W, ww, wt(-2.9), 0, 0.02, () => {
-    W.box('stucco', 0, 0.68, 0.14, 0.78, 1.36, 0.28, RC.wall);                      // the cream pedestal
-    for (const [y, x] of [[0.78, -0.12], [1.0, -0.12]]) W.box('flat', x - 0.26, y, 0.22, 0.32, 0.12, 0.3, RC.steel);
-    W.box('flat', -0.12, 0.9, 0.29, 0.1, 0.36, 0.02, RC.steel);
-  });
-  onWall(W, ww, wt(-3.05), 2.95, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
-  onWall(W, ww, wt(-3.1), 1.75, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.26, 0.02, color('#e2b43b')));
-  onWall(W, ww, wt(-2.2), 1.75, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.3, 0.01, color('#f2f2ee')));
+  cafFountain(W, ww, wt(-2.85));
+  onWall(W, ww, wt(-3.1), 2.95, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
+  onWall(W, ww, wt(-3.2), 1.78, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.24, 0.02, color('#e2b43b')));
+  onWall(W, ww, wt(-2.25), 1.78, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.3, 0.01, color('#f2f2ee')));
   doorAt(W, ww, wt(-1.3), 0.95, 2.2, color('#4f5459'), { frameCol: CC.frame, plain: true });
   // The east wing (IMG_2365): blank wall, then a pair of dark doors. (The fountain
   // that used to be drawn here is the west wing's, in IMG_2367.)
@@ -619,7 +642,7 @@ export function buildBuildings(W) {
     parapet(W, b.poly, b.h, wall, undefined, undefined, (e) => BUILDINGS.some((o) => o !== b && o.h >= b.h - 0.01 && sharesEdge(e, o)));
     if (b.gable) gable(W, b, roofY);
     else if (b.barrel) barrels(W, b, roofY);
-    else if (b.style !== 'r') rooftop(W, b, R, roofY);
+    else if (b.style !== 'r' && b.style !== 'caf-nw') rooftop(W, b, R, roofY);
     const kit = KITS[b.style] || KITS.plain;
     for (const e of edges(b.poly)) kit(W, b, e, R);
     if (b.style === 'r') buildR(W, b);
