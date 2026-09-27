@@ -161,7 +161,6 @@ ICONS = {
 MORE_GROUPS = [
     ("School day", [("calendar/", "Calendar", "calendar", "Breaks, finals and events, all year"),
                     ("campus/", "3D campus", "cube", "Walk the whole school, drawn like an anime"),
-                    ("numbers/", "By the numbers", "chart", "Classes, clubs and the semester in charts"),
                     ("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
                     ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
                     ("school/", "School info", "school", "Counselors, passes, tech"),
@@ -407,6 +406,10 @@ def build_subjects(depts):
 <p class="lede">Every class offered at Wilcox in the {e(CATALOG_SOURCE.split(' ')[-1])} catalog. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> nobody has written it yet</span></p>
 <div class="sortbar"><span class="label">Sort</span><div class="chips" id="sort"><button class="chip" data-sort="subject" aria-pressed="true">By subject</button><button class="chip" data-sort="az">A–Z</button><button class="chip" data-sort="grade">By grade</button></div>
 <span class="label">Show</span><div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div></div>
+<details class="nb-card nb-fold" id="ag"><summary><h2>Where each UC/CSU a–g requirement can be met</h2>
+  <span class="nb-sub">Bubble size = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g. Point at a bubble for the classes.</span></summary>
+  <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
+  <p class="nb-src">SCUSD COURSE CATALOG {e(CATALOG_SOURCE.split(' ')[-1])} · A FEW CLASSES LIST A–G LOOSELY (“D/G”); THEY COUNT UNDER EACH LETTER · CHECK WITH YOUR COUNSELOR</p></details>
 <div id="by-subject">{body}</div>
 <div id="flat" hidden></div>""", active="subjects/", data={"page": "subject"})
 
@@ -624,7 +627,12 @@ def build_static():
   <h2>Submitted. Thank you!</h2>
   <p>A reviewer will look at it soon. You can track it on <a href="../account/">your account page</a>. If they ask for changes, their note shows up there.</p>
   <p><button class="btn" id="again">Add something else</button> <span id="done-course"></span></p>
-</div>""", script="submit.js")
+</div>
+<article class="nb-card dark nb-contrib">
+  <h2 id="h-cascade">How much of Wilcox is written</h2>
+  <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects. Click a grey dot to see a class nobody has written up yet.</p>
+  <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
+</article>""", script="submit.js")
 
     page("review/", "Review", """
 <h1>Review</h1>
@@ -868,53 +876,12 @@ def build_static():
 <div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
-    page("numbers/", "By the numbers", """
-<h1>Wilcox by the numbers</h1>
-<p class="lede">Five pictures of how Wilcox works, drawn from the course catalog, the club list, the bell schedule and what students have written here. Every dot, tick and rung is one real class, club or day: point at it to see which, click to go there.</p>
-<div class="nb-grid">
-  <article class="nb-card dark">
-    <h2 id="h-cascade">How much of Wilcox is written</h2>
-    <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects, smallest to largest</p>
-    <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
-    <p class="nb-src">DOT CASCADE · LIVE FROM WILKIPEDIA · CATALOG 2025–26</p>
-  </article>
-  <article class="nb-card">
-    <h2>Where each UC/CSU a–g requirement can be met</h2>
-    <p class="nb-sub">Bubble area = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g</p>
-    <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
-    <p class="nb-src">ARC MATRIX · SCUSD COURSE CATALOG 2025–26 · CHECK WITH YOUR COUNSELOR</p>
-  </article>
-  <article class="nb-card wide">
-    <h2 id="h-grades">More classes open up every year</h2>
-    <p class="nb-sub">One tick = one class your grade is allowed to take · <span class="nb-hero">gold</span> = AP · from each class’s grade range in the catalog</p>
-    <svg id="tickrows" viewBox="0 0 840 250" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes open to each grade"></svg>
-    <p class="nb-src">TICK ROWS · SCUSD COURSE CATALOG 2025–26</p>
-  </article>
-  <article class="nb-card">
-    <h2 id="h-clubs">When clubs meet</h2>
-    <p class="nb-sub">One rung = one club that names this day · darker = meets more often</p>
-    <svg id="rungs" viewBox="0 0 400 312" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Clubs by the weekday they meet"></svg>
-    <p class="nb-src" id="n-clubs"></p>
-    <p class="nb-src">RUNG BARS · WILCOX CLUB LIST</p>
-  </article>
-  <article class="nb-card nb-about">
-    <h2>Where these numbers come from</h2>
-    <ul>
-      <li><b>Classes, grades and a–g</b> are copied from the SCUSD High School Course Catalog 2025–26. A few classes list a–g loosely (“D/G”, “D for 3rd year or higher”); they count under each letter they name. Pending approvals don’t count yet.</li>
-      <li><b>Clubs</b> come from the Wilcox club list. Many describe their schedule in their own words, so the day and how often are read from that text.</li>
-      <li><b>The semester</b> uses the official bell schedule and the special dates the school published for fall 2026.</li>
-      <li><b>Gold dots</b> in the first chart update live as students write.</li>
-    </ul>
-    <p class="meta">Spot something wrong? <a href="../feedback/">Tell us</a>.</p>
-  </article>
-  <article class="nb-card wide">
-    <h2>The fall semester, day by day</h2>
-    <p class="nb-sub">One stick = one school day · taller = you’re at school longer · <span class="nb-hero">gold</span> = out before 2 pm · hollow = no school · dashed = adjusted day with no published times</p>
-    <svg id="barcode" viewBox="0 0 810 290" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Each school day from August 11 to December 18 and when it ends"></svg>
-    <p class="nb-src">BARCODE LOLLIPOP · WILCOX BELL SCHEDULE 2026–27 · AUG 11 – DEC 18</p>
-  </article>
-</div>""", data={"page": "numbers"}, script="numbers.js",
-         desc="Wilcox High School in charts: classes by subject and grade, UC/CSU a–g requirements, when clubs meet, and the fall semester day by day.")
+    # "By the numbers" was retired (its a–g chart moved to All classes, its coverage
+    # chart to Contribute); the old address forwards to the a–g chart.
+    (ROOT / "numbers").mkdir(exist_ok=True)
+    (ROOT / "numbers" / "index.html").write_text('<!doctype html><meta charset="utf-8"><title>Moved</title>'
+        '<meta http-equiv="refresh" content="0; url=../subjects/#ag"><link rel="canonical" href="../subjects/">'
+        '<p>This page moved to <a href="../subjects/#ag">All classes</a>.</p>\n')
 
     page("guides/", "Study guides", f"""
 <h1>Study guides</h1>
@@ -991,7 +958,6 @@ SEARCH_PAGES = [
     ("Calendar", "calendar/", "Important dates, 2026–27", "calendar dates events breaks holidays no school finals exams psat sat ap caaspp homecoming prom graduation rally dance concert winter spring break first day last day"),
     ("Campus map", "map/", "Find a classroom", "map rooms where building find classroom directions"),
     ("3D campus", "campus/", "Walk the school in 3D", "3d campus walk tour virtual quad cedar building gym stadium three.js anime"),
-    ("By the numbers", "numbers/", "Wilcox in charts", "numbers charts graphs stats a-g ucsc requirements clubs meeting day grade classes semester calendar"),
     ("Study guides", "guides/", "Every shared study guide, as a graph", "study guides guide notes resources graph obsidian review"),
     ("Settings", "settings/", "Theme, text size, language", "settings preferences dark mode night mode theme text size font bigger language motion cookies cookie storage"),
     ("All classes", "subjects/", "Browse every class", "classes courses catalog subjects"),

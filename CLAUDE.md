@@ -198,13 +198,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   whole words, so "monthly" isn't Monday. Sports are a season board: Fall,
   Winter and Spring side by side, a tick per team, and level badges
   (V/JV/FS/F, with a key). `#slug` links open the row.
-- **By the numbers** (`numbers/`, `numbers.js`): five charts built from
-  lieflat-charts gallery templates (L2 Dot Cascade, L4 Arc Matrix, F5 Tick Rows,
-  F1 Rung Bars, L3 Barcode Lollipop), code skeleton kept, real data only.
-  Colours: Mono ladder `--ch1..--ch4` (flipped in both dark blocks) + one hero
-  (`--accent` / Wilcox gold). One dark card per page. Every mark is one real
-  class, club or day with a hover title. The semester chart covers only the
-  dates bell.json has; extend it when spring dates are added, never guess.
+- **Charts** (`charts.js`, from lieflat-charts templates, real data only; Mono
+  ladder `--ch1..--ch4` + Wilcox gold). The "By the numbers" page was retired at
+  Ethan's request (three of its five charts were trivia). What's left:
+  - **a–g arc matrix:** `mountArcMatrix`, in a fold (`#ag`) at the top of All
+    classes.
+  - **"How much is written" dot cascade:** `mountCascade`, at the bottom of
+    Contribute.
+  - **`numbers/`** is now a redirect to `subjects/#ag`, which opens the fold.
+  - **Reveal:** charts draw when scrolled into view (IntersectionObserver), or on
+    click. A hidden browser pane never reports "in view".
 - **Study guides graph** (`guides/`, `guides.js`): Obsidian's graph view,
   hand-written on a canvas. It has no library; ECharts was dropped at Ethan's
   request for Obsidian behaviour.

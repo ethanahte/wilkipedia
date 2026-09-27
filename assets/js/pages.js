@@ -234,6 +234,8 @@ const pages = {
   },
 
   async subject() {
+    if ($('#arcmatrix')) import('./charts.js').then((m) => m.mountArcMatrix());
+    if (location.hash === '#ag' && $('#ag')) $('#ag').open = true;       // from the old By the numbers link
     await markContent();
     const state = { f: 'all', sort: 'subject' };
     const rows = $$('.course-row');

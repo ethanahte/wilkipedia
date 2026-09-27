@@ -6,6 +6,7 @@ import { initHeader, requireUser, renderFields, suggestions, refreshPeriodOption
 import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
+import('./charts.js').then((m) => m.mountCascade(s));
 const q = new URLSearchParams(location.search);
 const data = await courses();
 // Club and team names, so club/sport submissions land on the right card
