@@ -61,6 +61,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   The header's icon buttons are search (phones), language, night mode and a Settings
   gear. On phones under 440px the gear shows only on the home page, where the
   search button steps aside; otherwise "Sign in" wraps to a second line.
+  The header sits in the 1040px `.wrap`, so on wide screens (≥1000px) the bar is
+  `nowrap`. The search box shrinks (down to 130px), then the member's name is cut
+  with an ellipsis. Reviewers' long "Review + avatar + name" once wrapped it at
+  every window size.
+- **Account → Notifications** starts with the review queue for reviewers
+  ("Waiting for review: N submissions · comments · reports →"). Their own
+  approvals never notify them, so the list alone was always empty.
   The bounty board belongs to the review team: reviewers/admins see and claim
   bounties, only admins post/edit/close them (RLS since migration 008, plus
   `is-team` UI gating and the shared `openBountyEditor` in ui.js). Everyone

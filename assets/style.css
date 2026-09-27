@@ -127,7 +127,19 @@ header.site { background: var(--bar); color: var(--bar-ink); border-bottom: 3px 
 /* Narrow phones have room for it only where the search button steps aside (home) */
 @media (max-width: 440px) { body:not(.home) .set-btn { display: none; } }
 /* …and on mid-size screens the search box gives up the room the gear takes, so the bar wraps no sooner than before */
-@media (min-width: 761px) and (max-width: 1100px) { .hsearch input { width: 160px; } }
+@media (min-width: 761px) and (max-width: 999px) { .hsearch input { width: 160px; } }
+/* Wide screens: the header sits in the 1040px column, so it must never wrap however
+   long the signed-in part gets (Review + avatar + name). The search box shrinks
+   first, then a long name is cut with an ellipsis. */
+@media (min-width: 1000px) {
+  .bar { flex-wrap: nowrap; }
+  .bar > * { flex: none; }
+  .bar > .hsearch { flex: 0 1 220px; min-width: 130px; }
+  .hsearch input { width: 100%; }
+  .bar > .auth { flex: 0 1 auto; min-width: 0; }
+  .auth .who { min-width: 0; }
+  .who-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 11em; }
+}
 
 /* "More" menu */
 .more { position: relative; }
@@ -1065,6 +1077,9 @@ a.chip { text-decoration: none; }
 .note-bell .n { position: absolute; top: 0; right: -2px; min-width: 17px; height: 17px; border-radius: 999px; background: var(--bad);
   color: #fff; font: 700 .64rem/17px var(--sans); text-align: center; padding: 0 4px; }
 .notes { list-style: none; padding: 0; margin: 0; }
+.queue-line { display: block; margin: 0 0 10px; padding: 10px 12px; border-radius: 6px; background: var(--accent-soft); color: var(--ink); text-decoration: none; }
+a.queue-line:hover { outline: 1px solid var(--accent); }
+p.queue-line { background: none; padding: 0; }
 .notes li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .notes li.unread { font-weight: 600; }
 .notes li.unread::before { content: ''; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 7px; }

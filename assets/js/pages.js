@@ -397,7 +397,15 @@ const pages = {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
           <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${themeCard}${demoTools}`;
       } else {
-        const [mine, data, notes] = await Promise.all([s.mySubmissions(), courses(), s.notifications ? s.notifications() : []]);
+        const team = REVIEWER_ROLES.includes(me.role);
+        const [mine, data, notes, queue] = await Promise.all([s.mySubmissions(), courses(), s.notifications ? s.notifications() : [],
+          // Reviewers: what's waiting for them (a failed count just leaves the line out)
+          team ? Promise.all([s.pending(), s.heldComments(), s.reports()]).then((l) => l.map((x) => x.length)).catch(() => null) : null]);
+        const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
+        const queueLine = !queue ? '' : queue.some(Boolean)
+          ? `<a class="queue-line" href="${root}review/"><b>Waiting for review:</b> ${[[queue[0], 'submission'], [queue[1], 'comment'], [queue[2], 'report']]
+              .filter(([n]) => n).map(([n, w]) => plural(n, w)).join(' · ')} <span aria-hidden="true">→</span></a>`
+          : `<p class="queue-line meta">The review queue is empty. <a href="${root}review/">Review desk →</a></p>`;
         const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
         // What you can still do with your own work: edit or withdraw it before it's
         // live, or send a change to live work (it stays up until that's approved)
@@ -412,7 +420,7 @@ const pages = {
           return '';
         };
         $('#account').innerHTML = `
-          <section class="card" id="notifications"><h2>Notifications</h2>${notes.length ? `<ul class="notes">${notes.map((n) =>
+          <section class="card" id="notifications"><h2>Notifications</h2>${queueLine}${notes.length ? `<ul class="notes">${notes.map((n) =>
             `<li class="${n.read ? '' : 'unread'}"><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
               <div class="meta">${ago(n.created_at)}</div></div></li>`).join('')}</ul>`
             : '<p class="meta">Nothing yet. You’ll hear here when your work is published or a reviewer edits it.</p>'}</section>
