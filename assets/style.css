@@ -1219,6 +1219,21 @@ body:has(#submit-form) .contribute-fab { display: none; }
 .goog-te-banner-frame, iframe.skiptranslate, .goog-te-gadget, #goog-gt-tt, .goog-te-balloon-frame, .goog-te-spinner-pos { display: none !important; }
 body { top: 0 !important; }
 font[style*="background-color"] { background: none !important; box-shadow: none !important; }
+/* Google wraps translated text in <font> tags, often several per sentence. In a
+   flex or grid row each tag became its own item, with gaps opening mid-sentence;
+   display: contents lets the text flow as one run again. */
+html.translated-ltr font, html.translated-rtl font { display: contents; }
+/* Chinese, Japanese and Korean may break between any two characters, which split
+   words like 一切 across lines in big headings. Break at spaces and punctuation,
+   and only mid-word if a line would otherwise overflow. */
+:lang(zh) :is(h1, h2, h3), :lang(ja) :is(h1, h2, h3), :lang(ko) :is(h1, h2, h3) {
+  word-break: keep-all; overflow-wrap: anywhere; }
+/* Longer words (Iniciar sesión, Anmelden…) pushed Sign in onto a line of its own on phones */
+@media (max-width: 420px) {
+  .bar { column-gap: 8px; }
+  .brand { font-size: 1.3rem; }
+  #signin { white-space: nowrap; padding: 6px 10px; font-size: .8rem; max-width: 8.5em; overflow: hidden; text-overflow: ellipsis; }
+}
 @media (max-width: 760px) { .lang-menu { right: -90px; } }
 
 /* ── school info icons ── */
@@ -1424,7 +1439,7 @@ html[data-fab="off"] .contribute-fab { display: none !important; }
    A transit map of prerequisite chains. Quiet until you point at something;
    then the path lights up and everything else steps back. */
 .pw-sec .sec-sub { max-width: none; }
-.pw-legend { white-space: nowrap; margin-left: 6px; }
+.pw-legend { display: inline-block; max-width: 100%; margin-left: 6px; }   /* keeps each key item together, but lets a long translation wrap */
 .pw-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); border: 1.5px solid var(--gold-ink);
   vertical-align: -1px; margin-right: 4px; }
 .pw-scroll { overflow-x: auto; margin: 8px 0 0; scrollbar-width: thin; }

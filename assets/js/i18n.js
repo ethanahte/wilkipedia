@@ -119,6 +119,10 @@ const ROWS = {
   'announcements': ['anuncios', 'thông báo', '广播通知', '廣播通知', '방송', '連絡', 'anunsyo', 'घोषणाएँ', 'ਘੋਸ਼ਣਾਵਾਂ', 'ప్రకటనలు', 'அறிவிப்புகள்', 'الإعلانات', 'اطلاعیه‌ها', 'объявления', 'avisos'],
   'Period {n}': ['Periodo {n}', 'Tiết {n}', '第{n}节', '第{n}節', '{n}교시', '{n}時間目', 'Period {n}', 'पीरियड {n}', 'ਪੀਰੀਅਡ {n}', 'పీరియడ్ {n}', 'பாடவேளை {n}', 'الحصة {n}', 'زنگ {n}', '{n}-й урок', '{n}º período'],
   'Period {n} final': ['Examen final del periodo {n}', 'Thi cuối kỳ tiết {n}', '第{n}节期末考试', '第{n}節期末考試', '{n}교시 기말고사', '{n}時間目の期末試験', 'Final exam ng period {n}', 'पीरियड {n} की फ़ाइनल परीक्षा', 'ਪੀਰੀਅਡ {n} ਦੀ ਫਾਈਨਲ ਪ੍ਰੀਖਿਆ', 'పీరియడ్ {n} ఫైనల్ పరీక్ష', 'பாடவேளை {n} இறுதித் தேர்வு', 'الاختبار النهائي للحصة {n}', 'امتحان پایانی زنگ {n}', 'Экзамен: {n}-й урок', 'Prova final do {n}º período'],
+  // cafeteria (Google turned "regulars" into "regular customers" and "cal" into "caliber")
+  'Regulars': ['Habituales', 'Món quen thuộc', '常备菜', '常備菜', '고정 메뉴', '定番メニュー', 'Palagian', 'रोज़ के व्यंजन', 'ਰੋਜ਼ਾਨਾ ਪਕਵਾਨ', 'రోజువారీ వంటకాలు', 'வழக்கமான உணவுகள்', 'أطباق ثابتة', 'غذاهای ثابت', 'Постоянные блюда', 'Pratos fixos'],
+  '+{n} regulars': ['Habituales +{n}', 'Món quen thuộc +{n}', '常备菜 +{n}', '常備菜 +{n}', '고정 메뉴 +{n}', '定番メニュー +{n}', 'Palagian +{n}', 'रोज़ के व्यंजन +{n}', 'ਰੋਜ਼ਾਨਾ ਪਕਵਾਨ +{n}', 'రోజువారీ వంటకాలు +{n}', 'வழக்கமான உணவுகள் +{n}', 'أطباق ثابتة +{n}', 'غذاهای ثابت +{n}', 'Постоянные блюда +{n}', 'Pratos fixos +{n}'],
+  'cal': ['cal', 'calo', '卡', '卡', 'kcal', 'kcal', 'cal', 'कैलोरी', 'ਕੈਲੋਰੀ', 'కేలరీలు', 'கலோரி', 'سعرة', 'کالری', 'ккал', 'cal'],
   'Homecoming Parade': ['Desfile de Homecoming', 'Diễu hành Homecoming', '返校节游行', '返校節遊行', '홈커밍 퍼레이드', 'ホームカミング・パレード', 'Homecoming parade', 'होमकमिंग परेड', 'ਹੋਮਕਮਿੰਗ ਪਰੇਡ', 'హోమ్‌కమింగ్ పరేడ్', 'ஹோம்கமிங் அணிவகுப்பு', 'موكب العودة للمدرسة', 'رژه هوم‌کامینگ', 'Парад Homecoming', 'Desfile de Homecoming'],
 };
 /* eslint-enable max-len */
@@ -139,6 +143,20 @@ export function t(key, vars = {}) {
   return s;
 }
 export const translating = COL >= 0;
+
+// Dates are written by the browser in the reader's language (Intl), not left to
+// Google, which named the same weekday two ways in one row. Mark the result
+// translate="no" wherever it's drawn.
+export const LOCALE = translating ? LANG : 'en-US';
+export const dateText = (d, opts) => new Date(d).toLocaleDateString(LOCALE, opts);
+// relDay(0) "Today", relDay(1) "Tomorrow", in the reader's language
+export function relDay(n) {
+  const s = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' }).format(n, 'day');
+  return s.charAt(0).toLocaleUpperCase(LOCALE) + s.slice(1);
+}
+// Line breaking and fonts follow the page language from the first paint
+// (Google only sets it once it has finished translating).
+if (translating) document.documentElement.lang = LANG;
 
 // "4th Period + announcements", "Period 3", "1st Period final", "SSR + announcements"…
 export function periodName(name) {

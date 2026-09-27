@@ -8,6 +8,7 @@
 
 import { initHeader, $, $$, esc, root } from './ui.js';
 import { loadBell, dayPlan, nextSchoolDay, clock } from './bell.js';
+import { t as tr, dateText, relDay } from './i18n.js';
 
 export const MENUS = {
   lunch: { type: '5654e429eabc8820748b4568', label: 'Lunch',
@@ -87,8 +88,8 @@ export function itemHtml(it) {
   const tags = [];
   const name = it.name.replace(/\s*\((VG|V|GF)\)/g, (_, t) => { tags.push(t); return ''; });
   const label = { V: 'Vegetarian', VG: 'Vegan', GF: 'Gluten-free' };
-  return `<li><span class="item">${esc(name)} ${tags.map((t) => `<span class="diet d-${t.toLowerCase()}" title="${label[t]}">${t}</span>`).join(' ')}</span>
-    <span class="cal">${it.calories ? `${it.calories} cal` : ''}</span></li>`;
+  return `<li><span class="item">${esc(name)} ${tags.map((t) => `<span class="diet d-${t.toLowerCase()}" title="${label[t]}" translate="no">${t}</span>`).join(' ')}</span>
+    <span class="cal" translate="no">${it.calories ? `${it.calories} ${tr('cal')}` : ''}</span></li>`;
 }
 
 export async function todaysLunch() {
@@ -134,7 +135,8 @@ export function dish(it) {
     .replace(/^Nature's Path Organic /, '').replace(/\s{2,}/g, ' ').trim();
   return { id: it.id, raw: it.name, name, tags, icon: foodIcon(name) };
 }
-export const diet = (tags) => tags.map((x) => `<span class="diet d-${x.toLowerCase()}" title="${DIET[x]}">${x}</span>`).join(' ');
+// translate="no": Google read "V" as a Roman numeral and pulled words into the badge
+export const diet = (tags) => tags.map((x) => `<span class="diet d-${x.toLowerCase()}" title="${DIET[x]}" translate="no">${x}</span>`).join(' ');
 export function regularsIn(days) {
   const lists = Object.values(days).map((d) => new Set(entrees(d).map((i) => i.name)));
   if (lists.length < 4) return new Set();             // too little to tell
@@ -165,8 +167,8 @@ export async function mountNextMeal(el) {
     const regL = regularsIn(lunch);
     const regB = regularsIn(breakfast);
     const tmr = new Date(now); tmr.setDate(tmr.getDate() + 1);
-    const tab = (d) => (key(d) === key(now) ? 'Today' : key(d) === key(tmr) ? 'Tomorrow'
-      : `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${d.getDate()}`);
+    const tab = (d) => (key(d) === key(now) ? relDay(0) : key(d) === key(tmr) ? relDay(1)
+      : `${dateText(d, { weekday: 'short' })} ${d.getDate()}`);
     const sep = '<i class="nm-sep" aria-hidden="true">·</i>';
     const link = (which, d, x) => `${root}menu/#${which}/${iso(d)}/${encodeURIComponent(x.id)}`;
     const inline = (x, href) => `<${href ? `a href="${href}"` : 'span'} class="nm-dish"><span class="nm-i" aria-hidden="true">${x.icon}</span>&#8288;${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</${href ? 'a' : 'span'}>`;
@@ -180,7 +182,7 @@ export async function mountNextMeal(el) {
     el.innerHTML = `<div class="nm-top">
         <span class="nm-title">Cafeteria</span>
         <div class="nm-days" role="tablist" aria-label="Day">${days.map((d, i) =>
-          `<button type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" tabindex="${i ? -1 : 0}">${tab(d)}</button>`).join('')}</div>
+          `<button type="button" role="tab" data-i="${i}" aria-selected="${i === 0}" tabindex="${i ? -1 : 0}" translate="no">${tab(d)}</button>`).join('')}</div>
         <a class="nm-full" href="${root}menu/">Full menu <span aria-hidden="true">→</span></a></div>
       <div class="nm-body" role="tabpanel"></div>`;
     const body = el.querySelector('.nm-body');
@@ -205,12 +207,12 @@ export async function mountNextMeal(el) {
       body.innerHTML = `
         ${showB ? `<div class="nm-row nm-bfast"><span class="nm-label">Breakfast</span>
           <span class="nm-list">${bFresh.map((x) => inline(x, link('breakfast', d, x))).join(sep)}</span>
-          ${bReg.length ? `<button type="button" class="nm-more" aria-expanded="false">+${bReg.length} regulars</button>
+          ${bReg.length ? `<button type="button" class="nm-more" aria-expanded="false" translate="no">${tr('+{n} regulars', { n: bReg.length })}</button>
             <span class="nm-list nm-extra" hidden>${bReg.map((x) => inline(x)).join(sep)}</span>` : ''}</div>` : ''}
         <div class="nm-row nm-lhead"><span class="nm-label">Lunch</span>
           ${lp ? `<span class="nm-time">${clock(lp[1])}–${clock(lp[2])}</span>` : ''}
           ${when ? `<span class="nm-when${when === 'on now' ? ' now' : ''}">${when}</span>` : ''}
-          ${lReg.length ? `<button type="button" class="nm-more nm-more-l" aria-expanded="false">+${lReg.length} regulars</button>` : ''}</div>
+          ${lReg.length ? `<button type="button" class="nm-more nm-more-l" aria-expanded="false" translate="no">${tr('+{n} regulars', { n: lReg.length })}</button>` : ''}</div>
         <ul class="nm-tiles">${lFresh.map((x, j) => `<li><a class="nm-tile" style="--i:${j}" href="${link('lunch', d, x)}">
           <span class="nm-ic" aria-hidden="true">${x.icon}</span><span class="nm-name">${esc(x.name)}${x.tags.length ? ` ${diet(x.tags)}` : ''}</span></a></li>`).join('')}</ul>
         ${lReg.length ? `<div class="nm-row nm-regulars" title="On the menu most days"><span class="nm-label">Regulars</span>
@@ -299,7 +301,7 @@ if ($('#menu-app')) {
 
   async function load() {
     week = [0, 1, 2, 3, 4].map((i) => addDays(state.monday, i));
-    $('#week-label').textContent = `${week[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${week[4].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    $('#week-label').textContent = `${dateText(week[0], { month: 'short', day: 'numeric' })} – ${dateText(week[4], { month: 'short', day: 'numeric', year: 'numeric' })}`;
     $$('.official-link').forEach((a) => { a.href = MENUS[state.which].official; });   // the district's own page for this meal
     $$('#menu-which [data-which]').forEach((b) => b.setAttribute('aria-checked', b.dataset.which === state.which));
     $('#mn-view').innerHTML = `<div class="mn-cards">${'<div class="mn-card mn-skel"><span class="mn-photo"></span><span class="mn-name">&nbsp;</span></div>'.repeat(5)}</div>`;
@@ -345,7 +347,7 @@ if ($('#menu-app')) {
       const star = fresh.find((x) => x.image) || fresh[0];
       return `<button type="button" role="tab" class="mn-day${k === todayK ? ' today' : ''}" data-k="${k}"
           aria-selected="${k === state.day}" tabindex="${k === state.day ? 0 : -1}" ${data[k] ? '' : 'disabled'}>
-        <span class="mn-dow">${k === todayK ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+        <span class="mn-dow" translate="no">${k === todayK ? relDay(0) : dateText(d, { weekday: 'short' })}</span>
         <span class="mn-date">${d.getDate()}</span>
         <span class="mn-thumb">${star ? pic(star) : ''}</span>
         <span class="mn-star">${star ? esc(dish(star).name) : 'No menu'}</span></button>`;
@@ -397,12 +399,12 @@ if ($('#menu-app')) {
     return `<button type="button" class="mn-card" data-id="${esc(x.id)}" style="--i:${i}">
       <span class="mn-photo">${pic(x)}${peek ? `<span class="mn-peek">${peek}</span>` : ''}</span>
       <span class="mn-name">${esc(v.name)}${v.tags.length ? ` ${diet(v.tags)}` : ''}</span>
-      <span class="mn-kcal">${x.calories ? `<b>${x.calories}</b> cal` : ''}${n.prod_protein != null ? `${x.calories ? ' · ' : ''}${num(n.prod_protein)}g protein` : ''}</span></button>`;
+      <span class="mn-kcal">${x.calories ? `<span translate="no"><b>${x.calories}</b> ${tr('cal')}</span>` : ''}${n.prod_protein != null ? `${x.calories ? ' · ' : ''}${num(n.prod_protein)}g protein` : ''}</span></button>`;
   };
   const side = (x) => {
     const v = dish(x);
     return `<button type="button" class="mn-side" data-id="${esc(x.id)}"><span aria-hidden="true">${v.icon}</span>${esc(v.name)}${
-      x.calories ? `<small>${x.calories} cal</small>` : ''}</button>`;
+      x.calories ? `<small translate="no">${x.calories} ${tr('cal')}</small>` : ''}</button>`;
   };
 
   function paintDay() {
@@ -412,8 +414,8 @@ if ($('#menu-app')) {
     $$('#mn-week [role=tab]').forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
     const plan = bell && d ? dayPlan(bell, d) : null;
     const lp = plan?.periods?.find(([name]) => /^Lunch/.test(name));
-    const head = `<div class="mn-dayhead"><h2>${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
-      ${k === todayK ? '<span class="tag today-tag">Today</span>' : ''}
+    const head = `<div class="mn-dayhead"><h2 translate="no">${dateText(d, { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
+      ${k === todayK ? `<span class="tag today-tag" translate="no">${relDay(0)}</span>` : ''}
       ${state.which === 'lunch' && lp ? `<span class="mn-when">Lunch ${clock(lp[1])}–${clock(lp[2])}</span>` : ''}</div>`;
     if (!day) {
       $('#mn-view').innerHTML = `${head}<p class="empty">No ${state.which} menu posted for this day. It may be a holiday or a day off.</p>`;

@@ -811,7 +811,7 @@ def build_static():
       <button type="button" role="radio" data-which="lunch">Lunch</button>
     </div>
     <div class="week-nav"><button type="button" class="week-btn" id="prev-week" aria-label="Previous week">‹</button>
-      <b id="week-label"></b><button type="button" class="week-btn" id="next-week" aria-label="Next week">›</button>
+      <b id="week-label" translate="no"></b><button type="button" class="week-btn" id="next-week" aria-label="Next week">›</button>
       <button type="button" class="chip" id="this-week">This week</button></div>
   </div>
   <div id="mn-week" class="mn-week" role="tablist" aria-label="Day"></div>
