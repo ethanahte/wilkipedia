@@ -80,7 +80,11 @@
 :root[data-class="purple"] { --class: #7c45e0; --class-ink: #fff; }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%;
+  /* No rubber-band bounce or pull-to-refresh at the page edges: pulling down
+     dragged the header along and looked like a refresh that never happened. */
+  overscroll-behavior-y: none; }
+body { overscroll-behavior-y: none; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 1rem/1.55 var(--sans); transition: background .2s, color .2s; }
 a { color: var(--ink); text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
