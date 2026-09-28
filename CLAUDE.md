@@ -673,10 +673,20 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     saw-cut joints with depth (a dark groove, a lit lip) and a slightly
     different tone per slab. Fine detail fades with distance. The quad's
     painted map no longer draws the joints.
+    - Everything else gets the same idea through `gbuffer()`'s
+      `SURFACE_DETAIL` (on unless `detail: false`; off for decals, flags
+      and the ground meshes). Tops get chips and fallen-leaf flecks on soil,
+      aggregate on grey and blades on green. Upright faces get a fine sand
+      grain.
+    - The quad's tree beds are painted with a dark rim where the mulch
+      meets the slab, lighter mulch heaped at the trunk, and fallen leaves.
     - Stucco is 512 px with sand grain, pits and lit reveal lips.
-    - The leaf atlas is drawn at double size, with midribs.
+    - The leaf atlas is drawn at double size, with midribs, more contrast
+      and sunlit glints.
     - Grass and flax blades shade darker toward the base.
-    - Short 3D grass clumps are scattered over the quad lawns.
+    - On high quality the ground maps are 1.5× sharper.
+    - Nothing sticks up out of the lawns (Ethan): no 3D grass clumps
+      there.
     ink modes: 'soft' (foliage: depth stored negated, only its outline is inked),
     'sky' (depth 5000), 'cloud' (depth 4000: no ink, but blocks sunbeams),
     'none', 'add'. `SUN_VIEW`/`DAY` in toon.js are shared uniforms main.js

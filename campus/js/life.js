@@ -324,7 +324,7 @@ export function makeFlags() {
   const flags = [];
   for (const [tex, top, w, h] of [[usFlag(), 11.85, 2.6, 1.37], [caFlag(), 10.2, 2.3, 1.35]]) {
     const geo = new THREE.PlaneGeometry(w, h, 16, 6).translate(w / 2, -h / 2, 0);
-    const mat = gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: SOFT, side: THREE.DoubleSide }));
+    const mat = gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: SOFT, side: THREE.DoubleSide }), { detail: false });
     const m = new THREE.Mesh(geo, mat);
     m.position.set(fx + 0.1, top, fz);
     m.rotation.y = -0.9;       // blowing roughly east-south-east

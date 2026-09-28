@@ -79,7 +79,7 @@ function plane(x0, z0, x1, z1, y, tex, t0) {
   // a detail layer lies 2 cm over the ground: also pull it forward in depth, or
   // at a distance / a glancing angle the two can't be told apart and flicker
   if (y > 0) { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -4; }
-  const m = new THREE.Mesh(g, groundDetail(gbuffer(mat)));
+  const m = new THREE.Mesh(g, groundDetail(gbuffer(mat, { detail: false })));
   m.receiveShadow = true;
   m.matrixAutoUpdate = false;
   return m;
@@ -109,7 +109,7 @@ function hillPlane(x0, z0, x1, z1, y, tex, t0, hf, step, grid = null) {
   g.setIndex(idx);
   const mat = new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON });
   mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -4;
-  const m = new THREE.Mesh(g, groundDetail(gbuffer(mat), { grid }));
+  const m = new THREE.Mesh(g, groundDetail(gbuffer(mat, { detail: false }), { grid }));
   m.receiveShadow = true;
   m.matrixAutoUpdate = false;
   return m;
@@ -139,7 +139,7 @@ function groundPoly(poly, y, tex, t0) {
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  const m = new THREE.Mesh(g, groundDetail(gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON }))));
+  const m = new THREE.Mesh(g, groundDetail(gbuffer(new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON }), { detail: false })));
   m.receiveShadow = true;
   m.matrixAutoUpdate = false;
   return m;
@@ -287,7 +287,17 @@ function quadPaint(p, g, W, H, Q) {
   p.circle(CEDAR.x, CEDAR.z, CEDAR.bed, '#74492f');                 // reddish bark mulch (IMG_2334)
   // mulch rings for the young trees
   // round beds for the young trees; near the cafeteria they're planted with groundcover (IMG_2362, IMG_2366)
-  for (const [x, z] of treeSpots()) p.circle(x, z, z < -12 ? 1.5 : 1.15, z < -12 ? '#6d8446' : '#7d5f47');
+  const LITTER = ['#a8893f', '#c49a45', '#7f8f3e', '#b86d3a', '#8a6a3a'];
+  for (const [x, z] of treeSpots()) {
+    const rr = z < -12 ? 1.5 : 1.15;
+    p.circle(x, z, rr + 0.07, 'rgba(58,44,34,0.9)');                  // the mulch sits a little below the slab: a dark edge
+    p.circle(x, z, rr, z < -12 ? '#6d8446' : '#7d5f47');
+    p.circle(x, z, rr * 0.55, z < -12 ? 'rgba(80,110,60,0.5)' : 'rgba(96,74,52,0.55)');   // lighter where it's heaped round the trunk
+    for (let k = 0; k < 20; k++) {                                     // fallen leaves, in the bed and a couple blown just past it
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * (rr + (k < 18 ? -0.1 : 0.6));
+      p.circle(x + Math.cos(a) * d, z + Math.sin(a) * d, 0.035 + r() * 0.035, k < 18 ? LITTER[k % LITTER.length] : 'rgba(150,120,70,0.6)');
+    }
+  }
   for (const [x, z] of LAWN_TREES) p.circle(x, z, 0.7, '#7d5f47');
 }
 

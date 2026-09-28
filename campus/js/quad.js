@@ -53,15 +53,6 @@ export function buildQuad(W, decals) {
     } else umbrellaTable(W, x, z, R);
   });
   for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true, y: lawnHeight(x, z) }); addCircle(x, z, 0.25); }   // up on the lawn's mound
-  // short clumps of blades scattered over the lawns, so the grass has some depth underfoot
-  {
-    const LG = ['#6fae45', '#7cb84e', '#649f3f', '#86be58'].map(color), R2 = rng(2025);
-    for (let x = -38; x < 24; x += 0.9) for (let z = 11; z < 33; z += 0.9) {
-      const px = x + (R2() - 0.5) * 0.8, pz = z + (R2() - 0.5) * 0.8, h = lawnHeight(px, pz);
-      if (h <= 0.004 || R2() < 0.45) continue;
-      grassTuft(W, px, pz, R2, { y: h + 0.02, h: 0.12 + R2() * 0.1, cols: LG });
-    }
-  }
   frontOfR(W, R);
   hydrant(W, 38.0, -24.9);
 

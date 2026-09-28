@@ -80,6 +80,33 @@ vec2 pxPlane(vec3 p, vec3 n){ vec3 a = abs(n); return a.y > max(a.x, a.z) ? p.xz
 float pxFade(vec2 pp){ float fw = max(length(dFdx(pp)), length(dFdy(pp))) * PX_D; return 1.0 - smoothstep(0.35, 0.9, fw); }
 `;
 
+// Surface detail on every painted material (not the ground meshes, which have groundDetail()):
+// on tops, bark chips and fallen-leaf flecks on soil and mulch, aggregate on grey concrete, blades
+// on green; on everything upright a fine sand grain, triplanar. Read off the surface's own colour,
+// strongest close up, gone with distance.
+const SURFACE_DETAIL = `{
+    vec3 dn = normalize(vPaintNrm), sc = diffuseColor.rgb;
+    float dfw = max(length(dFdx(vPaintPos)), length(dFdy(vPaintPos))), dnear = 1.0 - smoothstep(0.012, 0.09, dfw);
+    float smx = max(sc.r, max(sc.g, sc.b)), smn = min(sc.r, min(sc.g, sc.b)), ssat = (smx - smn) / max(smx, 1e-4);
+    float sgrass = smoothstep(0.03, 0.12, sc.g - max(sc.r, sc.b));
+    float ssoil = smoothstep(0.01, 0.045, sc.r - sc.g) * (1.0 - smoothstep(0.25, 0.45, smx));
+    float shard = (1.0 - smoothstep(0.14, 0.28, ssat)) * (1.0 - sgrass);
+    if (dn.y > 0.6) {
+      vec2 wp = vPaintPos.xz;
+      vec4 t3 = texture2D(tDetail, wp * 0.5), t1 = texture2D(tDetail, wp * 0.33), t2 = texture2D(tDetail, wp * 0.085 + 0.31);
+      diffuseColor.rgb *= 1.0 + ssoil * ((t3.b - 0.5) * 1.3 * mix(0.35, 1.0, dnear) + (t2.b - 0.5) * 0.45)
+                            + shard * ((t1.r - 0.5) * 0.45 * dnear + (t2.r - 0.5) * 0.25)
+                            + sgrass * (t3.g - 0.5) * 0.9 * mix(0.4, 1.0, dnear);
+      // a few fallen leaves in the soil: straw and rust flecks where the chips are brightest
+      float fl = smoothstep(0.74, 0.8, texture2D(tDetail, wp * 0.21 + 0.57).b) * ssoil * dnear;
+      diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(0.52, 0.36, 0.1), vec3(0.45, 0.16, 0.06), t2.g), fl * 0.8);
+    } else {
+      vec3 an2 = abs(dn) + 1e-3;
+      float gz = (texture2D(tDetail, vPaintPos.xy * 0.9).r * an2.z + texture2D(tDetail, vPaintPos.zy * 0.9).r * an2.x) / (an2.x + an2.z);
+      diffuseColor.rgb *= 1.0 + (gz - 0.5) * 0.2 * dnear;
+    }
+  }`;
+
 // ── the G-buffer patch ──
 // ink: 'normal' | 'soft' (foliage: only its outline against what's behind it) |
 // 'none' (decals) | 'sky' (pretend to be sky, so no outline at all) |
@@ -91,7 +118,7 @@ const OUT = 'layout(location = 1) out highp vec4 gNormalDepth;\n';
 // rim: a warm edge of sunlight where a sunlit surface turns away from you, the
 // cel-animation highlight. streaks: the diagonal white glints anime draws on glass.
 export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', paint = true, emissiveByColor = false,
-  rim = ink === 'normal' || ink === 'soft', streaks = false } = {}) {
+  rim = ink === 'normal' || ink === 'soft', streaks = false, detail = paint } = {}) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (s, r) => {
     prev?.(s, r);
@@ -111,12 +138,14 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
   vPaintPos = (modelMatrix * pw).xyz;
   vPaintNrm = mat3(modelMatrix) * pn;`);
       s.uniforms.uPixel = PIXEL;
-      fs = 'uniform sampler2D tPaint;\nvarying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + PX_FNS + fs.replace('#include <color_fragment>', `#include <color_fragment>
+      if (detail) s.uniforms.tDetail = { value: detailTex() };
+      fs = (detail ? 'uniform sampler2D tDetail;\n' : '') + 'uniform sampler2D tPaint;\nvarying vec3 vPaintPos;\nvarying vec3 vPaintNrm;\n' + PX_FNS + fs.replace('#include <color_fragment>', `#include <color_fragment>
   {
     vec3 an = abs(normalize(vPaintNrm)) + 1e-3;
     float pz = texture2D(tPaint, vPaintPos.xz * 0.085).r * an.y + texture2D(tPaint, vPaintPos.xy * 0.085).r * an.z + texture2D(tPaint, vPaintPos.zy * 0.085).r * an.x;
     pz /= an.x + an.y + an.z;
     diffuseColor.rgb *= 1.0 + (pz - 0.5) * 0.17 * (1.0 - uPixel);   // hand-painted, a little weathered
+    ${detail ? SURFACE_DETAIL : ''}
     float wall = 1.0 - clamp(an.y, 0.0, 1.0);
     float wy = uPixel > 0.5 ? floor(vPaintPos.y * PX_D) / PX_D : vPaintPos.y;   // stepped, in pixel art
     diffuseColor.rgb *= mix(1.0, mix(0.78, 1.0, smoothstep(0.0, 1.5, wy)), wall);
@@ -174,7 +203,7 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
     }
     s.fragmentShader = fs;
   };
-  mat.customProgramCacheKey = () => `gbuf5|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${rim ? 1 : 0}|${streaks ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
+  mat.customProgramCacheKey = () => `gbuf6|${detail ? 1 : 0}|${ink}|${paint ? 1 : 0}|${emissiveByColor ? 1 : 0}|${rim ? 1 : 0}|${streaks ? 1 : 0}|${mat.type}|${mat.map ? 1 : 0}|${mat.alphaTest}`;
   return mat;
 }
 
@@ -407,12 +436,13 @@ export function makeTextures() {
     for (let i = 0; i < 320; i++) {
       const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 100, x = 128 + Math.cos(a) * d, y = 128 + Math.sin(a) * d;
       const lit = 0.55 - (Math.cos(a) * d + Math.sin(a) * d) / 240 + (r() - 0.5) * 0.3;
-      const v = Math.round(140 + Math.max(0, Math.min(1, lit)) * 115);
+      const v = Math.round(118 + Math.max(0, Math.min(1, lit)) * 137);
       g.save(); g.translate(x, y); g.rotate(r() * Math.PI * 2);
       const w = 7 + r() * 7 - d * 0.02, h = w * 0.55;
       g.beginPath(); g.moveTo(-w, 0); g.quadraticCurveTo(0, -h * 1.6, w, 0); g.quadraticCurveTo(0, h * 1.6, -w, 0);
       g.fillStyle = `rgb(${v},${v},${v})`; g.fill();
       if (r() < 0.55) { g.lineWidth = 1.1; g.strokeStyle = 'rgb(96,96,96)'; g.stroke(); }
+      if (v > 225 && r() < 0.35) { g.fillStyle = 'rgb(255,255,255)'; g.beginPath(); g.ellipse(-w * 0.2, -h * 0.3, w * 0.3, h * 0.25, 0, 0, Math.PI * 2); g.fill(); }   // a sunlit glint
       if (r() < 0.7) { g.lineWidth = 0.5; g.strokeStyle = `rgba(${v > 200 ? 120 : 230},${v > 200 ? 120 : 230},${v > 200 ? 120 : 230},0.55)`; g.beginPath(); g.moveTo(-w * 0.8, 0); g.lineTo(w * 0.8, 0); g.stroke(); }   // midrib
       g.restore();
     }
@@ -475,5 +505,5 @@ export function makeMaterials(T) {
 export function decalMat(tex, { transparent = true } = {}) {
   const m = new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON, transparent, alphaTest: transparent ? 0.35 : 0 });
   m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2;
-  return gbuffer(m);
+  return gbuffer(m, { detail: false });
 }

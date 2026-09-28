@@ -97,7 +97,7 @@ async function boot() {
   let groundMeshes = [];
   steps.push(['Pouring the concrete', () => {
     const before = scene.children.length;
-    buildGround(scene, quality === 'low' ? 0.6 : 1);
+    buildGround(scene, quality === 'low' ? 0.6 : quality === 'high' ? 1.5 : 1);
     groundMeshes = scene.children.slice(before);
   }]);
   steps.push(['Raising the buildings', () => buildBuildings(W)]);
