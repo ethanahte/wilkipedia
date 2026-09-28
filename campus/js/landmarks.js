@@ -9,10 +9,13 @@
 import * as THREE from 'three';
 import { color, rng } from './geo.js';
 import { canvasTex, decalMat } from './toon.js';
-import { FRONT, CARPORTS, BUILDINGS } from './layout.js';
+import { FRONT, CARPORTS, BUILDINGS, COURT } from './layout.js';
 import { wallEdges } from './buildings.js';
 import { LIGHTS } from './lights.js';
-import { palm, flax, grassTuft, shrub, G } from './nature.js';
+import { palm, flax, grassTuft, shrub, shadeTree, youngTree, G } from './nature.js';
+import { umbrellaTable } from './quad.js';
+import { addCircle, addPoly } from './collide.js';
+import { inPoly, ensureCCW } from './geo.js';
 
 const concrete = color('#cfcbc3'), soil = color('#5b4636'), steel = color('#6f747a'), fin = color('#f4efe4');
 
@@ -69,7 +72,7 @@ export function buildLandmarks(W, group, fontFamily) {
   W.slab('flat', -26.2, -67.5, -24.2, -64.5, 3.2, 3.45, fin);
   W.slab('flat', -26.26, -66.8, -26.2, -65.2, 0, 2.4, steel);
 
-  // the planter: poured concrete, rounded at the east end, full of flax and fan palms
+  // the planter: poured concrete, rounded at the east end, full of flax (the palms have their own bed, below)
   const p = FRONT.planter, r = (p.z1 - p.z0) / 2, cz = (p.z0 + p.z1) / 2;
   const outline = [[p.x0, p.z0], [p.x1 - r, p.z0]];
   for (let i = 1; i < 10; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 10; outline.push([p.x1 - r + Math.cos(a) * r, cz + Math.sin(a) * r]); }
@@ -81,7 +84,7 @@ export function buildLandmarks(W, group, fontFamily) {
     if (R() < 0.72) flax(W, x, cz + (R() - 0.5) * 1.2, R, { y: p.h, h: 1.2 + R() * 0.7 });
     else shrub(W, x, cz, R, { y: p.h, s: 0.9, cols: G.leaf });
   }
-  for (const [x, zz, h] of FRONT.palms) palm(W, x, zz, R, { h });
+  for (const [x, zz, h] of FRONT.palms) palm(W, x, zz, R, { h, y: FRONT.palmBed.h });   // in their bed (below)
   // blue accessible-parking sign
   const [ax, az] = FRONT.ada;
   W.cyl('flat', ax, 0, az, 0.04, 0.04, 2.3, 6, color('#9a9ea3'));
@@ -92,17 +95,37 @@ export function buildLandmarks(W, group, fontFamily) {
   });
   group.add(decal(ada, ax, 2.0, az - 0.05, 0.45, 0.56, Math.PI));
 
-  // flagpole
-  const [fx, fz] = FRONT.flag;
-  W.cyl('flat', fx, 0, fz, 0.55, 0.5, 0.35, 12, concrete);
-  W.cyl('flat', fx, 0.35, fz, 0.1, 0.055, 11.6, 8, color('#c7cbd0'));
-  W.blob('flat', fx, 12.05, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
+  // the palms' bed at the office's north-east corner, rounded at its south-east corner
+  {
+    const b = FRONT.palmBed, out = [[b.x0, b.z0], [b.x1, b.z0], [b.x1, b.z1 - b.r]];
+    for (let i = 1; i < 8; i++) { const a = (Math.PI / 2) * (i / 8); out.push([b.x1 - b.r + Math.cos(a) * b.r, b.z1 - b.r + Math.sin(a) * b.r]); }
+    out.push([b.x1 - b.r, b.z1], [b.x0, b.z1]);
+    W.prism('flat', out, 0, b.h, concrete, { top: true, topMat: 'flat', topCol: soil });
+    addPoly(ensureCCW(out));
+    const R2 = rng(611);
+    for (let k = 0; k < 9; k++) {
+      const x = b.x0 + 0.8 + R2() * (b.x1 - b.x0 - 1.6), zz = b.z0 + 0.8 + R2() * (b.z1 - b.z0 - 1.6);
+      if (inPoly(x, zz, out)) flax(W, x, zz, R2, { y: b.h, h: 1.1 + R2() * 0.6 });
+    }
+  }
+  // the flagpole, in its round planter: a ring of shrubs round a paved circle
+  const [fx, fz] = FRONT.flag, fb = FRONT.flagBed;
+  W.cyl('flat', fx, 0, fz, fb.r, fb.r, 0.3, 36, soil);
+  W.cyl('flat', fx, 0, fz, fb.inner, fb.inner, 0.34, 36, color('#d6b98c'));
+  { const R3 = rng(612); for (let k = 0; k < 16; k++) { const a = (k / 16) * Math.PI * 2; shrub(W, fx + Math.cos(a) * 3.6, fz + Math.sin(a) * 3.6, R3, { y: 0.3, s: 1.0 + R3() * 0.3 }); } }
+  addCircle(fx, fz, 0.6);
+  W.cyl('flat', fx, 0.3, fz, 0.55, 0.5, 0.35, 12, concrete);
+  W.cyl('flat', fx, 0.65, fz, 0.1, 0.055, 11.6, 8, color('#c7cbd0'));
+  W.blob('flat', fx, 12.35, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
+
+  court(W);
 
   // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
   // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
   // roof's middle (its valley). Each post splits near the top into a Y whose arms hold the
   // two wings. It stands taller than the cafeteria's walkway roof (3.5–3.78) it meets.
-  const c0 = -54.7, c1 = -17.8, zp = -31.65, hw = 3.0;         // post line; half-width of the roof
+  // Its extent is off the Apple Maps view: from B's white entry block (x -48.2) to x -20, z -35.2..-29.0.
+  const c0 = -48.2, c1 = -20.0, zp = -32.1, hw = 3.1;          // post line; half-width of the roof
   const yv = 3.95, ye = 4.6, th = 0.12;                         // underside at the valley and at the edges
   const under = (d) => yv + (ye - yv) * (Math.abs(d) / hw);     // underside height d metres from the valley
   const post = color('#3d4044'), soffit = color('#e9e7e2'), metal = color('#9ea3a8');
@@ -120,7 +143,8 @@ export function buildLandmarks(W, group, fontFamily) {
     W.slab('flat', c0, Math.min(zE, zE - s * 0.1), c1, Math.max(zE, zE - s * 0.1), ye - 0.1, ye + th + 0.12, soffit);   // fascia
   }
   W.slab('flat', c0, zp - 0.14, c1, zp + 0.14, yv - 0.3, yv + 0.02, post);                       // the beam along the valley
-  for (let x = c0 + 5; x < c1; x += 6) {
+  const nPost = Math.round((c1 - c0) / 6), gap = (c1 - c0) / nPost;
+  for (let x = c0 + gap / 2; x < c1; x += gap) {
     W.slab('flat', x - 0.15, zp - 0.15, x + 0.15, zp + 0.15, 0, yv - 0.3, post);                  // the post
     for (const s of [-1, 1]) {
       W.rod('flat', [x, yv - 0.8, zp + s * 0.1], [x, under(1.7) - 0.02, zp + s * 1.7], 0.14, post);   // the Y's arm
@@ -141,14 +165,16 @@ export function buildLandmarks(W, group, fontFamily) {
 
   // ── the cafeteria's covered walkway along the quad ──
   const wz0 = -30.4, wz1 = -27.0;
-  // it starts at the west wing's corner, where B's canopy ends and the snack bar begins (IMG_2371)
-  const wx0 = -17.8;
+  // it starts at the west wing's corner (x -18.3); between it and B's canopy (which ends at x -20)
+  // is a gap open to the sky, in front of the door into the teachers' yard (Apple Maps view)
+  const wx0 = -18.3;
   for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', wx0, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', wx0, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
-  // it reaches back over the snack bar's recess and the door niche beside it (layout.js CAF-w)
-  W.slab('flat', -17.8, -32.4, -4.95, wz0, 3.5, 3.78, fin);
-  W.slab('flat', -17.8, -33.4, -15.6, -32.4, 3.5, 3.78, fin);
+  // it reaches back over the snack bar's recess and the set-back corner beside it (layout.js CAF-w)
+  W.slab('flat', -15.6, -32.4, -4.95, wz0, 3.5, 3.78, fin);
+  W.slab('flat', -18.3, -35.4, -15.6, wz0, 3.5, 3.78, fin);
+  W.slab('glow', -17.25, -33.3, -16.65, -32.9, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([-16.95, -33.1, 3.45, 4]);
   for (const x of [-13.5, -8.5]) { W.slab('glow', x - 0.3, -31.6, x + 0.3, -31.2, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -31.4, 3.45, 4]); }
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 
@@ -271,4 +297,33 @@ function solarRows(W, x0, z0, x1, z1, y, tilt, frames = false) {
       [[0, 0], [x1 - x0, 0], [x1 - x0, rowD], [0, rowD]]);
     if (!frames) W.slab('flat', x0, z + 0.05, x1, z + 0.12, y, y + tilt + lift, color('#9aa0a6'));
   }
+}
+
+// ── the courtyard between the front office and B's canopy (layout.js COURT) ──
+function court(W) {
+  const R = rng(613);
+  // the raised zig-zag planter: a concrete rim round soil, full of shrubs and grasses
+  const P = ensureCCW(COURT.planter), h = 0.45;
+  W.prism('flat', P, 0, h, concrete, { top: true, topMat: 'flat', topCol: soil });
+  for (let i = 0; i < P.length; i++) {
+    const [ax, az] = P[i], [bx, bz] = P[(i + 1) % P.length];
+    W.beam('flat', ax, az, bx, bz, h - 0.02, h + 0.05, 0.3, concrete);
+  }
+  addPoly(P);
+  const xs = P.map((p) => p[0]), zs = P.map((p) => p[1]);
+  for (let k = 0; k < 60; k++) {
+    const x = Math.min(...xs) + R() * (Math.max(...xs) - Math.min(...xs)), z = Math.min(...zs) + R() * (Math.max(...zs) - Math.min(...zs));
+    if (!inPoly(x, z, P)) continue;
+    if (R() < 0.55) shrub(W, x, z, R, { y: h, s: 0.8 + R() * 0.5, cols: R() < 0.5 ? G.leaf : G.dark });
+    else grassTuft(W, x, z, R, { y: h });
+  }
+  // the trees: a big shade tree by B, a small reddish one north of it, a small orange one east of it
+  const [bx, bz] = COURT.bigTree; shadeTree(W, bx, bz, R, { h: 11 }); addCircle(bx, bz, 0.45);
+  const [rx, rz] = COURT.redTree; youngTree(W, rx, rz, R, { h: 5.5, stake: false, cols: [color('#7a3b3f'), color('#8e4a45'), color('#6b3440')] }); addCircle(rx, rz, 0.2);
+  const [sx, sz] = COURT.smallTree; youngTree(W, sx, sz, R, { h: 3.2, stake: false, cols: [color('#c7793f'), color('#b8683a')] }); addCircle(sx, sz, 0.15);
+  const [tx, tz] = COURT.table; umbrellaTable(W, tx, tz, R);
+  // the covered walk along the office's south face: a flat roof on slim posts
+  const c = COURT.porch;
+  W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
+  for (let x = c.x0 + 1; x <= c.x1 - 0.5; x += (c.x1 - c.x0 - 1.5) / 4) W.slab('flat', x - 0.1, c.z1 - 0.35, x + 0.1, c.z1 - 0.15, 0, 3.2, fin);
 }

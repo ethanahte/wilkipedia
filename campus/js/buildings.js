@@ -142,9 +142,10 @@ const KITS = {
   },
   r() {},                                       // buildR() draws R whole
   yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on the quad side)
+  bentry() {},                                  // B's white entry block: its glass entry is in landmarks.js; nothing else is known
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
-    if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west end: the teachers' yard side (no photo of it)
+    if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west wall: the teachers' yard side (no photo of it)
     const tall = b.h > 6;
     for (const { i, t } of bays(e.len, 4.2, 1.5)) {
       if (e.nz > 0.5 && i % 3 === 1) doorAt(W, e, t, 1.8, 2.3, C.door);
@@ -213,7 +214,7 @@ const KITS = {
 const WALL = {
   b: C.cream, r: color('#ece0c4'), caf: color('#efe6d0'), p: color('#efe5cf'), library: color('#efe5cf'),
   admin: color('#efe8d6'), gym: color('#eee6d3'), gymlobby: color('#eee6d3'), plain: color('#efe5cf'), mn: color('#f1efe7'),
-  yard: color('#efe6d0'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
+  yard: color('#efe6d0'), bentry: color('#f3f1ec'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
 // ── Building R ──
@@ -596,20 +597,19 @@ function cafFront(W) {
   });
   // The west side, west to east (IMG_2367, IMG_2368, IMG_2371, IMG_2391; Ethan). The
   // outlines are in layout.js (YARD-*, CAF-w's notch).
-  //  · The teachers' yard: walls all round (layout.js YARD-*); the quad-side one carries the
-  //    poster board and, by the niche, a blue accessibility sign.
-  const yw = southWall(YARD.x0, -17.8, YARD.zs), yt = (x) => x - YARD.x0;
-  onWall(W, yw, yt(-20.0), 1.55, 0.03, () => {
+  //  · The teachers' yard (layout.js YARD-*): its quad-side wall, just behind the end of B's
+  //    canopy, carries the poster board, a blue accessibility sign and, right by the building,
+  //    the wide yellow door into the yard (the building is on your right as you go in).
+  const yw = southWall(YARD.xs, YARD.xe, YARD.zs), yt = (x) => x - YARD.xs;
+  onWall(W, yw, yt(-22.0), 1.55, 0.03, () => {
     W.box('flat', 0, 0, 0, 1.5, 1.2, 0.05, color('#2e3136'));
     const PC = ['#e9e4d8', '#7fb0d8', '#f0c75a', '#d9776a', '#ffffff', '#9ccf8e'];
     for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
       W.box('flat', -0.52 + c * 0.35, 0.25 - r * 0.5, 0.03, 0.27, 0.38, 0.01, color(PC[(r * 4 + c) % PC.length]));
     }
   });
-  onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
-  //  · The wide (1.9 m) door in its niche between the yard wall and the snack bar, set back
-  //    further. It opens into the yard (the building is on your right as you go in).
-  doorAt(W, southWall(-17.8, -15.6, -33.4), 1.1, 1.9, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  onWall(W, yw, yt(-20.7), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
+  doorAt(W, yw, yt(-19.25), 1.7, 2.2, C.door, { frameCol: color('#d9ccb0') });
   //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway.
   //    Symmetric (Ethan): a wide single glass door and panes; a pane, glass double doors and
   //    a pane; panes and a wide single glass door, with the SNACK BAR plaque by the right one.
@@ -650,7 +650,7 @@ export function buildBuildings(W) {
     parapet(W, b.poly, b.h, wall, undefined, undefined, (e) => BUILDINGS.some((o) => o !== b && o.h >= b.h - 0.01 && sharesEdge(e, o)));
     if (b.gable) gable(W, b, roofY);
     else if (b.barrel) barrels(W, b, roofY);
-    else if (b.style !== 'r' && b.style !== 'yard') rooftop(W, b, R, roofY);
+    else if (b.style !== 'r' && b.style !== 'yard' && b.style !== 'bentry') rooftop(W, b, R, roofY);
     const kit = KITS[b.style] || KITS.plain;
     for (const e of edges(b.poly)) kit(W, b, e, R);
     if (b.style === 'r') buildR(W, b);

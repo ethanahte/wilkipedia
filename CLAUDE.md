@@ -351,27 +351,30 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - The front has the storefront under the covered walkway: six groups of
       `storefront()` bays between cream piers. A bay is glass over a solid
       lower panel with a transom row, or glass doors.
-    - West side, west to east (IMG_2367/2368/2371/2391, Ethan):
-      - The teachers' yard, a right-angle trapezoid walled on every side
-        (layout.js `YARD` + `YARD-*`; Ethan: all walls, no fence). Its long
-        side is on the quad side, in line with the snack bar, carrying the
-        poster board. The right-angle side is the cafeteria's west wall (x
-        -15.6: the building behind the snack bar is narrower). The short side
-        faces the parking lot, and the slanted side makes 75° with
-        the long one. Ethan: wide, and deeper than 11 m but not the first 16 m (11 m
-        along the quad, 12.5 m deep).
-        It is a yard, not a building: style `yard` has no kit windows and no
-        rooftop units.
-      - B's grey steel canopy (landmarks.js), which runs from B to the snack
-        bar, is a butterfly (V) roof on ONE row of posts (IMG_2391, Ethan).
-        The posts stand under the valley, on the row nearer the parking lot
-        (z -31.65, in front of the yard wall). Each post splits into a Y
-        whose arms hold the two wings, and carries a light. The roof is
-        taller than the cafeteria walkway it meets (valley at 3.95 m,
-        edges 4.6 m).
-      - A wide yellow door (1.9 m) in a niche set back further (x -17.8 to
-        -15.6), between the yard wall and the snack bar. It opens into the
-        yard, with the building on your right as you go in (`YARD-door`).
+    - Ethan's Apple Maps view of this corner (September 2026) was registered
+      to the model's satellite crop (`satcrop.py`, 6 control points, ~1 m
+      fit). Shapes here come from it. Things within about a meter (the front
+      office, B's east face) were left alone.
+    - West side, west to east (IMG_2367/2368/2371/2391, the map, Ethan):
+      - The teachers' yard (layout.js `YARD` + `YARD-*`), walled all round.
+        Its quad-side wall (z -35.4) sits just behind the north edge of B's
+        canopy and carries the poster board, a blue accessibility sign and
+        the wide yellow door. The door is right by the building, so you go
+        in with the building on your right. In front of the door is a gap
+        open to the sky, between the canopy (ends at x -20) and the walkway
+        (starts at -18.3). The north wall is at z -48.3. The slanted wall
+        runs from (-25.9, -35.4) to (-21.3, -48.3), about 70°. The
+        cafeteria's west wall (x -18.3) is the right-angle side. It is a
+        yard, not a building: style `yard` has no kit windows and no rooftop
+        units.
+      - B's grey steel canopy (landmarks.js) runs from B's white entry block
+        (`B-entry`, x -54.7..-48.2, which carries B's glass entry) to x -20,
+        over z -35.2..-29.0. It is a butterfly (V) roof on ONE row of
+        posts, under the valley (IMG_2391, Ethan). Each post splits into a
+        Y whose arms hold the two wings, and carries a light. It is taller
+        than the cafeteria walkway (valley 3.95 m, edges 4.6 m).
+      - The west wing's corner x -18.3..-15.6 is set back to z -35.4, under
+        the walkway roof.
       - The snack bar is a shallow room whose glass front is set 2.0 m back
         (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -15.6
         to -4.95. The walkway roof reaches back over it. It is symmetric (Ethan)
@@ -384,6 +387,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         left of centre, and two steel bowls reaching out toward the walkway
         (a high one and a longer low one) with rounded tips, spouts and push
         buttons. Then the fire bell and notices, and a dark door.
+    - The courtyard between the front office and B's canopy (`COURT`,
+      `court()` in landmarks.js, from the map) has:
+      - a raised zig-zag planter;
+      - a big shade tree by B, with a small reddish tree north of it and a
+        small orange one east of it;
+      - an umbrella table;
+      - a covered walk along the office's south face.
+
+      The palms stand in their own bed at the office's north-east corner
+      (`FRONT.palmBed`). The flagpole stands in a round planter south of it
+      (`FRONT.flag`, `flagBed`), both off the map.
     - The fountain is on the west side, not the east (it was once drawn on the
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark
       doors.
