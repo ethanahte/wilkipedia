@@ -765,22 +765,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   puts up/down on the cube half-turned and flips x in the lookup; keep that
   mapping if you change the faces.
 
-  **Night faces are renders of the 3D campus.** To redo them, open the campus
-  page in a square viewport (1024×1024 at DPR 2 gives a 2048 canvas), press N,
-  and set these in `__campus`:
+  **Both sets are Ethan's paintings** (day watercolour, night anime-style),
+  stitched from renders of the 3D campus. To make the renders, open the campus
+  page in a square viewport (1024×1024 at DPR 2 gives a 2048 canvas), press N
+  for night, and set these in `__campus`:
   - `post.capture = true`: no vignette, no sun rays, so the faces meet
     without seams; also no bloom, tilt-shift or haze wash, and fog at 0.3×,
     so the faces stay crisp;
   - `controls.mode = 'walk'`, `fovWalk = 90`, `pos` (-9, 0, 6), just west
     of the cedar;
   - for each face, a yaw and pitch: n (0, 0), w (π/2, 0), s (π, 0),
-    e (−π/2, 0), u (0, π/2), d (0, −π/2). Heading = −yaw.
+    e (−π/2, 0), u (0, π/2), d (0, −π/2). Heading = −yaw; the in-between views
+  are yaw −π/4 steps.
 
   After a few `frame()` calls, draw the canvas into a 2D canvas in the same
   task, and save it as WebP (encode in the browser; sips can't write WebP).
 
-  **Day faces are Ethan's watercolour paintings** (2026-09), made with an
-  image tool from ten such renders: the eight sides every 45° (n, ne, e … nw)
+  **The paintings** (2026-09) were made with an image tool from ten such
+  renders: the eight sides every 45° (n, ne, e … nw)
   plus up and down. The tool zooms and nudges every picture differently
   (1.03–1.4× seen), so six cube-face paintings never meet at the edges. The
   in-between views give overlap, and `tools/pano-stitch/` (a local page, see
@@ -789,8 +791,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   writes the three sizes. The paintings and renders sit next to it,
   gitignored, on Ethan's Mac only. The tool also rewrote the lamp-post
   banners, once as "WILLOW HIGH"; `fixBanner` letters them CHARGER STRONG
-  again. Check any painted text before it ships. The day faces are still
-  dimmed a little in pano.js (Ethan: the bright version glared).
+  again. Check any painted text before it ships. The night set came as 4:5
+  phone screenshots (borders trimmed): the fit allows a different zoom across
+  and down, and matches side views on the ground only (`build(NIGHT, 2048,
+  { ground: true })`), since painted stars never sit where rendered ones do.
+  The day faces are still dimmed a little in pano.js (Ethan: the bright
+  version glared).
 - There is no node here, so check JS syntax with osascript (see git history of
   this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage

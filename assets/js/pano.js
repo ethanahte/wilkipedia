@@ -1,6 +1,6 @@
 // The home page's background: a slow 360° turn from the middle of the quad, like a game's title
 // screen (Ethan). Six views (a cube) from just west of the cedar: by day Ethan's watercolour of the
-// quad, by night renders of the 3D campus (assets/img/pano/, see CLAUDE.md); here one full-screen
+// quad, by night his anime-style one (assets/img/pano/, see CLAUDE.md); here one full-screen
 // triangle looks up each pixel's direction in them, so it is sharp at any size and costs almost nothing.
 // The painted courtyard (body.home::before) shows until it loads, and stays if WebGL can't run.
 import { lessMotion } from './ui.js';

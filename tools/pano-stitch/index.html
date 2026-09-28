@@ -17,9 +17,9 @@
   The paintings and renders are not committed (they're large); keep the source set outside the repo.
 -->
 <canvas id="c" width="1" height="1" style="display:none"></canvas>
-<script src="stitch.js"></script>
+<script src="stitch.js?v=3"></script>
 <script src="banner.js"></script>
-<script src="viewer.js"></script>
+<script src="viewer.js?v=3"></script>
 <script>
 // [name, heading, pitch, painting, render, patch]. The patches reletter lamp-post banners the painting tool got
 // wrong (one said "WILLOW HIGH"); their rectangles are in that painting's pixels, so redo them for a new painting.
@@ -35,4 +35,10 @@ window.SET = [
   ['u', 0, 90, 'paint-u.webp', 'render-u.jpg'],
   ['d', 0, -90, 'paint-d.webp', 'render-d.jpg'],
 ];
+// The night set (Ethan, 2026-09): phone screenshots, 4:5 with the border trimmed off. Their painted stars never
+// sit where the render's do, so they are matched on the ground only: await build(NIGHT, 2048, { ground: true }).
+window.NIGHT = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'u', 'd'].map((v) => {
+  const [h, p] = { u: [0, 90], d: [0, -90] }[v] || [{ n: 0, ne: 45, e: 90, se: 135, s: 180, sw: 225, w: 270, nw: 315 }[v], 0];
+  return [v, h, p, `night/paint-${v}.png`, `night/render-${v}.jpg`];
+});
 </script>

@@ -26,9 +26,9 @@ window.makeViewer = () => {
 };
 // Line up every view, find the seams, stitch the six faces at size S, and show them turning in the preview.
 // set: [name, heading, pitch, painting, render, patch?] rows, as in index.html.
-window.build = async (set, S = 2048) => {
+window.build = async (set, S = 2048, { ground = false } = {}) => {
   const views = [];
-  for (const [name, h, p, src, orig, patch] of set) views.push(await prepView({ name, h0: h, p0: p, src, orig, patch, sharpA: 0.8 }));
+  for (const [name, h, p, src, orig, patch] of set) views.push(await prepView({ name, h0: h, p0: p, src, orig, patch, sharpA: 0.8, ground }));
   window.VIEWS = views; window.SEAMS = computeSeams(views);
   const out = {}; for (const f of ['n', 'e', 's', 'w', 'u', 'd']) out[f] = stitchFace(views, f, S);
   window.OUT = out;

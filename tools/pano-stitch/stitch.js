@@ -19,12 +19,12 @@ function gradImg(img) {
 }
 window.align = async (orig, paint, sim, G = 9) => {
   const A = gradImg(await LD(orig)), B = gradImg(await LD(paint));
-  const [z, ox, oy] = sim;                                   // painting uv = 0.5 + (true uv - 0.5 - o) * z
+  const [z, ox, oy] = sim, zx = z * (sim[3] || 1);          // painting uv = 0.5 + (true uv - 0.5 - o) * zoom (zx across, z down)
   const P = 24, R = 12;                                       // patch half size, search radius (px at 256)
   const pts = [];
   for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
     const u = (i + 0.5) / G, v = (j + 0.5) / G;
-    const pu = 0.5 + (u - 0.5 - ox) * z, pv = 0.5 + (v - 0.5 - oy) * z;
+    const pu = 0.5 + (u - 0.5 - ox) * zx, pv = 0.5 + (v - 0.5 - oy) * z;
     const cx = Math.round(u * M), cy = Math.round(v * M), px = pu * M, py = pv * M;
     // NCC between render patch at (cx, cy) and painting patch (scaled by z) at (px + dx, py + dy)
     let best = [-2, 0, 0], energy = 0;
@@ -32,7 +32,7 @@ window.align = async (orig, paint, sim, G = 9) => {
       let n = 0, sa = 0, sb = 0, saa = 0, sbb = 0, sab = 0;
       for (let y = -P; y <= P; y += 2) for (let x = -P; x <= P; x += 2) {
         const ax = cx + x, ay = cy + y; if (ax < 1 || ay < 1 || ax >= M - 1 || ay >= M - 1) continue;
-        const bx = Math.round(px + dx + x * z), by = Math.round(py + dy + y * z); if (bx < 1 || by < 1 || bx >= M - 1 || by >= M - 1) continue;
+        const bx = Math.round(px + dx + x * zx), by = Math.round(py + dy + y * z); if (bx < 1 || by < 1 || bx >= M - 1 || by >= M - 1) continue;
         const a = A[ay * M + ax], b = B[by * M + bx]; n++; sa += a; sb += b; saa += a * a; sbb += b * b; sab += a * b;
       }
       if (n < 100) continue;
@@ -59,16 +59,16 @@ window.align = async (orig, paint, sim, G = 9) => {
 window.mapUV = (W, u, v) => {
   const G = W.G, gx = u * G - 0.5, gy = v * G - 0.5;
   const i0 = Math.max(0, Math.min(G - 2, Math.floor(gx))), j0 = Math.max(0, Math.min(G - 2, Math.floor(gy)));
-  const fx = gx - i0, fy = gy - j0, P = W.pts, z = W.sim[0];
+  const fx = gx - i0, fy = gy - j0, P = W.pts, z = W.sim[0], zx = z * (W.sim[3] || 1);
   const at = (i, j) => P[j * G + i];
   const a = at(i0, j0), b = at(i0 + 1, j0), c = at(i0, j0 + 1), d = at(i0 + 1, j0 + 1);
   // offsets relative to the similarity, interpolated (and held constant past the outer points)
-  const off = (q) => [q.pu - (0.5 + (q.u - 0.5 - W.sim[1]) * z), q.pv - (0.5 + (q.v - 0.5 - W.sim[2]) * z)];
+  const off = (q) => [q.pu - (0.5 + (q.u - 0.5 - W.sim[1]) * zx), q.pv - (0.5 + (q.v - 0.5 - W.sim[2]) * z)];
   const cx = Math.max(0, Math.min(1, fx)), cy = Math.max(0, Math.min(1, fy));
   const oa = off(a), ob = off(b), oc = off(c), od = off(d);
   const ox = (oa[0] * (1 - cx) + ob[0] * cx) * (1 - cy) + (oc[0] * (1 - cx) + od[0] * cx) * cy;
   const oy = (oa[1] * (1 - cx) + ob[1] * cx) * (1 - cy) + (oc[1] * (1 - cx) + od[1] * cx) * cy;
-  return [0.5 + (u - 0.5 - W.sim[1]) * z + ox, 0.5 + (v - 0.5 - W.sim[2]) * z + oy];
+  return [0.5 + (u - 0.5 - W.sim[1]) * zx + ox, 0.5 + (v - 0.5 - W.sim[2]) * z + oy];
 };
 // draw the painting pulled into the render's framing (transparent where the painting has nothing)
 window.unwarp = async (paint, W, size = 1024) => {
@@ -86,7 +86,7 @@ window.unwarp = async (paint, W, size = 1024) => {
 // Stitch painted views into the six cube faces pano.js reads. Every view was rendered from the campus with a known
 // heading and pitch at 90 degrees; each painting is lined up with its render (fit + align), then each output pixel
 // takes the painting whose view points closest to it. Colour blends over a wide band, detail over a narrow one.
-async function fitPair(ou, cu) {
+async function fitPair(ou, cu, { ground = false } = {}) {
   const N = 160, gradN = (img) => {
     const c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'); g.drawImage(img, 0, 0, N, N);
     const d = g.getImageData(0, 0, N, N).data, l = new Float32Array(N * N), o = new Float32Array(N * N);
@@ -94,21 +94,26 @@ async function fitPair(ou, cu) {
     for (let y = 1; y < N - 1; y++) for (let x = 1; x < N - 1; x++) { const i = y * N + x, gx = l[i + 1] - l[i - 1], gy = l[i + N] - l[i - N]; o[i] = Math.sqrt(gx * gx + gy * gy); }
     return o;
   };
-  const o = gradN(await LD(ou)), k = gradN(await LD(cu));
+  const pimg = await LD(cu), o = gradN(await LD(ou)), k = gradN(pimg);
   const samp = (u, v) => { const x = Math.round(u * N), y = Math.round(v * N); return x < 1 || y < 1 || x >= N - 1 || y >= N - 1 ? null : o[y * N + x]; };
-  const score = (s, ox, oy) => {
+  const score = (s, ox, oy, r = 1, st = 2) => {
     let n = 0, sa = 0, sb = 0, saa = 0, sbb = 0, sab = 0;
-    for (let y = 2; y < N - 2; y += 2) for (let x = 2; x < N - 2; x += 2) {
-      const a = samp(0.5 + (x / N - 0.5) / s + ox, 0.5 + (y / N - 0.5) / s + oy); if (a === null) continue;
+    // side views can match on the ground and buildings only: painted stars and clouds never sit where the render's do
+    for (let y = ground ? Math.round(N * 0.35) : 2; y < N - 2; y += st) for (let x = 2; x < N - 2; x += st) {
+      const a = samp(0.5 + (x / N - 0.5) / (s * r) + ox, 0.5 + (y / N - 0.5) / s + oy); if (a === null) continue;
       const b = k[y * N + x]; n++; sa += a; sb += b; saa += a * a; sbb += b * b; sab += a * b;
     }
-    return n < 500 ? -1 : (sab - sa * sb / n) / Math.sqrt((saa - sa * sa / n) * (sbb - sb * sb / n) + 1e-9);
+    return n < (ground ? 300 : 500) / (st * st / 4) ? -1 : (sab - sa * sb / n) / Math.sqrt((saa - sa * sa / n) * (sbb - sb * sb / n) + 1e-9);
   };
+  // a square painting keeps its shape; a non-square one (a phone screenshot) may be cropped or stretched
+  const square = Math.abs(pimg.width / pimg.height - 1) < 0.03, ratios = [];
+  if (square) ratios.push(1); else for (let r = 0.75; r <= 1.451; r += 0.05) ratios.push(r);
   let best = [-1];
-  for (let s = 0.8; s <= 1.9; s += 0.02) for (let ox = -0.2; ox <= 0.2; ox += 0.01) for (let oy = -0.2; oy <= 0.2; oy += 0.01) { const r = score(s, ox, oy); if (r > best[0]) best = [r, s, ox, oy]; }
-  const [, s0, x0, y0] = best;
-  for (let s = s0 - 0.02; s <= s0 + 0.02; s += 0.004) for (let ox = x0 - 0.01; ox <= x0 + 0.01; ox += 0.002) for (let oy = y0 - 0.01; oy <= y0 + 0.01; oy += 0.002) { const r = score(s, ox, oy); if (r > best[0]) best = [r, s, ox, oy]; }
-  return { corr: best[0], sim: [best[1], best[2], best[3]], ident: score(1, 0, 0) };
+  for (const r of ratios) for (let s = 0.8; s <= 1.9; s += 0.03) for (let ox = -0.2; ox <= 0.2; ox += 0.02) for (let oy = -0.2; oy <= 0.2; oy += 0.02) { const c = score(s, ox, oy, r, 4); if (c > best[0]) best = [c, s, ox, oy, r]; }
+  const [, s0, x0, y0, r0] = best; best = [-1];
+  for (let r = square ? 1 : r0 - 0.05; r <= (square ? 1 : r0 + 0.0501); r += 0.01)
+    for (let s = s0 - 0.03; s <= s0 + 0.03; s += 0.005) for (let ox = x0 - 0.02; ox <= x0 + 0.02; ox += 0.004) for (let oy = y0 - 0.02; oy <= y0 + 0.02; oy += 0.004) { const c = score(s, ox, oy, r); if (c > best[0]) best = [c, s, ox, oy, r]; }
+  return { corr: best[0], sim: [best[1], best[2], best[3], best[4]], ident: score(1, 0, 0) };
 }
 const D2R = Math.PI / 180;
 function basis(headingDeg, pitchDeg) {                   // campus camera: yaw = -heading, forward -Z at yaw 0
@@ -139,11 +144,11 @@ async function prepView(v) {
   v.B = basis(v.h0, v.p0);
   v.map = new Float32Array((Q + 1) * (Q + 1) * 2);
   if (v.orig) {
-    const f = await fitPair(v.orig, v.src); v.fit = f;
+    const f = await fitPair(v.orig, v.src, { ground: v.p0 === 0 && !!v.ground }); v.fit = f;
     const W = await align(v.orig, v.src, f.sim, 9); v.W = W;
     for (let j = 0; j <= Q; j++) for (let i = 0; i <= Q; i++) { const m = mapUV(W, i / Q, j / Q), k = (j * (Q + 1) + i) * 2; v.map[k] = m[0]; v.map[k + 1] = m[1]; }
   } else for (let j = 0; j <= Q; j++) for (let i = 0; i <= Q; i++) { const k = (j * (Q + 1) + i) * 2; v.map[k] = i / Q; v.map[k + 1] = j / Q; }
-  v.W0 = v.W ? v.W.sim[0] : 1;
+  v.W0 = v.W ? v.W.sim[0] : 1; v.W0x = v.W0 * (v.W ? v.W.sim[3] || 1 : 1);
   return v;
 }
 function lookup(v, tu, tv, out) {                        // true uv -> painting uv
@@ -175,7 +180,7 @@ window.stitchFace = (views, face, S = 2048, kn = 260, kw = 24) => {
       if (tu < -0.3 || tv < -0.3 || tu > 1.3 || tv > 1.3) continue;
       lookup(v, Math.min(1, Math.max(0, tu)), Math.min(1, Math.max(0, tv)), pu);
       // outside the render too: carry on in the direction we left it, so the gap fill knows how far out it is
-      if (tu < 0) pu[0] += tu * v.W0; else if (tu > 1) pu[0] += (tu - 1) * v.W0;
+      if (tu < 0) pu[0] += tu * v.W0x; else if (tu > 1) pu[0] += (tu - 1) * v.W0x;
       if (tv < 0) pu[1] += tv * v.W0; else if (tv > 1) pu[1] += (tv - 1) * v.W0;
       const m = Math.min(pu[0], pu[1], 1 - pu[0], 1 - pu[1]);
       // gap fill: the colour layer at the nearest point of each painting, fading with distance outside it
