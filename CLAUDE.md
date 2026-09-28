@@ -355,19 +355,21 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - The teachers' yard, a right-angle trapezoid walled on every side
         (layout.js `YARD` + `YARD-*`; Ethan: all walls, no fence). Its long
         side is on the quad side, in line with the snack bar, carrying the
-        poster board. The right-angle side is the cafeteria's west wall. The
-        short side faces the parking lot, and the slanted side makes 75° with
-        the long one. Ethan: wide, and deeper than 8 m but not the first 16 m (11 m
-        along the quad, 11 m deep).
+        poster board. The right-angle side is the cafeteria's west wall (x
+        -15.6: the building behind the snack bar is narrower). The short side
+        faces the parking lot, and the slanted side makes 75° with
+        the long one. Ethan: wide, and deeper than 11 m but not the first 16 m (11 m
+        along the quad, 12.5 m deep).
         It is a yard, not a building: style `yard` has no kit windows and no
         rooftop units. B's canopy stops in front of its wall (cz0 -32.0).
       - A wide yellow door (1.9 m) in a niche set back further (x -17.8 to
-        -15.6), between the yard wall and the snack bar.
+        -15.6), between the yard wall and the snack bar. It opens into the
+        yard, with the building on your right as you go in (`YARD-door`).
       - The snack bar is a shallow room whose glass front is set 2.0 m back
         (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -15.6
         to -4.95. The walkway roof reaches back over it. It is symmetric (Ethan)
-        with three groups between piers: single door and panes; pane, double
-        doors, pane; panes and a single door, with the SNACK BAR plaque by
+        with three groups between piers: a wide single door ('S') and panes;
+        pane, double doors, pane; panes and a wide single door, with the SNACK BAR plaque by
         the right-hand door.
       - Then the wall comes forward: a yellow door at the corner, then the
         drinking fountain (`cafFountain()`, from IMG_2367 close up). It has a

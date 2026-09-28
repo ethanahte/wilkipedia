@@ -519,9 +519,9 @@ const CC = { frame: color('#5d6166'), panel: color('#ebe7dc'), pier: color('#ece
 const southWall = (x0, x1, z) => rWall(x0, z, x1, z, 0, 1);        // t = x - x0
 
 // A run of storefront along a south-facing wall from x0 to x1. parts: 'p' a window
-// bay, 'd' a pair of glass doors, 's' a single glass door; they stretch to fit.
+// bay, 'd' a pair of glass doors, 's' a single glass door, 'S' a wide one; they stretch to fit.
 function storefront(W, z, x0, x1, parts, top = 3.1) {
-  const want = { p: 1.35, d: 1.9, s: 1.0 };
+  const want = { p: 1.35, d: 1.9, s: 1.0, S: 2.0 };   // S: a wide single door (the snack bar's)
   const k = (x1 - x0) / [...parts].reduce((a, c) => a + want[c], 0);
   onWall(W, southWall(x0, x1, z), 0, 0, 0.03, () => {
     W.box('flat', (x1 - x0) / 2, top / 2, 0, x1 - x0, top, 0.06, CC.frame);
@@ -607,19 +607,20 @@ function cafFront(W) {
     }
   });
   onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
-  //  · The wide (1.9 m) door in its niche between the yard wall and the snack bar, set back further.
+  //  · The wide (1.9 m) door in its niche between the yard wall and the snack bar, set back
+  //    further. It opens into the yard (the building is on your right as you go in).
   doorAt(W, southWall(-17.8, -15.6, -33.4), 1.1, 1.9, 2.2, C.door, { frameCol: color('#d9ccb0') });
   //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway.
-  //    Symmetric (Ethan): a single glass door and panes; a pane, glass double doors and a
-  //    pane; panes and a single glass door, with the SNACK BAR plaque by the right one.
+  //    Symmetric (Ethan): a wide single glass door and panes; a pane, glass double doors and
+  //    a pane; panes and a wide single glass door, with the SNACK BAR plaque by the right one.
   const RZ = -32.4, P2 = 0.35;
   let rx = -15.6 + 0.025;
-  [[3.075, 'sppp'], [3.75, 'pdp'], [3.075, 'ppps']].forEach(([w, parts], i) => {
+  [[3.075, 'Sppp'], [3.75, 'pdp'], [3.075, 'pppS']].forEach(([w, parts], i) => {
     if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
     storefront(W, RZ, rx, rx + w, parts, 3.0);
     rx += w;
   });
-  const door = 3.075 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
+  const door = 3.075 * 2.0 / (3 * 1.35 + 2.0);                 // the single door's width in that group
   onWall(W, southWall(rx - door - 0.5, rx - door - 0.1, RZ + 0.14), 0.2, 1.5, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
   //  · The wall comes forward again: a yellow door at the corner, the drinking fountain,
   //    the red fire bell and a yellow notice above it, a white notice, then a dark door.
