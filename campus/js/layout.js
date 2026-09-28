@@ -227,7 +227,8 @@ export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blu
 // which runs all the way to B (Ethan).
 export const COURT = {
   planter: [[-29.2, -52.8], [-33.7, -52.8], [-36.9, -49.6], [-33.7, -43.9], [-36.9, -40.4], [-33.4, -37.8], [-29.4, -43.5]],
-  bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-40.5, -44.3],
+  // the umbrella table sits by the B-side bed, clear of the way through (Ethan)
+  bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-42.8, -44.3],
   porch: { x0: -54.7, x1: -22.0, z0: -57.4, z1: -53.0 },          // from B's wall, past the office, over the gate (IMG_2396/2399)
   // the bed under the big trees north of B's entry block: ferns and feather grass, with a small
   // maple by the block (IMG_2392, IMG_2394)
@@ -236,7 +237,9 @@ export const COURT = {
   // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x; the doors and
   // box are on the wider west half, the filler and the WHS entrance on the set-back east half
   yellowDoors: [-49.5, -43.5], box: -41.8, filler: -39.6, entry: [-37.2, -31.2],
-  benches: [[-47.8, -50.3], [-44.2, -51.2]],
+  // the two benches stand along the bed's slanting edge north of the table, backs to the bed,
+  // short of the covered walk (Ethan, IMG_2395): [x, z, rot]
+  benches: [[-44.3, -49.1, -2.63], [-45.4, -51.1, -2.63]],
   // the black steel fence, an L (Ethan): south from the office's courtyard wall, just east of the
   // WHS entrance, through the zig-zag flower bed, then east in line with the teachers' yard's short
   // side to meet it. A pedestrian gate by the office, a double gate in the east leg (IMG_2396/2398/2399).
@@ -256,17 +259,21 @@ export const FRONT = {
   // The school's name faces north, across the office's north-east corner: on its north face and
   // the free-standing wall that carries that face on east (Ethan's photo of the front)
   sign: { x: -30.6, y: 2.3, w: 9.0 },
-  planter: { x0: -47.6, x1: -22.6, z0: -78.1, z1: -75.4, h: 0.6 },
   // The front, as in Ethan's photo of it from the parking lot and IMG_2400/2401/2403/2404: the
   // entrance is on the office's EAST face, facing the flagpole, recessed under a deep overhang that
   // runs the whole face (entry, from z0 north to z1 south). A free-standing wall runs EAST from
   // the office's north-east corner (screenWall, flush with the north face) and closes the entrance
-  // court on the north; the palms stand in a raised concrete planter along its south side, square
-  // at the building end and rounded at the east end (palmBed). The flax planter runs along its north side.
+  // court on the north.
   entry: { x: -30.2, z0: -74.3, z1: -57.4, depth: 4.0 },
-  screenWall: { x1: -23.0, z0: -74.3, z1: -74.0, h: 3.4 },
-  palmBed: { x0: -28.6, x1: -19.4, z0: -74.0, z1: -70.2, h: 0.55 },
-  palms: [[-27.3, -72.3, 10.5], [-24.1, -72.8, 11.8], [-21.5, -71.9, 9.6]],
+  screenWall: { x1: -22.0, z0: -74.3, z1: -74.0, h: 3.4 },
+  // ONE raised concrete bed wraps round that wall (Ethan): a south leg along it (x0 is its west
+  // end, clear of the north door), a big rounded east end past the wall's end (centred on cx), and
+  // a north leg along the wall and the office's north face to xw; zs and zn are its south and north
+  // edges (IMG_2401, the satellite view).
+  bed: { x0: -28.8, xw: -36.0, zs: -71.3, zn: -77.7, cx: -21.8, h: 0.55 },
+  // the three palms, where IMG_2401 puts them: one in the south leg by the overhang, one at the
+  // wall's east end, one in the round end north of the wall's line
+  palms: [[-25.8, -73.0, 11.8], [-22.1, -72.6, 9.6], [-20.2, -76.3, 10.5]],
   flag: [-18.4, -61.7],
   flagBed: { r: 4.3, inner: 2.9 },
   ada: [-48.2, -79.3],

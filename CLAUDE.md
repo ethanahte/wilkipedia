@@ -414,7 +414,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - a raised zig-zag planter;
       - a big shade tree by B, with a small reddish tree north of it and a
         small orange one east of it;
-      - an umbrella table;
+      - an umbrella table, right by the B-side bed so it doesn't block the
+        way through (Ethan), with two benches north of it. The benches stand
+        along the bed's slanting edge, backs to the bed, short of the
+        covered walk;
       - a covered walk along the office's south face, running all the way
         to B.
 
@@ -436,12 +439,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         north-east corner, flush with the north face, and closes the
         entrance court on the north; it holds the overhang's north end, then
         stands clear. It is not a north–south wall (that was wrong too).
-        Along its south side is the raised concrete palm planter
-        (`FRONT.palmBed`: square at the building end, rounded at the east
-        end, three palms, agapanthus, boulders; IMG_2401/2403). Along its
-        north side runs the flax planter (`FRONT.planter`), and the ADRIAN
-        WILCOX HIGH SCHOOL lettering sits on the north face across the
-        corner, as in the photo.
+        The ADRIAN WILCOX HIGH SCHOOL lettering sits on its north face,
+        across the corner, as in the photo.
+      - ONE raised concrete bed wraps round that wall (`FRONT.bed`; Ethan:
+        not two). It has a south leg along the wall (agapanthus, red-leaf
+        shrubs, boulders), a big rounded east end past the wall's end, and
+        a north leg of flax along the wall and the office's north face. Its
+        south leg stops short of the building, leaving room for the
+        storefront's north door. The three palms are where IMG_2401 puts
+        them: one in the south leg by the overhang, one at the wall's east
+        end, one in the round end north of the wall's line.
       - The flagpole's round planter has golden mounded shrubs, yellow tree
         roses and a bench.
       - IMG_2402 is NOT the office: it is the cafeteria's north wall (CAF-w,
@@ -454,7 +461,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         entrance with a storefront at the east end. The walk's roof reaches
         back over the step. B's glass doors close
         the walk's west end. The walk has round grey posts and lights, and
-        runs on over the gate. Two benches face it.
+        runs on over the gate.
       - The black steel fence (`steelFence()`, `COURT.fence`) is an L
         (Ethan). It runs south from the office's set-back courtyard wall at x -31,
         just east of the WHS entrance, through the zig-zag flower bed. Then
@@ -474,8 +481,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       windows). Its south face,
       behind the covered walk, is `adminSouth()` (above).
 
-      The palms stand in their own bed north of the entrance court, against
-      the free-standing wall (`FRONT.palmBed`), where the satellite shows them. The flagpole stands in a round planter south of it
+      The palms and their bed match the satellite too. The flagpole stands in a round planter south of it
       (`FRONT.flag`, `flagBed`), both off the map.
     - The fountain is on the west side, not the east (it was once drawn on the
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark

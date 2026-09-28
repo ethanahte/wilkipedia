@@ -80,19 +80,7 @@ export function buildLandmarks(W, group, fontFamily) {
   W.slab('stucco', e.x, e.z0 + 0.3, e.x + 0.2, e.z0 + 0.9, 0, 3.4, color('#efe8d6'));
   for (const gz of [-70.0, -63.0]) { W.slab('glow', e.x + 1.6, gz - 0.4, e.x + 2.4, gz + 0.4, 3.36, 3.4, color('#ffe6bd')); LIGHTS.push([e.x + 2.0, gz, 3.35, 5]); }
 
-  // the planter: poured concrete, rounded at the east end, full of flax (the palms have their own bed, below)
-  const p = FRONT.planter, r = (p.z1 - p.z0) / 2, cz = (p.z0 + p.z1) / 2;
-  const outline = [[p.x0, p.z0], [p.x1 - r, p.z0]];
-  for (let i = 1; i < 10; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 10; outline.push([p.x1 - r + Math.cos(a) * r, cz + Math.sin(a) * r]); }
-  outline.push([p.x1 - r, p.z1], [p.x0, p.z1]);
-  W.prism('flat', outline, 0, p.h, concrete);
-  const inner = outline.map(([x, zz]) => [x + (x < p.x0 + 0.1 ? 0.2 : 0), zz + (zz < cz ? 0.2 : -0.2)]);
-  W.prism('flat', inner, p.h - 0.1, p.h + 0.02, soil, { walls: false });
-  for (let x = p.x0 + 0.8; x < p.x1 - 0.6; x += 1.05 + R() * 0.5) {
-    if (R() < 0.72) flax(W, x, cz + (R() - 0.5) * 1.2, R, { y: p.h, h: 1.2 + R() * 0.7 });
-    else shrub(W, x, cz, R, { y: p.h, s: 0.9, cols: G.leaf });
-  }
-  for (const [x, zz, h] of FRONT.palms) palm(W, x, zz, R, { h, y: FRONT.palmBed.h });   // in their bed (below)
+  for (const [x, zz, h] of FRONT.palms) palm(W, x, zz, R, { h, y: FRONT.bed.h });   // in the bed round the wall (below)
   // blue accessible-parking sign
   const [ax, az] = FRONT.ada;
   W.cyl('flat', ax, 0, az, 0.04, 0.04, 2.3, 6, color('#9a9ea3'));
@@ -103,23 +91,31 @@ export function buildLandmarks(W, group, fontFamily) {
   });
   group.add(decal(ada, ax, 2.0, az - 0.05, 0.45, 0.56, Math.PI));
   // the free-standing wall that runs east from the office's north-east corner, flush with its north
-  // face, closing the entrance court (it carries the overhang's north end, then stands clear of it);
-  // along its south side the raised concrete palm planter, square at the building end and rounded
-  // at the east end, with agapanthus and boulders (IMG_2400, IMG_2401, IMG_2403, IMG_2404)
+  // face, closing the entrance court (it carries the overhang's north end, then stands clear of it),
+  // and the ONE raised concrete bed that wraps round it (Ethan, IMG_2401): agapanthus, red-leaf
+  // shrubs and boulders in the south leg and the round end, flax along the north side
   {
-    const sw = FRONT.screenWall, b = FRONT.palmBed, r = (b.z1 - b.z0) / 2, cz = (b.z0 + b.z1) / 2;
+    const sw = FRONT.screenWall, b = FRONT.bed, r = (b.zs - b.zn) / 2, cz = (b.zs + b.zn) / 2;
     W.slab('stucco', e.x, sw.z0, sw.x1, sw.z1, 0, sw.h, color('#efe8d6'));
     W.slab('flat', ox, sw.z0 - 0.03, sw.x1 + 0.03, sw.z1 + 0.03, sw.h, sw.h + 0.1, fin);
     addBox(e.x, sw.z0, sw.x1, sw.z1);
-    const out = [[b.x0, b.z0], [b.x1 - r, b.z0]];
-    for (let i = 1; i < 10; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 10; out.push([b.x1 - r + Math.cos(a) * r, cz + Math.sin(a) * r]); }
-    out.push([b.x1 - r, b.z1], [b.x0, b.z1]);
+    const out = [[b.xw, z], [b.xw, b.zn], [b.cx, b.zn]];
+    for (let i = 1; i < 12; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 12; out.push([b.cx + Math.cos(a) * r, cz + Math.sin(a) * r]); }
+    out.push([b.cx, b.zs], [b.x0, b.zs], [b.x0, z]);
     W.prism('flat', out, 0, b.h, concrete, { top: true, topMat: 'flat', topCol: soil });
     addPoly(ensureCCW(out));
-    const R2 = rng(611);
-    for (let x = b.x0 + 0.7; x < b.x1 - 0.6; x += 0.9 + R2() * 0.5) {
-      if (R2() < 0.7) grassTuft(W, x, cz + (R2() - 0.5) * 2.2, R2, { y: b.h, h: 0.9, cols: [color('#3f6f37'), color('#4a7d3d')] });
-      else W.blob('flat', x, b.h + 0.2, cz + (R2() - 0.5) * 1.6, 0.45, 0.3, 0.35, color('#9a948a'));
+    const R2 = rng(611), AG = [color('#3f6f37'), color('#4a7d3d')], RED = ['#6e2f3a', '#7d3b3f', '#5e3a34'].map(color);
+    const mS = (sw.z1 + b.zs) / 2, mN = (z + b.zn) / 2;             // middle lines of the south and north legs
+    for (let x = b.x0 + 0.7; x < b.cx + r - 0.8; x += 0.9 + R2() * 0.5) {
+      const zz = x < b.cx ? mS + (R2() - 0.5) * 1.4 : cz + (R2() - 0.5) * 4.0;
+      const k = R2();
+      if (k < 0.6) grassTuft(W, x, zz, R2, { y: b.h, h: 0.9, cols: AG });
+      else if (k < 0.8) shrub(W, x, zz, R2, { y: b.h, s: 1.0, cols: RED });
+      else W.blob('flat', x, b.h + 0.2, zz, 0.45, 0.3, 0.35, color('#9a948a'));
+    }
+    for (let x = b.xw + 0.8; x < b.cx; x += 1.05 + R2() * 0.5) {
+      if (R2() < 0.75) flax(W, x, mN + (R2() - 0.5) * 1.2, R2, { y: b.h, h: 1.2 + R2() * 0.7 });
+      else shrub(W, x, mN, R2, { y: b.h, s: 0.9, cols: G.leaf });
     }
   }
   // the cafeteria's north wall, toward the flagpole: two blue banners (IMG_2402)
@@ -360,7 +356,7 @@ function court(W, group) {
     W.cyl('flat', x, 0, c.z1 - 0.3, 0.09, 0.09, 3.2, 10, color('#8d9399')); addCircle(x, c.z1 - 0.3, 0.12);
     if (i < nP) { const lx = x + (c.x1 - c.x0 - 1.5) / nP / 2; W.slab('glow', lx - 0.25, c.z0 + 1.9, lx + 0.25, c.z0 + 2.3, 3.16, 3.2, color('#ffe6bd')); LIGHTS.push([lx, c.z0 + 2.1, 3.15, 4]); }
   }
-  for (const [x, z] of COURT.benches) bench(W, x, z, Math.PI / 2);
+  for (const [x, z, rot] of COURT.benches) bench(W, x, z, rot);
   // the black steel fence from the office to the teachers' yard, with its gates, the PTSA banner
   // and no-smoking signs on the passage side, and a bike rack there (IMG_2396, IMG_2398, IMG_2399)
   const [[fa, fb], [fc, fd], [fe, ff]] = COURT.fence;
