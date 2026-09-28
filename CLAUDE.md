@@ -422,17 +422,26 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       trees, with a small maple by the entry block (IMG_2392/2394).
 
       Around the front office (IMG_2395–2404):
-      - The main entrance is on the EAST face, facing the flagpole (Ethan,
-        IMG_2400/2404; it was once drawn on the north face by mistake). A
-        thick overhang on two posts, flush with the roofline, carries
-        ADMINISTRATION on its fascia over a frosted storefront
-        (`frostFrontE()`) with the WHS door and a narrow mosaic strip
-        (`FRONT.entry`). The north face keeps only the ADRIAN WILCOX sign
-        wall and the flax planter.
-      - North of the entrance, the east wall runs on past the office's
-        corner as a free-standing wall, with a long raised concrete planter
-        along it (rounded at its north end) holding three tall palms,
-        agapanthus and boulders (`FRONT.palmBed`, `screenWall`; IMG_2401).
+      - The main entrance is on the EAST face, facing the flagpole (Ethan's
+        photo of the front from the parking lot, IMG_2400/2404; it was once
+        drawn on the north face, then as a short canopy box, both wrong).
+        It is recessed under a deep overhang (`FRONT.entry`) that runs the
+        WHOLE east face and a little past its south end, thick and flush
+        with the roofline, with ADMINISTRATION on its fascia. One square
+        post holds its south corner. Under it, south to north: a wide
+        pebble-mosaic panel at the corner, then the frosted storefront
+        (`frostFrontE()`) with the WHS door in the south bay and a second
+        door at the north end. The north roof edge wraps round to meet it.
+      - A free-standing wall (`FRONT.screenWall`) runs EAST from the office's
+        north-east corner, flush with the north face, and closes the
+        entrance court on the north; it holds the overhang's north end, then
+        stands clear. It is not a north–south wall (that was wrong too).
+        Along its south side is the raised concrete palm planter
+        (`FRONT.palmBed`: square at the building end, rounded at the east
+        end, three palms, agapanthus, boulders; IMG_2401/2403). Along its
+        north side runs the flax planter (`FRONT.planter`), and the ADRIAN
+        WILCOX HIGH SCHOOL lettering sits on the north face across the
+        corner, as in the photo.
       - The flagpole's round planter has golden mounded shrubs, yellow tree
         roses and a bench.
       - IMG_2402 is NOT the office: it is the cafeteria's north wall (CAF-w,
@@ -465,8 +474,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       windows). Its south face,
       behind the covered walk, is `adminSouth()` (above).
 
-      The palms stand in their own bed along the office's east face, north of
-      the entrance (`FRONT.palmBed`). The flagpole stands in a round planter south of it
+      The palms stand in their own bed north of the entrance court, against
+      the free-standing wall (`FRONT.palmBed`), where the satellite shows them. The flagpole stands in a round planter south of it
       (`FRONT.flag`, `flagBed`), both off the map.
     - The fountain is on the west side, not the east (it was once drawn on the
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark

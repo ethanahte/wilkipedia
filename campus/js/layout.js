@@ -253,23 +253,22 @@ export const B_BED = {
 
 export const FRONT = {
   wallZ: -74.3,
-  sign: { x: -40.2, y: 2.3, w: 10.5 },
-  planter: { x0: -47.6, x1: -32.6, z0: -78.1, z1: -75.4, h: 0.6 },
-  // The palms and the flagpole, placed off Ethan's Apple Maps view (September 2026): the palms
-  // stand in their own bed at the office's north-east corner (palmBed, rounded at its south-east
-  // corner); the flagpole stands in a round planter south of it (flagBed: a ring of shrubs round
-  // a paved circle).
-  palms: [[-28.8, -71.3, 10.5], [-28.8, -73.9, 11.8], [-28.7, -76.4, 9.6]],
-  // (IMG_2400/2401/2404: north of the entrance, a long raised concrete planter along the office's
-  // east wall, which runs on past its corner as a free-standing wall; rounded at the north end,
-  // toward the street, with three tall palms, agapanthus and boulders)
-  palmBed: { x0: -30.2, x1: -27.4, z0: -78.3, z1: -69.6, h: 0.55 },
-  screenWall: { z0: -77.0, h: 3.6 },
+  // The school's name faces north, across the office's north-east corner: on its north face and
+  // the free-standing wall that carries that face on east (Ethan's photo of the front)
+  sign: { x: -30.6, y: 2.3, w: 9.0 },
+  planter: { x0: -47.6, x1: -22.6, z0: -78.1, z1: -75.4, h: 0.6 },
+  // The front, as in Ethan's photo of it from the parking lot and IMG_2400/2401/2403/2404: the
+  // entrance is on the office's EAST face, facing the flagpole, recessed under a deep overhang that
+  // runs the whole face (entry, from z0 north to z1 south). A free-standing wall runs EAST from
+  // the office's north-east corner (screenWall, flush with the north face) and closes the entrance
+  // court on the north; the palms stand in a raised concrete planter along its south side, square
+  // at the building end and rounded at the east end (palmBed). The flax planter runs along its north side.
+  entry: { x: -30.2, z0: -74.3, z1: -57.4, depth: 4.0 },
+  screenWall: { x1: -23.0, z0: -74.3, z1: -74.0, h: 3.4 },
+  palmBed: { x0: -28.6, x1: -19.4, z0: -74.0, z1: -70.2, h: 0.55 },
+  palms: [[-27.3, -72.3, 10.5], [-24.1, -72.8, 11.8], [-21.5, -71.9, 9.6]],
   flag: [-18.4, -61.7],
   flagBed: { r: 4.3, inner: 2.9 },
-  // The office's entrance is on its EAST face, facing the flagpole (Ethan, IMG_2400/2404): a deep
-  // overhang with ADMINISTRATION on its fascia over a frosted storefront, from z1 (south) to z0.
-  entry: { x: -30.2, z0: -69.2, z1: -62.2, depth: 4.4 },
   ada: [-48.2, -79.3],
 };
 
