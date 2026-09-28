@@ -25,7 +25,7 @@ import { Controls } from './controls.js';
 import { loadRooms, rooms, byId, makeHighlight, placeHighlight, standFor } from './rooms.js';
 import { Post } from './post.js';
 import { Hud } from './hud.js';
-import { FRONT, BUILDINGS, QUAD, TRACK, FIELDS, CREEK, ROADS, CAMPUS } from './layout.js';
+import { FRONT, BUILDINGS, QUAD, TRACK, FIELDS, CREEK, ROADS, CAMPUS, WORLD } from './layout.js';
 
 const ROOT = document.body.dataset.root || '../';
 const QKEY = 'wilcox-campus-quality';
@@ -345,9 +345,30 @@ async function boot() {
   let t = 0, pickT = 0, mapT = 0, slow = 0, running = 0, tilt = 1;
   const _focus = new THREE.Vector3();
   const lightRight = new THREE.Vector3(), lightUp = new THREE.Vector3();
+  // While the model turns by itself, keep the whole tile centred on screen (Ethan: it wasn't):
+  // perspective makes its near side loom larger, so aim a little past its middle. Found by
+  // stepping the aim to the ground point under the tile's on-screen centre.
+  const HOME = { x: (WORLD.x0 + WORLD.x1) / 2, z: (WORLD.z0 + WORLD.z1) / 2 };
+  const _pv = new THREE.Vector3(), _ray = new THREE.Raycaster(), _gp = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  function centreTile() {
+    const o = controls.orbit;
+    o.tx = HOME.x; o.tz = HOME.z;
+    for (let it = 0; it < 3; it++) {
+      controls._flyPose(camera); camera.updateMatrixWorld(); camera.updateProjectionMatrix();
+      let x0 = 9, x1 = -9, y0 = 9, y1 = -9;
+      for (const [x, z] of [[WORLD.x0, WORLD.z0], [WORLD.x1, WORLD.z0], [WORLD.x1, WORLD.z1], [WORLD.x0, WORLD.z1]]) {
+        _pv.set(x, 0, z).project(camera);
+        x0 = Math.min(x0, _pv.x); x1 = Math.max(x1, _pv.x); y0 = Math.min(y0, _pv.y); y1 = Math.max(y1, _pv.y);
+      }
+      _ray.setFromCamera({ x: (x0 + x1) / 2, y: (y0 + y1) / 2 }, camera);
+      if (!_ray.ray.intersectPlane(_gp, _pv)) return;
+      o.tx = _pv.x; o.tz = _pv.z;
+    }
+  }
   function frame(dt) {
     t += dt;
     controls.update(dt);
+    if (controls.mode === 'fly' && controls.autoRotate) { centreTile(); controls._flyPose(camera); }
     sky.position.copy(camera.position);                   // the sky dome travels with you
     sky.userData.update(dt); clouds.userData.update(dt); birds.userData.update(dt, t); flags.userData.update(dt, t);
     const walking = controls.mode === 'walk';
