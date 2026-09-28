@@ -9,7 +9,7 @@ import { gbuffer, SOFT, TOON, canvasTex, SUN_VIEW, DAY } from './toon.js';
 import { FRONT, STAGE } from './layout.js';
 
 export const SUN = new THREE.Vector3(-0.66, 0.37, 0.66).normalize();   // golden-afternoon sun, ~22° up in the south-west
-export const HORIZON = new THREE.Color('#d6abb1');   // the pink band along the horizon (Ethan's reference)
+export const HORIZON = new THREE.Color('#f6dccb');
 
 // ── sky dome ──
 // A vertical gradient painted like an anime background: deep saturated blue
@@ -31,25 +31,21 @@ export function makeSky() {
       void main(){
         vec3 d = normalize(vDir);
         float h = clamp(d.y, -0.2, 1.0);
-        // Ethan's reference painting: a deep teal overhead, lighter toward the horizon, and a band
-        // of dusty pink right along it (and below it, round the floating model)
-        vec3 zen = toLin(vec3(0.11, 0.33, 0.45)), mid = toLin(vec3(0.2, 0.46, 0.6)), low = toLin(vec3(0.42, 0.6, 0.7));
-        vec3 pink = toLin(vec3(0.86, 0.63, 0.65)), under = toLin(vec3(0.82, 0.69, 0.73));
-        vec3 c = mix(low, mid, smoothstep(0.1, 0.35, h));
-        c = mix(c, zen, smoothstep(0.35, 0.95, h));
-        c = mix(pink, c, smoothstep(0.0, 0.13, h));
-        c = mix(c, under, smoothstep(0.0, -0.12, h));
-        // the sun's side of the sky is a touch warmer low down
+        // a warm peach haze all round, a little rosier overhead (the diorama-game sky)
+        vec3 zen = toLin(vec3(0.95, 0.78, 0.69)), mid = toLin(vec3(0.97, 0.85, 0.77)), hor = toLin(vec3(0.99, 0.91, 0.85));
+        vec3 c = mix(hor, mid, smoothstep(0.0, 0.24, h));
+        c = mix(c, zen, smoothstep(0.24, 0.95, h));
+        // the sun's side of the sky is warmer and brighter low down
         float s = max(dot(d, sun), 0.0);
         vec2 dh = normalize(d.xz + 1e-4), sh = normalize(sun.xz);
         float side = pow(max(dot(dh, sh), 0.0), 2.5) * (1.0 - smoothstep(0.0, 0.45, h));
-        c = mix(c, toLin(vec3(0.93, 0.72, 0.62)), side * 0.35);
+        c = mix(c, toLin(vec3(1.0, 0.93, 0.84)), side * 0.6);
         // cirrus: long wisps, projected onto a high flat layer and stretched
         vec2 uv = d.xz / max(d.y, 0.04);
         uv = mat2(0.87, -0.5, 0.5, 0.87) * uv;
         float w = fbm(vec2(uv.x * 0.9, uv.y * 3.6) + vec2(time * 0.004, 0.0));
         w = smoothstep(0.52, 0.86, w) * smoothstep(0.02, 0.22, d.y) * (1.0 - smoothstep(0.55, 0.95, d.y));
-        c = mix(c, mix(toLin(vec3(0.72, 0.84, 0.9)), toLin(vec3(0.98, 0.84, 0.72)), side), w * 0.1);   // (only a trace: the reference sky is clear)
+        c = mix(c, mix(toLin(vec3(1.0, 0.96, 0.93)), toLin(vec3(1.0, 0.95, 0.88)), side), w * 0.55);
         // the sun: a wide warm halo, a tighter glow and a small white disc
         c += toLin(vec3(1.0, 0.9, 0.72)) * (pow(s, 6.0) * 0.2 + pow(s, 60.0) * 0.45 + pow(s, 1400.0) * 6.0);
         // the pixel style's sky: a clear, deep summer blue (Summerhouse), white wisps
@@ -170,18 +166,14 @@ function cloudMaterial() {
         vec3 an = abs(normalize(vNW)) + 1e-3;
         float b = (texture2D(tBrush, vW.xy * 0.011).r * an.z + texture2D(tBrush, vW.zy * 0.011).r * an.x
                  + texture2D(tBrush, vW.xz * 0.011).r * an.y) / (an.x + an.y + an.z);
-        float t = dot(N, uSunView) * 0.5 + 0.5 + (b - 0.5) * 0.28 + (vH - 0.45) * 0.5;
-        // cel-shaded like the reference painting: peach where the sun hits, a thin lavender band,
-        // slate blue in shade, and the sunniest bulges lighter still, with clean edges
-        float a1 = smoothstep(0.44, 0.46, t), a2 = smoothstep(0.54, 0.56, t), a3 = smoothstep(0.8, 0.82, t);
+        float t = dot(N, uSunView) * 0.5 + 0.5 + (b - 0.5) * 0.6 + (vH - 0.45) * 0.45;
+        // three painted tones with ragged edges; the edge of a cloud catches the light
+        float a1 = smoothstep(0.40, 0.44, t), a2 = smoothstep(0.60, 0.64, t);
         float day = clamp(uDay, 0.0, 1.0);
         vec3 L = mix(nLit, lit, day), M = mix(nMid, mid, day), D = mix(nDeep, deep, day);
         vec3 col = mix(mix(D, M, a1), L, a2);
-        col = mix(col, L * 1.18 + vec3(0.04, 0.03, 0.0), a3 * day);
-        col *= 1.0 + (b - 0.5) * 0.05;
-        // ink: every puff drawn round its edge with a dark line, so the heap reads as scallops
-        float rim = 1.0 - abs(dot(N, normalize(vV)));
-        col = mix(col, col * mix(vec3(0.4, 0.36, 0.46), vec3(0.6, 0.62, 0.8), 1.0 - day), smoothstep(0.6, 0.72, rim) * 0.9);
+        col += L * pow(1.0 - abs(dot(N, normalize(vV))), 3.0) * 0.18;
+        col *= 1.0 + (b - 0.5) * 0.08;
         gl_FragColor = vec4(col, 1.0);
         gNormalDepth = vec4(0.5, 0.5, 1.0, 4000.0);
       }`,
@@ -194,8 +186,8 @@ export function makeClouds(n = 16) {
   const mat = cloudMaterial();
   for (let i = 0; i < n; i++) {
     const P = [], N = [], H = [], I = [];
-    const k = (38 + R() * 46) * (i % 2 === 0 ? 1.6 : 1);    // big: they sit a kilometre out (the towering ones bigger still)
-    const tall = i % 2 === 0;               // (half of them tower, like the reference's cumulus)
+    const k = 38 + R() * 46;               // big: they sit a kilometre out
+    const tall = i % 4 === 0;
     const top = k * (tall ? 4.2 : 1.9), bottom = -k * 0.2;
     const add = (x, y, z, rx, ry, rz) => puff(P, N, H, I, R, x, y, z, rx, ry, rz, bottom, top);
     // a cauliflower heaped on a dome: puffs of every size, loosely placed
@@ -206,13 +198,10 @@ export function makeClouds(n = 16) {
       const r = k * (0.14 + dome * 0.36 + R() * 0.22);
       add(u * k * (1.5 + R() * 0.5), dome * k * (tall ? 1.4 : 0.75) + R() * k * 0.3, v * k * 0.8, r * (0.9 + R() * 0.3), r * (0.75 + R() * 0.2), r * (0.85 + R() * 0.2));
     }
-    if (tall) {                            // a towering one, heaped like the reference's cumulus: each level
-      for (let j = 0; j < 6; j++) {        // a cluster of puffs, narrowing and leaning a little as it climbs
-        const spread = k * (1.25 - j * 0.17), n = 4 - Math.floor(j / 2);
-        for (let q = 0; q < n; q++) {
-          const r = k * (0.62 - j * 0.05) * (0.8 + R() * 0.4), u = (q / Math.max(1, n - 1) - 0.5) * 2;
-          add(u * spread * (0.7 + R() * 0.3) + j * k * 0.08, k * (1.15 + j * 0.5) + R() * k * 0.2, (R() - 0.5) * k * 0.6, r, r * 0.85, r * 0.9);
-        }
+    if (tall) {                            // a towering one: puffs stacked up the middle, drifting off-centre
+      for (let j = 0; j < 6; j++) {
+        const r = k * (0.85 - j * 0.09) * (0.85 + R() * 0.3);
+        add((R() - 0.5) * k * 0.7 + j * k * 0.06, k * (1.3 + j * 0.55), (R() - 0.5) * k * 0.5, r, r * 0.82, r * 0.88);
       }
     }
     // stray bits breaking away round the edges
@@ -234,9 +223,9 @@ export function makeClouds(n = 16) {
     geo.computeBoundingSphere();
     const g = new THREE.Mesh(geo, mat);
     g.rotation.y = R() * Math.PI * 2;
-    // all out in the sky toward the horizon, over the land (the low ones that once circled the
-    // floating diorama at its own level went with the painting look)
-    const low = false;
+    // most sit out by the horizon; a few drift low round the diorama's edge,
+    // level with it, so the model floats among them (the diorama-game look)
+    const low = i % 3 === 1;
     const a = R() * Math.PI * 2, d = low ? 480 + R() * 140 : 760 + R() * 700;
     g.position.set(75 + Math.cos(a) * d, low ? -35 + R() * 45 : 150 + R() * 150, 78 + Math.sin(a) * d);
     if (low) g.scale.setScalar(0.45 + R() * 0.25);

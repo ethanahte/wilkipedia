@@ -70,7 +70,7 @@ void main(){
     float toward = pow(max(dot(dirW, sunDir), 0.0), 5.0);
     // (from the air it starts at the campus, not at the camera, so the land isn't hazed over)
     float thick = dz > 3000.0 ? 0.0 : 1.0 - exp(-max(dz - hazeFrom, 0.0) * 0.0035);
-    col += vec3(1.0, 0.78, 0.5) * toward * thick * hazeK * 0.12;   // (light: the air is clear)
+    col += vec3(1.0, 0.78, 0.5) * toward * thick * hazeK * 0.35;
   }
   // wet ground: march the mirrored ray through the depth buffer and borrow the
   // colour it hits (screen-space reflection). Strongest in puddles.
@@ -105,14 +105,13 @@ void main(){
   }
   // ink is a darker shade of whatever it outlines, never pure black; by day it's
   // barely there (a soft painted edge), at night it's crisper
-  // (by day: dark line art like an inked background painting, Ethan's reference)
-  col = mix(col, col * mix(vec3(0.3, 0.27, 0.3), vec3(0.26, 0.24, 0.36), night), edge * ink * mix(0.82, 1.0, night) * (1.0 - pixel));
+  col = mix(col, col * mix(vec3(0.62, 0.52, 0.52), vec3(0.26, 0.24, 0.36), night), edge * ink * mix(0.55, 1.0, night) * (1.0 - pixel));
   // pixel art: a firm dark outline, one art-pixel wide
   col = mix(col, col * vec3(0.2, 0.2, 0.32), step(0.45, edge) * ink * pixel);
   // tilt-shift: soften toward the top and bottom of the frame
   if (tiltK > 0.0) {
     float dz = min(abs(texture2D(tND, vUv).a), 6000.0);
-    float tb = smoothstep(0.12, 0.45, abs(dz - focusZ) / max(focusZ, 1.0)) * tiltK * 0.75;   // (gentle: the land stays readable)
+    float tb = smoothstep(0.06, 0.26, abs(dz - focusZ) / max(focusZ, 1.0)) * tiltK;
     col = mix(col, texture2D(tSoft, vUv).rgb, tb);
   }
   // the ground falls away into mist below the diorama's top (by day)
@@ -131,11 +130,11 @@ void main(){
   if (raysK > 0.0) { float r = texture2D(tRays, vUv).r; r = r / (1.0 + r); col += mix(vec3(1.0, 0.84, 0.6), vec3(1.0, 0.95, 0.85), r) * r * raysK; }
   // grade (the anime background look): richer colour, lavender-blue shadows, warm golden light
   float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(vec3(lum), col, mix(mix(1.12, 1.3, pixel), 1.14, night));   // day: rich, saturated colour (the reference painting)
+  col = mix(vec3(lum), col, mix(mix(0.92, 1.3, pixel), 1.14, night));   // day: pastel (diorama) or punchy (pixel)
   // day: pastel (shadows go warm mauve, blacks lift into the peach haze); night: cool blue shadows
-  col *= mix(mix(vec3(0.88, 0.92, 1.05), vec3(1.04, 1.0, 0.93), smoothstep(0.08, 0.6, lum)),
+  col *= mix(mix(vec3(0.96, 0.88, 0.9), vec3(1.03, 1.0, 0.95), smoothstep(0.08, 0.6, lum)),
              mix(vec3(0.86, 0.9, 1.14), vec3(1.04, 1.0, 0.94), smoothstep(0.08, 0.6, lum)), night);
-  col = mix(col, fogCol, 0.02 * (1.0 - night) * (1.0 - pixel));
+  col = mix(col, fogCol, 0.08 * (1.0 - night) * (1.0 - pixel));
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
   col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night) * (1.0 - pixel);

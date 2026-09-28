@@ -642,45 +642,25 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Never invent what something looks like.** Every facade kit and landmark is
     from a photo the owner sent (listed in the file headers). Ask for a photo
     before adding a building's detail, interior, or a logo placement.
-  - Look by day, since 2026-09-28: Ethan's reference painting (a cottage under
-    a towering cumulus). The things that make it:
-    - a deep teal sky, lighter toward a band of dusty pink along the horizon
-      (and a softer mauve below it, round the floating model);
-    - towering cumulus heaped in clusters, each puff inked round its edge,
-      cel-shaded peach in the sun, a thin lavender band, and slate blue in
-      shade (`CLOUD_TONES.diorama`, the cloud shader in life.js);
-    - clear air: linear fog that only starts at 320 m on foot and beyond the
-      campus from the air, and a light sun-side haze;
-    - dark inked line art by day, rich saturated colour, blue shadows
-      under a warm sun (post.js grade; `DAY` in main.js);
-    - only a trace of cirrus.
-    The tilt-shift is gentle, and it is off at low angles and when zoomed
-    out.
-    - Lenses are normal (Ethan): 50° on foot (62° stretched a wide screen)
-      and 45° from the air (a 24° telephoto made it a flat miniature). The
-      opening view is centred on the school's buildings (22, 0), not the
-      middle of the map (the fields), low enough to show the sky behind.
-    - Green land runs out to the horizon round the model (`outerLand()` in
-      ground.js, vertex-coloured because the rain tint resets ground
-      materials' colour). It replaced the diorama's layered slab, and the
-      low clouds that circled it are now up in the sky with the rest.
-    Earlier look, replaced: a flat, telephoto miniature floating in warm peach
-    mist, after the diorama game *High Above*.
-  - Rendering pieces that still hold:
-    - From the air, the tilt-shift blurs by depth (post.js `tilt` and
-      `focusZ`, the distance to the orbit target), not by screen position,
-      which looked like fog when looking straight down.
-    - The sun sits about 22° up in the south-west. The light ramp is soft,
-      so the unlit side is about 0.18, not black. The sky dome follows the
-      camera, with no mountains (the owner's call).
-    - Clouds (`makeClouds` in life.js) have their own shader: puffs of mixed
-      sizes, stray bits and flat wisps, with brush-stroke breakup
-      (`strokeTex`) and a moonlit palette at night.
-    - `gbuffer()` in toon.js patches every material. It writes normal and
-      depth to a second target for the ink pass, and adds the grain,
-      contact darkening at wall bases, a soft warm rim on sunlit edges and,
-      on glass only, diagonal glints. Any new material must go through
-      `gbuffer()`.
+  - Look (by day: the owner's reference is the diorama game *High Above*): a
+    near-isometric miniature floating in warm peach mist. From the air the
+    camera uses a long lens (`fovFly` 24°, distance × `lensK` in controls.js;
+    orbit.dist stays in 62°-lens units) with a tilt-shift blur by depth (post.js, `tilt` +
+    `focusZ` = distance to the orbit target: sharp there, soft much nearer or
+    further; screen-position blur looked like fog when looking straight down), and height fog dissolves the plinth into the haze. Light
+    is soft and pastel: a peachy-pink sky fill so shadows go warm mauve, a
+    gentle sun (~22° up, SW), a soft linear-filtered light ramp (the unlit side
+    is ~0.18, not black), barely-there warm outlines by day (crisper at night),
+    a stronger hand-painted grain, a slightly muted grade that lifts toward the
+    fog colour. Peach sky dome (follows the camera; no mountains, owner's call),
+    hand-painted clouds by the horizon and a few low ones circling the diorama
+    at its own level. Clouds (`makeClouds` in life.js) are their own shader:
+    lumpy low-frequency puffs of mixed sizes, stray bits and flat wisps, shaded
+    in three painted tones whose edges are broken by a brush-stroke texture
+    (`strokeTex`), with a moonlit palette at night. `gbuffer()` in toon.js patches every material: it
+    writes normal+depth to a second target for the ink pass, adds the grain +
+    contact darkening at wall bases, a soft warm rim on sunlit edges and (glass
+    only) diagonal glints. Any new material must go through `gbuffer()`.
   - Zoomed out from the air, the land must stay clear (Ethan). The tilt-shift
     fades out as orbit.dist goes from 200 to 480. The fog thins with the
     camera's distance. The sun-side haze starts at the campus, not at the
