@@ -38,7 +38,8 @@ export const BUILDINGS = [
   // One rectangle from B's wall to the east end (Ethan: the office and the part joining B are one
   // building). Its quad-side face is at -57.4 (Ethan: narrower; the Apple Maps view), with the
   // covered walk in front of it (COURT.porch) running all the way to B.
-  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-54.7, -74.3, -26.2, -57.4) },
+  // Ethan: not as long as first drawn; its east end (toward the flagpole) is at x -28.2.
+  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-54.7, -74.3, -28.2, -57.4) },
   // Cafeteria: north side of the quad, covered walkway on its quad side. The tall
   // dining hall stands 2.4 m back behind a one-storey front that holds the glass
   // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
@@ -230,11 +231,11 @@ export const COURT = {
   bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
   maple: [-52.2, -38.8],
   // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x
-  yellowDoors: [-49.5, -43.5], box: -39.5, filler: -36.0, entry: [-33.2, -27.2],
+  yellowDoors: [-49.5, -43.5], box: -40.5, filler: -37.6, entry: [-35.2, -29.2],
   benches: [[-47.8, -50.3], [-44.2, -51.2]],
   // the black steel fence from the office's south-east corner to the teachers' yard, with a
   // pedestrian gate by the office and a double gate by the yard (IMG_2396/2398/2399)
-  fence: [[-26.2, -57.4], [-25.45, -44.9]], bikeRack: [-24.2, -52.5],
+  fence: [[-28.2, -57.4], [-25.45, -44.9]], bikeRack: [-24.2, -52.5],
 };
 // The flower bed on the quad side of B's entry block, along B's wall (Apple Maps view for its shape;
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
@@ -255,11 +256,11 @@ export const FRONT = {
   palms: [[-24.3, -75.9, 10.5], [-21.8, -76.1, 11.8], [-19.3, -75.8, 9.6]],
   // (IMG_2400/2401/2404: a long raised concrete planter along a wall that continues east from the
   // entrance, rounded at its east end, with three tall palms, agapanthus and boulders)
-  palmBed: { x0: -26.2, x1: -17.6, z0: -77.4, z1: -74.55, h: 0.55 },
-  screenWall: { x0: -26.2, x1: -20.5, h: 3.6 },
+  palmBed: { x0: -28.2, x1: -17.6, z0: -77.4, z1: -74.55, h: 0.55 },
+  screenWall: { x0: -28.2, x1: -20.5, h: 3.6 },
   flag: [-18.4, -61.7],
   flagBed: { r: 4.3, inner: 2.9 },
-  entry: { x0: -32, x1: -26.2 },
+  entry: { x0: -34.0, x1: -28.2 },
   ada: [-48.2, -79.3],
 };
 

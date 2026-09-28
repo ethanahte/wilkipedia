@@ -56,7 +56,7 @@ export function buildLandmarks(W, group, fontFamily) {
   group.add(decal(signTex, s.x, s.y, z - 0.03, s.w, s.w * 400 / 2048, Math.PI));
 
   // roof edge over the sign wall, and the stepped-up volume behind it
-  W.slab('flat', -47.2, z - 1.3, -26.2, z, 4.45, 4.85, fin);
+  W.slab('flat', -47.2, z - 1.3, -28.2, z, 4.45, 4.85, fin);
   W.slab('stucco', -41, -71, -30, -62, 4.8, 6.6, color('#efe8d6'));
   // the main entrance: a flat canopy on two posts, glass doors and a mosaic panel
   const e = FRONT.entry;
@@ -105,7 +105,7 @@ export function buildLandmarks(W, group, fontFamily) {
     g.font = '800 48px "Helvetica Neue", Arial, sans-serif'; g.fillText('WILCOX HIGH SCHOOL', w / 2, 120);
     g.font = '700 40px "Helvetica Neue", Arial, sans-serif'; g.fillText('#CHARGERSTRONG', w / 2, 190);
   });
-  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -26.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
+  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -28.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
   // the wall that runs on east from the entrance, and the long raised planter along it, rounded at
   // its east end: three tall palms, agapanthus and boulders (IMG_2400, IMG_2401, IMG_2404)
   {

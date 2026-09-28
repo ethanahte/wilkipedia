@@ -447,7 +447,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         a small metal awning (IMG_2399).
 
       The front office (`ADMIN`) is ONE rectangle from B's wall to its east
-      end (Ethan). Its quad-side face is at z -57.4 (narrower, per Ethan and
+      end at x -28.2 (Ethan: shorter toward the flagpole). Its quad-side face is at z -57.4 (narrower, per Ethan and
       the map), and its west face is against B (no kit windows). Its south face,
       behind the covered walk, is `adminSouth()` (above).
 
