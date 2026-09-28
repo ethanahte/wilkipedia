@@ -381,16 +381,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
           glass double doors, a side light and a transom, with a big grid
           window above.
         - The north pier has a camera and a push-button post at its foot.
-        - North face: a window strip right by the corner, a grid window
-          upstairs and dark glass below (IMG_2394).
+        - North face (toward the office): a wide window by the corner, 2.6 m
+          across (Ethan: wider than first drawn). A three-pane grid window
+          upstairs, dark glass below (IMG_2394).
         - Quad face: a narrow window high by B (a window, not a vent: Ethan),
           a lamp, a vent, a conduit and a corner camera.
-        - Where it meets B, B has a tall louvered air-conditioning shaft
-          (IMG_2372/2374).
+        - Where it meets B, B has a tall air-conditioning shaft
+          (IMG_2372/2374). It is built like R's grey AC blocks (Ethan): grey
+          tower, cream cap, fine grey lines, a framed louver on each floor.
       - The flower bed on the block's quad side (`B_BED`, `bEntryBed()` in
         landmarks.js) is a wedge along B, widest at the block, with a strip
         of paving between it and B. It holds ceramic totem poles, blue-green
-        euphorbias, feather grass, poppies, a red-leaf shrub and flax.
+        euphorbias, feather grass, poppies, flax, and two red-leaf trees
+        (3–3.6 m, Ethan: bigger than the shrub first drawn).
       - B's grey steel canopy (landmarks.js) runs from the entry block to
         the snack bar (x -17.8), over z -34.65..-28.65. Its first post
         stands just in front of B's doors (IMG_2390). It is a butterfly (V) roof on ONE row of
@@ -412,8 +415,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - The courtyard between the front office and B's canopy (`COURT`,
       `court()` in landmarks.js, from the map) has:
       - a raised zig-zag planter;
-      - a big shade tree by B, with a small reddish tree north of it and a
-        small orange one east of it;
+      - a big shade tree by B, with a big purple-leaf tree north of it, over
+        the walk's roof by B's doors (IMG_2392/2395), and a small orange one
+        east of it;
       - an umbrella table, right by the B-side bed so it doesn't block the
         way through (Ethan), with two benches north of it. The benches stand
         along the bed's slanting edge, backs to the bed, short of the
@@ -422,7 +426,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         to B.
 
       The courtyard bed (`COURT.bed`) holds ferns and feather grass under the
-      trees, with a small maple by the entry block (IMG_2392/2394).
+      trees, with a maple by the entry block that spreads wide, up past the
+      block's first floor (IMG_2392/2394).
+
+      B's glass doors at the walk's west end are drawn by `adminSouth()`, and
+      B's facade kit leaves that stretch of B's east wall bare (no window,
+      louver or pilaster on top of them).
 
       Around the front office (IMG_2395–2404):
       - The main entrance is on the EAST face, facing the flagpole (Ethan's
@@ -463,10 +472,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         the walk's west end. The walk has round grey posts and lights, and
         runs on over the gate.
       - The black steel fence (`steelFence()`, `COURT.fence`) is an L
-        (Ethan). It runs south from the office's set-back courtyard wall at x -31,
-        just east of the WHS entrance, through the zig-zag flower bed. Then
+        (Ethan). It starts where a cream wall standing out from the office's
+        corner ends (`COURT.gateWall`, IMG_2396; flush with the east face, up
+        to the walk's roof). It runs south at x -31, just east of the WHS
+        entrance, through the zig-zag flower bed. Then
         it runs east in line with the teachers' yard's short side (z -44.9)
-        to meet it. It has an open pedestrian gate by the office and a
+        to meet it. It has an open pedestrian gate right after the wall and a
         double gate in the east leg. The PTSA banner and no-smoking signs
         face the passage, with a bike rack there. A crape myrtle and roses
         grow on the courtyard side.
@@ -482,7 +493,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       behind the covered walk, is `adminSouth()` (above).
 
       The palms and their bed match the satellite too. The flagpole stands in a round planter south of it
-      (`FRONT.flag`, `flagBed`), both off the map.
+      (`FRONT.flag`, `flagBed`), both off the map. It is NOT in the parking
+      lot (Ethan, his photo of the front): the faculty lot starts at x -11,
+      with a sidewalk round the flag bed and a yellow curb down its side.
+      The front drive runs on east to meet it.
     - The fountain is on the west side, not the east (it was once drawn on the
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark
       doors.

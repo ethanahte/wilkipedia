@@ -164,8 +164,10 @@ export const ROADS = OSM_ROADS.map((r) => ({
 
 // Asphalt lots: rect + which way the stall rows run ('x' = rows along x).
 export const LOTS = [
-  { r: [-75, -92, -18, -80], rows: 'x', name: 'Visitor parking', front: true },
-  { r: [-18, -90, 108, -56], rows: 'x', name: 'Faculty parking' },
+  // the faculty lot stops short of the flagpole: its bed has a sidewalk round it, then a yellow curb
+  // along the drive (Ethan, his photo of the front); the front drive runs on to meet it
+  { r: [-75, -92, -11, -80], rows: 'x', name: 'Visitor parking', front: true },
+  { r: [-11, -90, 108, -57.5], rows: 'x', name: 'Faculty parking' },
   { r: [112, -66, 190, -49], rows: 'x', name: 'Student parking' },
   { r: [-192, -92, -112, -56], rows: 'x', name: 'Student parking' },
   { r: [-159, -6.5, -112, 15.5], rows: 'x', name: 'Faculty parking' },
@@ -233,7 +235,7 @@ export const COURT = {
   // the bed under the big trees north of B's entry block: ferns and feather grass, with a small
   // maple by the block (IMG_2392, IMG_2394)
   bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
-  maple: [-52.2, -38.8],
+  maple: [-51.4, -39.2],
   // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x; the doors and
   // box are on the wider west half, the filler and the WHS entrance on the set-back east half
   yellowDoors: [-49.5, -43.5], box: -41.8, filler: -39.6, entry: [-37.2, -31.2],
@@ -243,7 +245,10 @@ export const COURT = {
   // the black steel fence, an L (Ethan): south from the office's courtyard wall, just east of the
   // WHS entrance, through the zig-zag flower bed, then east in line with the teachers' yard's short
   // side to meet it. A pedestrian gate by the office, a double gate in the east leg (IMG_2396/2398/2399).
-  fence: [[-31.0, -59.0], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-24.2, -52.5],
+  // Where it meets the office a cream wall stands out from the office's corner first, up to the
+  // walk's roof, and the fence and its gate start where that ends (Ethan, IMG_2396).
+  fence: [[-31.0, -57.0], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-24.2, -52.5],
+  gateWall: { x0: -31.2, x1: -30.2, z0: -59.0, z1: -57.0, h: 3.2 },
   step: { x: -41.0, z: -59.0 },      // where the office's courtyard wall steps back (layout ADMIN)
 };
 // The flower bed on the quad side of B's entry block, along B's wall (Apple Maps view for its shape;

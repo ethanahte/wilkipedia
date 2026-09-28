@@ -127,15 +127,19 @@ const KITS = {
   b(W, b, e, R) {
     const h = b.h, fl = [0, 4.5];
     if (e.len < 4) return;
+    // B's glass doors at the end of the office's covered walk (adminSouth()) have that stretch of
+    // B's east wall to themselves: no kit window, louver or pilaster lands on them
+    const wz = (COURT.porch.z0 + COURT.porch.z1) / 2;
+    const atDoors = (t, half) => b.id === 'B' && e.nx > 0.5 && Math.abs(e.az + e.dz * t - wz) < half;
     const bs = bays(e.len, 4.0, 1.0);
     for (const { i, t } of bs) {
       if (i % 3 === 0) {
         // pilaster: tan, proud of the wall, rising past the parapet
-        onWall(W, e, t - 2.0, 0, 0.22, () => W.box('stucco', 0, (h + 0.7) / 2, 0, 1.7, h + 0.7, 0.45, C.tan));
+        if (!atDoors(t - 2.0, 2.9)) onWall(W, e, t - 2.0, 0, 0.22, () => W.box('stucco', 0, (h + 0.7) / 2, 0, 1.7, h + 0.7, 0.45, C.tan));
         continue;
       }
-      if (i % 3 === 2 && R() < 0.55) { louverAt(W, e, t, h / 2 - 0.2, 1.25, h - 2.6); continue; }
-      for (const f of fl) windowAt(W, e, t, f + 2.0, 2.8, 1.55);
+      if (i % 3 === 2 && R() < 0.55) { if (!atDoors(t, 2.6)) louverAt(W, e, t, h / 2 - 0.2, 1.25, h - 2.6); continue; }
+      for (const f of fl) if (!(f === 0 && atDoors(t, 3.3))) windowAt(W, e, t, f + 2.0, 2.8, 1.55);
     }
     // belt course between the floors
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
@@ -607,22 +611,26 @@ function bEntry(W) {
   cam(BE.xf + 0.12, 4.4, BE.zS + 0.12);
   cam(BE.xf + 0.12, 4.6, BE.pN - 0.15);
   W.box('flat', BE.xf + 0.35, 0.55, BE.pN + 0.25, 0.12, 1.1, 0.1, steelC);
-  // north face: the narrow window strip by the corner — grid window upstairs, dark glass below
-  gridWindow(W, N, BE.xf - -48.95, 6.5, 1.3, 3.4, [0.5, 0.5], 4);
-  windowAt(W, N, BE.xf - -48.95, 2.0, 1.3, 2.2);
+  // north face, toward the office: the window by the corner — a grid window upstairs, three panes
+  // across, dark glass below; wider than first drawn (Ethan, IMG_2394)
+  gridWindow(W, N, 2.0, 6.5, 2.6, 3.4, [1 / 3, 1 / 3, 1 / 3], 4);
+  windowAt(W, N, 2.0, 2.0, 2.6, 2.2);
   // quad face: a narrow window high by B, a lamp, a small vent, a conduit
   windowAt(W, S, -53.3 - BE.x0, 7.4, 0.5, 1.5);
   sconce(W, S, -50.9 - BE.x0, 4.6);
   onWall(W, S, -53.4 - BE.x0, 2.9, 0.02, () => W.box('flat', 0, 0, 0, 0.36, 0.28, 0.03, color('#dcd6c6')));
   W.rod('flat', [BE.x0 + 0.3, 3.75, BE.zS + 0.05], [BE.xf - 0.1, 3.75, BE.zS + 0.05], 0.035, color('#cfd1d3'));
-  // B's louvered air-conditioning shaft in the corner where the block meets it
-  const sx0 = BE.x0, sx1 = BE.x0 + 0.7, sz0 = BE.zS, sz1 = BE.zS + 1.5;
-  W.slab('stucco', sx0, sz0, sx1, sz1, 0, BE.h, WALL.b);
+  // B's air-conditioning shaft in the corner where the block meets it, built like R's (Ethan): a
+  // grey tower with a cream cap, fine grey lines round it, and a framed louver panel on each floor
+  const sx0 = BE.x0, sx1 = BE.x0 + 1.0, sz0 = BE.zS, sz1 = BE.zS + 1.6;
+  W.slab('stucco', sx0, sz0, sx1, sz1, 0, BE.h - 0.7, RC.tower);
+  W.slab('stucco', sx0, sz0, sx1, sz1, BE.h - 0.7, BE.h + 0.08, RC.wall);
   const SH = rWall(sx1, sz1, sx1, sz0, 1, 0), SF = rWall(sx0, sz1, sx1, sz1, 0, 1);
-  for (const e of [SH, SF]) for (const [y, h] of [[2.3, 2.8], [6.7, 3.0]]) {
-    onWall(W, e, e.len / 2, y, 0.02, () => {
-      W.box('flat', 0, 0, 0, e.len - 0.3, h, 0.05, color('#6b6f74'));
-      for (let k = 0; k < Math.floor(h / 0.12); k++) W.box('flat', 0, -h / 2 + 0.08 + k * 0.12, 0.04, e.len - 0.4, 0.03, 0.05, color('#8e9297'));
+  for (const e of [SH, SF]) {
+    onWall(W, e, e.len / 2, 0, 0.012, () => { for (const y of [2.2, 6.6]) W.box('flat', 0, y, 0, e.len, 0.035, 0.02, RC.towerLine); });
+    for (const y of [2.3, 6.7]) onWall(W, e, e.len / 2, y, 0.02, () => {
+      W.box('flat', 0, 0, 0, e.len - 0.3, 2.5, 0.06, RC.towerLine);
+      W.box('louver', 0, 0, 0.04, e.len - 0.5, 2.3, 0.03, color('#b7bbbe'));
     });
   }
 }

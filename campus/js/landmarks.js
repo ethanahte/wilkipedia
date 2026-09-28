@@ -336,7 +336,8 @@ function court(W, group) {
   }
   // the trees: a big shade tree by B, a small reddish one north of it, a small orange one east of it
   const [bx, bz] = COURT.bigTree; shadeTree(W, bx, bz, R, { h: 11 }); addCircle(bx, bz, 0.45);
-  const [rx, rz] = COURT.redTree; youngTree(W, rx, rz, R, { h: 5.5, stake: false, cols: [color('#7a3b3f'), color('#8e4a45'), color('#6b3440')] }); addCircle(rx, rz, 0.2);
+  // the purple-leaf tree by the walk's west end is big, over the walk's roof (IMG_2392, IMG_2395)
+  const [rx, rz] = COURT.redTree; shadeTree(W, rx, rz, R, { h: 8.5, cols: [color('#5e2b3a'), color('#6b3440'), color('#532636')] }); addCircle(rx, rz, 0.3);
   const [sx, sz] = COURT.smallTree; youngTree(W, sx, sz, R, { h: 3.2, stake: false, cols: [color('#c7793f'), color('#b8683a')] }); addCircle(sx, sz, 0.15);
   const [tx, tz] = COURT.table; umbrellaTable(W, tx, tz, R);
   // the bed under the trees: ferns and feather grass, and the small maple by B's entry block
@@ -344,7 +345,8 @@ function court(W, group) {
   W.prism('flat', CB, 0, 0.07, soil, { top: true, topMat: 'flat', topCol: soil });
   bedFill(W, CB, R, 70, (x, z) => (R() < 0.5 ? fern(W, x, z, R) : grassTuft(W, x, z, R, { y: 0.07, h: 0.7, cols: FEATHER })));
   const [mx, mz] = COURT.maple;
-  youngTree(W, mx, mz, R, { h: 5.2, stake: false, cols: [color('#6f8a3f'), color('#7d9148'), color('#b8773a')] }); addCircle(mx, mz, 0.2);
+  // it spreads wide, up past the block's first floor (IMG_2392, IMG_2394)
+  youngTree(W, mx, mz, R, { h: 6.4, rx: 2.4, stake: false, cols: [color('#6f8a3f'), color('#7d9148'), color('#b8773a')] }); addCircle(mx, mz, 0.25);
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
@@ -360,7 +362,9 @@ function court(W, group) {
   // the black steel fence from the office to the teachers' yard, with its gates, the PTSA banner
   // and no-smoking signs on the passage side, and a bike rack there (IMG_2396, IMG_2398, IMG_2399)
   const [[fa, fb], [fc, fd], [fe, ff]] = COURT.fence;
-  steelFence(W, fa, fb, fc, fd, [[1.6, 1.2, true]]);                  // south from the office
+  const gw = COURT.gateWall;                                           // the wall out from the office's corner
+  W.slab('stucco', gw.x0, gw.z0, gw.x1, gw.z1, 0, gw.h, color('#efe8d6')); addBox(gw.x0, gw.z0, gw.x1, gw.z1);
+  steelFence(W, fa, fb, fc, fd, [[0.75, 1.2, true]]);                 // south from its end, the gate first
   steelFence(W, fc, fd, fe, ff, [[(fe - fc) / 2, 3.0, false]]);       // east to the yard's short side
   const ptsa = textCanvas(512, 256, (g, w, h) => {
     g.fillStyle = '#f2cf3a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1f2330'; g.textAlign = 'center';
@@ -419,7 +423,10 @@ export function bEntryBed(W) {
   const R = rng(614), P = ensureCCW(B_BED.poly);
   W.prism('flat', P, 0, 0.07, soil, { top: true, topMat: 'flat', topCol: soil });
   for (const [x, z] of B_BED.totems) totem(W, x, z, R);
-  shrub(W, -52.6, -24.9, R, { y: 0.07, s: 1.5, cols: [color('#8e2f33'), color('#9c3a34')] });
+  // red-leaf trees: bigger and taller than first drawn (Ethan; IMG_2372, IMG_2374)
+  const RED = [color('#8e2f33'), color('#9c3a34'), color('#7a2a33')];
+  youngTree(W, -52.4, -24.4, R, { h: 3.6, rx: 1.3, stake: false, y: 0.07, cols: RED }); addCircle(-52.4, -24.4, 0.15);
+  youngTree(W, -53.0, -19.4, R, { h: 3.2, rx: 1.1, stake: false, y: 0.07, cols: RED }); addCircle(-53.0, -19.4, 0.15);
   bedFill(W, P, R, 110, (x, z) => {
     if (B_BED.totems.some(([a, b]) => Math.hypot(a - x, b - z) < 0.45)) return;
     const r = R();

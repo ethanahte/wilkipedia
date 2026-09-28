@@ -156,7 +156,7 @@ export function buildGround(scene, q = 1) {
     }
   }
   // the front drive: yellow curb, yellow arrows (photo of the flagpole)
-  p.line([[-75, -80.2], [-18, -80.2]], 0.35, '#e3c43a', { cap: 'butt' });
+  p.line([[-75, -80.2], [-11.2, -80.2], [-11.2, -57.5]], 0.35, '#e3c43a', { cap: 'butt' });   // and down the flagpole's side
   arrow(p, -40, -86, 0, '#e3c43a'); arrow(p, -58, -86, 0, '#e3c43a');
   // the gym-entrance lot: yellow curb and white arrows
   p.line([[108, -49.2], [205, -49.2]], 0.35, '#e3c43a', { cap: 'butt' });
