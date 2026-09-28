@@ -98,15 +98,36 @@ export function buildLandmarks(W, group, fontFamily) {
   W.cyl('flat', fx, 0.35, fz, 0.1, 0.055, 11.6, 8, color('#c7cbd0'));
   W.blob('flat', fx, 12.05, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
 
-  // ── Building B's grey steel entry canopy, running to the cafeteria's walkway ──
-  const c0 = -54.7, c1 = -17.8, cz0 = -32.0, cz1 = -28.4;   // its north side stops in front of the teachers' yard wall (IMG_2391)
-  W.slab('flat', c0, cz0, c1, cz1, 3.55, 3.8, color('#e9e7e2'));          // soffit/underside
-  W.slab('flat', c0, cz0 - 0.1, c1, cz0, 3.4, 3.9, steel);
-  W.slab('flat', c0, cz1, c1, cz1 + 0.1, 3.4, 3.9, steel);
+  // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
+  // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
+  // roof's middle (its valley). Each post splits near the top into a Y whose arms hold the
+  // two wings. It stands taller than the cafeteria's walkway roof (3.5–3.78) it meets.
+  const c0 = -54.7, c1 = -17.8, zp = -31.65, hw = 3.0;         // post line; half-width of the roof
+  const yv = 3.95, ye = 4.6, th = 0.12;                         // underside at the valley and at the edges
+  const under = (d) => yv + (ye - yv) * (Math.abs(d) / hw);     // underside height d metres from the valley
+  const post = color('#3d4044'), soffit = color('#e9e7e2'), metal = color('#9ea3a8');
+  for (const s of [-1, 1]) {                                     // the two wings: s -1 north, +1 south
+    const zE = zp + s * hw;
+    const top = (a, b, c, d) => W.quad('metal', a, b, c, d, metal, 'auto');
+    const bot = (a, b, c, d) => W.quad('flat', a, b, c, d, soffit, 'auto');
+    if (s < 0) {
+      top([c0, yv + th, zp], [c1, yv + th, zp], [c1, ye + th, zE], [c0, ye + th, zE]);
+      bot([c0, yv, zp], [c0, ye, zE], [c1, ye, zE], [c1, yv, zp]);
+    } else {
+      top([c1, yv + th, zp], [c0, yv + th, zp], [c0, ye + th, zE], [c1, ye + th, zE]);
+      bot([c1, yv, zp], [c1, ye, zE], [c0, ye, zE], [c0, yv, zp]);
+    }
+    W.slab('flat', c0, Math.min(zE, zE - s * 0.1), c1, Math.max(zE, zE - s * 0.1), ye - 0.1, ye + th + 0.12, soffit);   // fascia
+  }
+  W.slab('flat', c0, zp - 0.14, c1, zp + 0.14, yv - 0.3, yv + 0.02, post);                       // the beam along the valley
   for (let x = c0 + 5; x < c1; x += 6) {
-    for (const zz of [cz0 + 0.35, cz1 - 0.35]) W.slab('flat', x - 0.14, zz - 0.14, x + 0.14, zz + 0.14, 0, 3.55, steel);
-    W.beam('flat', x, cz0 + 0.35, x + 1.8, cz0 + 1.8, 2.6, 3.55, 0.12, steel);   // angled struts, as in the photo
-    W.beam('flat', x, cz1 - 0.35, x + 1.8, cz1 - 1.8, 2.6, 3.55, 0.12, steel);
+    W.slab('flat', x - 0.15, zp - 0.15, x + 0.15, zp + 0.15, 0, yv - 0.3, post);                  // the post
+    for (const s of [-1, 1]) {
+      W.rod('flat', [x, yv - 0.8, zp + s * 0.1], [x, under(1.7) - 0.02, zp + s * 1.7], 0.14, post);   // the Y's arm
+      W.rod('flat', [x, under(0.2), zp + s * 0.2], [x, under(hw - 0.2), zp + s * (hw - 0.2)], 0.1, post);  // rib under the wing
+    }
+    W.slab('glow', x - 0.05, zp + 0.15, x + 0.05, zp + 0.2, 1.9, 2.6, color('#ffe6bd'));          // the light on the post
+    LIGHTS.push([x, zp + 0.5, 2.3, 4]);
   }
   // B's glass entry under the canopy's west end, with the triangular wall light
   W.slab('flat', c0 + 0.02, -33.2, c0 + 0.14, -29, 0, 3.3, steel);
@@ -117,8 +138,6 @@ export function buildLandmarks(W, group, fontFamily) {
   W.quad('glass', [c0 + 0.16, 2.55, -29.1], [c0 + 0.16, 2.55, -33.1], [c0 + 0.16, 3.2, -33.1], [c0 + 0.16, 3.2, -29.1], color('#fff'), 'auto');
   W.tris('flat', [[c0 + 0.2, 2.9, -34.2], [c0 + 0.2, 2.9, -34.9], [c0 + 0.2, 3.25, -34.55]], [[1, 0, 0], [1, 0, 0], [1, 0, 0]], null, color('#6b5a4a'));
 
-  // downlights under B's canopy
-  for (let x = c0 + 3; x < c1; x += 6) { W.slab('glow', x - 0.35, -31.3, x + 0.35, -30.7, 3.5, 3.54, color('#ffe6bd')); LIGHTS.push([x, -31, 3.5, 4.5]); }
 
   // ── the cafeteria's covered walkway along the quad ──
   const wz0 = -30.4, wz1 = -27.0;

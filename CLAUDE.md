@@ -361,7 +361,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         the long one. Ethan: wide, and deeper than 11 m but not the first 16 m (11 m
         along the quad, 12.5 m deep).
         It is a yard, not a building: style `yard` has no kit windows and no
-        rooftop units. B's canopy stops in front of its wall (cz0 -32.0).
+        rooftop units.
+      - B's grey steel canopy (landmarks.js), which runs from B to the snack
+        bar, is a butterfly (V) roof on ONE row of posts (IMG_2391, Ethan).
+        The posts stand under the valley, on the row nearer the parking lot
+        (z -31.65, in front of the yard wall). Each post splits into a Y
+        whose arms hold the two wings, and carries a light. The roof is
+        taller than the cafeteria walkway it meets (valley at 3.95 m,
+        edges 4.6 m).
       - A wide yellow door (1.9 m) in a niche set back further (x -17.8 to
         -15.6), between the yard wall and the snack bar. It opens into the
         yard, with the building on your right as you go in (`YARD-door`).
