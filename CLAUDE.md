@@ -758,18 +758,23 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     under the quad until the quad loads, or if WebGL is missing.
   - 'plain': no image and no frosted panels, the original white home page.
 
-  The cube faces in `assets/img/pano/` (`day`/`night`, n e s w u d, 1280 px,
-  plus `-sm` at 640) are renders of the 3D campus. To redo them, open the
-  campus page in a square viewport and set these in `__campus`:
-  - `post.capture = true` (no vignette, no sun rays, so the faces meet
-    without seams);
+  The cube faces in `assets/img/pano/` (`day`/`night`, n e s w u d) come in
+  three sizes: `-lg` 2048 px for big high-density screens, 1536 (no suffix)
+  for most, `-sm` 1024 for small screens or Save-Data. pano.js picks one and
+  draws at up to 2× device pixels; Ethan found 1280 faces blurry. They are
+  renders of the 3D campus. To redo them, open the campus page in a square
+  viewport (1024×1024 at DPR 2 gives a 2048 canvas) and set these in
+  `__campus`:
+  - `post.capture = true`: no vignette, no sun rays, so the faces meet
+    without seams; also no bloom, tilt-shift or haze wash, and fog at 0.3×,
+    so the faces stay crisp;
   - `controls.mode = 'walk'`, `fovWalk = 90`, `pos` (-9, 0, 6), just west
     of the cedar;
   - for each face, a yaw and pitch: n (0, 0), w (π/2, 0), s (π, 0),
     e (−π/2, 0), u (0, π/2), d (0, −π/2).
 
   After a few `frame()` calls, draw the canvas into a 2D canvas in the same
-  task, and save it as WebP. Press N for the night set. pano.js puts up/down
+  task, and save it as WebP (encode in the browser; sips can't write WebP). Press N for the night set. pano.js puts up/down
   on the cube half-turned and flips x in the lookup; keep that mapping if
   you change the faces.
 - There is no node here, so check JS syntax with osascript (see git history of

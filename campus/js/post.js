@@ -134,7 +134,7 @@ void main(){
   // day: pastel (shadows go warm mauve, blacks lift into the peach haze); night: cool blue shadows
   col *= mix(mix(vec3(0.96, 0.88, 0.9), vec3(1.03, 1.0, 0.95), smoothstep(0.08, 0.6, lum)),
              mix(vec3(0.86, 0.9, 1.14), vec3(1.04, 1.0, 0.94), smoothstep(0.08, 0.6, lum)), night);
-  col = mix(col, fogCol, 0.08 * (1.0 - night) * (1.0 - pixel));
+  col = mix(col, fogCol, 0.08 * (1.0 - night) * (1.0 - pixel) * vig);
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
   col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night) * (1.0 - pixel) * vig;
@@ -284,8 +284,9 @@ export class Post {
     // sunbeams: where the sun is on screen, and how much it faces us
     u.raysK.value = 0; u.hazeK.value = 0;
     // capture: panorama faces for the site's background (no vignette, no screen-placed sunbeams, so the
-    // six faces meet without seams)
+    // six faces meet without seams; and crisp: no glow, no lens blur, no haze wash)
     u.vig.value = this.capture ? 0 : 1;
+    u.useBloom.value = this.quality === 'high' && !this.capture ? 1 : 0;
     if (this.inkOn && env.sun && env.day > 0 && !this.pixel && !this.capture) {
       u.sunDir.value.copy(env.sun);
       camera.getWorldDirection(this._fwd);
@@ -306,7 +307,7 @@ export class Post {
     }
     u.fogCol.value.copy(env.fog || u.fogCol.value);
     // tilt-shift: a blurred quarter-size copy of the picture to fade into
-    u.tiltK.value = this.inkOn && !this.pixel ? (env.tilt || 0) * (env.night ? 0.6 : 1) : 0;
+    u.tiltK.value = this.inkOn && !this.pixel && !this.capture ? (env.tilt || 0) * (env.night ? 0.6 : 1) : 0;
     u.focusZ.value = env.focus || 1000;
     u.hazeFrom.value = env.hazeFrom || 0;
     if (u.tiltK.value > 0.01) {

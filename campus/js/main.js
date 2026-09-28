@@ -360,7 +360,7 @@ async function boot() {
     // from the air the land stays clear however far you zoom out (Ethan): thinner fog the
     // further the camera is, and no clouds once you're up above them
     const camFar = camera.position.length();
-    scene.fog.density = walking ? dens : dens * 0.11 * THREE.MathUtils.clamp(420 / Math.max(camFar, 1), 0.08, 1);
+    scene.fog.density = (walking ? dens : dens * 0.11 * THREE.MathUtils.clamp(420 / Math.max(camFar, 1), 0.08, 1)) * (post.capture ? 0.3 : 1);
     clouds.visible = !env.rain && (walking || camera.position.y < 240);
     // the sun's shadow box follows what you're looking at, snapped to its texels so edges don't crawl
     const focus = controls.mode === 'fly' ? new THREE.Vector3(controls.orbit.tx, 0, controls.orbit.tz) : controls.pos.clone();

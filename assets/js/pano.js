@@ -57,15 +57,16 @@ export function mountPano(root) {
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-  // the sharper set unless the screen is small and low-density, or the reader saves data
-  const small = navigator.connection?.saveData || Math.min(innerWidth, innerHeight) * (devicePixelRatio || 1) < 700;
+  // faces at 2048 px for big sharp screens, 1536 for most, 1024 for small ones or when saving data
+  const dpr = devicePixelRatio || 1, big = Math.max(innerWidth, innerHeight);
+  const tier = navigator.connection?.saveData || Math.min(innerWidth, innerHeight) * dpr < 700 ? '-sm' : dpr >= 1.5 && big >= 900 ? '-lg' : '';
   const base = `${root}assets/img/pano/`;
   let set = null, ready = false, raf = 0;
   const load = (which) => {
     set = which;
     const imgs = FACES.map(([f]) => new Promise((ok, bad) => {
       const i = new Image(); i.onload = () => ok(i); i.onerror = bad;
-      i.src = `${base}${which}-${f}${small ? '-sm' : ''}.webp`;
+      i.src = `${base}${which}-${f}${tier}.webp`;
     }));
     Promise.all(imgs).then((list) => {
       if (set !== which) return;                               // the theme changed meanwhile
@@ -86,7 +87,7 @@ export function mountPano(root) {
   };
 
   const resize = () => {
-    const k = Math.min(devicePixelRatio || 1, 1.5);
+    const k = Math.min(devicePixelRatio || 1, 2);           // full sharpness on high-density screens
     canvas.width = Math.round(innerWidth * k); canvas.height = Math.round(innerHeight * k);
     gl.viewport(0, 0, canvas.width, canvas.height);
   };
