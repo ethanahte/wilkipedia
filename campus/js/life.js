@@ -234,9 +234,9 @@ export function makeClouds(n = 16) {
     geo.computeBoundingSphere();
     const g = new THREE.Mesh(geo, mat);
     g.rotation.y = R() * Math.PI * 2;
-    // most sit out by the horizon; a few drift low round the diorama's edge,
-    // level with it, so the model floats among them (the diorama-game look)
-    const low = i % 3 === 1;
+    // all out in the sky toward the horizon, over the land (the low ones that once circled the
+    // floating diorama at its own level went with the painting look)
+    const low = false;
     const a = R() * Math.PI * 2, d = low ? 480 + R() * 140 : 760 + R() * 700;
     g.position.set(75 + Math.cos(a) * d, low ? -35 + R() * 45 : 150 + R() * 150, 78 + Math.sin(a) * d);
     if (low) g.scale.setScalar(0.45 + R() * 0.25);

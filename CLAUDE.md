@@ -656,6 +656,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - only a trace of cirrus.
     The tilt-shift is gentle, and it is off at low angles and when zoomed
     out.
+    - Lenses are normal (Ethan): 50° on foot (62° stretched a wide screen)
+      and 45° from the air (a 24° telephoto made it a flat miniature). The
+      opening view is centred on the school's buildings (22, 0), not the
+      middle of the map (the fields), low enough to show the sky behind.
+    - Green land runs out to the horizon round the model (`outerLand()` in
+      ground.js, vertex-coloured because the rain tint resets ground
+      materials' colour). It replaced the diorama's layered slab, and the
+      low clouds that circled it are now up in the sky with the rest.
     Earlier look, replaced: a near-isometric miniature floating in warm peach
     mist, after the diorama game *High Above*. From the air the
     camera uses a long lens (`fovFly` 24°, distance × `lensK` in controls.js;

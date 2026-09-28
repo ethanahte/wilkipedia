@@ -22,11 +22,11 @@ export class Controls {
     this.vy = 0;
     this.keys = new Set();
     this.orbit = { tx: 0, tz: 0, dist: 260, az: 0.6, el: 0.95 };
-    // From the air the camera looks through a long lens from further back, so
-    // the campus reads as a near-isometric miniature (like a diorama game);
-    // on foot it's a normal eye. orbit.dist stays in "62° lens" units.
-    this.fovWalk = 62; this.fovFly = 24;
-    this.lensK = Math.tan(THREE.MathUtils.degToRad(31)) / Math.tan(THREE.MathUtils.degToRad(12));
+    // Normal lenses, like the painting Ethan chose for the look: on foot 50° (62° stretched
+    // things toward the edges of a wide screen), from the air 45° (a 24° telephoto flattened
+    // the campus into a miniature). orbit.dist stays in "62° lens" units.
+    this.fovWalk = 50; this.fovFly = 45;
+    this.lensK = Math.tan(THREE.MathUtils.degToRad(31)) / Math.tan(THREE.MathUtils.degToRad(this.fovFly / 2));
     this.trans = null;
     this.locked = false;
     this.stick = { x: 0, y: 0, id: null, ox: 0, oy: 0 };

@@ -236,7 +236,7 @@ export function buildGround(scene, q = 1) {
   scene.add(plane(S.x0, S.z0, S.x1, S.z1, 0.02, texFrom(sc), [S.x0, S.z0, S.x1, S.z1]));
 
   creek(scene);
-  plinth(scene);
+  outerLand(scene);
   return { worldCanvas: wc };
 }
 
@@ -465,29 +465,20 @@ function creek(scene) {
   });
 }
 
-// The whole world sits on a thick slab, like a model on a table: layered
-// earth sides and a dark underside, so from the air it reads as a diorama.
-function plinth(scene) {
-  const { x0, z0, x1, z1 } = WORLD, D = 16;
-  const bands = [[0, 0.5, '#8a9a6a'], [0.5, 2.2, '#6d5a47'], [2.2, 7, '#5a4a3c'], [7, 11, '#4c3f35'], [11, D, '#3c332c']];
-  const pos = [], nor = [], col = [];
-  const c = new THREE.Color();
-  const quad = (a, b, cc, d, n) => { for (const v of [a, b, cc, a, cc, d]) { pos.push(...v); nor.push(...n); col.push(c.r, c.g, c.b); } };
-  for (const [ya, yb, hex] of bands) {
-    c.set(hex);
-    const y0 = -yb, y1 = -ya;
-    quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1]);
-    quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1]);
-    quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0]);
-    quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0]);
-  }
-  c.set('#2a2420');
-  quad([x0, -D, z0], [x1, -D, z0], [x1, -D, z1], [x0, -D, z1], [0, -1, 0]);
+// Land out to the horizon round the model, like the grassland in the painting Ethan chose for the
+// look: open green fields from the edge of the neighbourhood, melting into the pink horizon
+// through the fog. (It replaced the diorama's layered slab.)
+function outerLand(scene) {
+  const { x0, z0, x1, z1 } = WORLD, F = 9000, y = -0.03;
+  const strips = [[x0 - F, z0 - F, x1 + F, z0], [x0 - F, z1, x1 + F, z1 + F], [x0 - F, z0, x0, z1], [x1, z0, x1 + F, z1]];
+  const pos = [], nor = [], col = [], green = new THREE.Color('#93b85a');
+  for (const [a, b, c, d] of strips) for (const [px, pz] of [[a, d], [c, d], [c, b], [a, d], [c, b], [a, b]]) { pos.push(px, y, pz); nor.push(0, 1, 0); col.push(green.r, green.g, green.b); }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  const m = new THREE.Mesh(g, gbuffer(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: TOON }), { paint: false }));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));   // (vertex colours: the rain tint resets ground materials' own colour)
+  const m = new THREE.Mesh(g, groundDetail(gbuffer(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: TOON }), { detail: false })));
+  m.receiveShadow = true;
   m.frustumCulled = false;
   scene.add(m);
 }
