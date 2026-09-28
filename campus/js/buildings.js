@@ -15,9 +15,8 @@
 
 import * as THREE from 'three';
 import { color, rng, ensureCCW } from './geo.js';
-import { BUILDINGS } from './layout.js';
+import { BUILDINGS, YARD } from './layout.js';
 import { LIGHTS } from './lights.js';
-import { addSegment } from './collide.js';
 
 const C = {
   cream: color('#f0e5cc'), tan: color('#e0cca2'), panel: color('#f5eedf'), frame: color('#5f6368'),
@@ -142,7 +141,7 @@ const KITS = {
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
   },
   r() {},                                       // buildR() draws R whole
-  yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on them)
+  yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on the quad side)
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
     if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west end: the teachers' yard side (no photo of it)
@@ -552,30 +551,6 @@ function storefront(W, z, x0, x1, parts, top = 3.1) {
 }
 const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
 
-// A black steel fence along [x, z] points (the teachers' yard, IMG_2391): square posts
-// every 2.4 m or so, a top and bottom rail and bars every 12 cm. gate: where along the
-// run (0–1) a 1.2 m gate sits, drawn as heavier posts either side and a lock box.
-function blackFence(W, pts, { h = 1.9, gate = null } = {}) {
-  const ink = color('#26282b');
-  for (let i = 1; i < pts.length; i++) {
-    const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
-    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
-    W.rod('flat', [ax, h - 0.08, az], [bx, h - 0.08, bz], 0.035, ink);
-    W.rod('flat', [ax, 0.12, az], [bx, 0.12, bz], 0.035, ink);
-    for (let d = 0.06; d < L; d += 0.12) W.rod('flat', [ax + ux * d, 0.1, az + uz * d], [ax + ux * d, h, az + uz * d], 0.012, ink);
-    const n = Math.max(1, Math.round(L / 2.4));
-    for (let k = 0; k <= n; k++) {
-      const x = ax + (bx - ax) * k / n, z = az + (bz - az) * k / n;
-      W.box('flat', x, (h + 0.1) / 2, z, 0.07, h + 0.1, 0.07, ink);
-    }
-    if (gate != null) {
-      for (const g of [gate * L - 0.6, gate * L + 0.6]) W.box('flat', ax + ux * g, (h + 0.15) / 2, az + uz * g, 0.1, h + 0.15, 0.1, ink);
-      W.box('flat', ax + ux * (gate * L + 0.52), 1.05, az + uz * (gate * L + 0.52), 0.12, 0.2, 0.12, color('#3a3d41'));
-    }
-    addSegment(ax, az, bx, bz, 0.1);
-  }
-}
-
 // The drinking fountain by the snack bar (IMG_2367, close up): a wide cream concrete base
 // against the wall with a thick flat top; a stainless back plate on its face, left of
 // centre; two stainless bowls sticking straight out toward the walkway, a high one and a
@@ -621,9 +596,9 @@ function cafFront(W) {
   });
   // The west side, west to east (IMG_2367, IMG_2368, IMG_2371, IMG_2391; Ethan). The
   // outlines are in layout.js (YARD-*, CAF-w's notch).
-  //  · The teachers' yard: its quad-side wall carries the poster board; black steel
-  //    fences close the slanted side (with a gate) and the short side by the parking lot.
-  const yw = southWall(-25.5, -17.8, -32.4), yt = (x) => x + 25.5;
+  //  · The teachers' yard: walls all round (layout.js YARD-*); the quad-side one carries the
+  //    poster board and, by the niche, a blue accessibility sign.
+  const yw = southWall(YARD.x0, -17.8, YARD.zs), yt = (x) => x - YARD.x0;
   onWall(W, yw, yt(-20.0), 1.55, 0.03, () => {
     W.box('flat', 0, 0, 0, 1.5, 1.2, 0.05, color('#2e3136'));
     const PC = ['#e9e4d8', '#7fb0d8', '#f0c75a', '#d9776a', '#ffffff', '#9ccf8e'];
@@ -632,22 +607,19 @@ function cafFront(W) {
     }
   });
   onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
-  const YN = -48.3, XS = -25.5, XN = -25.5 + (-32.4 - YN) / Math.tan(75 * Math.PI / 180);
-  blackFence(W, [[XS, -32.5], [XN, YN]], { gate: 0.35 });
-  blackFence(W, [[XN, YN], [-17.8, YN]]);
-  //  · The door in its niche between the yard wall and the snack bar, set back further.
-  doorAt(W, southWall(-17.8, -16.6, -33.4), 0.6, 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  //  · The wide door in its niche between the yard wall and the snack bar, set back further.
+  doorAt(W, southWall(-17.8, -16.0, -33.4), 0.9, 1.5, 2.2, C.door, { frameCol: color('#d9ccb0') });
   //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway:
   //    three groups between cream piers — four panes; a pane, glass double doors and a
   //    pane; panes and a single glass door with the SNACK BAR plaque (IMG_2368).
   const RZ = -32.4, P2 = 0.35;
-  let rx = -16.6 + 0.025;
-  [[2.97, 'pppp'], [4.36, 'pdp'], [3.57, 'ppps']].forEach(([w, parts], i) => {
+  let rx = -16.0 + 0.025;
+  [[2.8, 'pppp'], [4.12, 'pdp'], [3.38, 'ppps']].forEach(([w, parts], i) => {
     if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
     storefront(W, RZ, rx, rx + w, parts, 3.0);
     rx += w;
   });
-  const door = 3.57 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
+  const door = 3.38 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
   onWall(W, southWall(rx - door - 0.5, rx - door - 0.1, RZ + 0.14), 0.2, 1.5, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
   //  · The wall comes forward again: a yellow door at the corner, the drinking fountain,
   //    the red fire bell and a yellow notice above it, a white notice, then a dark door.

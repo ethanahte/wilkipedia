@@ -352,20 +352,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       `storefront()` bays between cream piers. A bay is glass over a solid
       lower panel with a transom row, or glass doors.
     - West side, west to east (IMG_2367/2368/2371/2391, Ethan):
-      - The teachers' yard, a right-angle trapezoid (layout.js `YARD-*`).
-        Its long side is a plain wall on the quad side, in line with the
-        snack bar, carrying the poster board. The right-angle side is the
-        cafeteria's west wall. The short side faces the parking lot, and the
-        slanted side makes about 75° with the long one; both are black steel
-        fences (`blackFence()`, with colliders), and the slanted one has a
-        gate. The yard's depth and the fence line come from the satellite;
-        the short side's material is a guess. It is a yard, not a building:
-        style `yard` has no kit windows and no rooftop units. B's canopy
-        stops in front of its wall (cz0 -32.0).
-      - A door in a niche set back further (x -17.8 to -16.6), between the
-        yard wall and the snack bar.
+      - The teachers' yard, a right-angle trapezoid walled on every side
+        (layout.js `YARD` + `YARD-*`; Ethan: all walls, no fence). Its long
+        side is on the quad side, in line with the snack bar, carrying the
+        poster board. The right-angle side is the cafeteria's west wall. The
+        short side faces the parking lot, and the slanted side makes 75° with
+        the long one. Ethan: wide and not deep (11 m along the quad, 8 m deep).
+        It is a yard, not a building: style `yard` has no kit windows and no
+        rooftop units. B's canopy stops in front of its wall (cz0 -32.0).
+      - A wide yellow door (1.5 m) in a niche set back further (x -17.8 to
+        -16.0), between the yard wall and the snack bar.
       - The snack bar is a shallow room whose glass front is set 2.0 m back
-        (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -16.6
+        (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -16.0
         to -4.95. The walkway roof reaches back over it. It has three groups
         between piers: four panes; pane, double doors, pane; panes and a
         single door with the SNACK BAR plaque.

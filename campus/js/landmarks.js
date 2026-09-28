@@ -129,7 +129,7 @@ export function buildLandmarks(W, group, fontFamily) {
   W.slab('flat', wx0, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
   // it reaches back over the snack bar's recess and the door niche beside it (layout.js CAF-w)
   W.slab('flat', -17.8, -32.4, -4.95, wz0, 3.5, 3.78, fin);
-  W.slab('flat', -17.8, -33.4, -16.6, -32.4, 3.5, 3.78, fin);
+  W.slab('flat', -17.8, -33.4, -16.0, -32.4, 3.5, 3.78, fin);
   for (const x of [-13.5, -8.5]) { W.slab('glow', x - 0.3, -31.6, x + 0.3, -31.2, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -31.4, 3.45, 4]); }
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 
