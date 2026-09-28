@@ -187,6 +187,35 @@ export const QUAD = { x0: -46, z0: -30, x1: 36, z1: 38 };
 export const STAGE = { x: -17.3, z: 14, r: 8.8, ring: 10.6, lip: 10.95, plant: 13.0, walk: 15.2, h: 0.5 };   // r and plant re-measured off the satellite
 export const LAWN_W = { box: [-37.5, 17.5, -22, 32.3] };             // minus the walk ring round the stage
 export const LAWN_E = [[-3.3, 14.5], [15.9, 11.2], [23.4, 23.8], [-11.2, 32.3]];
+// Both lawns are mounded, highest in the middle and level with the walks at their edges (Ethan;
+// IMG_2338): the one by the library a little, the one in front of R more. Metres above the paving.
+export function lawnHeight(x, z) {
+  const [a, b, c, d] = LAWN_W.box;
+  if (x > a && x < c && z > b && z < d) {
+    const r = Math.hypot(x - STAGE.x, z - STAGE.z) - STAGE.walk;
+    if (r > 0) return mound(Math.min(x - a, c - x, z - b, d - z, r), 0.45, 4.5);
+  }
+  if (inside(LAWN_E, x, z)) return mound(edgeDist(LAWN_E, x, z), 1.0, 6.5);
+  return 0;
+}
+const mound = (d, H, D) => { const t = Math.min(1, d / D); return H * t * t * (3 - 2 * t); };
+function inside(P, x, z) {
+  let c = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const [ax, az] = P[i], [bx, bz] = P[j];
+    if ((az > z) !== (bz > z) && x < ax + ((z - az) * (bx - ax)) / (bz - az)) c = !c;
+  }
+  return c;
+}
+function edgeDist(P, x, z) {
+  let m = Infinity;
+  for (let i = 0; i < P.length; i++) {
+    const [ax, az] = P[i], [bx, bz] = P[(i + 1) % P.length], dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+    m = Math.min(m, Math.hypot(x - ax - t * dx, z - az - t * dz));
+  }
+  return m;
+}
 export const CEDAR = { x: 0, z: 0, bed: 4.2 };
 // In front of Building R on the quad side (Ethan; IMG_2349–2352, the satellite): a
 // bed shaped like a Toblerone bar seen from the side. A straight strip runs along
@@ -215,14 +244,17 @@ export const CEDAR_TREES = [[3.6, 8.4], [14.0, 5.9], [11.0, -1.2]];   // young t
 // umbrella tables. Pulled out of the image automatically, then thinned by hand.
 export const QUAD_SPOTS = [[-39.8, -23.1], [-39.2, 25.2], [-38.6, -13.9], [-36.9, -2.1], [-36.6, -11.9], [-36.1, 3.2],
   [-35.4, -5.4], [-35.3, -20.9], [-33.9, -1.2], [-33.7, 12.8], [-32.5, -14.9], [-32.1, -8.2], [-31.7, -11.4], [-30.2, 14.5],
-  [-29.5, -17.5], [-28.8, -9.4], [-27.6, -19.6], [-23.7, -20.2], [-23.7, -17.3], [-17.3, -17.1], [-11.9, 28.8],
+  [-29.5, -17.5], [-28.8, -9.4], [-27.6, -19.6], [-23.7, -20.2], [-23.7, -17.3], [-17.3, -17.1], [-7.9, 27.4],   // (that tree stood in the walk between the stage and the lawn: Ethan)
   [-11.2, -17.6], [-5.0, -18.9], [-4.7, -21.9], [0.7, -21.0], [2.4, -18.8], [3.7, -21.7], [6.5, -15.0], [8.1, 32.4],
   [9.9, -16.8], [13.3, -17.8], [15.3, 30.9], [16.5, -20.3], [20.9, -16.2], [26.9, -22.1], [27.3, 25.2],
   // the ring of umbrella tables just south of the cedar
   [-0.4, 8.6], [7.6, 8.6], [11.4, 8.3], [15, 8.8], [19, 8.4]];
 export const LAWN_TREES = [[2, 20], [9, 16.5], [15, 23.5], [4.5, 27], [-30, 25], [-26, 29.5]];
 export const LAMPS = [[-12, 1.3], [-27, 11.5], [-2, -13], [22, -8], [-38, -18], [26, 20], [-4, 30.8], [-30.5, 32], [-18.3, 3.3], [30, -24], [3.3, -3.6]];   // [-18.3, 3.3]: the one with the flag, due north of the stage (IMG_2324, satellite); [3.3, -3.6]: at the cedar's bed (IMG_2335)
-export const PICNIC = [[-31, 21, 0.3], [-34.5, 17.6, 0.3], [20, 30, -0.2], [-8, -6, 0], [-26, 4, 1.57]];
+// (no table stands on a lawn or at a lamp: Ethan)
+export const PICNIC = [[20, 30, -0.2], [-8, -6, 0], [-26, 4, 1.57]];
+// the long green tables with benches along the library's quad wall (Ethan; IMG_2378, IMG_2385)
+export const PICNIC_LIB = [[-40.2, 35.7, 0], [-34.6, 35.7, 0], [-29.0, 35.7, 0]];
 export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blue benches
 
 // Front of the school: the sign wall, planter, palms and flag.
@@ -261,7 +293,9 @@ export const COURT = {
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
 // A strip of paving runs between it and B. Ceramic totem poles stand in its north end.
 export const B_BED = {
-  poly: [[-53.8, -26.5], [-45.5, -26.5], [-47.3, -21.5], [-49.4, -13.0], [-51.9, -6.2], [-53.9, -4.3]],   // its tip off the satellite
+  // its quad edge has two points and a notch between (Ethan, the satellite): the point by the
+  // block and the canopy is the bigger; then the notch, a smaller point, and the tip
+  poly: [[-53.8, -26.5], [-45.5, -26.5], [-50.8, -17.0], [-48.6, -13.2], [-53.9, -4.3]],
   totems: [[-53.0, -26.1], [-51.6, -25.3], [-50.2, -26.0], [-48.8, -25.2], [-47.3, -26.2], [-52.4, -23.4], [-50.1, -22.7], [-48.5, -23.8]],
 };
 
@@ -274,7 +308,8 @@ export const B_QUAD = {
     { poly: [[-54.7, 11.9], [-51.3, 11.9], [-51.3, 17.0], [-48.6, 19.9], [-51.2, 22.8], [-54.7, 22.8]], trees: [[-51.8, 14.2], [-50.6, 19.9]] },
     { poly: [[-50.4, 25.6], [-46.3, 29.2], [-46.3, 32.9], [-50.4, 32.9]], trees: [[-48.2, 30.0]] },
   ],
-  benches: [[-49.4, -10.3, -0.35], [-50.4, -7.6, -0.35]],
+  benches: [[-49.24, -10.57, -0.538], [-50.83, -7.89, -0.538]],
+  table: [-51.4, -3.0],            // an umbrella table south of B's quad-side doors (Ethan, IMG_2377)
 };
 
 export const FRONT = {

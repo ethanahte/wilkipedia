@@ -11,7 +11,7 @@
 
 import { color, rng } from './geo.js';
 import * as THREE from 'three';
-import { STAGE, CEDAR, R_FRONT, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR } from './layout.js';
+import { STAGE, CEDAR, R_FRONT, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR, PICNIC_LIB, lawnHeight } from './layout.js';
 import { canvasTex, decalMat } from './toon.js';
 import { cedar, youngTree, crapeMyrtle, grassTuft, shrub, shadeTree, flax, G } from './nature.js';
 import { addCircle, addOBB, addBox, addHeight, addPoly } from './collide.js';
@@ -46,17 +46,18 @@ export function buildQuad(W, decals) {
   QUAD_SPOTS.forEach(([x, z], i) => {
     const nearCedar = Math.hypot(x, z - 8.5) < 12 && z > 7;
     if (!nearCedar && (i % 5 === 0 || i % 5 === 2 || i % 5 === 3)) {
-      youngTree(W, x, z, R, { h: 4.2 + R() * 1.4, stake: R() < 0.6 });
+      youngTree(W, x, z, R, { h: 4.2 + R() * 1.4, stake: R() < 0.6, y: lawnHeight(x, z) });
       addCircle(x, z, 0.25);
       // near the cafeteria the beds are planted with low groundcover (IMG_2362, IMG_2366)
       if (z < -12) for (let k = 0; k < 9; k++) { const a = R() * Math.PI * 2, d = 0.4 + R() * 0.95; W.blob('flat', x + Math.cos(a) * d, 0.06, z + Math.sin(a) * d, 0.28 + R() * 0.12, 0.13, 0.28 + R() * 0.12, G.leaf[k % 4], 0); }
     } else umbrellaTable(W, x, z, R);
   });
-  for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true }); addCircle(x, z, 0.25); }
+  for (const [x, z] of LAWN_TREES) { youngTree(W, x, z, R, { h: 4.6 + R(), stake: true, y: lawnHeight(x, z) }); addCircle(x, z, 0.25); }   // up on the lawn's mound
   frontOfR(W, R);
   hydrant(W, 38.0, -24.9);
 
   for (const [x, z, rot] of PICNIC) picnic(W, x, z, rot, green, green, green);
+  for (const [x, z, rot] of PICNIC_LIB) picnic(W, x, z, rot, green, green, green, greenDark, 2.8);
   for (const [x, z, rot] of PICNIC_COLOR) picnic(W, x, z, rot, color('#d0413a'), color('#e7b52f'), color('#2f68b5'));
   LAMPS.forEach(([x, z], i) => lamp(W, decals, x, z, i, R));
   for (const [x, z] of LAMPS) LIGHTS.push([x, z, 4.6, 6.5]);

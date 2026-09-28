@@ -1,8 +1,8 @@
 // One-off pieces that make the campus recognisable, each from a photo:
 //   the front sign wall with its concrete planter, flax, fan palms and flags;
 //   the grey steel canopy from Building B to the cafeteria; the cafeteria's
-//   covered walkway; the Career Center's yellow awning; the ASB Office awning;
-//   Building R's solar roof; the solar carports; the art poles along B;
+//   covered walkway; the ASB Office awning;
+//   Building R's solar roof; the solar carports; the totems by B's entry block;
 //   "WILCOX" on the main gym and the "WILCOX CHARGERS" entrance with its mosaic.
 // Lettering is drawn on canvases at load, so it stays sharp up close.
 
@@ -154,13 +154,13 @@ export function buildLandmarks(W, group, fontFamily) {
     g.fillStyle = '#e8c341'; g.font = 'italic 800 130px Georgia, serif'; g.fillText('W', w - 120, h / 2 + 8);
     g.font = 'italic 800 80px Georgia, serif'; g.fillText('W', 70, h / 2 + 6);
   });
-  group.add(decal(ccrc, -53.13, 3.47, 1.1, 5.1, 5.1 * 190 / 2048, Math.PI / 2));
+  group.add(decal(ccrc, -53.13, 3.47, 20.05, 5.1, 5.1 * 190 / 2048, Math.PI / 2));
   const libSign = textCanvas(512, 180, (g, w, h) => {
     g.fillStyle = '#f7f7f5'; g.fillRect(0, 0, w, h); g.strokeStyle = '#8a8f96'; g.lineWidth = 8; g.strokeRect(4, 4, w - 8, h - 8);
     g.fillStyle = '#26292e'; g.font = '600 110px "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText('Library', w / 2, h / 2 + 6);
   });
-  group.add(decal(libSign, -48.8, 3.4, 33.27, 1.3, 1.3 * 180 / 512, Math.PI));
+  group.add(decal(libSign, -48.2, 3.4, 33.27, 1.3, 1.3 * 180 / 512, Math.PI));
 
   // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
   // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
@@ -211,9 +211,6 @@ export function buildLandmarks(W, group, fontFamily) {
   W.slab('flat', -17.8, -33.4, -15.6, -32.4, 3.5, 3.78, fin);
   for (const x of [-13.5, -8.5]) { W.slab('glow', x - 0.3, -31.6, x + 0.3, -31.2, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -31.4, 3.45, 4]); }
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
-
-  // ── the Career Center's yellow awning on B, over its quad-side door ──
-  awning(W, -54.7, 26.2, 31.2, 1.6, 2.7, color('#e8b930'), 'x');
 
   // ── Building R: the ASB Office awning on the quad side ──
   const asbZ0 = 13.8, asbZ1 = 20.1;            // the southernmost bay (Ethan: "on the very right side")
@@ -278,17 +275,6 @@ export function buildLandmarks(W, group, fontFamily) {
       for (let t = -hw; t <= hw + 0.01; t += hw / 3) W.box('flat', t, 0, 0.03, 0.1, 5.6, 0.08, color('#2b3440'));
     });
   }
-}
-
-// A sloped fabric awning on a wall facing -x or +x (dir 'x'), spanning z0..z1.
-function awning(W, x, z0, z1, depth, y, col) {
-  const out = x > 0 ? -1 : 1;   // walls at x>0 face west (quad side of R), B's face east
-  const xo = x + out * depth;
-  W.quad('flat', [x, y + 0.9, z0], [x, y + 0.9, z1], [xo, y + 0.25, z1], [xo, y + 0.25, z0].map((v) => v), col);
-  W.quad('flat', [x, y + 0.9, z1], [x, y + 0.9, z0], [xo, y + 0.25, z0], [xo, y + 0.25, z1], col);
-  W.slab('flat', Math.min(x, xo), z0, Math.max(x, xo), z0 + 0.04, y + 0.25, y + 0.9, col);
-  W.slab('flat', Math.min(x, xo), z1 - 0.04, Math.max(x, xo), z1, y + 0.25, y + 0.9, col);
-  W.slab('flat', xo - 0.03, z0, xo + 0.03, z1, y - 0.2, y + 0.25, color('#1b1d20'));   // valance
 }
 
 // A rounded fabric awning against a west-facing wall at x (the ASB Office's,
@@ -521,4 +507,5 @@ function bQuadBeds(W) {
     });
   }
   for (const [x, z, rot] of B_QUAD.benches) bench(W, x, z, rot);
+  umbrellaTable(W, ...B_QUAD.table, R);
 }

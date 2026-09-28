@@ -343,6 +343,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       onto the last triangle's south slanted edge (`bench(W, x, z, rot)`).
       There are also two big trees in the southern triangles, one long green
       picnic table, and white square pots plus a clay one by the ASB Office.
+  - **The quad's two lawns are mounded**, not flat (Ethan; IMG_2338). The
+    one by the library (`LAWN_W`) rises 0.45 m; the one in front of R
+    (`LAWN_E`) rises 1.0 m. `lawnHeight()` in layout.js gives the height,
+    0 at the lawn edges where they meet the walks. The quad's painted
+    ground layer is a height grid that follows it (`hillPlane()` in
+    ground.js), the walk height follows it, and trees on the lawns stand
+    on it. No table stands on a lawn or at a lamp post (Ethan). No tree's
+    mulch bed may sit in the walk between the stage and a lawn.
   - **The cafeteria's quad side is `cafFront()` in buildings.js**, from Ethan's
     photos IMG_2362–2371. The `caf` kit skips south faces.
     - The tall dining hall (`CAF`) stands 2.4 m back behind a one-storey front
@@ -394,9 +402,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         of paving between it and B. It holds ceramic totem poles, blue-green
         euphorbias, feather grass, poppies, flax, and two red-leaf trees
         (3–3.6 m, Ethan: bigger than the shrub first drawn). They stand
-        clear of B's wall, the AC shaft and the totems. Its tip reaches
-        z -4.3 (satellite). Two benches stand along its slanting edge,
-        facing it (IMG_2386).
+        clear of B's wall, the AC shaft and the totems. Its quad edge is
+        not one slant: it has two points with a notch between (Ethan, the
+        satellite). The point by the block and the V roof is the bigger;
+        then the notch, a smaller point, and the tip at z -4.3. Two
+        benches stand along the last slant, facing the bed (IMG_2386).
+        An umbrella table stands just south of B's quad-side doors
+        (Ethan, IMG_2377).
       - B's quad face south of there, to the library (`bQuad()` in
         buildings.js; IMG_2376–2386), has two storeys between tall tan
         piers (`BQ.piers`). Each pier has a grey louver on each floor, a
@@ -406,8 +418,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         - The glass double doors (IMG_2377) are at z -7, with a single door,
           a fire bell and a white standpipe in the next bay south.
         - The navy CAREER & COLLEGE RESOURCE CENTER / RM B-113 awning
-          (IMG_2379) is over the next two bays, its lettering a decal in
-          landmarks.js.
+          (IMG_2379) is at the SOUTH end, over the two bays next to the
+          library's block, where the model always had it (Ethan: don't move
+          it). Its lettering is a decal in landmarks.js.
         - B's kit leaves this stretch bare. The paving runs right up to B.
           The old strip bed with art poles along B, never in a photo, is
           gone.
@@ -420,10 +433,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         door and a downpipe on its north face, and an electrical box with
         conduits and a standpipe on its east face.
       - The library's entrance (`libFront()`, IMG_2381/2383) is a thick flat
-        concrete canopy off the block's east face, on two grey posts, with a
-        "Library" sign. Under it: WHS glass double doors between side
-        lights, and a second pair with a transom. The library's quad
-        (north) face is plain precast panels with no windows (IMG_2385).
+        concrete canopy off the block's east face, with a "Library" sign. It
+        is 8.6 m long on three grey posts (Ethan: longer than the satellite
+        shows). Under it are three glass entrances of the same kind: the
+        library's wide WHS double doors between side lights, a second pair
+        with a transom, and one into B through the block's east face
+        (Ethan).
+      - The library's quad (north) face is plain precast panels with no
+        windows (IMG_2385). Three long green picnic tables stand along it
+        (`PICNIC_LIB`).
       - B's courtyard wall behind the courtyard bed has an
         air-conditioning shaft built like R's grey AC blocks (`bCourtAC()`;
         Ethan's "wind pipe"). It is a grey tower standing 1.1 m out, with a

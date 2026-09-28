@@ -181,7 +181,7 @@ const KITS = {
     if (b.id === 'LIB' && e.nz < -0.5) {
       // the quad (north) side is plain precast panels, no windows (IMG_2378, IMG_2385); its west end,
       // under the entrance canopy, is libFront()'s
-      for (let t = 3.3; t < e.len - 11; t += 3.3) onWall(W, e, t, b.h / 2 - 0.1, 0.012, () => W.box('flat', 0, 0, 0, 0.05, b.h - 0.5, 0.02, color('#d6cfc0')));
+      for (let t = 3.3; t < e.len - 12.3; t += 3.3) onWall(W, e, t, b.h / 2 - 0.1, 0.012, () => W.box('flat', 0, 0, 0, 0.05, b.h - 0.5, 0.02, color('#d6cfc0')));
       return;
     }
     for (const { t } of bays(e.len, 3.4, 1.5)) windowAt(W, e, t, 3.3, 2.6, 4.6);
@@ -669,8 +669,9 @@ function bCourtAC(W) {
 // fine reveals; between two piers, two or three bays split by slim cream columns, each bay a grid
 // of panes, glass over white panels, on both floors. The glass double doors (IMG_2377) take the
 // middle bay south of the entry block's bed, a single door the bay after; the navy CAREER &
-// COLLEGE RESOURCE CENTER awning (IMG_2379; its lettering is in landmarks.js) runs over the next two.
-const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: -7.0, side: -4.4, ccrc: [-1.3, 3.5], ccrcDoor: 2.4 };
+// COLLEGE RESOURCE CENTER awning (IMG_2379; its lettering is in landmarks.js) is at the south end,
+// over the two bays next to the library's block, where it always was (Ethan).
+const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: -7.0, side: -4.4, ccrc: [17.5, 22.6] };
 function bQuad(W, h) {
   const e = rWall(BQ.x, BQ.z1, BQ.x, BQ.z0, 1, 0), tz = (z) => BQ.z1 - z;
   const rev = color('#cdbf9e'), lvF = color('#7c8186'), lvS = color('#a3a8ad');
@@ -707,7 +708,7 @@ function bQuad(W, h) {
           W.box('flat', 0, 0, 0, 1.9, 0.6, 0.08, C.frame);
           W.quad('glass', [-0.88, -0.24, 0.05], [0.88, -0.24, 0.05], [0.88, 0.24, 0.05], [-0.88, 0.24, 0.05], color('#ffffff'), 'auto');
         });
-      } else if (near(BQ.side) || near(BQ.ccrcDoor)) {
+      } else if (near(BQ.side)) {
         doorAt(W, e, tz(c) + 0.5, 0.95, 2.3, null, { glass: true, frameCol: C.frame, single: true });
         panelWin(W, e, tz(c) - 0.55, 0.25, 3.35, w - 1.4, 1, 4, [2, 3]);
       } else panelWin(W, e, tz(c), 0.25, 3.35, w - 0.3, 2, 4, [2, 3]);
@@ -744,23 +745,27 @@ function panelWin(W, e, t, y0, y1, w, cols, rows, glassRows) {
 // with a transom to the east, and square lights in the soffit. The block itself (IMG_2380): plain,
 // a dark door on its north face by the corner, a downpipe there, and on its east face an
 // electrical box with conduits into the ground and a white standpipe.
-const LC = { x0: -51.4, x1: -44.4, z0: 33.3, z: 37.9, y0: 3.0, y1: 3.8 };
+const LC = { x0: -51.4, x1: -42.8, z0: 33.3, z: 37.9, y0: 3.0, y1: 3.8 };   // longer than the satellite's roof: Ethan
 function libFront(W) {
   W.slab('stucco', LC.x0, LC.z0, LC.x1, LC.z, LC.y0, LC.y1, WALL.library);
-  for (const px of [-50.3, -46.8]) { W.slab('flat', px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35, 0, LC.y0, color('#8d9399')); addBox(px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35); }
+  for (const px of [-50.3, -46.8, -43.3]) { W.slab('flat', px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35, 0, LC.y0, color('#8d9399')); addBox(px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35); }
   const e = rWall(LC.x1, LC.z, LC.x0, LC.z, 0, -1), t = (x) => LC.x1 - x;
-  doorAt(W, e, t(-49.1), 1.8, 2.4, null, { glass: true, frameCol: C.frame });
-  for (const d of [-1.25, 1.25]) onWall(W, e, t(-49.1) + d, 1.25, 0.03, () => {
+  doorAt(W, e, t(-49.1), 2.2, 2.4, null, { glass: true, frameCol: C.frame });           // wider (Ethan)
+  for (const d of [-1.45, 1.45]) onWall(W, e, t(-49.1) + d, 1.25, 0.03, () => {
     W.box('flat', 0, 0, 0, 0.66, 2.4, 0.08, C.frame);
     W.quad('glass', [-0.27, -1.12, 0.05], [0.27, -1.12, 0.05], [0.27, 1.12, 0.05], [-0.27, 1.12, 0.05], color('#ffffff'), 'auto');
   });
   onWall(W, e, t(-49.1), 1.5, 0.09, () => W.box('flat', 0, 0, 0, 1.2, 0.2, 0.01, color('#f4f4f2')));      // WHS on the doors
-  doorAt(W, e, t(-45.9), 1.8, 2.3, null, { glass: true, frameCol: C.frame });
-  onWall(W, e, t(-45.9), 2.72, 0.03, () => {
-    W.box('flat', 0, 0, 0, 1.9, 0.6, 0.08, C.frame);
-    W.quad('glass', [-0.88, -0.23, 0.05], [0.88, -0.23, 0.05], [0.88, 0.23, 0.05], [-0.88, 0.23, 0.05], color('#ffffff'), 'auto');
-  });
-  for (const gx of [-49.4, -46.4]) { W.slab('glow', gx - 0.3, 35.3, gx + 0.3, 35.9, LC.y0 - 0.04, LC.y0, color('#ffe6bd')); LIGHTS.push([gx, 35.6, LC.y0 - 0.05, 4]); }
+  // the second pair, and a third into B through the block's east face (Ethan): the same kind
+  const bd = rWall(LC.x0, LC.z, LC.x0, LC.z0, 1, 0);
+  for (const [w, tt] of [[e, t(-45.4)], [bd, (LC.z - LC.z0) / 2]]) {
+    doorAt(W, w, tt, 2.0, 2.3, null, { glass: true, frameCol: C.frame });
+    onWall(W, w, tt, 2.72, 0.03, () => {
+      W.box('flat', 0, 0, 0, 2.1, 0.6, 0.08, C.frame);
+      W.quad('glass', [-0.98, -0.23, 0.05], [0.98, -0.23, 0.05], [0.98, 0.23, 0.05], [-0.98, 0.23, 0.05], color('#ffffff'), 'auto');
+    });
+  }
+  for (const gx of [-49.4, -46.4, -44.0]) { W.slab('glow', gx - 0.3, 35.3, gx + 0.3, 35.9, LC.y0 - 0.04, LC.y0, color('#ffe6bd')); LIGHTS.push([gx, 35.6, LC.y0 - 0.05, 4]); }
   // the block
   const bn = rWall(-51.4, 24.6, -54.7, 24.6, 0, -1), bt = (x) => -51.4 - x;
   doorAt(W, bn, bt(-52.2), 0.95, 2.2, color('#3a4250'), { frameCol: color('#4a5260'), plain: true });

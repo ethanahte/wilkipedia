@@ -12,7 +12,7 @@ import { color, distToLine, offsetLine, clipLineZ, bankLine } from './geo.js';
 import { gbuffer, TOON, maxAniso } from './toon.js';
 import {
   WORLD, CAMPUS, LOTS, ROADS, BUILDINGS, FIELDS, TRACK, QUAD, STAGE,
-  LAWN_W, LAWN_E, CEDAR, CREEK, creekAt, LAWN_TREES, BRIDGES,
+  LAWN_W, LAWN_E, lawnHeight, CEDAR, CREEK, creekAt, LAWN_TREES, BRIDGES,
 } from './layout.js';
 import { treeSpots } from './quad.js';
 import { addHeight } from './collide.js';
@@ -79,6 +79,36 @@ function plane(x0, z0, x1, z1, y, tex, t0) {
   // a detail layer lies 2 cm over the ground: also pull it forward in depth, or
   // at a distance / a glancing angle the two can't be told apart and flicker
   if (y > 0) { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -4; }
+  const m = new THREE.Mesh(g, gbuffer(mat));
+  m.receiveShadow = true;
+  m.matrixAutoUpdate = false;
+  return m;
+}
+
+// plane(), but a grid of `step` metres raised by hf(x, z): the quad's layer, over the lawn mounds.
+function hillPlane(x0, z0, x1, z1, y, tex, t0, hf, step) {
+  const nx = Math.round((x1 - x0) / step), nz = Math.round((z1 - z0) / step), n = (nx + 1) * (nz + 1);
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2);
+  const [tx0, tz0, tx1, tz1] = t0, e = 0.25;
+  for (let j = 0; j <= nz; j++) for (let i = 0; i <= nx; i++) {
+    const x = x0 + (i * (x1 - x0)) / nx, z = z0 + (j * (z1 - z0)) / nz, k = j * (nx + 1) + i;
+    pos.set([x, y + hf(x, z), z], k * 3);
+    const dx = (hf(x + e, z) - hf(x - e, z)) / (2 * e), dz = (hf(x, z + e) - hf(x, z - e)) / (2 * e), l = Math.hypot(dx, 1, dz);
+    nor.set([-dx / l, 1 / l, -dz / l], k * 3);
+    uv.set([(x - tx0) / (tx1 - tx0), 1 - (z - tz0) / (tz1 - tz0)], k * 2);
+  }
+  const idx = [];
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+    const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
+    idx.push(a, c, b, b, c, d);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  const mat = new THREE.MeshToonMaterial({ map: tex, gradientMap: TOON });
+  mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -4;
   const m = new THREE.Mesh(g, gbuffer(mat));
   m.receiveShadow = true;
   m.matrixAutoUpdate = false;
@@ -195,7 +225,8 @@ export function buildGround(scene, q = 1) {
   const qc = makeCanvas(QW, QH), qg = qc.getContext('2d');
   const qp = painter(qg, Q.x0, Q.z0, Q.x1, Q.z1, QW, QH);
   quadPaint(qp, qg, QW, QH, Q);
-  scene.add(plane(Q.x0, Q.z0, Q.x1, Q.z1, 0.02, texFrom(qc), [Q.x0, Q.z0, Q.x1, Q.z1]));
+  scene.add(hillPlane(Q.x0, Q.z0, Q.x1, Q.z1, 0.02, texFrom(qc), [Q.x0, Q.z0, Q.x1, Q.z1], lawnHeight, 0.5));
+  addHeight((x, z) => { const h = lawnHeight(x, z); return h > 0.005 ? h + 0.02 : null; });
 
   // ── stadium detail ──
   const S = { x0: TRACK.x - 50, z0: TRACK.z - 92, x1: TRACK.x + 50, z1: TRACK.z + 92 };
