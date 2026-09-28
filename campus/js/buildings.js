@@ -607,19 +607,19 @@ function cafFront(W) {
     }
   });
   onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
-  //  · The wide door in its niche between the yard wall and the snack bar, set back further.
-  doorAt(W, southWall(-17.8, -16.0, -33.4), 0.9, 1.5, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway:
-  //    three groups between cream piers — four panes; a pane, glass double doors and a
-  //    pane; panes and a single glass door with the SNACK BAR plaque (IMG_2368).
+  //  · The wide (1.9 m) door in its niche between the yard wall and the snack bar, set back further.
+  doorAt(W, southWall(-17.8, -15.6, -33.4), 1.1, 1.9, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway.
+  //    Symmetric (Ethan): a single glass door and panes; a pane, glass double doors and a
+  //    pane; panes and a single glass door, with the SNACK BAR plaque by the right one.
   const RZ = -32.4, P2 = 0.35;
-  let rx = -16.0 + 0.025;
-  [[2.8, 'pppp'], [4.12, 'pdp'], [3.38, 'ppps']].forEach(([w, parts], i) => {
+  let rx = -15.6 + 0.025;
+  [[3.075, 'sppp'], [3.75, 'pdp'], [3.075, 'ppps']].forEach(([w, parts], i) => {
     if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
     storefront(W, RZ, rx, rx + w, parts, 3.0);
     rx += w;
   });
-  const door = 3.38 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
+  const door = 3.075 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
   onWall(W, southWall(rx - door - 0.5, rx - door - 0.1, RZ + 0.14), 0.2, 1.5, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
   //  · The wall comes forward again: a yellow door at the corner, the drinking fountain,
   //    the red fire bell and a yellow notice above it, a white notice, then a dark door.

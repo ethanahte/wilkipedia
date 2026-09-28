@@ -357,16 +357,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         side is on the quad side, in line with the snack bar, carrying the
         poster board. The right-angle side is the cafeteria's west wall. The
         short side faces the parking lot, and the slanted side makes 75° with
-        the long one. Ethan: wide and not deep (11 m along the quad, 8 m deep).
+        the long one. Ethan: wide, and deeper than 8 m but not the first 16 m (11 m
+        along the quad, 11 m deep).
         It is a yard, not a building: style `yard` has no kit windows and no
         rooftop units. B's canopy stops in front of its wall (cz0 -32.0).
-      - A wide yellow door (1.5 m) in a niche set back further (x -17.8 to
-        -16.0), between the yard wall and the snack bar.
+      - A wide yellow door (1.9 m) in a niche set back further (x -17.8 to
+        -15.6), between the yard wall and the snack bar.
       - The snack bar is a shallow room whose glass front is set 2.0 m back
-        (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -16.0
-        to -4.95. The walkway roof reaches back over it. It has three groups
-        between piers: four panes; pane, double doors, pane; panes and a
-        single door with the SNACK BAR plaque.
+        (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -15.6
+        to -4.95. The walkway roof reaches back over it. It is symmetric (Ethan)
+        with three groups between piers: single door and panes; pane, double
+        doors, pane; panes and a single door, with the SNACK BAR plaque by
+        the right-hand door.
       - Then the wall comes forward: a yellow door at the corner, then the
         drinking fountain (`cafFountain()`, from IMG_2367 close up). It has a
         wide cream concrete base with a thick flat top, a steel back plate

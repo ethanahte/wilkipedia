@@ -17,7 +17,7 @@ export const K = 0.4675;   // metres per satellite pixel (kept for re-measuring)
 // The teachers' yard beside the cafeteria (see YARD-* below): the quad-side wall at zs from x0
 // to the cafeteria's west wall, the parking-lot side at zn, the slanted side at 75°.
 export const YARD = (() => {
-  const zs = -32.4, zn = -40.4, x0 = -28.8;
+  const zs = -32.4, zn = -43.4, x0 = -28.8;
   return { zs, zn, x0, xn: x0 + (zs - zn) / Math.tan((75 * Math.PI) / 180) };
 })();
 // A straight wall of thickness t from (ax, az) to (bx, bz), standing on its left side (seen from a to b)
@@ -41,15 +41,15 @@ export const BUILDINGS = [
   { id: 'CAF', name: 'Cafeteria', style: 'caf', h: 7.2, poly: rect(0, -52.8, 50, -32.8) },
   { id: 'CAF-front', name: 'Cafeteria', style: 'caf', h: 3.8, poly: rect(0, -32.8, 50, -30.4) },
   // The west wing's quad face (IMG_2367/2368/2371/2391, Ethan): the snack bar is a shallow room
-  // whose glass front is set 2.0 m back (Ethan: 2.5 times the first 0.8 m), from x -16.0 to -4.95.
-  // Between it and the yard wall a wide door sits in a niche set back further (x -17.8 to -16.0).
+  // whose glass front is set 2.0 m back (Ethan: 2.5 times the first 0.8 m), from x -15.6 to -4.95.
+  // Between it and the yard wall a wide door sits in a niche set back further (x -17.8 to -15.6).
   // buildings.js cafFront() and landmarks.js (the walkway over the recess) must match.
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6,
-    poly: [[-17.8, -51], [0, -51], [0, -30.4], [-4.95, -30.4], [-4.95, -32.4], [-16.0, -32.4], [-16.0, -33.4], [-17.8, -33.4]] },
+    poly: [[-17.8, -51], [0, -51], [0, -30.4], [-4.95, -30.4], [-4.95, -32.4], [-15.6, -32.4], [-15.6, -33.4], [-17.8, -33.4]] },
   // The teachers' yard west of the snack bar (Ethan, IMG_2391): a right-angle trapezoid walled on
   // every side. The long side is the wall on the quad side, in line with the snack bar's glass;
   // the right-angle side is the cafeteria's west wall; the short side faces the parking lot; the
-  // slanted side makes 75° with the long side. Ethan: wide and not very deep (8 m × 11 m).
+  // slanted side makes 75° with the long side. Ethan: wide, and deeper than 8 m but not 16 m (11 × 11 m).
   { id: 'YARD-s', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.x0, YARD.zs - 0.25, -17.8, YARD.zs) },
   { id: 'YARD-n', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.xn, YARD.zn, -17.8, YARD.zn + 0.25) },
   { id: 'YARD-w', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: wallPoly(YARD.x0, YARD.zs, YARD.xn, YARD.zn, 0.25) },
