@@ -393,7 +393,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - a big shade tree by B, with a small reddish tree north of it and a
         small orange one east of it;
       - an umbrella table;
-      - a covered walk along the office's south face.
+      - a covered walk along the office's south face, running all the way
+        to B.
+
+      The front office (`ADMIN`) is ONE rectangle from B's wall to its east
+      end (Ethan). Its quad-side face is at z -57.4 (narrower, per Ethan and
+      the map), and its west face is against B (no kit windows).
 
       The palms stand in their own bed at the office's north-east corner
       (`FRONT.palmBed`). The flagpole stands in a round planter south of it

@@ -325,5 +325,6 @@ function court(W) {
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
-  for (let x = c.x0 + 1; x <= c.x1 - 0.5; x += (c.x1 - c.x0 - 1.5) / 4) W.slab('flat', x - 0.1, c.z1 - 0.35, x + 0.1, c.z1 - 0.15, 0, 3.2, fin);
+  const nP = Math.round((c.x1 - c.x0) / 6);
+  for (let i = 0; i <= nP; i++) { const x = c.x0 + 1 + (i * (c.x1 - c.x0 - 1.5)) / nP; W.slab('flat', x - 0.1, c.z1 - 0.35, x + 0.1, c.z1 - 0.15, 0, 3.2, fin); }
 }

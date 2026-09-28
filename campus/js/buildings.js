@@ -168,6 +168,7 @@ const KITS = {
   },
   admin(W, b, e) {
     if (e.len < 4 || e.nz < -0.5) return;   // the north face is the sign wall (landmarks.js)
+    if (e.nx < -0.5) return;                 // the west face is against B
     for (const { t } of bays(e.len, 3.6, 1.2)) windowAt(W, e, t, 2.0, 2.6, 1.6);
   },
   gym(W, b, e, R) {

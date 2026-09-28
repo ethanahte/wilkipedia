@@ -32,8 +32,10 @@ export const BUILDINGS = [
   { id: 'B-south2', name: 'Building B', style: 'plain', h: 4.6, poly: rect(-87.9, 52.8, -50.5, 68.3) },
   { id: 'LIB', name: 'Library', style: 'library', h: 7.2, poly: rect(-54.7, 37.9, -17.8, 52.8) },
   // Front office: single storey at the north end, the sign wall faces Monroe Street.
-  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-46.8, -74.3, -26.2, -55.6) },
-  { id: 'ADMIN-link', name: 'Front office', style: 'plain', h: 4.4, poly: rect(-54.7, -78.5, -46.8, -62) },
+  // One rectangle from B's wall to the east end (Ethan: the office and the part joining B are one
+  // building). Its quad-side face is at -57.4 (Ethan: narrower; the Apple Maps view), with the
+  // covered walk in front of it (COURT.porch) running all the way to B.
+  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-54.7, -74.3, -26.2, -57.4) },
   // Cafeteria: north side of the quad, covered walkway on its quad side. The tall
   // dining hall stands 2.4 m back behind a one-storey front that holds the glass
   // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
@@ -205,11 +207,12 @@ export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blu
 // Front of the school: the sign wall, planter, palms and flag.
 // The courtyard between the front office and B's canopy (Apple Maps view, September 2026): a
 // raised zig-zag planter, a big shade tree by B with a small reddish one north of it and a small
-// orange one east of it, an umbrella table, and the covered walk along the office's south face.
+// orange one east of it, an umbrella table, and the covered walk along the office's south face,
+// which runs all the way to B (Ethan).
 export const COURT = {
   planter: [[-29.2, -52.8], [-33.7, -52.8], [-36.9, -49.6], [-33.7, -43.9], [-36.9, -40.4], [-33.4, -37.8], [-29.4, -43.5]],
-  bigTree: [-49.2, -43.9], redTree: [-52.5, -52.5], smallTree: [-44.6, -42.6], table: [-40.5, -44.3],
-  porch: { x0: -46.8, x1: -25.8, z0: -55.6, z1: -53.0 },
+  bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-40.5, -44.3],
+  porch: { x0: -54.7, x1: -25.8, z0: -57.4, z1: -53.0 },          // from B's wall to past the office's east end
 };
 
 export const FRONT = {
