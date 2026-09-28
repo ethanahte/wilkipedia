@@ -233,7 +233,7 @@ STORAGE_GATE = ("<script>try{(function(){var L=localStorage,S=Storage.prototype,
 # Applies a saved night-mode choice before first paint, so pages never flash.
 THEME_BOOT = ("<script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),"
               "c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c;"
-              "['text','motion','bell','fab','avatars'].forEach(function(k){var v=localStorage.getItem('wilkipedia-'+k);if(v)d.dataset[k]=v})"
+              "['text','motion','bell','fab','avatars','homebg'].forEach(function(k){var v=localStorage.getItem('wilkipedia-'+k);if(v)d.dataset[k]=v})"
               "}catch(e){}</script>")
 
 

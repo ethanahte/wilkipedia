@@ -747,6 +747,31 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   kind 'school' (gold) or 'site'. Closing one is remembered per browser only.
   Never post school news you can't source.
 - The home page (`body.home`) hides the header search: its big hero search replaces it.
+- **Home page background** is a reader setting (Settings → Pages; `homebg` in
+  PREF_DEFAULTS, `html[data-homebg]`). There are three choices:
+  - 'pano', the default: the quad turning slowly all the way round, like a
+    game's title screen (Ethan). `assets/js/pano.js` looks up a cube map in
+    one WebGL full-screen triangle (no three.js on the home page). It starts
+    facing east and turns once every 150 s, stops turning with reduced
+    motion, and follows day and night mode.
+  - 'paint': the painted courtyard (`body.home::before`). It also shows
+    under the quad until the quad loads, or if WebGL is missing.
+  - 'plain': no image and no frosted panels, the original white home page.
+
+  The cube faces in `assets/img/pano/` (`day`/`night`, n e s w u d, 1280 px,
+  plus `-sm` at 640) are renders of the 3D campus. To redo them, open the
+  campus page in a square viewport and set these in `__campus`:
+  - `post.capture = true` (no vignette, no sun rays, so the faces meet
+    without seams);
+  - `controls.mode = 'walk'`, `fovWalk = 90`, `pos` (-9, 0, 6), just west
+    of the cedar;
+  - for each face, a yaw and pitch: n (0, 0), w (π/2, 0), s (π, 0),
+    e (−π/2, 0), u (0, π/2), d (0, −π/2).
+
+  After a few `frame()` calls, draw the canvas into a 2D canvas in the same
+  task, and save it as WebP. Press N for the night set. pano.js puts up/down
+  on the cube half-turned and flips x in the lookup; keep that mapping if
+  you change the faces.
 - There is no node here, so check JS syntax with osascript (see git history of
   this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage

@@ -28,7 +28,7 @@ const COMPOSITE = `
 precision highp float;
 uniform sampler2D tColor, tND, tBloom, tRays, tSoft;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ, pixel, hazeFrom;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ, pixel, hazeFrom, vig;
 
 uniform vec3 fogCol;
 uniform mat4 proj, projInv, viewInv;
@@ -137,7 +137,7 @@ void main(){
   col = mix(col, fogCol, 0.08 * (1.0 - night) * (1.0 - pixel));
   col = mix(col, col * vec3(0.92, 0.97, 1.12), night * (1.0 - smoothstep(0.1, 0.5, lum)));
   vec2 q = vUv - 0.5;
-  col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night) * (1.0 - pixel);
+  col *= 1.0 - dot(q, q) * mix(0.22, 0.42, night) * (1.0 - pixel) * vig;
   if (any(isnan(col))) col = fogCol;
   col = toSRGB(col);
   if (pixel < 0.5) col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.022;
@@ -204,7 +204,7 @@ export class Post {
       wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
       tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
-      tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, hazeFrom: { value: 0 }, fogCol: { value: new THREE.Color() },
+      tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, hazeFrom: { value: 0 }, vig: { value: 1 }, fogCol: { value: new THREE.Color() },
       pixel: { value: 0 },
     });
     this.pixel = false;
@@ -283,7 +283,10 @@ export class Post {
     u.farFade.value = farFade;
     // sunbeams: where the sun is on screen, and how much it faces us
     u.raysK.value = 0; u.hazeK.value = 0;
-    if (this.inkOn && env.sun && env.day > 0 && !this.pixel) {
+    // capture: panorama faces for the site's background (no vignette, no screen-placed sunbeams, so the
+    // six faces meet without seams)
+    u.vig.value = this.capture ? 0 : 1;
+    if (this.inkOn && env.sun && env.day > 0 && !this.pixel && !this.capture) {
       u.sunDir.value.copy(env.sun);
       camera.getWorldDirection(this._fwd);
       const facing = this._fwd.dot(env.sun);

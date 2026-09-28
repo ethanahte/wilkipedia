@@ -118,7 +118,7 @@ export function themePref() {
 // Each is stored as localStorage 'wilkipedia-<name>' and mirrored on
 // html[data-<name>] so CSS can react. THEME_BOOT in build.py applies them before
 // first paint. Defaults are stored as "nothing", so a reset is just removal.
-export const PREF_DEFAULTS = { text: 'normal', motion: 'system', bell: 'on', fab: 'on', avatars: 'lines' };
+export const PREF_DEFAULTS = { text: 'normal', motion: 'system', bell: 'on', fab: 'on', avatars: 'lines', homebg: 'pano' };
 export function getPref(name) {
   try { return localStorage.getItem('wilkipedia-' + name) || PREF_DEFAULTS[name]; } catch { return PREF_DEFAULTS[name]; }
 }

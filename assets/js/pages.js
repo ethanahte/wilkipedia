@@ -265,6 +265,7 @@ function mountInbox(el) {
 
 const pages = {
   async home() {
+    if (getPref('homebg') === 'pano') import('./pano.js').then((m) => m.mountPano(root));   // the turning quad behind the page
     mountInbox($('#inbox'));
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
@@ -614,6 +615,8 @@ const pages = {
         ['language', 'Language', row('Language', 'Menus and buttons use our own translations. Everything else is translated by Google.',
           `<select id="set-lang" class="set-select">${LANGS.map(([code, native, english]) => `<option value="${code}" ${code === currentLang() ? 'selected' : ''}>${esc(native)}${native !== english ? ` · ${esc(english)}` : ''}</option>`).join('')}</select>`)],
         ['pages', 'Pages', [
+          row('Home page background', 'What’s behind the home page: the quad turning slowly all the way round, the painting of the courtyard, or nothing (plain).',
+            seg('set-homebg', 'Home page background', getPref('homebg'), [['pano', 'The quad, turning'], ['paint', 'Painting'], ['plain', 'Plain']])),
           row('Bell schedule on the home page', 'Today’s periods at the top of the home page. The full schedule is always under More.', tgl('set-bell', 'Bell schedule on the home page', getPref('bell') === 'on')),
           row('Contribute button', 'The round + button in the corner of every page. You can still contribute from the More menu or your account.', tgl('set-fab', 'Contribute button', getPref('fab') === 'on')),
           row('Tour of the site', 'The speech bubbles from your first sign-in that show where everything is.',
@@ -674,6 +677,7 @@ const pages = {
       segWire('set-text', (v) => setPref('text', v));
       segWire('set-motion', (v) => setPref('motion', v));
       segWire('set-avatars', (v) => setPref('avatars', v));
+      segWire('set-homebg', (v) => setPref('homebg', v));
       segWire('set-bview', (v) => ls.set('wilkipedia-bounty-view', v));
       $('#set-lang').onchange = (e) => setLanguage(e.target.value);
       $('#set-bell').onchange = (e) => setPref('bell', e.target.checked ? 'on' : 'off');
@@ -709,7 +713,7 @@ const pages = {
     const NAMES = {
       'wilkipedia-cookies': 'Your cookie choices', 'wilkipedia-theme': 'Night mode', 'wilkipedia-class': 'Class colour',
       'wilkipedia-class-applied': 'Class colour', 'wilkipedia-text': 'Text size', 'wilkipedia-motion': 'Motion',
-      'wilkipedia-bell': 'Bell schedule on the home page', 'wilkipedia-fab': 'Contribute button',
+      'wilkipedia-bell': 'Bell schedule on the home page', 'wilkipedia-fab': 'Contribute button', 'wilkipedia-homebg': 'Home page background',
       'wilkipedia-dismissed-announcements': 'Closed announcements', 'wilkipedia-bounty-view': 'Bounty board view',
       'wilkipedia-orrery': 'Orrery display', 'wilkipedia-graph': 'Study-guide graph display',
       'wilkipedia-recent-classes': 'Recently opened classes', 'wilcox-campus-quality': '3D campus quality',
@@ -717,7 +721,7 @@ const pages = {
     };
     const keyLabel = (k) => (k.startsWith('sb-') ? 'Sign-in token' : k.startsWith(DRAFT) ? 'Unsent draft'
       : k.startsWith('wilkipedia-demo') ? 'Demo-mode data' : NAMES[k] || k);
-    const PREF_KEYS = { 'wilkipedia-text': 1, 'wilkipedia-motion': 1, 'wilkipedia-bell': 1, 'wilkipedia-fab': 1 };
+    const PREF_KEYS = { 'wilkipedia-text': 1, 'wilkipedia-motion': 1, 'wilkipedia-bell': 1, 'wilkipedia-fab': 1, 'wilkipedia-homebg': 1 };
     s.onAuth(draw);
     draw();
     if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
