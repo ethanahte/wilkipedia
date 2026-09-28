@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Panorama stitcher</title>
+<!--
+  Builds the painted daytime quad for the home page (see CLAUDE.md, "Home page background"). Local tool: nothing
+  here is linked from the site.
+
+  1. Render the ten views from the campus page (walk mode, fovWalk 90, capture mode, standing at (-9, 0, 6)):
+     sides every 45 degrees (heading = -yaw) and straight up and down. Save them next to this file as
+     render-<name>.jpg.
+  2. Have them painted (Ethan's watercolour set, 2026-09). Save the paintings as paint-<name>.<ext>. Trim any
+     screenshot border first; framing and zoom don't matter, the stitcher lines them up.
+  3. From the repo root: python3 -m http.server 8801, and python3 tools/pano-stitch/recv.py.
+     Open http://127.0.0.1:8801/tools/pano-stitch/ and in the console:
+       await build(SET)            // about 40 s; shows the result turning (look(heading) to aim)
+       await exportFaces('day')    // writes tools/pano-stitch/out/day-*.webp; copy them to assets/img/pano/
+  The paintings and renders are not committed (they're large); keep the source set outside the repo.
+-->
+<canvas id="c" width="1" height="1" style="display:none"></canvas>
+<script src="stitch.js"></script>
+<script src="banner.js"></script>
+<script src="viewer.js"></script>
+<script>
+// [name, heading, pitch, painting, render, patch]. The patches reletter lamp-post banners the painting tool got
+// wrong (one said "WILLOW HIGH"); their rectangles are in that painting's pixels, so redo them for a new painting.
+window.SET = [
+  ['n', 0, 0, 'paint-n.png', 'render-n.jpg'],
+  ['ne', 45, 0, 'paint-ne.png', 'render-ne.jpg'],
+  ['e', 90, 0, 'paint-e.webp', 'render-e.jpg', (g) => fixBanner(g, [208, 920, 252, 952])],
+  ['se', 135, 0, 'paint-se.png', 'render-se.jpg'],
+  ['s', 180, 0, 'paint-s.webp', 'render-s.jpg'],
+  ['sw', 225, 0, 'paint-sw.png', 'render-sw.jpg'],
+  ['w', 270, 0, 'paint-w.webp', 'render-w.jpg', (g) => { fixBanner(g, [1337, 858, 1377, 910]); fixBanner(g, [710, 952, 731, 983]); }],
+  ['nw', 315, 0, 'paint-nw.png', 'render-nw.jpg', (g) => fixBanner(g, [728, 421, 777, 478])],
+  ['u', 0, 90, 'paint-u.webp', 'render-u.jpg'],
+  ['d', 0, -90, 'paint-d.webp', 'render-d.jpg'],
+];
+</script>

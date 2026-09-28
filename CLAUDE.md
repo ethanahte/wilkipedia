@@ -761,22 +761,36 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   The cube faces in `assets/img/pano/` (`day`/`night`, n e s w u d) come in
   three sizes: `-lg` 2048 px for big high-density screens, 1536 (no suffix)
   for most, `-sm` 1024 for small screens or Save-Data. pano.js picks one and
-  draws at up to 2× device pixels; Ethan found 1280 faces blurry. They are
-  renders of the 3D campus. To redo them, open the campus page in a square
-  viewport (1024×1024 at DPR 2 gives a 2048 canvas) and set these in
-  `__campus`:
+  draws at up to 2× device pixels; Ethan found 1280 faces blurry. pano.js
+  puts up/down on the cube half-turned and flips x in the lookup; keep that
+  mapping if you change the faces.
+
+  **Night faces are renders of the 3D campus.** To redo them, open the campus
+  page in a square viewport (1024×1024 at DPR 2 gives a 2048 canvas), press N,
+  and set these in `__campus`:
   - `post.capture = true`: no vignette, no sun rays, so the faces meet
     without seams; also no bloom, tilt-shift or haze wash, and fog at 0.3×,
     so the faces stay crisp;
   - `controls.mode = 'walk'`, `fovWalk = 90`, `pos` (-9, 0, 6), just west
     of the cedar;
   - for each face, a yaw and pitch: n (0, 0), w (π/2, 0), s (π, 0),
-    e (−π/2, 0), u (0, π/2), d (0, −π/2).
+    e (−π/2, 0), u (0, π/2), d (0, −π/2). Heading = −yaw.
 
   After a few `frame()` calls, draw the canvas into a 2D canvas in the same
-  task, and save it as WebP (encode in the browser; sips can't write WebP). Press N for the night set. pano.js puts up/down
-  on the cube half-turned and flips x in the lookup; keep that mapping if
-  you change the faces.
+  task, and save it as WebP (encode in the browser; sips can't write WebP).
+
+  **Day faces are Ethan's watercolour paintings** (2026-09), made with an
+  image tool from ten such renders: the eight sides every 45° (n, ne, e … nw)
+  plus up and down. The tool zooms and nudges every picture differently
+  (1.03–1.4× seen), so six cube-face paintings never meet at the edges. The
+  in-between views give overlap, and `tools/pano-stitch/` (a local page, see
+  its index.html) lines each painting up with its render, runs each seam
+  along the path where neighbours agree (a soft wide blend in the sky), and
+  writes the three sizes. The paintings and renders sit next to it,
+  gitignored, on Ethan's Mac only. The tool also rewrote the lamp-post
+  banners, once as "WILLOW HIGH"; `fixBanner` letters them CHARGER STRONG
+  again. Check any painted text before it ships. The day faces are still
+  dimmed a little in pano.js (Ethan: the bright version glared).
 - There is no node here, so check JS syntax with osascript (see git history of
   this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
