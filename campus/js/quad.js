@@ -9,7 +9,7 @@
 // shows; green picnic tables, the one red/yellow/blue table; black lamp posts
 // on concrete bases; trash cans.
 
-import { color, rng } from './geo.js';
+import { color, rng, inPoly, ensureCCW } from './geo.js';
 import * as THREE from 'three';
 import { STAGE, CEDAR, R_FRONT, CEDAR_PICNIC, CEDAR_CANS, CEDAR_TABLES, CEDAR_TREES, QUAD_SPOTS, LAWN_TREES, LAMPS, PICNIC, PICNIC_COLOR, PICNIC_LIB, lawnHeight } from './layout.js';
 import { canvasTex, decalMat } from './toon.js';
@@ -287,19 +287,14 @@ function frontOfR(W, R) {
   const F = R_FRONT, BX = F.front, mulch = color('#5e4231');
   const tw = (F.z1 - F.z0) / F.teeth;
   const TEETH = Array.from({ length: F.teeth }, (_, i) => [F.z0 + i * tw, F.z0 + (i + 1) * tw, F.tip, F.z0 + (i + 0.5) * tw]);
-  const inTooth = (x, z, [z0, z1, tx, tz]) => {
-    const side = (ax, az, bx, bz) => (bx - ax) * (z - az) - (bz - az) * (x - ax);
-    const a = side(BX, z0, tx, tz), b = side(tx, tz, BX, z1), c = side(BX, z1, BX, z0);
-    return (a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0);
-  };
-  const inBed = (x, z) => TEETH.some((t) => inTooth(x, z, t)) || (x >= F.front && x <= F.back && z >= F.z0 && z <= F.z1);
-  // the straight strip along the building, then the teeth off its front
-  W.slab('flat', F.front, F.z0, F.back, F.z1, 0, 0.06, mulch);
-  addBox(F.front, F.z0, F.back, F.z1);
-  for (const [z0, z1, tx, tz] of TEETH) {
-    W.prism('flat', [[BX + 0.02, z0], [tx, tz], [BX + 0.02, z1]], 0, 0.06, mulch);
-    addPoly([[BX, z0], [tx, tz], [BX, z1]]);
-  }
+  // one outline, peaks and valleys all the way: its two ends run to a point at the strip's back
+  // line rather than stopping square (Ethan, the aerial view), with the valleys on the front line
+  const OUT = [[F.back, F.z0]];
+  TEETH.forEach(([, z1, tx, tz], i) => { OUT.push([tx, tz]); if (i < TEETH.length - 1) OUT.push([BX, z1]); });
+  OUT.push([F.back, F.z1]);
+  const P = ensureCCW(OUT), inBed = (x, z) => inPoly(x, z, P);
+  W.prism('flat', P, 0, 0.06, mulch);
+  addPoly(P);
   // plants on a jittered grid: fountain grasses, red-tipped shrubs, flax (IMG_2351)
   const clear = (x, z) => !F.trees.some(([a, b]) => Math.hypot(x - a, z - b) < 1.0);
   for (let z = F.z0 + 0.4; z < F.z1 - 0.3; z += 1.05) {
@@ -319,8 +314,8 @@ function frontOfR(W, R) {
   picnic(W, lx, lz, lrot, green, green, green, greenDark, llen);
   for (const [x, z] of F.cans) can(W, x, z);
   // the benches back onto the last triangle's south slanted edge, facing out from it
-  const [, lz1, ltx, ltz] = TEETH[TEETH.length - 1], el = Math.hypot(BX - ltx, lz1 - ltz);
-  const ux = (BX - ltx) / el, uz = (lz1 - ltz) / el, rot = Math.atan2(-uz, ux) + Math.PI / 2;
+  const [, , ltx, ltz] = TEETH[TEETH.length - 1], el = Math.hypot(F.back - ltx, F.z1 - ltz);
+  const ux = (F.back - ltx) / el, uz = (F.z1 - ltz) / el, rot = Math.atan2(-uz, ux) + Math.PI / 2;
   for (const t of F.benches) bench(W, ltx + ux * t - uz * 0.3, ltz + uz * t + ux * 0.3, rot);
   for (const [x, z, kind] of F.pots) {
     if (kind === 'white') { W.box('flat', x, 0.29, z, 0.5, 0.58, 0.5, color('#f3f2ed')); shrub(W, x, z, R, { s: 0.42, y: 0.56, cols: G.leaf }); }

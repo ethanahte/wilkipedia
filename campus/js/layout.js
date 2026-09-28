@@ -218,10 +218,11 @@ function edgeDist(P, x, z) {
 }
 export const CEDAR = { x: 0, z: 0, bed: 4.2 };
 // In front of Building R on the quad side (Ethan; IMG_2349–2352, the satellite): a
-// bed shaped like a Toblerone bar seen from the side. A straight strip runs along
+// bed shaped like a Toblerone bar seen from the side. A strip runs along
 // the building with a paved walk between (its back at x 30.1; the blocks stand at
 // 31.6), and identical, symmetric triangles stand side by side on its front,
-// pointing at the quad. Umbrella tables sit in the notches between the triangles;
+// pointing at the quad; the two end ones run back to a point at the strip's back line
+// (Ethan's aerial view), so the bed has no square ends. Umbrella tables sit in the notches between the triangles;
 // the two benches back onto the last triangle's south slanted edge, by the ASB Office.
 export const R_FRONT = {
   back: 30.1, front: 27.5, z0: -18.6, z1: 13.2, teeth: 3, tip: 23.8,
