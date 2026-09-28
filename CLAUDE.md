@@ -440,8 +440,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         with a transom, and one into B through the block's east face
         (Ethan).
       - The library's quad (north) face is plain precast panels with no
-        windows (IMG_2385). Three long green picnic tables stand along it
-        (`PICNIC_LIB`).
+        windows (IMG_2385). ONE long green picnic table stands along it,
+        by the entrance (`PICNIC_LIB`; Ethan: not three).
       - B's courtyard wall behind the courtyard bed has an
         air-conditioning shaft built like R's grey AC blocks (`bCourtAC()`;
         Ethan's "wind pipe"). It is a grey tower standing 1.1 m out, with a
