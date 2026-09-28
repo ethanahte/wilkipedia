@@ -12,9 +12,9 @@ import { canvasTex, decalMat } from './toon.js';
 import { FRONT, CARPORTS, BUILDINGS, COURT, B_BED } from './layout.js';
 import { wallEdges } from './buildings.js';
 import { LIGHTS } from './lights.js';
-import { palm, flax, grassTuft, shrub, shadeTree, youngTree, cards, G } from './nature.js';
-import { umbrellaTable, poppies } from './quad.js';
-import { addCircle, addPoly } from './collide.js';
+import { palm, flax, grassTuft, shrub, shadeTree, youngTree, crapeMyrtle, cards, G } from './nature.js';
+import { umbrellaTable, poppies, bench } from './quad.js';
+import { addCircle, addPoly, addSegment } from './collide.js';
 import { inPoly, ensureCCW } from './geo.js';
 
 const concrete = color('#cfcbc3'), soil = color('#5b4636'), steel = color('#6f747a'), fin = color('#f4efe4');
@@ -62,15 +62,18 @@ export function buildLandmarks(W, group, fontFamily) {
   const e = FRONT.entry;
   W.slab('flat', e.x0, z - 4.6, e.x1 + 1.5, z, 3.4, 3.7, fin);
   for (const px of [e.x0 + 0.4, e.x1 + 1.1]) W.slab('flat', px - 0.14, z - 4.4, px + 0.14, z - 4.12, 0, 3.4, fin);
-  W.slab('mosaic', e.x0 + 0.2, z - 0.12, e.x0 + 2.2, z, 0, 3.2, color('#ffffff'));
-  for (const dx of [2.6, 4.0]) {
-    W.slab('flat', e.x0 + dx, z - 0.08, e.x0 + dx + 1.35, z, 0, 2.5, steel);
-    W.quad('glass', [e.x0 + dx + 1.25, 0.1, z - 0.1], [e.x0 + dx + 0.1, 0.1, z - 0.1], [e.x0 + dx + 0.1, 2.4, z - 0.1], [e.x0 + dx + 1.25, 2.4, z - 0.1], color('#fff'), 'auto');
-  }
+  W.slab('mosaic', e.x0 + 0.2, z - 0.12, e.x0 + 0.8, z, 0, 3.2, color('#ffffff'));
+  // its fascia is deep, with ADMINISTRATION in grey letters (IMG_2400, IMG_2404)
+  W.slab('flat', e.x0, z - 4.6, e.x1 + 1.5, z - 4.4, 3.0, 3.95, fin);
+  const adm = textCanvas(1024, 128, (g, w, h) => {
+    g.clearRect(0, 0, w, h); g.fillStyle = '#4a4e54'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '700 92px "Helvetica Neue", Arial, sans-serif'; g.fillText('ADMINISTRATION', w / 2, h / 2 + 4);
+  });
+  group.add(decal(adm, (e.x0 + e.x1 + 1.5) / 2 + 0.8, 3.47, z - 4.63, 4.6, 0.575, Math.PI));
+  // the storefront under it: frosted glass over white panels with a clear transom row, the WHS
+  // public-entrance door in the west bay, a second glass door at the east end (IMG_2400, IMG_2404)
+  frostFront(W, e.x0 + 1.0, e.x1 - 0.1, z, ['f', 'd', 'f', '|', 'f', 'f', 'd']);
   W.slab('glow', e.x0 + 1.5, z - 2.6, e.x0 + 2.3, z - 1.8, 3.36, 3.4, color('#ffe6bd')); LIGHTS.push([e.x0 + 1.9, z - 2.2, 3.4, 5]);
-  // student entrance: a second door just south of the main one, on the east face
-  W.slab('flat', -26.2, -67.5, -24.2, -64.5, 3.2, 3.45, fin);
-  W.slab('flat', -26.26, -66.8, -26.2, -65.2, 0, 2.4, steel);
 
   // the planter: poured concrete, rounded at the east end, full of flax (the palms have their own bed, below)
   const p = FRONT.planter, r = (p.z1 - p.z0) / 2, cz = (p.z0 + p.z1) / 2;
@@ -95,30 +98,49 @@ export function buildLandmarks(W, group, fontFamily) {
   });
   group.add(decal(ada, ax, 2.0, az - 0.05, 0.45, 0.56, Math.PI));
 
-  // the palms' bed at the office's north-east corner, rounded at its south-east corner
+  // the office's long east wall: two blue banners (IMG_2402)
+  const ban = textCanvas(512, 280, (g, w, h) => {
+    g.fillStyle = '#23407e'; g.fillRect(0, 0, w, h); g.fillStyle = '#ffffff'; g.fillRect(10, 10, w - 20, h - 20);
+    g.fillStyle = '#23407e'; g.fillRect(18, 18, w - 36, h - 36); g.fillStyle = '#ffffff'; g.textAlign = 'center';
+    g.font = '800 48px "Helvetica Neue", Arial, sans-serif'; g.fillText('WILCOX HIGH SCHOOL', w / 2, 120);
+    g.font = '700 40px "Helvetica Neue", Arial, sans-serif'; g.fillText('#CHARGERSTRONG', w / 2, 190);
+  });
+  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -26.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
+  // the wall that runs on east from the entrance, and the long raised planter along it, rounded at
+  // its east end: three tall palms, agapanthus and boulders (IMG_2400, IMG_2401, IMG_2404)
   {
-    const b = FRONT.palmBed, out = [[b.x0, b.z0], [b.x1, b.z0], [b.x1, b.z1 - b.r]];
-    for (let i = 1; i < 8; i++) { const a = (Math.PI / 2) * (i / 8); out.push([b.x1 - b.r + Math.cos(a) * b.r, b.z1 - b.r + Math.sin(a) * b.r]); }
-    out.push([b.x1 - b.r, b.z1], [b.x0, b.z1]);
+    const b = FRONT.palmBed, sw = FRONT.screenWall, r = (b.z1 - b.z0) / 2, cz = (b.z0 + b.z1) / 2;
+    W.slab('stucco', sw.x0, z, sw.x1, z + 0.25, 0, sw.h, color('#efe8d6'));
+    W.slab('flat', sw.x0, z - 0.03, sw.x1 + 0.03, z + 0.28, sw.h, sw.h + 0.12, fin);
+    addSegment(sw.x0, z + 0.12, sw.x1, z + 0.12, 0.15);
+    const out = [[b.x0, b.z0], [b.x1 - r, b.z0]];
+    for (let i = 1; i < 10; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 10; out.push([b.x1 - r + Math.cos(a) * r, cz + Math.sin(a) * r]); }
+    out.push([b.x1 - r, b.z1], [b.x0, b.z1]);
     W.prism('flat', out, 0, b.h, concrete, { top: true, topMat: 'flat', topCol: soil });
     addPoly(ensureCCW(out));
     const R2 = rng(611);
-    for (let k = 0; k < 9; k++) {
-      const x = b.x0 + 0.8 + R2() * (b.x1 - b.x0 - 1.6), zz = b.z0 + 0.8 + R2() * (b.z1 - b.z0 - 1.6);
-      if (inPoly(x, zz, out)) flax(W, x, zz, R2, { y: b.h, h: 1.1 + R2() * 0.6 });
+    for (let x = b.x0 + 0.7; x < b.x1 - 0.6; x += 0.9 + R2() * 0.5) {
+      if (R2() < 0.7) grassTuft(W, x, cz + (R2() - 0.5) * 1.4, R2, { y: b.h, h: 0.9, cols: [color('#3f6f37'), color('#4a7d3d')] });
+      else W.blob('flat', x, b.h + 0.2, cz + (R2() - 0.5), 0.45, 0.3, 0.35, color('#9a948a'));
     }
   }
   // the flagpole, in its round planter: a ring of shrubs round a paved circle
   const [fx, fz] = FRONT.flag, fb = FRONT.flagBed;
   W.cyl('flat', fx, 0, fz, fb.r, fb.r, 0.3, 36, soil);
   W.cyl('flat', fx, 0, fz, fb.inner, fb.inner, 0.34, 36, color('#d6b98c'));
-  { const R3 = rng(612); for (let k = 0; k < 16; k++) { const a = (k / 16) * Math.PI * 2; shrub(W, fx + Math.cos(a) * 3.6, fz + Math.sin(a) * 3.6, R3, { y: 0.3, s: 1.0 + R3() * 0.3 }); } }
+  // golden mounded shrubs round it, yellow tree roses on the outside, a bench at its edge (IMG_2402, IMG_2403)
+  {
+    const R3 = rng(612), GOLD = ['#b9c94a', '#a8bd3f', '#c7d25e'].map(color);
+    for (let k = 0; k < 11; k++) { const a = (k / 11) * Math.PI * 2; shrub(W, fx + Math.cos(a) * 3.4, fz + Math.sin(a) * 3.4, R3, { y: 0.3, s: 1.4 + R3() * 0.3, cols: GOLD }); }
+    for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2 + 0.3; treeRose(W, fx + Math.cos(a) * 4.0, fz + Math.sin(a) * 4.0, R3, color('#f2d24a')); }
+    bench(W, fx - 5.2, fz + 0.6, 0);
+  }
   addCircle(fx, fz, 0.6);
   W.cyl('flat', fx, 0.3, fz, 0.55, 0.5, 0.35, 12, concrete);
   W.cyl('flat', fx, 0.65, fz, 0.1, 0.055, 11.6, 8, color('#c7cbd0'));
   W.blob('flat', fx, 12.35, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
 
-  court(W);
+  court(W, group);
   bEntryBed(W);
 
   // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
@@ -293,7 +315,7 @@ function solarRows(W, x0, z0, x1, z1, y, tilt, frames = false) {
 }
 
 // ── the courtyard between the front office and B's canopy (layout.js COURT) ──
-function court(W) {
+function court(W, group) {
   const R = rng(613);
   // the raised zig-zag planter: a concrete rim round soil, full of shrubs and grasses
   const P = ensureCCW(COURT.planter), h = 0.45;
@@ -324,8 +346,40 @@ function court(W) {
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
+  // round grey steel posts along its edge, and a light in each bay (IMG_2395, IMG_2397)
   const nP = Math.round((c.x1 - c.x0) / 6);
-  for (let i = 0; i <= nP; i++) { const x = c.x0 + 1 + (i * (c.x1 - c.x0 - 1.5)) / nP; W.slab('flat', x - 0.1, c.z1 - 0.35, x + 0.1, c.z1 - 0.15, 0, 3.2, fin); }
+  for (let i = 0; i <= nP; i++) {
+    const x = c.x0 + 1 + (i * (c.x1 - c.x0 - 1.5)) / nP;
+    W.cyl('flat', x, 0, c.z1 - 0.3, 0.09, 0.09, 3.2, 10, color('#8d9399')); addCircle(x, c.z1 - 0.3, 0.12);
+    if (i < nP) { const lx = x + (c.x1 - c.x0 - 1.5) / nP / 2; W.slab('glow', lx - 0.25, c.z0 + 1.9, lx + 0.25, c.z0 + 2.3, 3.16, 3.2, color('#ffe6bd')); LIGHTS.push([lx, c.z0 + 2.1, 3.15, 4]); }
+  }
+  for (const [x, z] of COURT.benches) bench(W, x, z, Math.PI / 2);
+  // the black steel fence from the office to the teachers' yard, with its gates, the PTSA banner
+  // and no-smoking signs on the passage side, and a bike rack there (IMG_2396, IMG_2398, IMG_2399)
+  const [[fa, fb], [fc, fd]] = COURT.fence;
+  steelFence(W, fa, fb, fc, fd, [[1.4, 1.2, true], [10.2, 3.0, false]]);
+  const L = Math.hypot(fc - fa, fd - fb), ux = (fc - fa) / L, uz = (fd - fb) / L;
+  const at = (d, off) => [fa + ux * d + uz * off, fb + uz * d - ux * off];
+  const ptsa = textCanvas(512, 256, (g, w, h) => {
+    g.fillStyle = '#f2cf3a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1f2330'; g.textAlign = 'center';
+    g.font = '800 54px "Helvetica Neue", Arial, sans-serif'; g.fillText('GO CHARGERS!', w / 2, 80);
+    g.font = '600 36px "Helvetica Neue", Arial, sans-serif'; g.fillText('We\u2019re stronger together.', w / 2, 140); g.fillText('Join us.', w / 2, 190);
+  });
+  const nosm = textCanvas(128, 180, (g, w, h) => {
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); g.strokeStyle = '#c8352e'; g.lineWidth = 8;
+    g.beginPath(); g.arc(w / 2, 70, 40, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.moveTo(w / 2 - 28, 42); g.lineTo(w / 2 + 28, 98); g.stroke();
+    g.fillStyle = '#c8352e'; g.font = '700 20px Arial, sans-serif'; g.textAlign = 'center'; g.fillText('NO SMOKING', w / 2, 140); g.fillText('NO VAPING', w / 2, 165);
+  });
+  const rot = Math.atan2(ux, uz) + Math.PI / 2;        // face the passage (east side)
+  { const [x, z] = at(6.0, 0.06); group.add(decal(ptsa, x, 1.25, z, 1.6, 0.8, rot)); }
+  for (const d of [7.2, 7.65]) { const [x, z] = at(d, 0.06); group.add(decal(nosm, x, 1.25, z, 0.36, 0.5, rot)); }
+  const [kx, kz] = COURT.bikeRack;                       // a grey hoop rack
+  W.rod('flat', [kx, 0.75, kz - 1.1], [kx, 0.75, kz + 1.1], 0.05, color('#9ea3a8'));
+  for (let k = 0; k < 6; k++) { const zz = kz - 1.0 + k * 0.4; W.rod('flat', [kx - 0.3, 0.05, zz], [kx - 0.3, 0.75, zz], 0.03, color('#9ea3a8')); W.rod('flat', [kx + 0.3, 0.05, zz], [kx + 0.3, 0.75, zz], 0.03, color('#9ea3a8')); W.rod('flat', [kx - 0.3, 0.75, zz], [kx + 0.3, 0.75, zz], 0.03, color('#9ea3a8')); }
+  addSegment(kx, kz - 1.1, kx, kz + 1.1, 0.35);
+  // a pink crape myrtle and roses in the zig-zag planter, by the fence (IMG_2396, IMG_2398)
+  crapeMyrtle(W, -30.8, -50.4, R, { h: 4.6, y: 0.45 });
+  for (const [x, zz, c] of [[-30.0, -47.6, '#c8352e'], [-30.1, -45.6, '#e38aae'], [-30.5, -48.9, '#e8784e']]) roseBush(W, x, zz, R, color(c), 0.45);
 }
 
 const FEATHER = ['#a9b86a', '#b7c27a', '#9aad5e'].map(color);            // Mexican feather grass
@@ -373,4 +427,55 @@ export function bEntryBed(W) {
     else if (x < -52) flax(W, x, z, R, { y: 0.07, h: 1.2 });
     else shrub(W, x, z, R, { y: 0.07, s: 0.6, cols: G.leaf });
   });
+}
+
+// A black steel picket fence from (ax, az) to (bx, bz). gates: [distance from a, width, open]:
+// heavier posts either side; an open gate leaves the gap walkable.
+function steelFence(W, ax, az, bx, bz, gates = [], h = 2.0) {
+  const ink = color('#26282b'), L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+  const P = (d, y) => [ax + ux * d, y, az + uz * d];
+  W.rod('flat', P(0, h - 0.1), P(L, h - 0.1), 0.04, ink);
+  W.rod('flat', P(0, 0.14), P(L, 0.14), 0.04, ink);
+  for (let d = 0.06; d < L; d += 0.12) W.rod('flat', P(d, 0.1), P(d, h), 0.014, ink);
+  for (let d = 0; d <= L + 0.01; d += L / Math.max(1, Math.round(L / 2.4))) { const [x, , z] = P(d, 0); W.box('flat', x, h / 2 + 0.05, z, 0.08, h + 0.1, 0.08, ink); }
+  let from = 0;
+  for (const [d, w, open] of gates) {
+    for (const g of [d - w / 2, d + w / 2]) { const [x, , z] = P(g, 0); W.box('flat', x, (h + 0.15) / 2, z, 0.11, h + 0.15, 0.11, ink); }
+    const [lx, , lz] = P(d + w / 2 - 0.12, 0); W.box('flat', lx, 1.1, lz, 0.14, 0.22, 0.14, color('#3a3d41'));
+    if (open) { if (d - w / 2 > from) addSegment(...P(from, 0).filter((_, i) => i !== 1), ...P(d - w / 2, 0).filter((_, i) => i !== 1), 0.1); from = d + w / 2; }
+  }
+  addSegment(...P(from, 0).filter((_, i) => i !== 1), ...P(L, 0).filter((_, i) => i !== 1), 0.1);
+}
+// A rose bush: a leafy mound dotted with blooms.
+function roseBush(W, x, z, R, bloom, y = 0) {
+  shrub(W, x, z, R, { y, s: 1.0, cols: G.leaf });
+  for (let k = 0; k < 9; k++) { const a = R() * Math.PI * 2, d = R() * 0.4; W.blob('flat', x + Math.cos(a) * d, y + 0.55 + R() * 0.35, z + Math.sin(a) * d, 0.07, 0.06, 0.07, bloom); }
+}
+// A tree rose (a standard): a bare stem with a round, flowering head.
+function treeRose(W, x, z, R, bloom) {
+  W.cyl('flat', x, 0, z, 0.03, 0.025, 1.1, 5, G.bark);
+  W.blob('flat', x, 1.35, z, 0.42, 0.36, 0.42, darker(G.leaf[2]));
+  cards(W, x, 1.35, z, 0.55, 0.45, 0.55, G.leaf[0], R, 30, 0.6);
+  for (let k = 0; k < 12; k++) { const a = R() * Math.PI * 2, e = R() * Math.PI - Math.PI / 2; W.blob('flat', x + Math.cos(a) * Math.cos(e) * 0.5, 1.35 + Math.sin(e) * 0.4, z + Math.sin(a) * Math.cos(e) * 0.5, 0.07, 0.06, 0.07, bloom); }
+  addCircle(x, z, 0.1);
+}
+const darker = (c) => c.clone().multiplyScalar(0.62);
+// A storefront facing north (the office's front) from x0 to x1 at wall z: 'f' a frosted glass bay
+// (clear transom row, frosted middle, white panel below), 'd' a glass door, '|' a pier. They stretch to fit.
+function frostFront(W, x0, x1, z, parts) {
+  const want = { f: 1.2, d: 1.0, '|': 0.3 }, k = (x1 - x0) / parts.reduce((a, c) => a + want[c], 0);
+  const frame = color('#6b7076'), top = 3.1;
+  W.slab('flat', x0, z - 0.06, x1, z, 0, top, frame);
+  let x = x0;
+  for (const c of parts) {
+    const w = want[c] * k, a = x + 0.05, b = x + w - 0.05;
+    const q = (y0, y1, col) => W.quad('glass', [b, y0, z - 0.08], [a, y0, z - 0.08], [a, y1, z - 0.08], [b, y1, z - 0.08], col, 'auto');
+    if (c === '|') W.slab('stucco', x, z - 0.2, x + w, z, 0, top, color('#efe8d6'));
+    else if (c === 'f') {
+      W.slab('flat', a, z - 0.09, b, z - 0.06, 0.05, 0.85, color('#f1f1ee'));
+      q(0.9, 2.15, color('#dfe6ea')); q(2.25, top - 0.06, color('#ffffff'));
+    } else { q(0.1, 2.3, color('#ffffff')); q(2.4, top - 0.06, color('#ffffff')); W.slab('flat', a + 0.1, z - 0.12, a + 0.14, z - 0.08, 0.9, 1.3, color('#c9ccd0')); }
+    W.slab('flat', x + w - 0.03, z - 0.1, x + w + 0.03, z - 0.06, 0, top, frame);
+    x += w;
+  }
 }

@@ -329,7 +329,7 @@ function frontOfR(W, R) {
 }
 
 // A black mesh bench with a back (IMG_2349). Unrotated it faces -x, its back to +x.
-function bench(W, x, z, rot = 0) {
+export function bench(W, x, z, rot = 0) {
   W.with(x, 0, z, rot, () => {
     W.box('flat', 0, 0.45, 0, 0.42, 0.04, 1.8, black);
     W.box('flat', 0.23, 0.72, 0, 0.04, 0.42, 1.8, black);

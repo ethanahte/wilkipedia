@@ -224,12 +224,17 @@ export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blu
 export const COURT = {
   planter: [[-29.2, -52.8], [-33.7, -52.8], [-36.9, -49.6], [-33.7, -43.9], [-36.9, -40.4], [-33.4, -37.8], [-29.4, -43.5]],
   bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-40.5, -44.3],
-  porch: { x0: -54.7, x1: -25.8, z0: -57.4, z1: -53.0 },          // from B's wall to past the office's east end
+  porch: { x0: -54.7, x1: -22.0, z0: -57.4, z1: -53.0 },          // from B's wall, past the office, over the gate (IMG_2396/2399)
   // the bed under the big trees north of B's entry block: ferns and feather grass, with a small
   // maple by the block (IMG_2392, IMG_2394)
   bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
   maple: [-52.2, -38.8],
-  officeDoor: -44.0,                 // the yellow door in the office's south wall, behind the covered walk (IMG_2392)
+  // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x
+  yellowDoors: [-49.5, -43.5], box: -39.5, filler: -36.0, entry: [-33.2, -27.2],
+  benches: [[-47.8, -50.3], [-44.2, -51.2]],
+  // the black steel fence from the office's south-east corner to the teachers' yard, with a
+  // pedestrian gate by the office and a double gate by the yard (IMG_2396/2398/2399)
+  fence: [[-26.2, -57.4], [-25.45, -44.9]], bikeRack: [-24.2, -52.5],
 };
 // The flower bed on the quad side of B's entry block, along B's wall (Apple Maps view for its shape;
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
@@ -247,8 +252,11 @@ export const FRONT = {
   // stand in their own bed at the office's north-east corner (palmBed, rounded at its south-east
   // corner); the flagpole stands in a round planter south of it (flagBed: a ring of shrubs round
   // a paved circle).
-  palms: [[-22.2, -73.6, 14.2], [-23.6, -71.2, 12.8], [-20.2, -75.3, 15.5]],
-  palmBed: { x0: -24.4, x1: -18.1, z0: -77.5, z1: -69.1, r: 3.5, h: 0.45 },
+  palms: [[-24.3, -75.9, 10.5], [-21.8, -76.1, 11.8], [-19.3, -75.8, 9.6]],
+  // (IMG_2400/2401/2404: a long raised concrete planter along a wall that continues east from the
+  // entrance, rounded at its east end, with three tall palms, agapanthus and boulders)
+  palmBed: { x0: -26.2, x1: -17.6, z0: -77.4, z1: -74.55, h: 0.55 },
+  screenWall: { x0: -26.2, x1: -20.5, h: 3.6 },
   flag: [-18.4, -61.7],
   flagBed: { r: 4.3, inner: 2.9 },
   entry: { x0: -32, x1: -26.2 },

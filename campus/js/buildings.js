@@ -169,7 +169,7 @@ const KITS = {
   admin(W, b, e) {
     if (e.len < 4 || e.nz < -0.5) return;   // the north face is the sign wall (landmarks.js)
     if (e.nx < -0.5) return;                 // the west face is against B
-    if (e.nz > 0.5) return;                  // the south face is adminSouth()'s (IMG_2392)
+    if (e.nz > 0.5 || e.nx > 0.5) return;    // the south and east faces are adminSouth()'s (IMG_2392/2395/2402)
     for (const { t } of bays(e.len, 3.6, 1.2)) windowAt(W, e, t, 2.0, 2.6, 1.6);
   },
   gym(W, b, e, R) {
@@ -626,11 +626,44 @@ function bEntry(W) {
   }
 }
 
-// The front office's south wall, behind its covered walk (IMG_2392): plain cream with a yellow door.
+// The front office's courtyard (south) side, behind its covered walk (IMG_2392, 2395, 2396, 2397):
+// cream wall with two yellow doors, a fire bell over an electrical box, a bottle-filler fountain,
+// and at the east end the WHS glass entrance with its frosted storefront. B's glass doors close the
+// walk's west end. Its east side (IMG_2402): a long plain wall with two doors near the south end
+// (the banners are decals in landmarks.js).
 function adminSouth(W, b) {
-  const xs = b.poly.map((p) => p[0]), z = Math.max(...b.poly.map((p) => p[1]));
-  const e = southWall(Math.min(...xs), Math.max(...xs), z);
-  doorAt(W, e, COURT.officeDoor - Math.min(...xs), 1.0, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  const xs = b.poly.map((p) => p[0]), zs = b.poly.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), zS = Math.max(...zs), zN = Math.min(...zs);
+  const e = southWall(x0, x1, zS), t = (x) => x - x0;
+  for (const x of COURT.yellowDoors) doorAt(W, e, t(x), 1.0, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  onWall(W, e, t(COURT.box), 1.3, 0.02, () => W.box('flat', 0, 0, 0.08, 0.45, 0.55, 0.16, color('#b7bbbf')));
+  onWall(W, e, t(COURT.box - 0.3), 2.8, 0.03, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
+  onWall(W, e, t(COURT.filler), 0, 0.02, () => {                 // bottle filler over a fountain bowl
+    W.box('flat', 0, 1.45, 0.1, 0.5, 0.9, 0.2, color('#b8bcc0'));
+    W.box('flat', 0, 0.85, 0.2, 0.55, 0.14, 0.4, color('#b8bcc0'));
+    W.box('flat', 0, 0.55, 0.12, 0.3, 0.5, 0.2, color('#a4a8ac'));
+  });
+  const [ex0, ex1] = COURT.entry;
+  storefront(W, zS, ex0, ex1, 'dpp', 3.0);
+  onWall(W, e, t(ex0 + 1.0), 1.55, 0.09, () => W.box('flat', 0, 0, 0, 0.9, 0.22, 0.01, color('#f4f4f2')));   // the WHS lettering band on the door
+  // B's glass doors at the walk's west end: double doors between side lights, a transom over
+  const bw = rWall(x0, COURT.porch.z1 - 0.2, x0, COURT.porch.z0 + 0.4, 1, 0);
+  doorAt(W, bw, bw.len / 2, 1.8, 2.3, null, { glass: true, frameCol: CC.frame });
+  for (const dt of [-1.25, 1.25]) onWall(W, bw, bw.len / 2 + dt, 1.2, 0.03, () => {
+    W.box('flat', 0, 0, 0, 0.62, 2.3, 0.08, CC.frame);
+    W.quad('glass', [-0.25, -1.08, 0.05], [0.25, -1.08, 0.05], [0.25, 1.08, 0.05], [-0.25, 1.08, 0.05], color('#ffffff'), 'auto');
+  });
+  onWall(W, bw, bw.len / 2, 2.72, 0.03, () => {
+    W.box('flat', 0, 0, 0, 3.2, 0.6, 0.08, CC.frame);
+    W.quad('glass', [-1.55, -0.23, 0.05], [1.55, -0.23, 0.05], [1.55, 0.23, 0.05], [-1.55, 0.23, 0.05], color('#ffffff'), 'auto');
+  });
+  // east side: two doors near its south end, a light over each
+  const ee = rWall(x1, zS, x1, zN, 1, 0);
+  for (const z of [-60.4, -58.8]) {
+    doorAt(W, ee, zS - z, 0.95, 2.2, color('#d8cfb8'), { frameCol: color('#cfc5ae'), plain: true });
+    onWall(W, ee, zS - z, 2.55, 0.03, () => W.box('flat', 0, 0, 0.04, 0.16, 0.12, 0.08, color('#3d4044')));
+  }
+  onWall(W, ee, zS - -69.2, 2.1, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.28, 0.02, color('#d9544c')));
 }
 
 // The drinking fountain by the snack bar (IMG_2367, close up): a wide cream concrete base
@@ -713,6 +746,16 @@ function cafFront(W) {
   onWall(W, ww, wt(-3.2), 1.78, 0.02, () => W.box('flat', 0, 0, 0, 0.14, 0.24, 0.02, color('#e2b43b')));
   onWall(W, ww, wt(-2.25), 1.78, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.3, 0.01, color('#f2f2ee')));
   doorAt(W, ww, wt(-1.3), 0.95, 2.2, color('#4f5459'), { frameCol: CC.frame, plain: true });
+  // The west wall north of the teachers' yard (IMG_2399): a yellow door with a grille in it under a
+  // small standing-seam metal awning, and a small sign beside it.
+  const wy = rWall(-15.6, -44.9, -15.6, -52.8, -1, 0), wyt = (z) => Math.abs(z - wy.az);
+  doorAt(W, wy, wyt(-48.4), 1.0, 2.2, C.door, { frameCol: color('#d9ccb0'), plain: true });
+  onWall(W, wy, wyt(-48.4), 1.1, 0.1, () => W.box('flat', 0, 0, 0, 0.55, 1.2, 0.02, color('#8d8f8c')));
+  onWall(W, wy, wyt(-48.4), 2.65, 0.45, () => {
+    W.box('flat', 0, 0, 0, 1.7, 0.08, 0.9, color('#7c8187'));
+    for (let k = -3; k <= 3; k++) W.box('flat', k * 0.24, 0.05, 0, 0.03, 0.04, 0.9, color('#9aa0a6'));
+  });
+  onWall(W, wy, wyt(-49.3), 1.6, 0.02, () => W.box('flat', 0, 0, 0, 0.3, 0.14, 0.02, color('#f4f4f2')));
   // The east wing (IMG_2365): blank wall, then a pair of dark doors. (The fountain
   // that used to be drawn here is the west wing's, in IMG_2367.)
   const ew = southWall(50, 62.6, z), et = (x) => x - 50;

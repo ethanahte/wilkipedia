@@ -421,11 +421,35 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       The courtyard bed (`COURT.bed`) holds ferns and feather grass under the
       trees, with a small maple by the entry block (IMG_2392/2394).
 
+      Around the front office (IMG_2395–2404):
+      - North entrance: a deep fascia with ADMINISTRATION letters over a
+        frosted storefront (`frostFront()`) and the WHS door, beside a
+        narrow mosaic strip.
+      - A wall runs on east from the entrance, with a long raised concrete
+        planter along it (rounded at its east end) holding three tall
+        palms, agapanthus and boulders (`FRONT.palmBed`, `screenWall`).
+      - The flagpole's round planter has golden mounded shrubs, yellow tree
+        roses and a bench.
+      - The long east wall is plain, with two blue WILCOX HIGH SCHOOL
+        #CHARGERSTRONG banners and two doors near its south end. The old
+        "student entrance" there was never in a photo and is gone.
+      - Courtyard side, behind the covered walk: two yellow doors, a fire
+        bell over an electrical box, a bottle filler, and the WHS glass
+        entrance with a storefront at the east end. B's glass doors close
+        the walk's west end. The walk has round grey posts and lights, and
+        runs on over the gate. Two benches face it.
+      - A black steel fence (`steelFence()`) runs from the office's
+        south-east corner to the teachers' yard, with an open pedestrian
+        gate by the office and a double gate by the yard. It carries a PTSA
+        banner and no-smoking signs on the passage side, with a bike rack
+        there. The zig-zag planter has a crape myrtle and roses by it.
+      - The cafeteria's west wall north of the yard has a yellow door under
+        a small metal awning (IMG_2399).
+
       The front office (`ADMIN`) is ONE rectangle from B's wall to its east
       end (Ethan). Its quad-side face is at z -57.4 (narrower, per Ethan and
       the map), and its west face is against B (no kit windows). Its south face,
-      behind the covered walk, is plain cream with a yellow door
-      (`adminSouth()`, IMG_2392; the door's position along it is estimated).
+      behind the covered walk, is `adminSouth()` (above).
 
       The palms stand in their own bed at the office's north-east corner
       (`FRONT.palmBed`). The flagpole stands in a round planter south of it
