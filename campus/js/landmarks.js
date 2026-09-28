@@ -56,7 +56,7 @@ export function buildLandmarks(W, group, fontFamily) {
   group.add(decal(signTex, s.x, s.y, z - 0.03, s.w, s.w * 400 / 2048, Math.PI));
 
   // roof edge over the sign wall, and the stepped-up volume behind it
-  W.slab('flat', -47.2, z - 1.3, -28.2, z, 4.45, 4.85, fin);
+  W.slab('flat', -47.2, z - 1.3, -30.2, z, 4.45, 4.85, fin);
   W.slab('stucco', -41, -71, -30, -62, 4.8, 6.6, color('#efe8d6'));
   // the main entrance: a flat canopy on two posts, glass doors and a mosaic panel
   const e = FRONT.entry;
@@ -105,7 +105,7 @@ export function buildLandmarks(W, group, fontFamily) {
     g.font = '800 48px "Helvetica Neue", Arial, sans-serif'; g.fillText('WILCOX HIGH SCHOOL', w / 2, 120);
     g.font = '700 40px "Helvetica Neue", Arial, sans-serif'; g.fillText('#CHARGERSTRONG', w / 2, 190);
   });
-  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -28.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
+  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -30.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
   // the wall that runs on east from the entrance, and the long raised planter along it, rounded at
   // its east end: three tall palms, agapanthus and boulders (IMG_2400, IMG_2401, IMG_2404)
   {
@@ -356,10 +356,9 @@ function court(W, group) {
   for (const [x, z] of COURT.benches) bench(W, x, z, Math.PI / 2);
   // the black steel fence from the office to the teachers' yard, with its gates, the PTSA banner
   // and no-smoking signs on the passage side, and a bike rack there (IMG_2396, IMG_2398, IMG_2399)
-  const [[fa, fb], [fc, fd]] = COURT.fence;
-  steelFence(W, fa, fb, fc, fd, [[1.4, 1.2, true], [10.2, 3.0, false]]);
-  const L = Math.hypot(fc - fa, fd - fb), ux = (fc - fa) / L, uz = (fd - fb) / L;
-  const at = (d, off) => [fa + ux * d + uz * off, fb + uz * d - ux * off];
+  const [[fa, fb], [fc, fd], [fe, ff]] = COURT.fence;
+  steelFence(W, fa, fb, fc, fd, [[1.6, 1.2, true]]);                  // south from the office
+  steelFence(W, fc, fd, fe, ff, [[(fe - fc) / 2, 3.0, false]]);       // east to the yard's short side
   const ptsa = textCanvas(512, 256, (g, w, h) => {
     g.fillStyle = '#f2cf3a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1f2330'; g.textAlign = 'center';
     g.font = '800 54px "Helvetica Neue", Arial, sans-serif'; g.fillText('GO CHARGERS!', w / 2, 80);
@@ -370,16 +369,16 @@ function court(W, group) {
     g.beginPath(); g.arc(w / 2, 70, 40, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.moveTo(w / 2 - 28, 42); g.lineTo(w / 2 + 28, 98); g.stroke();
     g.fillStyle = '#c8352e'; g.font = '700 20px Arial, sans-serif'; g.textAlign = 'center'; g.fillText('NO SMOKING', w / 2, 140); g.fillText('NO VAPING', w / 2, 165);
   });
-  const rot = Math.atan2(ux, uz) + Math.PI / 2;        // face the passage (east side)
-  { const [x, z] = at(6.0, 0.06); group.add(decal(ptsa, x, 1.25, z, 1.6, 0.8, rot)); }
-  for (const d of [7.2, 7.65]) { const [x, z] = at(d, 0.06); group.add(decal(nosm, x, 1.25, z, 0.36, 0.5, rot)); }
+  // on the south leg's east face, toward the passage, over the flower bed
+  group.add(decal(ptsa, fa + 0.06, 1.3, -51.2, 1.6, 0.8, Math.PI / 2));
+  for (const zz of [-50.0, -49.55]) group.add(decal(nosm, fa + 0.06, 1.3, zz, 0.36, 0.5, Math.PI / 2));
   const [kx, kz] = COURT.bikeRack;                       // a grey hoop rack
   W.rod('flat', [kx, 0.75, kz - 1.1], [kx, 0.75, kz + 1.1], 0.05, color('#9ea3a8'));
   for (let k = 0; k < 6; k++) { const zz = kz - 1.0 + k * 0.4; W.rod('flat', [kx - 0.3, 0.05, zz], [kx - 0.3, 0.75, zz], 0.03, color('#9ea3a8')); W.rod('flat', [kx + 0.3, 0.05, zz], [kx + 0.3, 0.75, zz], 0.03, color('#9ea3a8')); W.rod('flat', [kx - 0.3, 0.75, zz], [kx + 0.3, 0.75, zz], 0.03, color('#9ea3a8')); }
   addSegment(kx, kz - 1.1, kx, kz + 1.1, 0.35);
   // a pink crape myrtle and roses in the zig-zag planter, by the fence (IMG_2396, IMG_2398)
-  crapeMyrtle(W, -30.8, -50.4, R, { h: 4.6, y: 0.45 });
-  for (const [x, zz, c] of [[-30.0, -47.6, '#c8352e'], [-30.1, -45.6, '#e38aae'], [-30.5, -48.9, '#e8784e']]) roseBush(W, x, zz, R, color(c), 0.45);
+  crapeMyrtle(W, -32.6, -50.2, R, { h: 4.6, y: 0.45 });
+  for (const [x, zz, c] of [[-31.6, -47.6, '#c8352e'], [-31.6, -46.0, '#e38aae'], [-31.7, -49.2, '#e8784e']]) roseBush(W, x, zz, R, color(c), 0.45);
 }
 
 const FEATHER = ['#a9b86a', '#b7c27a', '#9aad5e'].map(color);            // Mexican feather grass

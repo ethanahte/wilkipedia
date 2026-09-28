@@ -438,16 +438,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         entrance with a storefront at the east end. B's glass doors close
         the walk's west end. The walk has round grey posts and lights, and
         runs on over the gate. Two benches face it.
-      - A black steel fence (`steelFence()`) runs from the office's
-        south-east corner to the teachers' yard, with an open pedestrian
-        gate by the office and a double gate by the yard. It carries a PTSA
-        banner and no-smoking signs on the passage side, with a bike rack
-        there. The zig-zag planter has a crape myrtle and roses by it.
+      - The black steel fence (`steelFence()`, `COURT.fence`) is an L
+        (Ethan). It runs south from the office's courtyard wall at x -31,
+        just east of the WHS entrance, through the zig-zag flower bed. Then
+        it runs east in line with the teachers' yard's short side (z -44.9)
+        to meet it. It has an open pedestrian gate by the office and a
+        double gate in the east leg. The PTSA banner and no-smoking signs
+        face the passage, with a bike rack there. A crape myrtle and roses
+        grow on the courtyard side.
       - The cafeteria's west wall north of the yard has a yellow door under
         a small metal awning (IMG_2399).
 
       The front office (`ADMIN`) is ONE rectangle from B's wall to its east
-      end at x -28.2 (Ethan: shorter toward the flagpole). Its quad-side face is at z -57.4 (narrower, per Ethan and
+      end at x -30.2 (Ethan: shorter toward the flagpole). Its quad-side face is at z -57.4 (narrower, per Ethan and
       the map), and its west face is against B (no kit windows). Its south face,
       behind the covered walk, is `adminSouth()` (above).
 
