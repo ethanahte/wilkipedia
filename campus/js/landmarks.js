@@ -99,7 +99,7 @@ export function buildLandmarks(W, group, fontFamily) {
   W.blob('flat', fx, 12.05, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
 
   // ── Building B's grey steel entry canopy, running to the cafeteria's walkway ──
-  const c0 = -54.7, c1 = -17.8, cz0 = -33.6, cz1 = -28.4;
+  const c0 = -54.7, c1 = -17.8, cz0 = -32.0, cz1 = -28.4;   // its north side stops in front of the teachers' yard wall (IMG_2391)
   W.slab('flat', c0, cz0, c1, cz1, 3.55, 3.8, color('#e9e7e2'));          // soffit/underside
   W.slab('flat', c0, cz0 - 0.1, c1, cz0, 3.4, 3.9, steel);
   W.slab('flat', c0, cz1, c1, cz1 + 0.1, 3.4, 3.9, steel);
@@ -127,6 +127,10 @@ export function buildLandmarks(W, group, fontFamily) {
   for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', wx0, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', wx0, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
+  // it reaches back over the snack bar's recess and the door niche beside it (layout.js CAF-w)
+  W.slab('flat', -17.8, -32.4, -4.95, wz0, 3.5, 3.78, fin);
+  W.slab('flat', -17.8, -33.4, -16.6, -32.4, 3.5, 3.78, fin);
+  for (const x of [-13.5, -8.5]) { W.slab('glow', x - 0.3, -31.6, x + 0.3, -31.2, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -31.4, 3.45, 4]); }
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 
   // ── the Career Center's yellow awning on B, over its quad-side door ──

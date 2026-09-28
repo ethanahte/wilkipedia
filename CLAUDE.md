@@ -351,15 +351,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - The front has the storefront under the covered walkway: six groups of
       `storefront()` bays between cream piers. A bay is glass over a solid
       lower panel with a transom row, or glass doors.
-    - West side, west to east (IMG_2367/2368/2370/2371, Ethan):
-      - A low building (`CAF-nw`, style `caf-nw`: no kit windows, no rooftop
-        units) stands furthest back, at z -35.5 behind the end of B's canopy.
-        It carries the notice board, a blue accessibility sign and a yellow
-        door. Its west and north extent are a best reading of the satellite.
-      - The snack bar runs from the wing's west corner (x -17.8) to -4.95, set
-        0.8 m back (a notch in `CAF-w`; Ethan: 凹进去, twice as wide as first
-        drawn). It has three groups between piers: four panes; pane, double
-        doors, pane; panes and a single door with the SNACK BAR plaque.
+    - West side, west to east (IMG_2367/2368/2371/2391, Ethan):
+      - The teachers' yard, a right-angle trapezoid (layout.js `YARD-*`).
+        Its long side is a plain wall on the quad side, in line with the
+        snack bar, carrying the poster board. The right-angle side is the
+        cafeteria's west wall. The short side faces the parking lot, and the
+        slanted side makes about 75° with the long one; both are black steel
+        fences (`blackFence()`, with colliders), and the slanted one has a
+        gate. The yard's depth and the fence line come from the satellite;
+        the short side's material is a guess. It is a yard, not a building:
+        style `yard` has no kit windows and no rooftop units. B's canopy
+        stops in front of its wall (cz0 -32.0).
+      - A door in a niche set back further (x -17.8 to -16.6), between the
+        yard wall and the snack bar.
+      - The snack bar is a shallow room whose glass front is set 2.0 m back
+        (a notch in `CAF-w`; Ethan: 2.5 times the first 0.8 m), from x -16.6
+        to -4.95. The walkway roof reaches back over it. It has three groups
+        between piers: four panes; pane, double doors, pane; panes and a
+        single door with the SNACK BAR plaque.
       - Then the wall comes forward: a yellow door at the corner, then the
         drinking fountain (`cafFountain()`, from IMG_2367 close up). It has a
         wide cream concrete base with a thick flat top, a steel back plate
@@ -370,7 +379,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark
       doors.
     - The walkway (landmarks.js) stands on grey steel posts. It starts at the
-      wing's west corner, where B's canopy ends.
+      wing's west corner, where B's canopy ends, and its roof reaches back
+      over the snack bar's recess.
     - Young trees' beds near the cafeteria (z < -12) are low green groundcover.
       The fire hydrant in its ring guard sits by R's north end.
   - **Room plates are hidden for now (Ethan)** except the P building's door

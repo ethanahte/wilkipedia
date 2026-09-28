@@ -17,6 +17,7 @@ import * as THREE from 'three';
 import { color, rng, ensureCCW } from './geo.js';
 import { BUILDINGS } from './layout.js';
 import { LIGHTS } from './lights.js';
+import { addSegment } from './collide.js';
 
 const C = {
   cream: color('#f0e5cc'), tan: color('#e0cca2'), panel: color('#f5eedf'), frame: color('#5f6368'),
@@ -141,10 +142,10 @@ const KITS = {
     onWall(W, e, e.len / 2, 4.35, 0.06, () => W.box('flat', 0, 0, 0, e.len, 0.16, 0.12, C.fin));
   },
   r() {},                                       // buildR() draws R whole
-  'caf-nw'() {},                                // only its quad face is known (cafFront()); no invented windows
+  yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on them)
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
-    if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west end: the snack bar's return and CAF-nw's party wall (no photo)
+    if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west end: the teachers' yard side (no photo of it)
     const tall = b.h > 6;
     for (const { i, t } of bays(e.len, 4.2, 1.5)) {
       if (e.nz > 0.5 && i % 3 === 1) doorAt(W, e, t, 1.8, 2.3, C.door);
@@ -213,7 +214,7 @@ const KITS = {
 const WALL = {
   b: C.cream, r: color('#ece0c4'), caf: color('#efe6d0'), p: color('#efe5cf'), library: color('#efe5cf'),
   admin: color('#efe8d6'), gym: color('#eee6d3'), gymlobby: color('#eee6d3'), plain: color('#efe5cf'), mn: color('#f1efe7'),
-  'caf-nw': color('#efe6d0'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
+  yard: color('#efe6d0'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
 // ── Building R ──
@@ -551,6 +552,30 @@ function storefront(W, z, x0, x1, parts, top = 3.1) {
 }
 const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
 
+// A black steel fence along [x, z] points (the teachers' yard, IMG_2391): square posts
+// every 2.4 m or so, a top and bottom rail and bars every 12 cm. gate: where along the
+// run (0–1) a 1.2 m gate sits, drawn as heavier posts either side and a lock box.
+function blackFence(W, pts, { h = 1.9, gate = null } = {}) {
+  const ink = color('#26282b');
+  for (let i = 1; i < pts.length; i++) {
+    const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
+    W.rod('flat', [ax, h - 0.08, az], [bx, h - 0.08, bz], 0.035, ink);
+    W.rod('flat', [ax, 0.12, az], [bx, 0.12, bz], 0.035, ink);
+    for (let d = 0.06; d < L; d += 0.12) W.rod('flat', [ax + ux * d, 0.1, az + uz * d], [ax + ux * d, h, az + uz * d], 0.012, ink);
+    const n = Math.max(1, Math.round(L / 2.4));
+    for (let k = 0; k <= n; k++) {
+      const x = ax + (bx - ax) * k / n, z = az + (bz - az) * k / n;
+      W.box('flat', x, (h + 0.1) / 2, z, 0.07, h + 0.1, 0.07, ink);
+    }
+    if (gate != null) {
+      for (const g of [gate * L - 0.6, gate * L + 0.6]) W.box('flat', ax + ux * g, (h + 0.15) / 2, az + uz * g, 0.1, h + 0.15, 0.1, ink);
+      W.box('flat', ax + ux * (gate * L + 0.52), 1.05, az + uz * (gate * L + 0.52), 0.12, 0.2, 0.12, color('#3a3d41'));
+    }
+    addSegment(ax, az, bx, bz, 0.1);
+  }
+}
+
 // The drinking fountain by the snack bar (IMG_2367, close up): a wide cream concrete base
 // against the wall with a thick flat top; a stainless back plate on its face, left of
 // centre; two stainless bowls sticking straight out toward the walkway, a high one and a
@@ -594,25 +619,35 @@ function cafFront(W) {
     W.box('flat', 49.8, 5.15, 0.06, 0.07, 2.3, 0.04, CC.frame);
     W.box('flat', 25, 4.83, 0.06, 49.6, 0.06, 0.04, CC.frame);
   });
-  // The west side, west to east (IMG_2367, IMG_2368, IMG_2370, IMG_2371; Ethan). The
-  // outlines are in layout.js (CAF-nw, CAF-w's notch).
-  //  · The low building west of the wing, standing furthest back, behind the end of B's
-  //    canopy: the notice board, a small blue accessibility sign and a yellow door.
-  const nw = southWall(-25.5, -17.8, -35.5), nt = (x) => x + 25.5;
-  onWall(W, nw, nt(-23), 1.65, 0.03, () => { W.box('flat', 0, 0, 0, 1.8, 1.15, 0.06, color('#5b4432')); W.box('flat', 0, 0, 0.035, 1.62, 0.97, 0.01, color('#c9a877')); });
-  onWall(W, nw, nt(-20.1), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));
-  doorAt(W, nw, nt(-19.3), 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
-  //  · The snack bar, set 0.8 m back (Ethan: 凹进去), under the walkway from the wing's
-  //    west corner: three groups between cream piers — four panes; a pane, glass double
-  //    doors and a pane; panes and a single glass door with the SNACK BAR plaque (IMG_2368).
-  const RZ = -31.2, P2 = 0.35;
-  let rx = -17.8 + 0.025;
-  [[3.3, 'pppp'], [4.84, 'pdp'], [3.96, 'ppps']].forEach(([w, parts], i) => {
+  // The west side, west to east (IMG_2367, IMG_2368, IMG_2371, IMG_2391; Ethan). The
+  // outlines are in layout.js (YARD-*, CAF-w's notch).
+  //  · The teachers' yard: its quad-side wall carries the poster board; black steel
+  //    fences close the slanted side (with a gate) and the short side by the parking lot.
+  const yw = southWall(-25.5, -17.8, -32.4), yt = (x) => x + 25.5;
+  onWall(W, yw, yt(-20.0), 1.55, 0.03, () => {
+    W.box('flat', 0, 0, 0, 1.5, 1.2, 0.05, color('#2e3136'));
+    const PC = ['#e9e4d8', '#7fb0d8', '#f0c75a', '#d9776a', '#ffffff', '#9ccf8e'];
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
+      W.box('flat', -0.52 + c * 0.35, 0.25 - r * 0.5, 0.03, 0.27, 0.38, 0.01, color(PC[(r * 4 + c) % PC.length]));
+    }
+  });
+  onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
+  const YN = -48.3, XS = -25.5, XN = -25.5 + (-32.4 - YN) / Math.tan(75 * Math.PI / 180);
+  blackFence(W, [[XS, -32.5], [XN, YN]], { gate: 0.35 });
+  blackFence(W, [[XN, YN], [-17.8, YN]]);
+  //  · The door in its niche between the yard wall and the snack bar, set back further.
+  doorAt(W, southWall(-17.8, -16.6, -33.4), 0.6, 0.95, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway:
+  //    three groups between cream piers — four panes; a pane, glass double doors and a
+  //    pane; panes and a single glass door with the SNACK BAR plaque (IMG_2368).
+  const RZ = -32.4, P2 = 0.35;
+  let rx = -16.6 + 0.025;
+  [[2.97, 'pppp'], [4.36, 'pdp'], [3.57, 'ppps']].forEach(([w, parts], i) => {
     if (i) { cafPier(W, RZ, rx, rx + P2, 3.4); rx += P2; }
     storefront(W, RZ, rx, rx + w, parts, 3.0);
     rx += w;
   });
-  const door = 3.96 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
+  const door = 3.57 * 1.0 / (3 * 1.35 + 1.0);                 // the single door's width in that group
   onWall(W, southWall(rx - door - 0.5, rx - door - 0.1, RZ + 0.14), 0.2, 1.5, 0.01, () => W.box('flat', 0, 0, 0, 0.36, 0.2, 0.02, color('#9aa0a6')));
   //  · The wall comes forward again: a yellow door at the corner, the drinking fountain,
   //    the red fire bell and a yellow notice above it, a white notice, then a dark door.
@@ -642,7 +677,7 @@ export function buildBuildings(W) {
     parapet(W, b.poly, b.h, wall, undefined, undefined, (e) => BUILDINGS.some((o) => o !== b && o.h >= b.h - 0.01 && sharesEdge(e, o)));
     if (b.gable) gable(W, b, roofY);
     else if (b.barrel) barrels(W, b, roofY);
-    else if (b.style !== 'r' && b.style !== 'caf-nw') rooftop(W, b, R, roofY);
+    else if (b.style !== 'r' && b.style !== 'yard') rooftop(W, b, R, roofY);
     const kit = KITS[b.style] || KITS.plain;
     for (const e of edges(b.poly)) kit(W, b, e, R);
     if (b.style === 'r') buildR(W, b);
