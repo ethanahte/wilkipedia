@@ -409,8 +409,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         satellite). The point by the block and the V roof is the bigger;
         then the notch, a smaller point, and the tip at z -4.3. Two
         benches stand along the last slant, facing the bed (IMG_2386).
-        An umbrella table stands just south of (left of) B's quad-side
-        doors (Ethan, IMG_2377).
+        An umbrella table stands well south of (left of) B's quad-side
+        doors, past the next pier (Ethan, IMG_2377).
       - B's quad face south of there, to the library (`bQuad()` in
         buildings.js; IMG_2376–2386), has two storeys between tall tan
         piers (`BQ.piers`). Each pier has a grey louver on each floor, a
@@ -420,6 +420,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         panes across the top, a narrow glass column down the side toward
         the bay's pier (the middle bay: south), and white panels in the
         rest. Not a plain grid.
+        - The bay beside the entrance is one frame: a strip of glass along
+          its top, and white panels beside a single glass door (IMG_2377).
         - The entrance (IMG_2377) is in the middle of the face, z 2.4,
           facing the quad's middle (Ethan). It is two pairs of glass doors
           side by side under a transom of four panes, in a bay wider than
@@ -448,8 +450,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         library's wide WHS double doors between side lights, a second pair
         with a transom, and a wider one (2.6 m) into B through the
         block's east face (Ethan).
-      - The library's quad (north) face is plain precast panels with no
-        windows (IMG_2385). Two long green picnic tables stand right against
+      - The library's quad (north) face, and its east face toward the math
+        portables (Ethan), are plain precast panels with no windows
+        (IMG_2385). Two long green picnic tables stand right against
         it, one by the entrance and one at the east end (`PICNIC_LIB`;
         Ethan).
       - B's courtyard wall behind the courtyard bed has an
@@ -658,6 +661,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     writes normal+depth to a second target for the ink pass, adds the grain +
     contact darkening at wall bases, a soft warm rim on sunlit edges and (glass
     only) diagonal glints. Any new material must go through `gbuffer()`.
+  - Zoomed out from the air, the land must stay clear (Ethan). The tilt-shift
+    fades out as orbit.dist goes from 200 to 480. The fog thins with the
+    camera's distance. The sun-side haze starts at the campus, not at the
+    camera (`hazeFrom`). The clouds hide once the camera is above them
+    (y > 240).
+  - Surface detail (Ethan: more texture, still painterly). Ground meshes get
+    `groundDetail()` (toon.js), a world-space layer read off the ground's
+    own colour: sand, aggregate and stains on grey hard surfaces; brush
+    strokes of blades on green; chips on brown. On the quad's slabs it adds
+    saw-cut joints with depth (a dark groove, a lit lip) and a slightly
+    different tone per slab. Fine detail fades with distance. The quad's
+    painted map no longer draws the joints.
+    - Stucco is 512 px with sand grain, pits and lit reveal lips.
+    - The leaf atlas is drawn at double size, with midribs.
+    - Grass and flax blades shade darker toward the base.
+    - Short 3D grass clumps are scattered over the quad lawns.
     ink modes: 'soft' (foliage: depth stored negated, only its outline is inked),
     'sky' (depth 5000), 'cloud' (depth 4000: no ink, but blocks sunbeams),
     'none', 'add'. `SUN_VIEW`/`DAY` in toon.js are shared uniforms main.js

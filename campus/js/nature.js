@@ -114,7 +114,7 @@ export function blade(W, x, y, z, ang, lean, len, width, col, curve = 0.8, seg =
     const r = len * s, py = y + Math.cos(a) * r * (1 - 0.25 * s), out = Math.sin(a) * r;
     const cx = x + ux * out, cz = z + uz * out, w = width * (1 - s * 0.85);
     const L = [cx - px * w / 2, py, cz - pz * w / 2], Rr = [cx + px * w / 2, py, cz + pz * w / 2];
-    if (prev) W.quad('leaf', prev[0], prev[1], Rr, L, col);
+    if (prev) W.quad('leaf', prev[0], prev[1], Rr, L, col.clone().multiplyScalar(0.7 + 0.42 * s));   // darker at the base
     prev = [L, Rr];
   }
 }

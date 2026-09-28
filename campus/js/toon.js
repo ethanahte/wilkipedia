@@ -178,6 +178,115 @@ export function gbuffer(mat, { noInk = false, ink = noInk ? 'none' : 'normal', p
   return mat;
 }
 
+// ── ground detail ──
+// What the painted ground maps are too coarse to hold, added in world space: sand and aggregate
+// and soft stains on concrete and asphalt, blades on grass, chips in the mulch, and on the quad's
+// slabs saw-cut joints with a little depth (a dark groove, a lit lip). Which is which is read off
+// the ground's own colour (grey: hard; green: grass; brown and dark: soil), so every painted map
+// gets it. Fine detail fades out with distance, so nothing shimmers.
+let DETAIL = null;
+function detailTex() {
+  if (DETAIL) return DETAIL;
+  const S = 512;
+  let sd = 21; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+  // draw fn at (x, y) and again wherever it crosses an edge, so each layer tiles
+  const wrapAt = (x, y, m, fn) => {
+    for (const ox of x < m ? [0, S] : x > S - m ? [0, -S] : [0]) for (const oy of y < m ? [0, S] : y > S - m ? [0, -S] : [0]) fn(x + ox, y + oy);
+  };
+  const layer = (base, draw) => {
+    const c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d'); g.fillStyle = `rgb(${base},${base},${base})`; g.fillRect(0, 0, S, S);
+    draw(g); return g.getImageData(0, 0, S, S).data;
+  };
+  const conc = layer(128, (g) => {
+    const img = g.getImageData(0, 0, S, S), d = img.data;
+    for (let i = 0; i < d.length; i += 4) { const k = (r() - 0.5) * 40; d[i] = d[i + 1] = d[i + 2] = 128 + k; }   // sand
+    g.putImageData(img, 0, 0);
+    for (let i = 0; i < 2200; i++) {                              // aggregate: small stones, dark and light
+      const x = r() * S, y = r() * S, rr = 1.1 + r() * 2.4, e = 0.55 + r() * 0.45, a = r() * 3, v = r() < 0.55 ? 64 + r() * 40 : 176 + r() * 50;
+      g.fillStyle = `rgba(${v},${v},${v},0.85)`;
+      wrapAt(x, y, 4, (X, Y) => { g.beginPath(); g.ellipse(X, Y, rr, rr * e, a, 0, Math.PI * 2); g.fill(); });
+    }
+    for (let i = 0; i < 26; i++) {                                // soft stains and wear
+      const x = r() * S, y = r() * S, rr = 30 + r() * 90, v = r() < 0.7 ? 88 : 168;
+      wrapAt(x, y, rr, (X, Y) => {
+        const gr = g.createRadialGradient(X, Y, 0, X, Y, rr);
+        gr.addColorStop(0, `rgba(${v},${v},${v},${0.3 + r() * 0.2})`); gr.addColorStop(1, `rgba(${v},${v},${v},0)`);
+        g.fillStyle = gr; g.fillRect(X - rr, Y - rr, rr * 2, rr * 2);
+      });
+    }
+  });
+  const grass = layer(112, (g) => {                              // brush strokes of blades, lighter toward their tips
+    g.lineCap = 'round';
+    for (let i = 0; i < 6400; i++) {
+      const big = i < 1400;                                      // broad painterly strokes first, then fine blades over them
+      const x = r() * S, y = r() * S, L = big ? 16 + r() * 26 : 6 + r() * 12, a = -Math.PI / 2 + (r() - 0.5) * 1.2;
+      const v = big ? 60 + r() * 140 : 70 + r() * 150, w = big ? 3 + r() * 4 : 1.1 + r() * 1.6;
+      const x2 = x + Math.cos(a) * L, y2 = y + Math.sin(a) * L;
+      const gr = g.createLinearGradient(x, y, x2, y2);
+      gr.addColorStop(0, `rgb(${v * 0.6},${v * 0.6},${v * 0.6})`); gr.addColorStop(1, `rgb(${v},${v},${v})`);
+      g.strokeStyle = gr; g.lineWidth = w;
+      wrapAt(x, y, 16, (X, Y) => { g.beginPath(); g.moveTo(X, Y); g.lineTo(X + x2 - x, Y + y2 - y); g.stroke(); });
+    }
+  });
+  const mulch = layer(128, (g) => {                              // bark chips, every which way
+    for (let i = 0; i < 2600; i++) {
+      const x = r() * S, y = r() * S, w = 3 + r() * 8, h = 1.4 + r() * 3, a = r() * Math.PI, v = 55 + r() * 160;
+      g.fillStyle = `rgb(${v},${v},${v})`;
+      wrapAt(x, y, 8, (X, Y) => { g.save(); g.translate(X, Y); g.rotate(a); g.fillRect(-w / 2, -h / 2, w, h); g.restore(); });
+    }
+  });
+  const c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d'), out = g.createImageData(S, S);
+  for (let i = 0; i < out.data.length; i += 4) { out.data[i] = conc[i]; out.data[i + 1] = grass[i]; out.data[i + 2] = mulch[i]; out.data[i + 3] = 255; }
+  g.putImageData(out, 0, 0);
+  DETAIL = new THREE.CanvasTexture(c);
+  DETAIL.wrapS = DETAIL.wrapT = THREE.RepeatWrapping;
+  DETAIL.colorSpace = THREE.NoColorSpace;
+  DETAIL.anisotropy = maxAniso;
+  return DETAIL;
+}
+// Apply it to a ground material (after gbuffer()). grid: [x0, z0, dx, dz] of the slab joints.
+export function groundDetail(mat, { grid = null } = {}) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (s, r) => {
+    prev?.(s, r);
+    s.uniforms.tDetail = { value: detailTex() };
+    s.uniforms.uGrid = { value: grid ? new THREE.Vector4(...grid) : new THREE.Vector4(0, 0, 0, 0) };
+    s.vertexShader = 'varying vec3 vGW;\n' + s.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    s.fragmentShader = 'uniform sampler2D tDetail;\nuniform vec4 uGrid;\nvarying vec3 vGW;\n' + s.fragmentShader.replace('#include <alphamap_fragment>', `{
+    vec3 c = diffuseColor.rgb;
+    float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b)), sat = (mx - mn) / max(mx, 1e-4);
+    float grass = smoothstep(0.03, 0.12, c.g - max(c.r, c.b));
+    float soil = smoothstep(0.015, 0.06, c.r - c.g) * (1.0 - smoothstep(0.25, 0.45, mx));
+    float hard = (1.0 - smoothstep(0.14, 0.28, sat)) * (1.0 - grass);
+    vec2 wp = vGW.xz;
+    float fw = max(length(dFdx(wp)), length(dFdy(wp)));            // metres per screen pixel
+    float near = 1.0 - smoothstep(0.02, 0.12, fw);
+    vec4 f1 = texture2D(tDetail, wp * 0.33), f2 = texture2D(tDetail, wp * 0.085 + 0.31), f3 = texture2D(tDetail, wp * 0.5);
+    float k = 1.0 + hard * ((f1.r - 0.5) * 0.5 * near + (f2.r - 0.5) * 0.36)
+                  + grass * ((f3.g - 0.5) * 1.1 * mix(0.4, 1.0, near) + (f2.g - 0.5) * 0.5)
+                  + soil * (f3.b - 0.5) * 1.1 * mix(0.35, 1.0, near);
+    diffuseColor.rgb *= k;
+    diffuseColor.rgb += grass * (f2.g - 0.5) * vec3(0.07, 0.04, -0.04);      // patches a touch yellower or bluer
+    if (uGrid.z > 0.0) {
+      vec2 fq = fract((wp - uGrid.xy) / uGrid.zw) * uGrid.zw, d2 = min(fq, uGrid.zw - fq);
+      float d = min(d2.x, d2.y), w = 0.012 + fw * 0.5, e = min(fq.x, fq.y);
+      float groove = 1.0 - smoothstep(w, w * 2.2, d);
+      float lip = smoothstep(w, w * 1.6, e) * (1.0 - smoothstep(w * 1.6, w * 3.4, e));
+      float pave = hard * smoothstep(0.35, 0.5, mx) * (1.0 - smoothstep(0.05, 0.14, fw));
+      vec2 cell = floor((wp - uGrid.xy) / uGrid.zw);
+      float tone = fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;   // each slab poured a shade apart
+      diffuseColor.rgb *= (1.0 - 0.5 * groove * pave) * (1.0 + 0.14 * lip * pave) * (1.0 + tone * 0.08 * hard * smoothstep(0.35, 0.5, mx));
+    }
+  }
+  #include <alphamap_fragment>`);
+  };
+  const key = mat.customProgramCacheKey.bind(mat);
+  mat.customProgramCacheKey = () => 'gdet|' + key();
+  return mat;
+}
+
 // ── canvas textures ──
 export function canvasTex(w, h, draw, { repeat = null, srgb = true, mips = true } = {}) {
   const c = document.createElement('canvas');
@@ -207,12 +316,16 @@ export function makeTextures() {
   const T = {};
   // Stucco: white (tinted per vertex), faint horizontal reveals every 0.625 m and
   // a panel joint every 2.5 m, like the scored stucco on B and R.
-  T.stucco = canvasTex(256, 256, (g, w, h) => {
+  T.stucco = canvasTex(512, 512, (g, w, h) => {
     g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
-    noise(g, w, h, 10);
+    noise(g, w, h, 16);                                         // sand grain
+    let sd = 9; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(90,80,60,${0.08 + r() * 0.12})`; g.fillRect(r() * w, r() * h, 1 + r() * 1.5, 1 + r() * 1.5); }   // pits
     g.fillStyle = 'rgba(90,70,40,0.10)';
-    for (let i = 0; i < 4; i++) g.fillRect(0, i * 64, w, 2);
-    g.fillStyle = 'rgba(90,70,40,0.07)'; g.fillRect(0, 0, 2, h);
+    for (let i = 0; i < 4; i++) g.fillRect(0, i * 128, w, 3);
+    g.fillStyle = 'rgba(255,255,255,0.35)';
+    for (let i = 0; i < 4; i++) g.fillRect(0, i * 128 + 3, w, 1);   // the lit lip of each reveal
+    g.fillStyle = 'rgba(90,70,40,0.07)'; g.fillRect(0, 0, 3, h);
   }, { repeat: [2.5, 2.5] });
 
   // Glass: sky-bright at the top, dark below, and an anime glint across it.
@@ -286,9 +399,10 @@ export function makeTextures() {
   }, { repeat: [0.12, 0.12] });
 
   // Foliage atlas, drawn in greys so each tree tints it: [leaf clump | needle clump | solid].
-  T.leaves = canvasTex(768, 256, (g) => {
+  T.leaves = canvasTex(1536, 512, (g) => {
     let sd = 11; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
-    g.clearRect(0, 0, 768, 256);
+    g.clearRect(0, 0, 1536, 512);
+    g.scale(2, 2);                                              // drawn at twice the size: crisper leaves
     // broad leaves: a round, ragged clump of many small leaves, lit from the top left
     for (let i = 0; i < 320; i++) {
       const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 100, x = 128 + Math.cos(a) * d, y = 128 + Math.sin(a) * d;
@@ -299,6 +413,7 @@ export function makeTextures() {
       g.beginPath(); g.moveTo(-w, 0); g.quadraticCurveTo(0, -h * 1.6, w, 0); g.quadraticCurveTo(0, h * 1.6, -w, 0);
       g.fillStyle = `rgb(${v},${v},${v})`; g.fill();
       if (r() < 0.55) { g.lineWidth = 1.1; g.strokeStyle = 'rgb(96,96,96)'; g.stroke(); }
+      if (r() < 0.7) { g.lineWidth = 0.5; g.strokeStyle = `rgba(${v > 200 ? 120 : 230},${v > 200 ? 120 : 230},${v > 200 ? 120 : 230},0.55)`; g.beginPath(); g.moveTo(-w * 0.8, 0); g.lineTo(w * 0.8, 0); g.stroke(); }   // midrib
       g.restore();
     }
     // needles: drooping sprays of short strokes

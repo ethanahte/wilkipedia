@@ -357,7 +357,11 @@ async function boot() {
     rain.userData.update(dt, camera.position, env.rain, !walking);
     ripples.userData.update(dt, walking ? controls.pos : camera.position, env.rain && walking);
     const dens = (env.night ? NIGHT : DAY).density * (env.rain ? 1.3 : 1);
-    scene.fog.density = walking ? dens : dens * 0.11;
+    // from the air the land stays clear however far you zoom out (Ethan): thinner fog the
+    // further the camera is, and no clouds once you're up above them
+    const camFar = camera.position.length();
+    scene.fog.density = walking ? dens : dens * 0.11 * THREE.MathUtils.clamp(420 / Math.max(camFar, 1), 0.08, 1);
+    clouds.visible = !env.rain && (walking || camera.position.y < 240);
     // the sun's shadow box follows what you're looking at, snapped to its texels so edges don't crawl
     const focus = controls.mode === 'fly' ? new THREE.Vector3(controls.orbit.tx, 0, controls.orbit.tz) : controls.pos.clone();
     if (controls.mode !== 'fly') focus.addScaledVector(new THREE.Vector3(-Math.sin(controls.yaw), 0, -Math.cos(controls.yaw)), 30);
@@ -393,12 +397,14 @@ async function boot() {
     if (Math.abs(camera.near - nearWant) > 0.05) { camera.near = nearWant; camera.updateProjectionMatrix(); }
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * controls.lensK * 1.5) : 420;
     // tilt-shift (the miniature look) only from the air
-    tilt += ((controls.mode === 'fly' ? 1 : 0) - tilt) * Math.min(1, dt * 3);
+    // (and it fades out as you zoom out, so the whole campus stays sharp: Ethan)
+    const tiltWant = controls.mode === 'fly' ? 1 - THREE.MathUtils.smoothstep(controls.orbit.dist, 200, 480) : 0;
+    tilt += (tiltWant - tilt) * Math.min(1, dt * 3);
     camera.updateMatrixWorld();                            // (this frame's view, not last frame's)
     SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);
     const focusZ = camera.position.distanceTo(_focus.set(controls.orbit.tx, 0, controls.orbit.tz));   // where the lens is sharp
     post.render(scene, camera, fade, { night: env.night ? 1 : 0, wet: env.rain ? 1 : 0, sun: SUN, day: DAYLIGHT.value,
-      fog: scene.fog.color, tilt, focus: focusZ });
+      fog: scene.fog.color, tilt, focus: focusZ, hazeFrom: controls.mode === 'fly' ? focusZ * 0.9 : 0 });
   }
   function loop() {
     const dt = Math.min(0.05, clock.getDelta());

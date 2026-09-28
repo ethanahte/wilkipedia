@@ -311,7 +311,7 @@ export const B_QUAD = {
     { poly: [[-50.4, 25.6], [-46.3, 29.2], [-46.3, 32.9], [-50.4, 32.9]], trees: [[-48.2, 30.0]] },
   ],
   benches: [[-49.24, -10.57, -0.538], [-50.83, -7.89, -0.538]],
-  table: [-51.4, 6.4],             // an umbrella table south of (left of) B's quad-side doors (Ethan, IMG_2377)
+  table: [-50.8, 9.3],             // an umbrella table well south of (left of) B's quad-side doors (Ethan, IMG_2377)
 };
 
 export const FRONT = {

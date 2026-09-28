@@ -178,10 +178,11 @@ const KITS = {
   },
   library(W, b, e) {
     if (e.len < 4) return;
-    if (b.id === 'LIB' && e.nz < -0.5) {
-      // the quad (north) side is plain precast panels, no windows (IMG_2378, IMG_2385); its west end,
-      // under the entrance canopy, is libFront()'s
-      for (let t = 3.3; t < e.len - 12.3; t += 3.3) onWall(W, e, t, b.h / 2 - 0.1, 0.012, () => W.box('flat', 0, 0, 0, 0.05, b.h - 0.5, 0.02, color('#d6cfc0')));
+    if (b.id === 'LIB' && (e.nz < -0.5 || e.nx > 0.5)) {
+      // the quad (north) side and the side toward the math portables (east) are plain precast
+      // panels, no windows (IMG_2378, IMG_2385; Ethan); the north side's west end, under the
+      // entrance canopy, is libFront()'s
+      for (let t = 3.3; t < e.len - (e.nz < -0.5 ? 12.3 : 0.5); t += 3.3) onWall(W, e, t, b.h / 2 - 0.1, 0.012, () => W.box('flat', 0, 0, 0, 0.05, b.h - 0.5, 0.02, color('#d6cfc0')));
       return;
     }
     for (const { t } of bays(e.len, 3.4, 1.5)) windowAt(W, e, t, 3.3, 2.6, 4.6);
@@ -715,9 +716,18 @@ function bQuad(W, h) {
         });
         lWin(W, e, tz(c), 4.75, 7.95, w - 0.3, -1);
       } else if (near(BQ.side)) {
-        // a single door, white panels under a strip of glass beside it, a ribbon of glass high upstairs
-        doorAt(W, e, tz(c) + 0.35, 0.9, 2.3, null, { glass: true, frameCol: C.frame, single: true });
-        panelWin(W, e, tz(c) - 0.45, 0.25, 3.35, 0.7, 1, 4, [3]);
+        // one frame across the bay (IMG_2377): a strip of glass along its top, and under it white
+        // panels beside a single glass door at the entrance's side; a ribbon of glass high upstairs
+        const bw = w - 0.3, dx = bw / 2 - 0.5;
+        onWall(W, e, tz(c), 0, 0.03, () => {
+          W.box('flat', 0, 1.8, 0, bw + 0.12, 3.2, 0.06, C.frame);
+          for (let q = 0; q < 3; q++) {
+            const u = -bw / 2 + (q * bw) / 3 + 0.04, v = -bw / 2 + ((q + 1) * bw) / 3 - 0.04;
+            W.quad('glass', [u, 2.62, 0.05], [v, 2.62, 0.05], [v, 3.34, 0.05], [u, 3.34, 0.05], pane(), [[0, 0], [v - u, 0], [v - u, 0.72], [0, 0.72]]);
+          }
+          W.box('flat', (-bw / 2 + dx - 0.5) / 2, 1.39, 0.045, dx - 0.5 + bw / 2 - 0.08, 2.3, 0.02, CC.white);
+        });
+        doorAt(W, e, tz(c) + dx, 0.9, 2.45, null, { glass: true, frameCol: C.frame, single: true });
         panelWin(W, e, tz(c), 6.95, 7.95, w - 0.3, 3, 1, [0]);
       } else {
         lWin(W, e, tz(c), 4.75, 7.95, w - 0.3, side);

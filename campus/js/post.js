@@ -28,7 +28,7 @@ const COMPOSITE = `
 precision highp float;
 uniform sampler2D tColor, tND, tBloom, tRays, tSoft;
 uniform vec2 texel;
-uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ, pixel;
+uniform float ink, inkW, bloomK, useBloom, farFade, wet, night, raysK, hazeK, tiltK, focusZ, pixel, hazeFrom;
 
 uniform vec3 fogCol;
 uniform mat4 proj, projInv, viewInv;
@@ -68,7 +68,8 @@ void main(){
     vec3 P = viewPos(vUv, min(dz, 3000.0));
     vec3 dirW = normalize(mat3(viewInv) * P);
     float toward = pow(max(dot(dirW, sunDir), 0.0), 5.0);
-    float thick = dz > 3000.0 ? 0.0 : 1.0 - exp(-dz * 0.0035);
+    // (from the air it starts at the campus, not at the camera, so the land isn't hazed over)
+    float thick = dz > 3000.0 ? 0.0 : 1.0 - exp(-max(dz - hazeFrom, 0.0) * 0.0035);
     col += vec3(1.0, 0.78, 0.5) * toward * thick * hazeK * 0.35;
   }
   // wet ground: march the mirrored ray through the depth buffer and borrow the
@@ -203,7 +204,7 @@ export class Post {
       wet: { value: 0 }, night: { value: 0 }, proj: { value: new THREE.Matrix4() }, projInv: { value: new THREE.Matrix4() },
       viewInv: { value: new THREE.Matrix4() }, viewUp: { value: new THREE.Vector3() },
       tRays: { value: null }, raysK: { value: 0 }, hazeK: { value: 0 }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
-      tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, fogCol: { value: new THREE.Color() },
+      tSoft: { value: null }, tiltK: { value: 0 }, focusZ: { value: 1000 }, hazeFrom: { value: 0 }, fogCol: { value: new THREE.Color() },
       pixel: { value: 0 },
     });
     this.pixel = false;
@@ -304,6 +305,7 @@ export class Post {
     // tilt-shift: a blurred quarter-size copy of the picture to fade into
     u.tiltK.value = this.inkOn && !this.pixel ? (env.tilt || 0) * (env.night ? 0.6 : 1) : 0;
     u.focusZ.value = env.focus || 1000;
+    u.hazeFrom.value = env.hazeFrom || 0;
     if (u.tiltK.value > 0.01) {
       this.bright.uniforms.tColor.value = this.gbuf.textures[0];
       this.bright.uniforms.thresh.value = -2;           // everything passes: a plain copy
