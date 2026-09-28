@@ -18,7 +18,7 @@ const FACES = [['w', 0], ['e', 0], ['u', 1], ['d', 1], ['s', 0], ['n', 0]];
 
 const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
 const FS = `precision highp float;
-uniform samplerCube cube; uniform vec2 res; uniform float yaw, pitch, th;
+uniform samplerCube cube; uniform vec2 res; uniform float yaw, pitch, th, dim;
 void main(){
   vec2 q = gl_FragCoord.xy / res * 2.0 - 1.0;
   q.x *= res.x / res.y;
@@ -26,7 +26,11 @@ void main(){
   float cp = cos(pitch), sp = sin(pitch), cy = cos(yaw), sy = sin(yaw);
   d = vec3(d.x, d.y * cp - d.z * sp, d.y * sp + d.z * cp);
   d = vec3(d.x * cy + d.z * sy, d.y, -d.x * sy + d.z * cy);
-  gl_FragColor = textureCube(cube, vec3(-d.x, d.y, d.z));
+  vec3 c = textureCube(cube, vec3(-d.x, d.y, d.z)).rgb;
+  // by day the render is a bright peach haze: behind a page it glares (Ethan), so bring it down,
+  // a little more contrast, and the pale sky most of all
+  c = mix(c, pow(c, vec3(1.15)) * 0.86 * (1.0 - 0.12 * smoothstep(0.0, 0.5, d.y)), dim);
+  gl_FragColor = vec4(c, 1.0);
 }`;
 
 export function mountPano(root) {
@@ -46,7 +50,7 @@ export function mountPano(root) {
   const loc = gl.getAttribLocation(prog, 'p');
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n) => gl.getUniformLocation(prog, n);
-  const uRes = U('res'), uYaw = U('yaw'), uPitch = U('pitch'), uTh = U('th');
+  const uRes = U('res'), uYaw = U('yaw'), uPitch = U('pitch'), uTh = U('th'), uDim = U('dim');
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
   for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_CUBE_MAP, p, gl.CLAMP_TO_EDGE);
@@ -94,6 +98,7 @@ export function mountPano(root) {
     gl.uniform2f(uRes, canvas.width, canvas.height);
     gl.uniform1f(uTh, Math.max(0.5, 0.466 / a));             // ~78° across a wide screen, ~50° on a phone
     gl.uniform1f(uPitch, PITCH);
+    gl.uniform1f(uDim, set === 'day' ? 1 : 0);
     // start facing the cedar and the quad (east), and turn slowly to the right
     gl.uniform1f(uYaw, -Math.PI / 2 - (lessMotion() ? 0 : ((now - t0) / 1000 / TURN) * Math.PI * 2));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
