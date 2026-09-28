@@ -124,8 +124,9 @@ export function buildLandmarks(W, group, fontFamily) {
   // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
   // roof's middle (its valley). Each post splits near the top into a Y whose arms hold the
   // two wings. It stands taller than the cafeteria's walkway roof (3.5–3.78) it meets.
-  // Its extent is off the Apple Maps view: from B's white entry block (x -48.2) to x -20, z -35.2..-29.0.
-  const c0 = -48.2, c1 = -20.0, zp = -32.1, hw = 3.1;          // post line; half-width of the roof
+  // It runs from B's white entry block (x -48.2, the Apple Maps view) to the snack bar (Ethan),
+  // with its posts just in front of the teachers' yard wall (z -32.4).
+  const c0 = -48.2, c1 = -17.8, zp = -31.65, hw = 3.0;         // post line; half-width of the roof
   const yv = 3.95, ye = 4.6, th = 0.12;                         // underside at the valley and at the edges
   const under = (d) => yv + (ye - yv) * (Math.abs(d) / hw);     // underside height d metres from the valley
   const post = color('#3d4044'), soffit = color('#e9e7e2'), metal = color('#9ea3a8');
@@ -165,16 +166,14 @@ export function buildLandmarks(W, group, fontFamily) {
 
   // ── the cafeteria's covered walkway along the quad ──
   const wz0 = -30.4, wz1 = -27.0;
-  // it starts at the west wing's corner (x -18.3); between it and B's canopy (which ends at x -20)
-  // is a gap open to the sky, in front of the door into the teachers' yard (Apple Maps view)
-  const wx0 = -18.3;
+  // it starts at the west wing's corner, where B's canopy ends and the snack bar begins (IMG_2371)
+  const wx0 = -17.8;
   for (let x = -14; x < 62; x += 7.5) { W.slab('glow', x - 0.3, -28.9, x + 0.3, -28.5, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -28.7, 3.45, 4]); }
   W.slab('flat', wx0, wz0, 62.6, wz1, 3.5, 3.78, fin);
   W.slab('flat', wx0, wz1 - 0.05, 62.6, wz1 + 0.05, 3.2, 3.8, color('#e3dccb'));
-  // it reaches back over the snack bar's recess and the set-back corner beside it (layout.js CAF-w)
-  W.slab('flat', -15.6, -32.4, -4.95, wz0, 3.5, 3.78, fin);
-  W.slab('flat', -18.3, -35.4, -15.6, wz0, 3.5, 3.78, fin);
-  W.slab('glow', -17.25, -33.3, -16.65, -32.9, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([-16.95, -33.1, 3.45, 4]);
+  // it reaches back over the snack bar's recess and the door niche beside it (layout.js CAF-w)
+  W.slab('flat', -17.8, -32.4, -4.95, wz0, 3.5, 3.78, fin);
+  W.slab('flat', -17.8, -33.4, -15.6, -32.4, 3.5, 3.78, fin);
   for (const x of [-13.5, -8.5]) { W.slab('glow', x - 0.3, -31.6, x + 0.3, -31.2, 3.45, 3.49, color('#ffe6bd')); LIGHTS.push([x, -31.4, 3.45, 4]); }
   for (let x = -15; x < 62; x += 5) W.slab('flat', x - 0.08, wz1 - 0.38, x + 0.08, wz1 - 0.12, 0, 3.5, color('#9ea3a8'));   // grey steel posts (IMG_2363)
 

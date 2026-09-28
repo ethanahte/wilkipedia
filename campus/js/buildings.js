@@ -598,19 +598,20 @@ function cafFront(W) {
   });
   // The west side, west to east (IMG_2367, IMG_2368, IMG_2371, IMG_2391; Ethan). The
   // outlines are in layout.js (YARD-*, CAF-w's notch).
-  //  · The teachers' yard (layout.js YARD-*): its quad-side wall, just behind the end of B's
-  //    canopy, carries the poster board, a blue accessibility sign and, right by the building,
-  //    the wide yellow door into the yard (the building is on your right as you go in).
-  const yw = southWall(YARD.xs, YARD.xe, YARD.zs), yt = (x) => x - YARD.xs;
-  onWall(W, yw, yt(-22.0), 1.55, 0.03, () => {
+  //  · The teachers' yard: walls all round (layout.js YARD-*); the quad-side one carries the
+  //    poster board and, by the niche, a blue accessibility sign.
+  const yw = southWall(YARD.x0, -17.8, YARD.zs), yt = (x) => x - YARD.x0;
+  onWall(W, yw, yt(-20.0), 1.55, 0.03, () => {
     W.box('flat', 0, 0, 0, 1.5, 1.2, 0.05, color('#2e3136'));
     const PC = ['#e9e4d8', '#7fb0d8', '#f0c75a', '#d9776a', '#ffffff', '#9ccf8e'];
     for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
       W.box('flat', -0.52 + c * 0.35, 0.25 - r * 0.5, 0.03, 0.27, 0.38, 0.01, color(PC[(r * 4 + c) % PC.length]));
     }
   });
-  onWall(W, yw, yt(-20.7), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
-  doorAt(W, yw, yt(-19.25), 1.7, 2.2, C.door, { frameCol: color('#d9ccb0') });
+  onWall(W, yw, yt(-18.3), 1.5, 0.02, () => W.box('flat', 0, 0, 0, 0.2, 0.2, 0.02, color('#2f5fa8')));   // accessibility sign
+  //  · The wide (1.9 m) door in its niche between the yard wall and the snack bar, set back
+  //    further. It opens into the yard (the building is on your right as you go in).
+  doorAt(W, southWall(-17.8, -15.6, -33.4), 1.1, 1.9, 2.2, C.door, { frameCol: color('#d9ccb0') });
   //  · The snack bar, a shallow room with its glass front set 2.0 m back under the walkway.
   //    Symmetric (Ethan): a wide single glass door and panes; a pane, glass double doors and
   //    a pane; panes and a wide single glass door, with the SNACK BAR plaque by the right one.

@@ -14,11 +14,14 @@ export const K = 0.4675;   // metres per satellite pixel (kept for re-measuring)
 
 // ── buildings ──
 // style: which facade kit to use (buildings.js). h: parapet height.
-// The teachers' yard beside the cafeteria (YARD-* below), measured off Ethan's Apple Maps view
-// (September 2026): the quad-side wall at zs, just behind B's canopy; the parking-lot side at zn;
-// the slanted side from (xs, zs) to (xn, zn), about 70° to the quad-side wall; the cafeteria's
-// west wall (xe) is the right-angle side.
-export const YARD = { zs: -35.4, zn: -48.3, xs: -25.9, xn: -21.3, xe: -18.3 };
+// The teachers' yard beside the cafeteria (see YARD-* below): the quad-side wall at zs from x0
+// to the cafeteria's west wall, the parking-lot side at zn, the slanted side at 75°. Ethan: the
+// quad-side wall is in line with the snack bar (it stands behind B's canopy posts, under the
+// canopy's north wing), and the yard is 12.5 m deep.
+export const YARD = (() => {
+  const zs = -32.4, zn = -44.9, x0 = -28.8;
+  return { zs, zn, x0, xn: x0 + (zs - zn) / Math.tan((75 * Math.PI) / 180) };
+})();
 // A straight wall of thickness t from (ax, az) to (bx, bz), standing on its left side (seen from a to b)
 function wallPoly(ax, az, bx, bz, t) {
   const L = Math.hypot(bx - ax, bz - az), nx = -(bz - az) / L * t, nz = (bx - ax) / L * t;
@@ -41,20 +44,24 @@ export const BUILDINGS = [
   // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
   { id: 'CAF', name: 'Cafeteria', style: 'caf', h: 7.2, poly: rect(0, -52.8, 50, -32.8) },
   { id: 'CAF-front', name: 'Cafeteria', style: 'caf', h: 3.8, poly: rect(0, -32.8, 50, -30.4) },
-  // The west wing (Ethan's photos IMG_2367/2368/2371/2391 and his Apple Maps view). Its west wall
-  // is at x -18.3 and it reaches back to z -52.8. On the quad side, west to east:
-  //  · the corner x -18.3..-15.6 is set back to z -35.4, under the walkway roof;
-  //  · the snack bar, a shallow room whose glass front is set 2.0 m back (x -15.6..-4.95);
-  //  · the fountain wall, forward at z -30.4.
-  // buildings.js cafFront() and landmarks.js (the walkway over the recesses) must match.
+  // The west wing's quad face (IMG_2367/2368/2371/2391, Ethan): the snack bar is a shallow room
+  // whose glass front is set 2.0 m back (Ethan: 2.5 times the first 0.8 m), from x -15.6 to -4.95.
+  // Between it and the yard wall a wide door sits in a niche set back further (x -17.8 to -15.6);
+  // it opens into the yard, and the building behind the snack bar is narrower (Ethan): its west
+  // wall, at x -15.6, is the yard's right-angle side, on your right as you go through the door.
+  // It reaches back to z -52.8 (the Apple Maps view). buildings.js cafFront() and landmarks.js
+  // (the walkway over the recess) must match.
   { id: 'CAF-w', name: 'Cafeteria', style: 'caf', h: 4.6,
-    poly: [[-18.3, -52.8], [0, -52.8], [0, -30.4], [-4.95, -30.4], [-4.95, -32.4], [-15.6, -32.4], [-15.6, -35.4], [-18.3, -35.4]] },
-  // The teachers' yard west of it: walls all round (Ethan), shape and size from the Apple Maps view.
-  // The wide door into it is in the quad-side wall right by the building (cafFront()), so you go in
-  // with the building on your right.
-  { id: 'YARD-s', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.xs, YARD.zs - 0.25, YARD.xe, YARD.zs) },
-  { id: 'YARD-n', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.xn, YARD.zn, YARD.xe, YARD.zn + 0.25) },
-  { id: 'YARD-w', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: wallPoly(YARD.xs, YARD.zs, YARD.xn, YARD.zn, 0.25) },
+    poly: [[-15.6, -52.8], [0, -52.8], [0, -30.4], [-4.95, -30.4], [-4.95, -32.4], [-15.6, -32.4]] },
+  // The teachers' yard west of the snack bar (Ethan, IMG_2391): a right-angle trapezoid walled on
+  // every side. The long side is the wall on the quad side, in line with the snack bar's glass;
+  // the right-angle side is the cafeteria's west wall (x -15.6); the short side faces the parking
+  // lot; the slanted side makes 75° with the long side (12.5 m deep).
+  { id: 'YARD-s', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.x0, YARD.zs - 0.25, -17.8, YARD.zs) },
+  { id: 'YARD-n', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: rect(YARD.xn, YARD.zn, -15.6, YARD.zn + 0.25) },
+  { id: 'YARD-w', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: wallPoly(YARD.x0, YARD.zs, YARD.xn, YARD.zn, 0.25) },
+  { id: 'YARD-nook', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-18.05, -33.65, -17.8, YARD.zs - 0.25) },
+  { id: 'YARD-door', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-17.8, -33.65, -15.6, -33.4) },   // the wide door's wall
   // B's white entry block at the west end of its canopy (Apple Maps view); B's glass entry is on its east face.
   { id: 'B-entry', name: 'Building B', style: 'bentry', h: 5.0, poly: rect(-54.7, -35.8, -48.2, -27.1) },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
