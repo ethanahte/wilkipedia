@@ -62,11 +62,13 @@ export const BUILDINGS = [
   { id: 'YARD-w', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: wallPoly(YARD.x0, YARD.zs, YARD.xn, YARD.zn, 0.25) },
   { id: 'YARD-nook', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-18.05, -33.65, -17.8, YARD.zs - 0.25) },
   { id: 'YARD-door', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-17.8, -33.65, -15.6, -33.4) },   // the wide door's wall
-  // B's entry block at the west end of its canopy (footprint off the Apple Maps view; the rest from
-  // Ethan's photos IMG_2372/2374/2387/2390/2392/2394): a tall precast block standing above B. Its
-  // entrance is set 0.6 m into the east face, full height, from z -32.0 to -34.6 (buildings.js bEntry()).
-  { id: 'B-entry', name: 'Building B', style: 'bentry', h: 11.0,
-    poly: [[-54.7, -35.8], [-48.2, -35.8], [-48.2, -34.6], [-48.8, -34.6], [-48.8, -32.0], [-48.2, -32.0], [-48.2, -27.1], [-54.7, -27.1]] },
+  // B's entry block at the west end of its canopy (Ethan; photos IMG_2372/2374/2387/2390/2392/2394;
+  // footprint off the Apple Maps view): as tall as the rest of B. Its east face (toward the V roof)
+  // sits inside a frame that stands 0.5 m proud: a pier at each end (z -26.5..-27.3, -35.0..-35.8)
+  // and a band across the top. The entrance is set 0.6 m further in, full height, from z -32.2 up
+  // to the north pier. buildings.js bEntry() draws the rest.
+  { id: 'B-entry', name: 'Building B', style: 'bentry', h: 9.6,
+    poly: [[-54.7, -35.8], [-47.7, -35.8], [-47.7, -35.0], [-48.8, -35.0], [-48.8, -32.2], [-48.2, -32.2], [-48.2, -27.3], [-47.7, -27.3], [-47.7, -26.5], [-54.7, -26.5]] },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
   // (Ethan, his photos IMG_2342–2361, the satellite): a 凸 in plan. The narrow block
@@ -233,7 +235,7 @@ export const COURT = {
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
 // A strip of paving runs between it and B. Ceramic totem poles stand in its north end.
 export const B_BED = {
-  poly: [[-53.8, -27.1], [-45.5, -27.1], [-47.3, -21.5], [-49.3, -15.5], [-52.0, -9.5], [-53.8, -8.0]],
+  poly: [[-53.8, -26.5], [-45.5, -26.5], [-47.3, -21.5], [-49.3, -15.5], [-52.0, -9.5], [-53.8, -8.0]],
   totems: [[-53.0, -26.1], [-51.6, -25.3], [-50.2, -26.0], [-48.8, -25.2], [-47.3, -26.2], [-52.4, -23.4], [-50.1, -22.7], [-48.5, -23.8]],
 };
 

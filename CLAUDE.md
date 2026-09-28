@@ -370,17 +370,23 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         go in. It is a yard, not a building: style `yard` has no kit windows
         and no rooftop units.
       - B's entry block (`B-entry`, `bEntry()` in buildings.js; footprint
-        from the map, the rest from IMG_2372/2374/2387/2390/2392/2394):
-        - A tall cream precast block (11 m, above B) with horizontal
-          reveals.
-        - East face, under the canopy: a lamp, a small BUILDING B sign and a
-          vent. Then the entrance, set 0.6 m in at full height (a notch in
-          the outline): glass double doors, a side light and a transom,
-          with a big grid window above and a cap closing the top. A narrow
-          pier with a camera and an accessibility push-button post follow.
-        - North face: tall grid windows upstairs by the corner.
-        - Quad face: nearly blank (a small louvered window, a lamp, a vent,
-          a conduit, a corner camera).
+        from the map, the rest from Ethan and IMG_2372/2374/2387/2390/2392/
+        2394):
+        - As tall as the rest of B (9.6 m), cream precast with reveals.
+        - Its east face (toward the V roof) sits in a frame that stands 0.5 m
+          proud: a pier at each end and a band across the top.
+        - Inside the frame, from the south: two narrow windows stacked by
+          the south pier (IMG_2390), then a lamp, a BUILDING B sign and a
+          vent. Then the entrance, set back full height up to the north pier:
+          glass double doors, a side light and a transom, with a big grid
+          window above.
+        - The north pier has a camera and a push-button post at its foot.
+        - North face: a window strip right by the corner, a grid window
+          upstairs and dark glass below (IMG_2394).
+        - Quad face: a narrow window high by B (a window, not a vent: Ethan),
+          a lamp, a vent, a conduit and a corner camera.
+        - Where it meets B, B has a tall louvered air-conditioning shaft
+          (IMG_2372/2374).
       - The flower bed on the block's quad side (`B_BED`, `bEntryBed()` in
         landmarks.js) is a wedge along B, widest at the block, with a strip
         of paving between it and B. It holds ceramic totem poles, blue-green

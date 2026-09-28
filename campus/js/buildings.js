@@ -555,61 +555,75 @@ function storefront(W, z, x0, x1, parts, top = 3.1) {
 const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
 
 // ── B's entry block (layout.js B-entry) ──
-// From Ethan's photos IMG_2372, IMG_2374, IMG_2387, IMG_2390, IMG_2392 and IMG_2394:
-//  · A tall cream precast block standing above B, with horizontal reveals.
-//  · East face, under the grey canopy: blank wall with a triangular lamp, a small BUILDING B
-//    sign and a vent. Then the entrance, set back in a full-height recess: glass double doors and
-//    a side light under a transom, a big grid window above, a cap closing the top. Then a narrow
-//    pier to the corner, with a camera. An accessibility push-button post stands by the doors.
-//  · North face: tall grid windows upstairs by the north-east corner, a window below.
-//  · Quad (south) face: nearly blank. A small louvered window high up, a triangular lamp, a small
-//    vent, a conduit along it and a camera on the south-east corner.
-const BE = { x0: -54.7, x1: -48.2, zN: -35.8, zS: -27.1, h: 11.0, rS: -32.0, rN: -34.6, rd: 0.6 };
+// From Ethan and his photos IMG_2372, IMG_2374, IMG_2387, IMG_2390, IMG_2392 and IMG_2394:
+//  · Cream precast with horizontal reveals, as tall as the rest of B.
+//  · East face, toward the V roof: framed by a pier at each end and a band across the top, all
+//    0.5 m proud. Inside the frame, from the south: two narrow windows stacked by the south pier
+//    (IMG_2390), a lamp, a small BUILDING B sign and a vent; then the entrance set back full
+//    height (glass double doors and a side light under a transom, a big grid window above) up
+//    to the north pier, which carries a camera, with an accessibility push-button post at its foot.
+//  · North face: a narrow strip of windows by the corner, a grid window upstairs and dark glass
+//    below (IMG_2394).
+//  · Quad (south) face: nearly blank. A narrow window high by B (a window, not a vent: Ethan), a
+//    lamp, a small vent, a conduit along it, and a camera on the corner pier.
+//  · Where it meets B, B carries a tall louvered air-conditioning shaft (IMG_2372, IMG_2374).
+const BE = { x0: -54.7, xf: -47.7, xe: -48.2, xr: -48.8, zN: -35.8, zS: -26.5, pS: -27.3, pN: -35.0, rS: -32.2, h: 9.6, band: 8.4 };
 function bEntry(W) {
-  const rev = color('#cdc3ae'), frame = CC.frame, steelC = color('#b8bcc0');
-  const S = southWall(BE.x0, BE.x1, BE.zS);                        // t = x - x0
-  const E = rWall(BE.x1, BE.zS, BE.x1, BE.zN, 1, 0);               // t = zS - z
-  const N = rWall(BE.x1, BE.zN, BE.x0, BE.zN, 0, -1);              // t = x1 - x
-  const Rw = rWall(BE.x1 - BE.rd, BE.rS, BE.x1 - BE.rd, BE.rN, 1, 0); // the recess's back: t = rS - z
-  const w = BE.x1 - BE.x0, eS = BE.zS - BE.rS, eN = BE.rN - BE.zN;
-  const line = (e, t, len, y) => onWall(W, e, t + len / 2, y, 0.012, () => W.box('flat', 0, 0, 0, len, 0.05, 0.02, rev));
+  const rev = color('#cdc3ae'), frame = CC.frame, steelC = color('#b8bcc0'), wall = WALL.bentry;
+  const S = rWall(BE.x0, BE.zS, BE.xf, BE.zS, 0, 1);               // t = x - x0
+  const N = rWall(BE.xf, BE.zN, BE.x0, BE.zN, 0, -1);              // t = xf - x
+  const E = rWall(BE.xe, BE.pS, BE.xe, BE.rS, 1, 0);               // inside the frame, south of the entrance: t = pS - z
+  const Rw = rWall(BE.xr, BE.rS, BE.xr, BE.pN, 1, 0);              // the entrance's back: t = rS - z
+  const PS = rWall(BE.xf, BE.zS, BE.xf, BE.pS, 1, 0), PN = rWall(BE.xf, BE.pN, BE.xf, BE.zN, 1, 0);   // the piers' faces
+  const line = (e, y) => onWall(W, e, e.len / 2, y, 0.012, () => W.box('flat', 0, 0, 0, e.len, 0.05, 0.02, rev));
   for (let y = 1.25; y < BE.h - 0.4; y += 1.25) {
-    line(S, 0, w, y); line(N, 0, w, y); line(E, 0, eS, y); line(E, BE.zS - BE.rN, eN, y);
+    line(S, y); line(N, y); line(PS, y); line(PN, y);
+    if (y < BE.band) line(E, y);
   }
   for (const x of [-52.6, -50.4]) onWall(W, S, x - BE.x0, BE.h / 2, 0.012, () => W.box('flat', 0, 0, 0, 0.05, BE.h, 0.02, rev));
-  // the east face's top projects a little, and closes over the recess
-  onWall(W, E, (BE.zS - BE.zN) / 2, 10.2, 0.15, () => W.box('stucco', 0, 0, 0, BE.zS - BE.zN, 1.6, 0.3, WALL.bentry));
-  W.box('stucco', BE.x1 - BE.rd / 2, 9.9, (BE.rS + BE.rN) / 2, BE.rd, 2.2, BE.rS - BE.rN, WALL.bentry);
+  // the frame's top band, across the face and over the entrance
+  W.box('stucco', (BE.xr + BE.xf) / 2, (BE.band + BE.h) / 2, (BE.pS + BE.pN) / 2, BE.xf - BE.xr, BE.h - BE.band, BE.pS - BE.pN, wall);
+  onWall(W, rWall(BE.xf, BE.pS, BE.xf, BE.pN, 1, 0), (BE.pS - BE.pN) / 2, BE.band + 0.6, 0.012, () => W.box('flat', 0, 0, 0, BE.pS - BE.pN, 0.05, 0.02, rev));
+  // two narrow windows stacked by the south pier, below and above the V roof (IMG_2390)
+  for (const [y, h] of [[2.5, 2.0], [6.3, 2.4]]) windowAt(W, E, 0.35, y, 0.42, h);
+  // lamp, sign and vent
+  sconce(W, E, BE.pS - -30.4, 2.7);
+  onWall(W, E, BE.pS - -31.1, 1.7, 0.02, () => W.box('flat', 0, 0, 0, 0.34, 0.12, 0.02, color('#f4f4f2')));
+  onWall(W, E, BE.pS - -29.6, 3.5, 0.02, () => W.box('flat', 0, 0, 0, 0.26, 0.26, 0.03, color('#dcd6c6')));
   // the entrance: glass double doors, a side light to the north, a transom, a big grid window above
-  doorAt(W, Rw, 0.95, 1.8, 2.3, null, { glass: true, frameCol: frame });
-  onWall(W, Rw, 2.2, 1.2, 0.03, () => {
-    W.box('flat', 0, 0, 0, 0.62, 2.3, 0.08, frame);
-    W.quad('glass', [-0.25, -1.08, 0.05], [0.25, -1.08, 0.05], [0.25, 1.08, 0.05], [-0.25, 1.08, 0.05], color('#ffffff'), 'auto');
+  doorAt(W, Rw, 1.0, 1.8, 2.3, null, { glass: true, frameCol: frame });
+  onWall(W, Rw, 2.3, 1.2, 0.03, () => {
+    W.box('flat', 0, 0, 0, 0.66, 2.3, 0.08, frame);
+    W.quad('glass', [-0.27, -1.08, 0.05], [0.27, -1.08, 0.05], [0.27, 1.08, 0.05], [-0.27, 1.08, 0.05], color('#ffffff'), 'auto');
   });
-  onWall(W, Rw, 1.3, 2.72, 0.03, () => {
-    W.box('flat', 0, 0, 0, 2.5, 0.62, 0.08, frame);
-    W.quad('glass', [-1.18, -0.24, 0.05], [1.18, -0.24, 0.05], [1.18, 0.24, 0.05], [-1.18, 0.24, 0.05], color('#ffffff'), 'auto');
+  onWall(W, Rw, 1.35, 2.72, 0.03, () => {
+    W.box('flat', 0, 0, 0, 2.6, 0.62, 0.08, frame);
+    W.quad('glass', [-1.23, -0.24, 0.05], [1.23, -0.24, 0.05], [1.23, 0.24, 0.05], [-1.23, 0.24, 0.05], color('#ffffff'), 'auto');
   });
-  gridWindow(W, Rw, 1.3, 6.7, 2.3, 3.9, [1 / 3, 1 / 3, 1 / 3], 3);
-  // east face, south of the entrance: lamp, sign, vent; the camera on the corner
-  sconce(W, E, BE.zS - -30.4, 2.7);
-  onWall(W, E, BE.zS - -31.1, 1.7, 0.02, () => W.box('flat', 0, 0, 0, 0.34, 0.12, 0.02, color('#f4f4f2')));
-  onWall(W, E, BE.zS - -29.6, 3.5, 0.02, () => W.box('flat', 0, 0, 0, 0.26, 0.26, 0.03, color('#dcd6c6')));
+  gridWindow(W, Rw, 1.4, 6.4, 2.5, 3.5, [1 / 3, 1 / 3, 1 / 3], 3);
+  // cameras on the corner piers, and the push-button post at the north pier's foot
   const cam = (x, y, z) => { W.box('flat', x, y + 0.12, z, 0.16, 0.2, 0.16, color('#f2f2f0')); W.blob('flat', x, y, z, 0.1, 0.08, 0.1, color('#e6e7e8')); };
-  cam(BE.x1 + 0.12, 4.4, BE.zS + 0.12);
-  cam(BE.x1 + 0.12, 4.4, BE.zN - 0.12);
-  W.box('flat', BE.x1 + 0.45, 0.55, BE.rN - 0.3, 0.12, 1.1, 0.1, steelC);      // push-button post
-  // north face: tall grid windows upstairs by the corner, a window below
-  gridWindow(W, N, 2.0, 6.7, 2.4, 3.9, [1 / 3, 1 / 3, 1 / 3], 3);
-  windowAt(W, N, 2.0, 1.95, 2.4, 2.1);
-  // quad face: louvered window high up, lamp, vent, conduit
-  onWall(W, S, -53.3 - BE.x0, 7.4, 0.02, () => {
-    W.box('flat', 0, 0, 0, 0.6, 1.5, 0.06, frame);
-    for (let k = 0; k < 9; k++) W.box('flat', 0, -0.6 + k * 0.15, 0.04, 0.5, 0.05, 0.04, color('#5d6166'));
-  });
+  cam(BE.xf + 0.12, 4.4, BE.zS + 0.12);
+  cam(BE.xf + 0.12, 4.6, BE.pN - 0.15);
+  W.box('flat', BE.xf + 0.35, 0.55, BE.pN + 0.25, 0.12, 1.1, 0.1, steelC);
+  // north face: the narrow window strip by the corner — grid window upstairs, dark glass below
+  gridWindow(W, N, BE.xf - -48.95, 6.5, 1.3, 3.4, [0.5, 0.5], 4);
+  windowAt(W, N, BE.xf - -48.95, 2.0, 1.3, 2.2);
+  // quad face: a narrow window high by B, a lamp, a small vent, a conduit
+  windowAt(W, S, -53.3 - BE.x0, 7.4, 0.5, 1.5);
   sconce(W, S, -50.9 - BE.x0, 4.6);
   onWall(W, S, -53.4 - BE.x0, 2.9, 0.02, () => W.box('flat', 0, 0, 0, 0.36, 0.28, 0.03, color('#dcd6c6')));
-  W.rod('flat', [BE.x0 + 0.3, 3.75, BE.zS + 0.05], [BE.x1 - 0.1, 3.75, BE.zS + 0.05], 0.035, color('#cfd1d3'));
+  W.rod('flat', [BE.x0 + 0.3, 3.75, BE.zS + 0.05], [BE.xf - 0.1, 3.75, BE.zS + 0.05], 0.035, color('#cfd1d3'));
+  // B's louvered air-conditioning shaft in the corner where the block meets it
+  const sx0 = BE.x0, sx1 = BE.x0 + 0.7, sz0 = BE.zS, sz1 = BE.zS + 1.5;
+  W.slab('stucco', sx0, sz0, sx1, sz1, 0, BE.h, WALL.b);
+  const SH = rWall(sx1, sz1, sx1, sz0, 1, 0), SF = rWall(sx0, sz1, sx1, sz1, 0, 1);
+  for (const e of [SH, SF]) for (const [y, h] of [[2.3, 2.8], [6.7, 3.0]]) {
+    onWall(W, e, e.len / 2, y, 0.02, () => {
+      W.box('flat', 0, 0, 0, e.len - 0.3, h, 0.05, color('#6b6f74'));
+      for (let k = 0; k < Math.floor(h / 0.12); k++) W.box('flat', 0, -h / 2 + 0.08 + k * 0.12, 0.04, e.len - 0.4, 0.03, 0.05, color('#8e9297'));
+    });
+  }
 }
 
 // The front office's south wall, behind its covered walk (IMG_2392): plain cream with a yellow door.
