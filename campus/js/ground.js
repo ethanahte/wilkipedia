@@ -225,8 +225,6 @@ function quadPaint(p, g, W, H, Q) {
   }
   for (let x = Q.x0; x < Q.x1; x += 3.05) p.line([[x, Q.z0], [x, Q.z1]], 0.03, 'rgba(120,112,100,0.45)', { cap: 'butt' });
   for (let z = Q.z0; z < Q.z1; z += 4.5) p.line([[Q.x0, z], [Q.x1, z]], 0.03, 'rgba(120,112,100,0.45)', { cap: 'butt' });
-  // planting bed along Building B (grasses and the art poles)
-  p.rect(-54.7, -27, -50.6, 36, '#8a6c52');
   // the cafeteria walkway and the canopy walk: a finer, lighter finish
   p.rect(-17.8, -30.4, 36.5, -27, '#e6e2da');
   p.rect(-54.7, -33.6, -17.8, -28.4, '#e6e2da');

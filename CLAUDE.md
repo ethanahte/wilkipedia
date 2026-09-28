@@ -386,15 +386,48 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
           upstairs, dark glass below (IMG_2394).
         - Quad face: a narrow window high by B (a window, not a vent: Ethan),
           a lamp, a vent, a conduit and a corner camera.
-        - Where it meets B, B has a tall air-conditioning shaft
-          (IMG_2372/2374). It is built like R's grey AC blocks (Ethan): grey
-          tower, cream cap, fine grey lines, a framed louver on each floor.
+        - Where it meets B, B has a tall louvered air-conditioning shaft,
+          cream with dark louvers (IMG_2372/2374). It is NOT the "wind pipe"
+          Ethan asked to build like R's; that is `bCourtAC()` (below).
       - The flower bed on the block's quad side (`B_BED`, `bEntryBed()` in
         landmarks.js) is a wedge along B, widest at the block, with a strip
         of paving between it and B. It holds ceramic totem poles, blue-green
         euphorbias, feather grass, poppies, flax, and two red-leaf trees
         (3–3.6 m, Ethan: bigger than the shrub first drawn). They stand
-        clear of B's wall, the AC shaft and the totems.
+        clear of B's wall, the AC shaft and the totems. Its tip reaches
+        z -4.3 (satellite). Two benches stand along its slanting edge,
+        facing it (IMG_2386).
+      - B's quad face south of there, to the library (`bQuad()` in
+        buildings.js; IMG_2376–2386), has two storeys between tall tan
+        piers (`BQ.piers`). Each pier has a grey louver on each floor, a
+        triangle lamp and fine reveals. Between two piers are two or three
+        bays split by slim cream columns, each a grid of panes (glass over
+        white panels) on both floors.
+        - The glass double doors (IMG_2377) are at z -7, with a single door,
+          a fire bell and a white standpipe in the next bay south.
+        - The navy CAREER & COLLEGE RESOURCE CENTER / RM B-113 awning
+          (IMG_2379) is over the next two bays, its lettering a decal in
+          landmarks.js.
+        - B's kit leaves this stretch bare. The paving runs right up to B.
+          The old strip bed with art poles along B, never in a photo, is
+          gone.
+      - Two beds on that side (`B_QUAD`, `bQuadBeds()`), each with crape
+        myrtles, flax, feather grass and yellow daisies. One is along B at
+        z 12–23; the other is east of the library's block, north of its
+        canopy.
+      - The library's block (`LIB-block`, satellite, IMG_2380) is a plain
+        block standing out from B's quad face at z 24.6–37.9. It has a dark
+        door and a downpipe on its north face, and an electrical box with
+        conduits and a standpipe on its east face.
+      - The library's entrance (`libFront()`, IMG_2381/2383) is a thick flat
+        concrete canopy off the block's east face, on two grey posts, with a
+        "Library" sign. Under it: WHS glass double doors between side
+        lights, and a second pair with a transom. The library's quad
+        (north) face is plain precast panels with no windows (IMG_2385).
+      - B's courtyard wall behind the courtyard bed has an
+        air-conditioning shaft built like R's grey AC blocks (`bCourtAC()`;
+        Ethan's "wind pipe"). It is a grey tower standing 1.1 m out, with a
+        cream cap, fine lines and a framed louver on each floor.
       - B's grey steel canopy (landmarks.js) runs from the entry block to
         the snack bar (x -17.8), over z -34.65..-28.65. No post stands in
         front of B's doors (Ethan; it was once drawn there): its west end

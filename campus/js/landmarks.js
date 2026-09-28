@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { color, rng } from './geo.js';
 import { canvasTex, decalMat } from './toon.js';
-import { FRONT, CARPORTS, BUILDINGS, COURT, B_BED } from './layout.js';
+import { FRONT, CARPORTS, BUILDINGS, COURT, B_BED, B_QUAD } from './layout.js';
 import { wallEdges } from './buildings.js';
 import { LIGHTS } from './lights.js';
 import { palm, flax, grassTuft, shrub, shadeTree, youngTree, crapeMyrtle, cards, G } from './nature.js';
@@ -145,6 +145,23 @@ export function buildLandmarks(W, group, fontFamily) {
   court(W, group);
   bEntryBed(W);
 
+  // ── B's quad side and the library's entrance (IMG_2376–2386; the rest is buildings.js) ──
+  bQuadBeds(W);
+  const ccrc = textCanvas(2048, 190, (g, w, h) => {
+    g.fillStyle = '#1f2f5c'; g.fillRect(0, 0, w, h); g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#f4f4f2'; g.font = '600 64px "Helvetica Neue", Arial, sans-serif';
+    g.fillText('CAREER & COLLEGE RESOURCE CENTER     RM B-113', w / 2 - 50, h / 2 + 4);
+    g.fillStyle = '#e8c341'; g.font = 'italic 800 130px Georgia, serif'; g.fillText('W', w - 120, h / 2 + 8);
+    g.font = 'italic 800 80px Georgia, serif'; g.fillText('W', 70, h / 2 + 6);
+  });
+  group.add(decal(ccrc, -53.13, 3.47, 1.1, 5.1, 5.1 * 190 / 2048, Math.PI / 2));
+  const libSign = textCanvas(512, 180, (g, w, h) => {
+    g.fillStyle = '#f7f7f5'; g.fillRect(0, 0, w, h); g.strokeStyle = '#8a8f96'; g.lineWidth = 8; g.strokeRect(4, 4, w - 8, h - 8);
+    g.fillStyle = '#26292e'; g.font = '600 110px "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('Library', w / 2, h / 2 + 6);
+  });
+  group.add(decal(libSign, -48.8, 3.4, 33.27, 1.3, 1.3 * 180 / 512, Math.PI));
+
   // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
   // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
   // roof's middle (its valley). Each post splits near the top into a Y whose arms hold the
@@ -223,22 +240,6 @@ export function buildLandmarks(W, group, fontFamily) {
     }
     solarRows(W, x0, z0, x1, z1, 4.35, 0.12, true);
   }
-
-  // ── colourful ceramic art poles in the planting bed along B ──
-  const beads = ['#d1463c', '#2f6db3', '#e2b336', '#e07a2e', '#2d9b8f', '#7b4aa0', '#f0e6d2'].map(color);
-  for (let i = 0; i < 9; i++) {
-    const x = -52.6 + (R() - 0.5) * 1.2, zz = -14 + i * 4.2 + R() * 1.5;
-    let y = 0;
-    const H = 2.2 + R() * 1.1;
-    W.cyl('flat', x, 0, zz, 0.05, 0.05, H, 6, color('#555'));
-    while (y < H) {
-      const k = 0.18 + R() * 0.22, c = beads[Math.floor(R() * beads.length)];
-      if (R() < 0.5) W.cyl('flat', x, y, zz, 0.13, 0.13, k, 8, c); else W.blob('flat', x, y + k / 2, zz, 0.15, k / 2, 0.15, c, 0);
-      y += k + 0.02;
-    }
-  }
-  // grasses in the same bed
-  for (let zz = -26; zz < 36; zz += 1.3) grassTuft(W, -53.2 + R() * 2.4, zz + R(), R, { h: 0.7 + R() * 0.5 });
 
   // ── the main gym: WILCOX in huge black letters on its east wall ──
   const wilcox = textCanvas(2048, 360, (g, w, h) => {
@@ -499,4 +500,25 @@ function frostFrontE(W, zS, zN, x, parts) {
     W.slab('flat', x + 0.06, z - w - 0.03, x + 0.1, z - w + 0.03, 0, top, frame);
     z -= w;
   }
+}
+
+// The beds on B's quad side south of the entry block's bed, and the benches by that bed (layout.js
+// B_QUAD): crape myrtles set clear of the walls, then flax, feather grass, yellow daisies and small
+// shrubs, kept off B's piers.
+function bQuadBeds(W) {
+  const R = rng(615);
+  for (const bed of B_QUAD.beds) {
+    const P = ensureCCW(bed.poly);
+    W.prism('flat', P, 0, 0.07, soil, { top: true, topMat: 'flat', topCol: soil });
+    for (const [x, z] of bed.trees) { crapeMyrtle(W, x, z, R, { h: 4.4, y: 0.07 }); addCircle(x, z, 0.2); }
+    bedFill(W, P, R, 60, (x, z) => {
+      if (x < -54.0 || bed.trees.some(([a, b]) => Math.hypot(a - x, b - z) < 0.6)) return;
+      const r = R();
+      if (r < 0.3) flax(W, x, z, R, { y: 0.07, h: 1.1 + R() * 0.5 });
+      else if (r < 0.62) grassTuft(W, x, z, R, { y: 0.07, h: 0.75, cols: FEATHER });
+      else if (r < 0.82) roseBush(W, x, z, R, color('#f2c21b'), 0.07);
+      else shrub(W, x, z, R, { y: 0.07, s: 0.7, cols: G.leaf });
+    });
+  }
+  for (const [x, z, rot] of B_QUAD.benches) bench(W, x, z, rot);
 }

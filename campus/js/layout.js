@@ -34,6 +34,9 @@ export const BUILDINGS = [
   { id: 'B-south', name: 'Building B', style: 'plain', h: 4.6, poly: rect(-87.9, 37.9, -54.7, 52.8) },
   { id: 'B-south2', name: 'Building B', style: 'plain', h: 4.6, poly: rect(-87.9, 52.8, -50.5, 68.3) },
   { id: 'LIB', name: 'Library', style: 'library', h: 7.2, poly: rect(-54.7, 37.9, -17.8, 52.8) },
+  // the plain block between B and the library, standing out from B's quad face; the library's
+  // entrance canopy hangs off its east face (the satellite; IMG_2380, IMG_2381, IMG_2382)
+  { id: 'LIB-block', name: 'Library', style: 'libblock', h: 6.6, poly: rect(-54.7, 24.6, -51.4, 37.9) },
   // Front office: single storey at the north end, the sign wall faces Monroe Street.
   // One rectangle from B's wall to the east end (Ethan: the office and the part joining B are one
   // building). Its quad-side face is at -57.4 (Ethan: narrower; the Apple Maps view), with the
@@ -258,8 +261,20 @@ export const COURT = {
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
 // A strip of paving runs between it and B. Ceramic totem poles stand in its north end.
 export const B_BED = {
-  poly: [[-53.8, -26.5], [-45.5, -26.5], [-47.3, -21.5], [-49.3, -15.5], [-52.0, -9.5], [-53.8, -8.0]],
+  poly: [[-53.8, -26.5], [-45.5, -26.5], [-47.3, -21.5], [-49.4, -13.0], [-51.9, -6.2], [-53.9, -4.3]],   // its tip off the satellite
   totems: [[-53.0, -26.1], [-51.6, -25.3], [-50.2, -26.0], [-48.8, -25.2], [-47.3, -26.2], [-52.4, -23.4], [-50.1, -22.7], [-48.5, -23.8]],
+};
+
+// B's quad side south of the entry block's bed, to the library (IMG_2376–2386, the satellite):
+// paving right up to B, then a bed along B with two crape myrtles, flax, grasses and yellow
+// daisies, and one east of the library's block, north of its canopy, with a crape myrtle and
+// grasses. Two benches stand along the entry block's bed, facing it (IMG_2386): [x, z, rot].
+export const B_QUAD = {
+  beds: [
+    { poly: [[-54.7, 11.9], [-51.3, 11.9], [-51.3, 17.0], [-48.6, 19.9], [-51.2, 22.8], [-54.7, 22.8]], trees: [[-51.8, 14.2], [-50.6, 19.9]] },
+    { poly: [[-50.4, 25.6], [-46.3, 29.2], [-46.3, 32.9], [-50.4, 32.9]], trees: [[-48.2, 30.0]] },
+  ],
+  benches: [[-49.4, -10.3, -0.35], [-50.4, -7.6, -0.35]],
 };
 
 export const FRONT = {

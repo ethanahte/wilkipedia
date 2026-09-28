@@ -17,6 +17,7 @@ import * as THREE from 'three';
 import { color, rng, ensureCCW } from './geo.js';
 import { BUILDINGS, YARD, COURT } from './layout.js';
 import { LIGHTS } from './lights.js';
+import { addBox } from './collide.js';
 
 const C = {
   cream: color('#f0e5cc'), tan: color('#e0cca2'), panel: color('#f5eedf'), frame: color('#5f6368'),
@@ -131,14 +132,21 @@ const KITS = {
     // B's east wall to themselves: no kit window, louver or pilaster lands on them
     const wz = (COURT.porch.z0 + COURT.porch.z1) / 2;
     const atDoors = (t, half) => b.id === 'B' && e.nx > 0.5 && Math.abs(e.az + e.dz * t - wz) < half;
+    // ...and bQuad() and bCourtAC() draw two more stretches of it whole
+    const own = (t, half) => {
+      if (b.id !== 'B' || e.nx < 0.5) return false;
+      const z = e.az + e.dz * t;
+      return (z + half > BQ.z0 && z - half < BQ.z1) || Math.abs(z - BCA.z) < BCA.w / 2 + half;
+    };
     const bs = bays(e.len, 4.0, 1.0);
     for (const { i, t } of bs) {
       if (i % 3 === 0) {
         // pilaster: tan, proud of the wall, rising past the parapet
-        if (!atDoors(t - 2.0, 2.9)) onWall(W, e, t - 2.0, 0, 0.22, () => W.box('stucco', 0, (h + 0.7) / 2, 0, 1.7, h + 0.7, 0.45, C.tan));
+        if (!atDoors(t - 2.0, 2.9) && !own(t - 2.0, 0.85)) onWall(W, e, t - 2.0, 0, 0.22, () => W.box('stucco', 0, (h + 0.7) / 2, 0, 1.7, h + 0.7, 0.45, C.tan));
         continue;
       }
-      if (i % 3 === 2 && R() < 0.55) { if (!atDoors(t, 2.6)) louverAt(W, e, t, h / 2 - 0.2, 1.25, h - 2.6); continue; }
+      if (i % 3 === 2 && R() < 0.55) { if (!atDoors(t, 2.6) && !own(t, 0.7)) louverAt(W, e, t, h / 2 - 0.2, 1.25, h - 2.6); continue; }
+      if (own(t, 1.4)) continue;
       for (const f of fl) if (!(f === 0 && atDoors(t, 3.3))) windowAt(W, e, t, f + 2.0, 2.8, 1.55);
     }
     // belt course between the floors
@@ -147,6 +155,7 @@ const KITS = {
   r() {},                                       // buildR() draws R whole
   yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on the quad side)
   bentry() {},                                  // B's entry block: bEntry() draws it whole
+  libblock() {},                                // the library's block: libFront() adds its door and fittings
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
     if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west wall: the teachers' yard side (no photo of it)
@@ -169,6 +178,12 @@ const KITS = {
   },
   library(W, b, e) {
     if (e.len < 4) return;
+    if (b.id === 'LIB' && e.nz < -0.5) {
+      // the quad (north) side is plain precast panels, no windows (IMG_2378, IMG_2385); its west end,
+      // under the entrance canopy, is libFront()'s
+      for (let t = 3.3; t < e.len - 11; t += 3.3) onWall(W, e, t, b.h / 2 - 0.1, 0.012, () => W.box('flat', 0, 0, 0, 0.05, b.h - 0.5, 0.02, color('#d6cfc0')));
+      return;
+    }
     for (const { t } of bays(e.len, 3.4, 1.5)) windowAt(W, e, t, 3.3, 2.6, 4.6);
   },
   admin(W, b, e) {
@@ -221,7 +236,7 @@ const KITS = {
 const WALL = {
   b: C.cream, r: color('#ece0c4'), caf: color('#efe6d0'), p: color('#efe5cf'), library: color('#efe5cf'),
   admin: color('#efe8d6'), gym: color('#eee6d3'), gymlobby: color('#eee6d3'), plain: color('#efe5cf'), mn: color('#f1efe7'),
-  yard: color('#efe6d0'), bentry: color('#e6dfce'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
+  yard: color('#efe6d0'), bentry: color('#e6dfce'), libblock: color('#ebe6da'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
 // ── Building R ──
@@ -620,19 +635,140 @@ function bEntry(W) {
   sconce(W, S, -50.9 - BE.x0, 4.6);
   onWall(W, S, -53.4 - BE.x0, 2.9, 0.02, () => W.box('flat', 0, 0, 0, 0.36, 0.28, 0.03, color('#dcd6c6')));
   W.rod('flat', [BE.x0 + 0.3, 3.75, BE.zS + 0.05], [BE.xf - 0.1, 3.75, BE.zS + 0.05], 0.035, color('#cfd1d3'));
-  // B's air-conditioning shaft in the corner where the block meets it, built like R's (Ethan): a
-  // grey tower with a cream cap, fine grey lines round it, and a framed louver panel on each floor
-  const sx0 = BE.x0, sx1 = BE.x0 + 1.0, sz0 = BE.zS, sz1 = BE.zS + 1.6;
-  W.slab('stucco', sx0, sz0, sx1, sz1, 0, BE.h - 0.7, RC.tower);
-  W.slab('stucco', sx0, sz0, sx1, sz1, BE.h - 0.7, BE.h + 0.08, RC.wall);
+  // B's louvered air-conditioning shaft in the corner where the block meets it (IMG_2372, IMG_2374)
+  const sx0 = BE.x0, sx1 = BE.x0 + 0.7, sz0 = BE.zS, sz1 = BE.zS + 1.5;
+  W.slab('stucco', sx0, sz0, sx1, sz1, 0, BE.h, WALL.b);
   const SH = rWall(sx1, sz1, sx1, sz0, 1, 0), SF = rWall(sx0, sz1, sx1, sz1, 0, 1);
-  for (const e of [SH, SF]) {
-    onWall(W, e, e.len / 2, 0, 0.012, () => { for (const y of [2.2, 6.6]) W.box('flat', 0, y, 0, e.len, 0.035, 0.02, RC.towerLine); });
-    for (const y of [2.3, 6.7]) onWall(W, e, e.len / 2, y, 0.02, () => {
-      W.box('flat', 0, 0, 0, e.len - 0.3, 2.5, 0.06, RC.towerLine);
-      W.box('louver', 0, 0, 0.04, e.len - 0.5, 2.3, 0.03, color('#b7bbbe'));
+  for (const e of [SH, SF]) for (const [y, h] of [[2.3, 2.8], [6.7, 3.0]]) {
+    onWall(W, e, e.len / 2, y, 0.02, () => {
+      W.box('flat', 0, 0, 0, e.len - 0.3, h, 0.05, color('#6b6f74'));
+      for (let k = 0; k < Math.floor(h / 0.12); k++) W.box('flat', 0, -h / 2 + 0.08 + k * 0.12, 0.04, e.len - 0.4, 0.03, 0.05, color('#8e9297'));
     });
   }
+}
+
+// B's air-conditioning shaft on its courtyard wall, behind the courtyard bed (Ethan: this is the
+// "wind pipe" to build like R's grey AC blocks): a grey tower standing out from B with a cream cap,
+// fine grey lines round it, and a framed louver panel on each floor. B's kit leaves its stretch bare.
+const BCA = { z: -46.3, w: 2.2, d: 1.1 };
+function bCourtAC(W) {
+  const x0 = -54.7, x1 = x0 + BCA.d, z0 = BCA.z - BCA.w / 2, z1 = BCA.z + BCA.w / 2, h = 9.6;
+  W.slab('stucco', x0, z0, x1, z1, 0, h - 0.7, RC.tower);
+  W.slab('stucco', x0, z0, x1, z1, h - 0.7, h + 0.08, RC.wall);
+  addBox(x0, z0, x1, z1);
+  const F = rWall(x1, z1, x1, z0, 1, 0), S1 = rWall(x0, z1, x1, z1, 0, 1), S0 = rWall(x1, z0, x0, z0, 0, -1);
+  for (const e of [F, S1, S0]) onWall(W, e, e.len / 2, 0, 0.012, () => { for (const y of [2.2, 6.6]) W.box('flat', 0, y, 0, e.len, 0.035, 0.02, RC.towerLine); });
+  for (const y of [2.3, 6.7]) onWall(W, F, F.len / 2, y, 0.02, () => {
+    W.box('flat', 0, 0, 0, F.len - 0.4, 2.5, 0.06, RC.towerLine);
+    W.box('louver', 0, 0, 0.04, F.len - 0.6, 2.3, 0.03, color('#b7bbbe'));
+  });
+}
+
+// B's quad (east) face from the entry block south to the library's block (IMG_2376–2386). Two
+// storeys between tall tan piers, each pier with a grey louver on each floor, a triangle lamp and
+// fine reveals; between two piers, two or three bays split by slim cream columns, each bay a grid
+// of panes, glass over white panels, on both floors. The glass double doors (IMG_2377) take the
+// middle bay south of the entry block's bed, a single door the bay after; the navy CAREER &
+// COLLEGE RESOURCE CENTER awning (IMG_2379; its lettering is in landmarks.js) runs over the next two.
+const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: -7.0, side: -4.4, ccrc: [-1.3, 3.5], ccrcDoor: 2.4 };
+function bQuad(W, h) {
+  const e = rWall(BQ.x, BQ.z1, BQ.x, BQ.z0, 1, 0), tz = (z) => BQ.z1 - z;
+  const rev = color('#cdbf9e'), lvF = color('#7c8186'), lvS = color('#a3a8ad');
+  // the piers
+  for (const p of BQ.piers) {
+    onWall(W, e, tz(p), 0, 0, () => {
+      W.box('stucco', 0, (h + 0.75) / 2, 0.25, BQ.pw, h + 0.75, 0.5, C.tan);
+      for (let y = 1.2; y < h; y += 1.2) W.box('flat', 0, y, 0.505, BQ.pw, 0.04, 0.02, rev);
+      for (const [y, lh] of [[2.1, 2.6], [6.9, 2.6]]) {
+        W.box('flat', 0, y, 0.52, 1.44, lh + 0.14, 0.06, lvF);
+        for (let k = 0; k < Math.floor(lh / 0.14); k++) W.box('flat', 0, y - lh / 2 + 0.08 + k * 0.14, 0.56, 1.3, 0.05, 0.05, lvS);
+      }
+    });
+    sconce(W, e, tz(p) + 0.55, 3.8, 0.5);
+    addBox(BQ.x, p - BQ.pw / 2, BQ.x + 0.5, p + BQ.pw / 2);
+  }
+  // camera at the top of the southern pier (IMG_2382)
+  onWall(W, e, tz(BQ.piers[BQ.piers.length - 1]) + 0.75, 5.6, 0.5, () => { W.box('flat', 0, 0.12, 0.08, 0.16, 0.2, 0.16, color('#f2f2f0')); W.blob('flat', 0, 0, 0.12, 0.1, 0.08, 0.1, color('#e6e7e8')); });
+  // the bays between them
+  const cuts = [BQ.z0, ...BQ.piers.flatMap((p) => [p - BQ.pw / 2, p + BQ.pw / 2]), BQ.z1];
+  for (let i = 0; i + 1 < cuts.length; i += 2) {
+    const a = cuts[i], g = cuts[i + 1] - a;
+    if (g < 1.5) continue;
+    const n = g > 6.5 ? 3 : g > 3.8 ? 2 : 1, w = (g - 0.4 * (n - 1)) / n;
+    for (let k = 0; k < n; k++) {
+      const z0 = a + k * (w + 0.4), c = z0 + w / 2;
+      if (k < n - 1) onWall(W, e, tz(z0 + w + 0.2), 0, 0, () => W.box('stucco', 0, (h + 0.55) / 2, 0.12, 0.4, h + 0.55, 0.24, CC.white));
+      if (z0 < -24.9) continue;                                  // behind the entry block's AC shaft
+      const near = (z) => Math.abs(c - z) < 0.3;
+      panelWin(W, e, tz(c), 4.75, 7.95, w - 0.3, 2, 4, near(BQ.doors) ? [1, 3] : [1, 2, 3]);
+      if (near(BQ.doors)) {
+        doorAt(W, e, tz(c), 1.8, 2.4, null, { glass: true, frameCol: C.frame });
+        onWall(W, e, tz(c), 2.9, 0.03, () => {
+          W.box('flat', 0, 0, 0, 1.9, 0.6, 0.08, C.frame);
+          W.quad('glass', [-0.88, -0.24, 0.05], [0.88, -0.24, 0.05], [0.88, 0.24, 0.05], [-0.88, 0.24, 0.05], color('#ffffff'), 'auto');
+        });
+      } else if (near(BQ.side) || near(BQ.ccrcDoor)) {
+        doorAt(W, e, tz(c) + 0.5, 0.95, 2.3, null, { glass: true, frameCol: C.frame, single: true });
+        panelWin(W, e, tz(c) - 0.55, 0.25, 3.35, w - 1.4, 1, 4, [2, 3]);
+      } else panelWin(W, e, tz(c), 0.25, 3.35, w - 0.3, 2, 4, [2, 3]);
+    }
+  }
+  // by the side door: a fire bell and a white standpipe (IMG_2377)
+  onWall(W, e, tz(BQ.side) - 0.6, 3.9, 0.02, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
+  W.cyl('flat', BQ.x + 0.25, 0, BQ.side + 0.9, 0.06, 0.06, 0.85, 8, color('#eef0f0'));
+  W.rod('flat', [BQ.x + 0.25, 0.75, BQ.side + 0.9], [BQ.x + 0.02, 0.75, BQ.side + 0.9], 0.05, color('#eef0f0'));
+  // the CAREER & COLLEGE RESOURCE CENTER awning: a flat grey roof, a navy fascia (lettering: landmarks.js)
+  const [ca, cb] = BQ.ccrc;
+  onWall(W, e, tz((ca + cb) / 2), 3.45, 0, () => {
+    W.box('flat', 0, 0, 0.75, cb - ca + 0.3, 0.12, 1.5, color('#8a8f94'));
+    W.box('flat', 0, 0.02, 1.5, cb - ca + 0.3, 0.46, 0.06, color('#1f2f5c'));
+  });
+}
+// A grid of panes on B's quad face: glass in the rows listed (0 = bottom), white panels in the rest.
+function panelWin(W, e, t, y0, y1, w, cols, rows, glassRows) {
+  const h = y1 - y0;
+  onWall(W, e, t, (y0 + y1) / 2, 0.03, () => {
+    W.box('flat', 0, 0, 0, w + 0.12, h + 0.12, 0.06, C.frame);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const a = -w / 2 + (w * c) / cols + 0.04, b = -w / 2 + (w * (c + 1)) / cols - 0.04;
+      const p = -h / 2 + (h * r) / rows + 0.04, q = -h / 2 + (h * (r + 1)) / rows - 0.04;
+      if (glassRows.includes(r)) W.quad('glass', [a, p, 0.05], [b, p, 0.05], [b, q, 0.05], [a, q, 0.05], pane(), [[0, 0], [b - a, 0], [b - a, q - p], [0, q - p]]);
+      else W.box('flat', (a + b) / 2, (p + q) / 2, 0.045, b - a, q - p, 0.02, CC.white);
+    }
+  });
+}
+
+// The library's entrance at the west end of its quad (north) face, by B (IMG_2376, 2378, 2381,
+// 2383): a thick flat concrete canopy off the library's block, on two grey steel posts, "Library"
+// on its fascia (landmarks.js); under it WHS glass double doors between side lights, a second pair
+// with a transom to the east, and square lights in the soffit. The block itself (IMG_2380): plain,
+// a dark door on its north face by the corner, a downpipe there, and on its east face an
+// electrical box with conduits into the ground and a white standpipe.
+const LC = { x0: -51.4, x1: -44.4, z0: 33.3, z: 37.9, y0: 3.0, y1: 3.8 };
+function libFront(W) {
+  W.slab('stucco', LC.x0, LC.z0, LC.x1, LC.z, LC.y0, LC.y1, WALL.library);
+  for (const px of [-50.3, -46.8]) { W.slab('flat', px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35, 0, LC.y0, color('#8d9399')); addBox(px - 0.1, LC.z0 + 0.15, px + 0.1, LC.z0 + 0.35); }
+  const e = rWall(LC.x1, LC.z, LC.x0, LC.z, 0, -1), t = (x) => LC.x1 - x;
+  doorAt(W, e, t(-49.1), 1.8, 2.4, null, { glass: true, frameCol: C.frame });
+  for (const d of [-1.25, 1.25]) onWall(W, e, t(-49.1) + d, 1.25, 0.03, () => {
+    W.box('flat', 0, 0, 0, 0.66, 2.4, 0.08, C.frame);
+    W.quad('glass', [-0.27, -1.12, 0.05], [0.27, -1.12, 0.05], [0.27, 1.12, 0.05], [-0.27, 1.12, 0.05], color('#ffffff'), 'auto');
+  });
+  onWall(W, e, t(-49.1), 1.5, 0.09, () => W.box('flat', 0, 0, 0, 1.2, 0.2, 0.01, color('#f4f4f2')));      // WHS on the doors
+  doorAt(W, e, t(-45.9), 1.8, 2.3, null, { glass: true, frameCol: C.frame });
+  onWall(W, e, t(-45.9), 2.72, 0.03, () => {
+    W.box('flat', 0, 0, 0, 1.9, 0.6, 0.08, C.frame);
+    W.quad('glass', [-0.88, -0.23, 0.05], [0.88, -0.23, 0.05], [0.88, 0.23, 0.05], [-0.88, 0.23, 0.05], color('#ffffff'), 'auto');
+  });
+  for (const gx of [-49.4, -46.4]) { W.slab('glow', gx - 0.3, 35.3, gx + 0.3, 35.9, LC.y0 - 0.04, LC.y0, color('#ffe6bd')); LIGHTS.push([gx, 35.6, LC.y0 - 0.05, 4]); }
+  // the block
+  const bn = rWall(-51.4, 24.6, -54.7, 24.6, 0, -1), bt = (x) => -51.4 - x;
+  doorAt(W, bn, bt(-52.2), 0.95, 2.2, color('#3a4250'), { frameCol: color('#4a5260'), plain: true });
+  W.cyl('flat', -51.52, 0, 24.48, 0.05, 0.05, 6.5, 8, color('#c9ccce'));
+  const be = rWall(-51.4, LC.z0, -51.4, 24.6, 1, 0), bz = (z) => LC.z0 - z;
+  onWall(W, be, bz(29.3), 1.35, 0.02, () => W.box('flat', 0, 0, 0.12, 0.9, 1.0, 0.24, color('#d9dbd6')));
+  for (let k = 0; k < 4; k++) W.rod('flat', [-51.2, 0.85, 29.0 + k * 0.2], [-51.2, 0, 29.0 + k * 0.2], 0.03, color('#c9ccce'));
+  W.cyl('flat', -51.2, 0, 27.4, 0.05, 0.05, 0.9, 8, color('#eef0f0'));
 }
 
 // The front office's courtyard (south) side, behind its covered walk (IMG_2392, 2395, 2396, 2397):
@@ -791,6 +927,8 @@ export function buildBuildings(W) {
     if (b.style === 'r') buildR(W, b);
     if (b.id === 'CAF') cafFront(W);
     if (b.id === 'B-entry') bEntry(W);
+    if (b.id === 'B') { bQuad(W, b.h); bCourtAC(W); }
+    if (b.id === 'LIB') libFront(W);
     if (b.id === 'ADMIN') adminSouth(W, b);
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
