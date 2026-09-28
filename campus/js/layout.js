@@ -38,8 +38,11 @@ export const BUILDINGS = [
   // One rectangle from B's wall to the east end (Ethan: the office and the part joining B are one
   // building). Its quad-side face is at -57.4 (Ethan: narrower; the Apple Maps view), with the
   // covered walk in front of it (COURT.porch) running all the way to B.
-  // Ethan: not as long as first drawn; its east end (toward the flagpole) is at x -30.2.
-  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8, poly: rect(-54.7, -74.3, -30.2, -57.4) },
+  // Ethan: not as long as first drawn; its east end (toward the flagpole) is at x -30.2, where its
+  // entrance is (IMG_2400). The half toward the flag is narrower: its courtyard wall steps back 1.6 m
+  // at x -41 (IMG_2395/2396/2397).
+  { id: 'ADMIN', name: 'Front office', style: 'admin', h: 4.8,
+    poly: [[-54.7, -74.3], [-30.2, -74.3], [-30.2, -59.0], [-41.0, -59.0], [-41.0, -57.4], [-54.7, -57.4]] },
   // Cafeteria: north side of the quad, covered walkway on its quad side. The tall
   // dining hall stands 2.4 m back behind a one-storey front that holds the glass
   // storefront (Ethan's photos IMG_2362–2371, the satellite); buildings.js cafFront().
@@ -230,13 +233,15 @@ export const COURT = {
   // maple by the block (IMG_2392, IMG_2394)
   bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
   maple: [-52.2, -38.8],
-  // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x
+  // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x; the doors and
+  // box are on the wider west half, the filler and the WHS entrance on the set-back east half
   yellowDoors: [-49.5, -43.5], box: -41.8, filler: -39.6, entry: [-37.2, -31.2],
   benches: [[-47.8, -50.3], [-44.2, -51.2]],
   // the black steel fence, an L (Ethan): south from the office's courtyard wall, just east of the
   // WHS entrance, through the zig-zag flower bed, then east in line with the teachers' yard's short
   // side to meet it. A pedestrian gate by the office, a double gate in the east leg (IMG_2396/2398/2399).
-  fence: [[-31.0, -57.4], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-24.2, -52.5],
+  fence: [[-31.0, -59.0], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-24.2, -52.5],
+  step: { x: -41.0, z: -59.0 },      // where the office's courtyard wall steps back (layout ADMIN)
 };
 // The flower bed on the quad side of B's entry block, along B's wall (Apple Maps view for its shape;
 // IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
@@ -254,14 +259,17 @@ export const FRONT = {
   // stand in their own bed at the office's north-east corner (palmBed, rounded at its south-east
   // corner); the flagpole stands in a round planter south of it (flagBed: a ring of shrubs round
   // a paved circle).
-  palms: [[-24.3, -75.9, 10.5], [-21.8, -76.1, 11.8], [-19.3, -75.8, 9.6]],
-  // (IMG_2400/2401/2404: a long raised concrete planter along a wall that continues east from the
-  // entrance, rounded at its east end, with three tall palms, agapanthus and boulders)
-  palmBed: { x0: -30.2, x1: -17.6, z0: -77.4, z1: -74.55, h: 0.55 },
-  screenWall: { x0: -30.2, x1: -20.5, h: 3.6 },
+  palms: [[-28.8, -71.3, 10.5], [-28.8, -73.9, 11.8], [-28.7, -76.4, 9.6]],
+  // (IMG_2400/2401/2404: north of the entrance, a long raised concrete planter along the office's
+  // east wall, which runs on past its corner as a free-standing wall; rounded at the north end,
+  // toward the street, with three tall palms, agapanthus and boulders)
+  palmBed: { x0: -30.2, x1: -27.4, z0: -78.3, z1: -69.6, h: 0.55 },
+  screenWall: { z0: -77.0, h: 3.6 },
   flag: [-18.4, -61.7],
   flagBed: { r: 4.3, inner: 2.9 },
-  entry: { x0: -36.0, x1: -30.2 },
+  // The office's entrance is on its EAST face, facing the flagpole (Ethan, IMG_2400/2404): a deep
+  // overhang with ADMINISTRATION on its fascia over a frosted storefront, from z1 (south) to z0.
+  entry: { x: -30.2, z0: -69.2, z1: -62.2, depth: 4.4 },
   ada: [-48.2, -79.3],
 };
 

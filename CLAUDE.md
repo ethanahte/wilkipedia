@@ -422,24 +422,32 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       trees, with a small maple by the entry block (IMG_2392/2394).
 
       Around the front office (IMG_2395–2404):
-      - North entrance: a deep fascia with ADMINISTRATION letters over a
-        frosted storefront (`frostFront()`) and the WHS door, beside a
-        narrow mosaic strip.
-      - A wall runs on east from the entrance, with a long raised concrete
-        planter along it (rounded at its east end) holding three tall
-        palms, agapanthus and boulders (`FRONT.palmBed`, `screenWall`).
+      - The main entrance is on the EAST face, facing the flagpole (Ethan,
+        IMG_2400/2404; it was once drawn on the north face by mistake). A
+        thick overhang on two posts, flush with the roofline, carries
+        ADMINISTRATION on its fascia over a frosted storefront
+        (`frostFrontE()`) with the WHS door and a narrow mosaic strip
+        (`FRONT.entry`). The north face keeps only the ADRIAN WILCOX sign
+        wall and the flax planter.
+      - North of the entrance, the east wall runs on past the office's
+        corner as a free-standing wall, with a long raised concrete planter
+        along it (rounded at its north end) holding three tall palms,
+        agapanthus and boulders (`FRONT.palmBed`, `screenWall`; IMG_2401).
       - The flagpole's round planter has golden mounded shrubs, yellow tree
         roses and a bench.
-      - The long east wall is plain, with two blue WILCOX HIGH SCHOOL
-        #CHARGERSTRONG banners and two doors near its south end. The old
-        "student entrance" there was never in a photo and is gone.
+      - IMG_2402 is NOT the office: it is the cafeteria's north wall (CAF-w,
+        z -52.8) seen from the flag looking east. That wall is plain, with
+        two blue WILCOX HIGH SCHOOL #CHARGERSTRONG banners, a red sign and
+        two doors near its east end (`cafFront()`); the caf kit skips it.
       - Courtyard side, behind the covered walk: two yellow doors, a fire
-        bell over an electrical box, a bottle filler, and the WHS glass
-        entrance with a storefront at the east end. B's glass doors close
+        bell over an electrical box, then the wall steps back 1.6 m
+        (`COURT.step`, x -41) and carries a bottle filler and the WHS glass
+        entrance with a storefront at the east end. The walk's roof reaches
+        back over the step. B's glass doors close
         the walk's west end. The walk has round grey posts and lights, and
         runs on over the gate. Two benches face it.
       - The black steel fence (`steelFence()`, `COURT.fence`) is an L
-        (Ethan). It runs south from the office's courtyard wall at x -31,
+        (Ethan). It runs south from the office's set-back courtyard wall at x -31,
         just east of the WHS entrance, through the zig-zag flower bed. Then
         it runs east in line with the teachers' yard's short side (z -44.9)
         to meet it. It has an open pedestrian gate by the office and a
@@ -449,13 +457,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - The cafeteria's west wall north of the yard has a yellow door under
         a small metal awning (IMG_2399).
 
-      The front office (`ADMIN`) is ONE rectangle from B's wall to its east
-      end at x -30.2 (Ethan: shorter toward the flagpole). Its quad-side face is at z -57.4 (narrower, per Ethan and
-      the map), and its west face is against B (no kit windows). Its south face,
+      The front office (`ADMIN`) is ONE building from B's wall to its east
+      end at x -30.2 (Ethan: shorter toward the flagpole). Its courtyard face
+      is at z -57.4 (narrower, per Ethan and the map), but the half toward
+      the flag is narrower still: east of x -41 that face steps back to
+      z -59.0 (Ethan, IMG_2395/2396/2397). Its west face is against B (no kit
+      windows). Its south face,
       behind the covered walk, is `adminSouth()` (above).
 
-      The palms stand in their own bed at the office's north-east corner
-      (`FRONT.palmBed`). The flagpole stands in a round planter south of it
+      The palms stand in their own bed along the office's east face, north of
+      the entrance (`FRONT.palmBed`). The flagpole stands in a round planter south of it
       (`FRONT.flag`, `flagBed`), both off the map.
     - The fountain is on the west side, not the east (it was once drawn on the
       east by mistake). East wing (IMG_2365): blank wall and a pair of dark

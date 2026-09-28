@@ -57,23 +57,23 @@ export function buildLandmarks(W, group, fontFamily) {
 
   // roof edge over the sign wall, and the stepped-up volume behind it
   W.slab('flat', -47.2, z - 1.3, -30.2, z, 4.45, 4.85, fin);
-  W.slab('stucco', -41, -71, -30, -62, 4.8, 6.6, color('#efe8d6'));
-  // the main entrance: a flat canopy on two posts, glass doors and a mosaic panel
-  const e = FRONT.entry;
-  W.slab('flat', e.x0, z - 4.6, e.x1 + 1.5, z, 3.4, 3.7, fin);
-  for (const px of [e.x0 + 0.4, e.x1 + 1.1]) W.slab('flat', px - 0.14, z - 4.4, px + 0.14, z - 4.12, 0, 3.4, fin);
-  W.slab('mosaic', e.x0 + 0.2, z - 0.12, e.x0 + 0.8, z, 0, 3.2, color('#ffffff'));
-  // its fascia is deep, with ADMINISTRATION in grey letters (IMG_2400, IMG_2404)
-  W.slab('flat', e.x0, z - 4.6, e.x1 + 1.5, z - 4.4, 3.0, 3.95, fin);
+  W.slab('stucco', -41, -71, -30.4, -62, 4.8, 6.6, color('#efe8d6'));
+  // the office's entrance, on its EAST face toward the flagpole (Ethan, IMG_2400, IMG_2404): a
+  // deep overhang on two square posts with ADMINISTRATION in grey letters on its fascia, a narrow
+  // pebble-mosaic strip, and a storefront of frosted glass over white panels with a clear transom
+  // row: the WHS public-entrance door in the south bay, a second glass door at the north end.
+  const e = FRONT.entry, ox = e.x + e.depth;
+  W.slab('flat', e.x, e.z0, ox, e.z1, 3.4, 4.8, fin);                 // thick, flush with the roofline
+  W.slab('flat', ox - 0.15, e.z0, ox, e.z1, 3.3, 3.4, fin);
+  for (const pz of [e.z0 + 0.4, e.z1 - 0.4]) { W.slab('flat', ox - 0.55, pz - 0.18, ox - 0.2, pz + 0.18, 0, 3.4, fin); addCircle(ox - 0.37, pz, 0.25); }
   const adm = textCanvas(1024, 128, (g, w, h) => {
     g.clearRect(0, 0, w, h); g.fillStyle = '#4a4e54'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = '700 92px "Helvetica Neue", Arial, sans-serif'; g.fillText('ADMINISTRATION', w / 2, h / 2 + 4);
   });
-  group.add(decal(adm, (e.x0 + e.x1 + 1.5) / 2 + 0.8, 3.47, z - 4.63, 4.6, 0.575, Math.PI));
-  // the storefront under it: frosted glass over white panels with a clear transom row, the WHS
-  // public-entrance door in the west bay, a second glass door at the east end (IMG_2400, IMG_2404)
-  frostFront(W, e.x0 + 1.0, e.x1 - 0.1, z, ['f', 'd', 'f', '|', 'f', 'f', 'd']);
-  W.slab('glow', e.x0 + 1.5, z - 2.6, e.x0 + 2.3, z - 1.8, 3.36, 3.4, color('#ffe6bd')); LIGHTS.push([e.x0 + 1.9, z - 2.2, 3.4, 5]);
+  group.add(decal(adm, ox + 0.03, 4.05, (e.z0 + e.z1) / 2 - 0.9, 4.2, 0.525, Math.PI / 2));
+  W.slab('mosaic', e.x, e.z1 - 0.8, e.x + 0.12, e.z1 - 0.2, 0, 3.2, color('#ffffff'));
+  frostFrontE(W, e.z1 - 1.0, e.z0 + 0.1, e.x, ['f', 'd', 'f', '|', 'f', 'f', 'd']);
+  W.slab('glow', e.x + 1.8, (e.z0 + e.z1) / 2 - 0.4, e.x + 2.6, (e.z0 + e.z1) / 2 + 0.4, 3.36, 3.4, color('#ffe6bd')); LIGHTS.push([e.x + 2.2, (e.z0 + e.z1) / 2, 3.35, 5]);
 
   // the planter: poured concrete, rounded at the east end, full of flax (the palms have their own bed, below)
   const p = FRONT.planter, r = (p.z1 - p.z0) / 2, cz = (p.z0 + p.z1) / 2;
@@ -97,33 +97,34 @@ export function buildLandmarks(W, group, fontFamily) {
     g.fillStyle = '#fff'; g.font = 'bold 96px sans-serif'; g.textAlign = 'center'; g.fillText('♿', w / 2, 112);
   });
   group.add(decal(ada, ax, 2.0, az - 0.05, 0.45, 0.56, Math.PI));
-
-  // the office's long east wall: two blue banners (IMG_2402)
+  // north of the entrance: the long raised planter along the office's east wall, which runs on past
+  // its corner as a free-standing wall; rounded at the north end, toward the street, with three tall
+  // palms, agapanthus and boulders (IMG_2400, IMG_2401, IMG_2404)
+  {
+    const b = FRONT.palmBed, sw = FRONT.screenWall, r = (b.x1 - b.x0) / 2, cx = (b.x0 + b.x1) / 2;
+    W.slab('stucco', b.x0 - 0.25, sw.z0, b.x0, z, 0, sw.h, color('#efe8d6'));
+    W.slab('flat', b.x0 - 0.28, sw.z0 - 0.03, b.x0 + 0.03, z, sw.h, sw.h + 0.12, fin);
+    addSegment(b.x0 - 0.12, sw.z0, b.x0 - 0.12, z, 0.15);
+    const out = [[b.x0, b.z1], [b.x1, b.z1], [b.x1, b.z0 + r]];
+    for (let i = 1; i < 10; i++) { const a = (Math.PI * i) / 10; out.push([cx + Math.cos(a) * r, b.z0 + r - Math.sin(a) * r]); }
+    out.push([b.x0, b.z0 + r]);
+    out.reverse();                                                   // prism() wants this winding
+    W.prism('flat', out, 0, b.h, concrete, { top: true, topMat: 'flat', topCol: soil });
+    addPoly(ensureCCW(out));
+    const R2 = rng(611);
+    for (let zz = b.z1 - 0.7; zz > b.z0 + 0.6; zz -= 0.9 + R2() * 0.5) {
+      if (R2() < 0.7) grassTuft(W, cx + (R2() - 0.5) * 1.4, zz, R2, { y: b.h, h: 0.9, cols: [color('#3f6f37'), color('#4a7d3d')] });
+      else W.blob('flat', cx + (R2() - 0.5), b.h + 0.2, zz, 0.35, 0.3, 0.45, color('#9a948a'));
+    }
+  }
+  // the cafeteria's north wall, toward the flagpole: two blue banners (IMG_2402)
   const ban = textCanvas(512, 280, (g, w, h) => {
     g.fillStyle = '#23407e'; g.fillRect(0, 0, w, h); g.fillStyle = '#ffffff'; g.fillRect(10, 10, w - 20, h - 20);
     g.fillStyle = '#23407e'; g.fillRect(18, 18, w - 36, h - 36); g.fillStyle = '#ffffff'; g.textAlign = 'center';
     g.font = '800 48px "Helvetica Neue", Arial, sans-serif'; g.fillText('WILCOX HIGH SCHOOL', w / 2, 120);
     g.font = '700 40px "Helvetica Neue", Arial, sans-serif'; g.fillText('#CHARGERSTRONG', w / 2, 190);
   });
-  for (const [zz, bw] of [[-70.8, 2.3], [-66.3, 1.5]]) group.add(decal(ban, -30.17, 3.4, zz, bw, bw * 280 / 512, Math.PI / 2));
-  // the wall that runs on east from the entrance, and the long raised planter along it, rounded at
-  // its east end: three tall palms, agapanthus and boulders (IMG_2400, IMG_2401, IMG_2404)
-  {
-    const b = FRONT.palmBed, sw = FRONT.screenWall, r = (b.z1 - b.z0) / 2, cz = (b.z0 + b.z1) / 2;
-    W.slab('stucco', sw.x0, z, sw.x1, z + 0.25, 0, sw.h, color('#efe8d6'));
-    W.slab('flat', sw.x0, z - 0.03, sw.x1 + 0.03, z + 0.28, sw.h, sw.h + 0.12, fin);
-    addSegment(sw.x0, z + 0.12, sw.x1, z + 0.12, 0.15);
-    const out = [[b.x0, b.z0], [b.x1 - r, b.z0]];
-    for (let i = 1; i < 10; i++) { const a = -Math.PI / 2 + (Math.PI * i) / 10; out.push([b.x1 - r + Math.cos(a) * r, cz + Math.sin(a) * r]); }
-    out.push([b.x1 - r, b.z1], [b.x0, b.z1]);
-    W.prism('flat', out, 0, b.h, concrete, { top: true, topMat: 'flat', topCol: soil });
-    addPoly(ensureCCW(out));
-    const R2 = rng(611);
-    for (let x = b.x0 + 0.7; x < b.x1 - 0.6; x += 0.9 + R2() * 0.5) {
-      if (R2() < 0.7) grassTuft(W, x, cz + (R2() - 0.5) * 1.4, R2, { y: b.h, h: 0.9, cols: [color('#3f6f37'), color('#4a7d3d')] });
-      else W.blob('flat', x, b.h + 0.2, cz + (R2() - 0.5), 0.45, 0.3, 0.35, color('#9a948a'));
-    }
-  }
+  for (const [xx, bw] of [[-12.5, 2.3], [-7.5, 1.5]]) group.add(decal(ban, xx, 3.1, -52.83, bw, bw * 280 / 512, Math.PI));
   // the flagpole, in its round planter: a ring of shrubs round a paved circle
   const [fx, fz] = FRONT.flag, fb = FRONT.flagBed;
   W.cyl('flat', fx, 0, fz, fb.r, fb.r, 0.3, 36, soil);
@@ -346,6 +347,7 @@ function court(W, group) {
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
+  W.slab('flat', COURT.step.x, COURT.step.z, -30.2, c.z0, 3.2, 3.45, fin);    // over the set-back half
   // round grey steel posts along its edge, and a light in each bay (IMG_2395, IMG_2397)
   const nP = Math.round((c.x1 - c.x0) / 6);
   for (let i = 0; i <= nP; i++) {
@@ -459,22 +461,23 @@ function treeRose(W, x, z, R, bloom) {
   addCircle(x, z, 0.1);
 }
 const darker = (c) => c.clone().multiplyScalar(0.62);
-// A storefront facing north (the office's front) from x0 to x1 at wall z: 'f' a frosted glass bay
-// (clear transom row, frosted middle, white panel below), 'd' a glass door, '|' a pier. They stretch to fit.
-function frostFront(W, x0, x1, z, parts) {
-  const want = { f: 1.2, d: 1.0, '|': 0.3 }, k = (x1 - x0) / parts.reduce((a, c) => a + want[c], 0);
+// A storefront on the office's east-facing front wall at x, from zS (south end) to zN (north end):
+// 'f' a frosted glass bay (clear transom row, frosted middle, white panel below), 'd' a glass door,
+// '|' a pier. They stretch to fit.
+function frostFrontE(W, zS, zN, x, parts) {
+  const want = { f: 1.2, d: 1.0, '|': 0.3 }, k = (zS - zN) / parts.reduce((a, c) => a + want[c], 0);
   const frame = color('#6b7076'), top = 3.1;
-  W.slab('flat', x0, z - 0.06, x1, z, 0, top, frame);
-  let x = x0;
+  W.slab('flat', x, zN, x + 0.06, zS, 0, top, frame);
+  let z = zS;
   for (const c of parts) {
-    const w = want[c] * k, a = x + 0.05, b = x + w - 0.05;
-    const q = (y0, y1, col) => W.quad('glass', [b, y0, z - 0.08], [a, y0, z - 0.08], [a, y1, z - 0.08], [b, y1, z - 0.08], col, 'auto');
-    if (c === '|') W.slab('stucco', x, z - 0.2, x + w, z, 0, top, color('#efe8d6'));
+    const w = want[c] * k, a = z - 0.05, b = z - w + 0.05;          // a: the part's south edge, b: its north edge
+    const q = (y0, y1, col) => W.quad('glass', [x + 0.08, y0, a], [x + 0.08, y0, b], [x + 0.08, y1, b], [x + 0.08, y1, a], col, 'auto');
+    if (c === '|') W.slab('stucco', x, z - w, x + 0.2, z, 0, top, color('#efe8d6'));
     else if (c === 'f') {
-      W.slab('flat', a, z - 0.09, b, z - 0.06, 0.05, 0.85, color('#f1f1ee'));
+      W.slab('flat', x + 0.06, b, x + 0.09, a, 0.05, 0.85, color('#f1f1ee'));
       q(0.9, 2.15, color('#dfe6ea')); q(2.25, top - 0.06, color('#ffffff'));
-    } else { q(0.1, 2.3, color('#ffffff')); q(2.4, top - 0.06, color('#ffffff')); W.slab('flat', a + 0.1, z - 0.12, a + 0.14, z - 0.08, 0.9, 1.3, color('#c9ccd0')); }
-    W.slab('flat', x + w - 0.03, z - 0.1, x + w + 0.03, z - 0.06, 0, top, frame);
-    x += w;
+    } else { q(0.1, 2.3, color('#ffffff')); q(2.4, top - 0.06, color('#ffffff')); W.slab('flat', x + 0.08, a - 0.14, x + 0.12, a - 0.1, 0.9, 1.3, color('#c9ccd0')); }
+    W.slab('flat', x + 0.06, z - w - 0.03, x + 0.1, z - w + 0.03, 0, top, frame);
+    z -= w;
   }
 }
