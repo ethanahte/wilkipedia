@@ -671,7 +671,7 @@ function bCourtAC(W) {
 // middle bay south of the entry block's bed, a single door the bay after; the navy CAREER &
 // COLLEGE RESOURCE CENTER awning (IMG_2379; its lettering is in landmarks.js) is at the south end,
 // over the two bays next to the library's block, where it always was (Ethan).
-const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: -7.0, side: -4.4, ccrc: [17.5, 22.6] };
+const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: 2.4, side: 5.0, ccrc: [17.5, 22.6] };   // doors: the middle of the face, facing the quad's middle (Ethan)
 function bQuad(W, h) {
   const e = rWall(BQ.x, BQ.z1, BQ.x, BQ.z0, 1, 0), tz = (z) => BQ.z1 - z;
   const rev = color('#cdbf9e'), lvF = color('#7c8186'), lvS = color('#a3a8ad');
@@ -758,11 +758,11 @@ function libFront(W) {
   onWall(W, e, t(-49.1), 1.5, 0.09, () => W.box('flat', 0, 0, 0, 1.2, 0.2, 0.01, color('#f4f4f2')));      // WHS on the doors
   // the second pair, and a third into B through the block's east face (Ethan): the same kind
   const bd = rWall(LC.x0, LC.z, LC.x0, LC.z0, 1, 0);
-  for (const [w, tt] of [[e, t(-45.4)], [bd, (LC.z - LC.z0) / 2]]) {
-    doorAt(W, w, tt, 2.0, 2.3, null, { glass: true, frameCol: C.frame });
+  for (const [w, tt, dw] of [[e, t(-45.4), 2.0], [bd, (LC.z - LC.z0) / 2, 2.6]]) {         // B's is the wider (Ethan)
+    doorAt(W, w, tt, dw, 2.3, null, { glass: true, frameCol: C.frame });
     onWall(W, w, tt, 2.72, 0.03, () => {
-      W.box('flat', 0, 0, 0, 2.1, 0.6, 0.08, C.frame);
-      W.quad('glass', [-0.98, -0.23, 0.05], [0.98, -0.23, 0.05], [0.98, 0.23, 0.05], [-0.98, 0.23, 0.05], color('#ffffff'), 'auto');
+      W.box('flat', 0, 0, 0, dw + 0.1, 0.6, 0.08, C.frame);
+      W.quad('glass', [-dw / 2 + 0.02, -0.23, 0.05], [dw / 2 - 0.02, -0.23, 0.05], [dw / 2 - 0.02, 0.23, 0.05], [-dw / 2 + 0.02, 0.23, 0.05], color('#ffffff'), 'auto');
     });
   }
   for (const gx of [-49.4, -46.4, -44.0]) { W.slab('glow', gx - 0.3, 35.3, gx + 0.3, 35.9, LC.y0 - 0.04, LC.y0, color('#ffe6bd')); LIGHTS.push([gx, 35.6, LC.y0 - 0.05, 4]); }

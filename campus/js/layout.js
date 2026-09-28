@@ -253,8 +253,9 @@ export const LAWN_TREES = [[2, 20], [9, 16.5], [15, 23.5], [4.5, 27], [-30, 25],
 export const LAMPS = [[-12, 1.3], [-27, 11.5], [-2, -13], [22, -8], [-38, -18], [26, 20], [-4, 30.8], [-30.5, 32], [-18.3, 3.3], [30, -24], [3.3, -3.6]];   // [-18.3, 3.3]: the one with the flag, due north of the stage (IMG_2324, satellite); [3.3, -3.6]: at the cedar's bed (IMG_2335)
 // (no table stands on a lawn or at a lamp: Ethan)
 export const PICNIC = [[20, 30, -0.2], [-8, -6, 0], [-26, 4, 1.57]];
-// the ONE long green table with benches along the library's quad wall, by its entrance (Ethan)
-export const PICNIC_LIB = [[-40.2, 35.7, 0]];
+// two long green tables with benches right against the library's quad wall, one by its entrance
+// and one at the far (east) end (Ethan)
+export const PICNIC_LIB = [[-40.2, 36.8, 0], [-20.4, 36.8, 0]];
 export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blue benches
 
 // Front of the school: the sign wall, planter, palms and flag.
@@ -309,7 +310,7 @@ export const B_QUAD = {
     { poly: [[-50.4, 25.6], [-46.3, 29.2], [-46.3, 32.9], [-50.4, 32.9]], trees: [[-48.2, 30.0]] },
   ],
   benches: [[-49.24, -10.57, -0.538], [-50.83, -7.89, -0.538]],
-  table: [-51.4, -3.0],            // an umbrella table south of B's quad-side doors (Ethan, IMG_2377)
+  table: [-51.4, 6.4],             // an umbrella table south of (left of) B's quad-side doors (Ethan, IMG_2377)
 };
 
 export const FRONT = {
