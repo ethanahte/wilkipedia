@@ -57,7 +57,8 @@ async function boot() {
 
   const scene = new THREE.Scene();
   // haze: distance melts into the pale horizon, as in a painted background
-  scene.fog = new THREE.FogExp2(HORIZON, 0.0021);
+  // clear air (Ethan's reference): the fog only starts far out, where the land meets the horizon
+  scene.fog = new THREE.Fog(HORIZON, 320, 1400);
   const camera = new THREE.PerspectiveCamera(62, 1, 0.15, 7000);   // far: the aerial long lens sits ~2 km out
 
   // light: sky + ground bounce, and one warm afternoon sun that follows you with its shadows
@@ -142,18 +143,20 @@ async function boot() {
   const TKEY = 'wilcox-campus-sky2';
   let env = { night: false, rain: false };
   try { Object.assign(env, JSON.parse(localStorage.getItem(TKEY)) || {}); } catch { /* defaults */ }
-  // soft pastel daylight: a peachy-pink sky fill (every shadow goes warm mauve) and a gentle sun
-  const DAY = { hemi: ['#f0cfc4', '#e3cdb0', 2.35], sun: ['#fff0dc', 2.05], fog: '#f6dccb', density: 0.0022 };
-  const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', density: 0.0034 };
+  // daylight after Ethan's reference painting (a cottage under a towering cumulus): a teal sky
+  // fill so shadows go cool blue, warm sun, clear air; the far distance melts into the pink band
+  // along the horizon. near/far: where the fog starts and where it's total, on foot.
+  const DAY = { hemi: ['#b7cfe6', '#d6c7a0', 2.2], sun: ['#fff0d8', 2.3], fog: '#d6abb1', near: 320, far: 1400 };
+  const NIGHT = { hemi: ['#34457a', '#0f121b', 0.95], sun: ['#aebfff', 0.6], fog: '#0a0f1c', near: 120, far: 700 };
   // the pixel style's daylight: a clear blue summer day, bright sun, hard shadows
-  const PIXEL_DAY = { hemi: ['#d4ddef', '#dccfae', 1.75], sun: ['#fff4dc', 2.7], fog: '#86b1ea', density: 0.0015 };
+  const PIXEL_DAY = { hemi: ['#d4ddef', '#dccfae', 1.75], sun: ['#fff4dc', 2.7], fog: '#86b1ea', near: 300, far: 1300 };
   // Two looks: 'diorama' (the soft peach miniature) and 'pixel' (pixel art, like
   // Summerhouse). Remembered once the viewer picks one.
   const SKEY = 'wilcox-campus-style';
   let style = 'diorama';
   try { if (localStorage.getItem(SKEY) === 'pixel') style = 'pixel'; } catch { /* default */ }
   const CLOUD_TONES = {
-    diorama: ['#fff4ec', '#f0d0c8', '#dcb0b0'],
+    diorama: ['#f7c49b', '#a99cbc', '#6c84b2'],               // peach in the sun, lavender, slate blue in shade
     pixel: ['#ffffff', '#d9e5f8', '#a8bde4'],
   };
   const applyStyle = () => {
@@ -356,11 +359,12 @@ async function boot() {
     leaves.userData.update(dt, t, camera.position, walking && !env.rain);
     rain.userData.update(dt, camera.position, env.rain, !walking);
     ripples.userData.update(dt, walking ? controls.pos : camera.position, env.rain && walking);
-    const dens = (env.night ? NIGHT : DAY).density * (env.rain ? 1.3 : 1);
-    // from the air the land stays clear however far you zoom out (Ethan): thinner fog the
-    // further the camera is, and no clouds once you're up above them
+    const FE = env.night ? NIGHT : style === 'pixel' ? PIXEL_DAY : DAY, fk = env.rain ? 0.6 : 1;
+    // clear air at any angle (Ethan): on foot the fog only starts far out; from the air it starts
+    // beyond the campus however far you zoom out, and the clouds go once you're up above them
     const camFar = camera.position.length();
-    scene.fog.density = walking ? dens : dens * 0.11 * THREE.MathUtils.clamp(420 / Math.max(camFar, 1), 0.08, 1);
+    scene.fog.near = walking ? FE.near * fk : Math.max(FE.near, camFar * 0.95);
+    scene.fog.far = walking ? FE.far * fk : Math.max(FE.far, camFar * 3.2);
     clouds.visible = !env.rain && (walking || camera.position.y < 240);
     // the sun's shadow box follows what you're looking at, snapped to its texels so edges don't crawl
     const focus = controls.mode === 'fly' ? new THREE.Vector3(controls.orbit.tx, 0, controls.orbit.tz) : controls.pos.clone();
@@ -398,7 +402,8 @@ async function boot() {
     const fade = controls.mode === 'fly' ? Math.max(420, controls.orbit.dist * controls.lensK * 1.5) : 420;
     // tilt-shift (the miniature look) only from the air
     // (and it fades out as you zoom out, so the whole campus stays sharp: Ethan)
-    const tiltWant = controls.mode === 'fly' ? 1 - THREE.MathUtils.smoothstep(controls.orbit.dist, 200, 480) : 0;
+    // ...and at low angles, where the view runs deep and the lens would soften most of it (Ethan)
+    const tiltWant = controls.mode === 'fly' ? (1 - THREE.MathUtils.smoothstep(controls.orbit.dist, 200, 480)) * THREE.MathUtils.smoothstep(controls.orbit.el, 0.35, 0.8) : 0;
     tilt += (tiltWant - tilt) * Math.min(1, dt * 3);
     camera.updateMatrixWorld();                            // (this frame's view, not last frame's)
     SUN_VIEW.value.copy(SUN).transformDirection(camera.matrixWorldInverse);

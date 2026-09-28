@@ -642,8 +642,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Never invent what something looks like.** Every facade kit and landmark is
     from a photo the owner sent (listed in the file headers). Ask for a photo
     before adding a building's detail, interior, or a logo placement.
-  - Look (by day: the owner's reference is the diorama game *High Above*): a
-    near-isometric miniature floating in warm peach mist. From the air the
+  - Look by day, since 2026-09-28: Ethan's reference painting (a cottage under
+    a towering cumulus). The things that make it:
+    - a deep teal sky, lighter toward a band of dusty pink along the horizon
+      (and a softer mauve below it, round the floating model);
+    - towering cumulus heaped in clusters, each puff inked round its edge,
+      cel-shaded peach in the sun, a thin lavender band, and slate blue in
+      shade (`CLOUD_TONES.diorama`, the cloud shader in life.js);
+    - clear air: linear fog that only starts at 320 m on foot and beyond the
+      campus from the air, and a light sun-side haze;
+    - dark inked line art by day, rich saturated colour, blue shadows
+      under a warm sun (post.js grade; `DAY` in main.js);
+    - only a trace of cirrus.
+    The tilt-shift is gentle, and it is off at low angles and when zoomed
+    out.
+    Earlier look, replaced: a near-isometric miniature floating in warm peach
+    mist, after the diorama game *High Above*. From the air the
     camera uses a long lens (`fovFly` 24°, distance × `lensK` in controls.js;
     orbit.dist stays in 62°-lens units) with a tilt-shift blur by depth (post.js, `tilt` +
     `focusZ` = distance to the orbit target: sharp there, soft much nearer or
