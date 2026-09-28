@@ -62,8 +62,11 @@ export const BUILDINGS = [
   { id: 'YARD-w', name: 'Teachers’ yard', style: 'yard', h: 3.0, poly: wallPoly(YARD.x0, YARD.zs, YARD.xn, YARD.zn, 0.25) },
   { id: 'YARD-nook', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-18.05, -33.65, -17.8, YARD.zs - 0.25) },
   { id: 'YARD-door', name: 'Teachers’ yard', style: 'yard', h: 3.5, poly: rect(-17.8, -33.65, -15.6, -33.4) },   // the wide door's wall
-  // B's white entry block at the west end of its canopy (Apple Maps view); B's glass entry is on its east face.
-  { id: 'B-entry', name: 'Building B', style: 'bentry', h: 5.0, poly: rect(-54.7, -35.8, -48.2, -27.1) },
+  // B's entry block at the west end of its canopy (footprint off the Apple Maps view; the rest from
+  // Ethan's photos IMG_2372/2374/2387/2390/2392/2394): a tall precast block standing above B. Its
+  // entrance is set 0.6 m into the east face, full height, from z -32.0 to -34.6 (buildings.js bEntry()).
+  { id: 'B-entry', name: 'Building B', style: 'bentry', h: 11.0,
+    poly: [[-54.7, -35.8], [-48.2, -35.8], [-48.2, -34.6], [-48.8, -34.6], [-48.8, -32.0], [-48.2, -32.0], [-48.2, -27.1], [-54.7, -27.1]] },
   { id: 'CAF-e', name: 'Cafeteria', style: 'caf', h: 4.6, poly: rect(50, -52.8, 62.6, -30.4) },
   // Classroom Building R: three storeys, solar roof, east side of the quad.
   // (Ethan, his photos IMG_2342–2361, the satellite): a 凸 in plan. The narrow block
@@ -220,6 +223,18 @@ export const COURT = {
   planter: [[-29.2, -52.8], [-33.7, -52.8], [-36.9, -49.6], [-33.7, -43.9], [-36.9, -40.4], [-33.4, -37.8], [-29.4, -43.5]],
   bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-40.5, -44.3],
   porch: { x0: -54.7, x1: -25.8, z0: -57.4, z1: -53.0 },          // from B's wall to past the office's east end
+  // the bed under the big trees north of B's entry block: ferns and feather grass, with a small
+  // maple by the block (IMG_2392, IMG_2394)
+  bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
+  maple: [-52.2, -38.8],
+  officeDoor: -44.0,                 // the yellow door in the office's south wall, behind the covered walk (IMG_2392)
+};
+// The flower bed on the quad side of B's entry block, along B's wall (Apple Maps view for its shape;
+// IMG_2372, IMG_2374, IMG_2387 for what's in it): a wedge, widest against the block, narrowing south.
+// A strip of paving runs between it and B. Ceramic totem poles stand in its north end.
+export const B_BED = {
+  poly: [[-53.8, -27.1], [-45.5, -27.1], [-47.3, -21.5], [-49.3, -15.5], [-52.0, -9.5], [-53.8, -8.0]],
+  totems: [[-53.0, -26.1], [-51.6, -25.3], [-50.2, -26.0], [-48.8, -25.2], [-47.3, -26.2], [-52.4, -23.4], [-50.1, -22.7], [-48.5, -23.8]],
 };
 
 export const FRONT = {

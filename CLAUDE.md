@@ -369,9 +369,25 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         bar. It opens into the yard, with the building on your right as you
         go in. It is a yard, not a building: style `yard` has no kit windows
         and no rooftop units.
-      - B's grey steel canopy (landmarks.js) runs from B's white entry block
-        (`B-entry`, x -54.7..-48.2, which carries B's glass entry) to the
-        snack bar (x -17.8), over z -34.65..-28.65. It is a butterfly (V) roof on ONE row of
+      - B's entry block (`B-entry`, `bEntry()` in buildings.js; footprint
+        from the map, the rest from IMG_2372/2374/2387/2390/2392/2394):
+        - A tall cream precast block (11 m, above B) with horizontal
+          reveals.
+        - East face, under the canopy: a lamp, a small BUILDING B sign and a
+          vent. Then the entrance, set 0.6 m in at full height (a notch in
+          the outline): glass double doors, a side light and a transom,
+          with a big grid window above and a cap closing the top. A narrow
+          pier with a camera and an accessibility push-button post follow.
+        - North face: tall grid windows upstairs by the corner.
+        - Quad face: nearly blank (a small louvered window, a lamp, a vent,
+          a conduit, a corner camera).
+      - The flower bed on the block's quad side (`B_BED`, `bEntryBed()` in
+        landmarks.js) is a wedge along B, widest at the block, with a strip
+        of paving between it and B. It holds ceramic totem poles, blue-green
+        euphorbias, feather grass, poppies, a red-leaf shrub and flax.
+      - B's grey steel canopy (landmarks.js) runs from the entry block to
+        the snack bar (x -17.8), over z -34.65..-28.65. Its first post
+        stands just in front of B's doors (IMG_2390). It is a butterfly (V) roof on ONE row of
         posts, under the valley (IMG_2391, Ethan). Each post splits into a
         Y whose arms hold the two wings, and carries a light. It is taller
         than the cafeteria walkway (valley 3.95 m, edges 4.6 m).
@@ -396,9 +412,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - a covered walk along the office's south face, running all the way
         to B.
 
+      The courtyard bed (`COURT.bed`) holds ferns and feather grass under the
+      trees, with a small maple by the entry block (IMG_2392/2394).
+
       The front office (`ADMIN`) is ONE rectangle from B's wall to its east
       end (Ethan). Its quad-side face is at z -57.4 (narrower, per Ethan and
-      the map), and its west face is against B (no kit windows).
+      the map), and its west face is against B (no kit windows). Its south face,
+      behind the covered walk, is plain cream with a yellow door
+      (`adminSouth()`, IMG_2392; the door's position along it is estimated).
 
       The palms stand in their own bed at the office's north-east corner
       (`FRONT.palmBed`). The flagpole stands in a round planter south of it

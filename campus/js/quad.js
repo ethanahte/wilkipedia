@@ -193,7 +193,7 @@ function stage(W, R) {
 }
 
 // A low mound of California poppies: blue-green leaves dotted with orange cups.
-function poppies(W, x, z, R) {
+export function poppies(W, x, z, R) {
   const s = 0.35 + R() * 0.25;
   W.blob('flat', x, 0.1, z, s, s * 0.45, s, color('#7f9a6a'));
   for (let k = 0; k < 7; k++) {

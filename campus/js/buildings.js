@@ -15,7 +15,7 @@
 
 import * as THREE from 'three';
 import { color, rng, ensureCCW } from './geo.js';
-import { BUILDINGS, YARD } from './layout.js';
+import { BUILDINGS, YARD, COURT } from './layout.js';
 import { LIGHTS } from './lights.js';
 
 const C = {
@@ -142,7 +142,7 @@ const KITS = {
   },
   r() {},                                       // buildR() draws R whole
   yard() {},                                    // the teachers' yard walls: plain (cafFront() adds what's on the quad side)
-  bentry() {},                                  // B's white entry block: its glass entry is in landmarks.js; nothing else is known
+  bentry() {},                                  // B's entry block: bEntry() draws it whole
   caf(W, b, e, R) {
     if (e.len < 4 || e.nz > 0.5) return;          // the quad side is cafFront()'s
     if (b.id === 'CAF-w' && e.nx < -0.5) return;  // west wall: the teachers' yard side (no photo of it)
@@ -169,6 +169,7 @@ const KITS = {
   admin(W, b, e) {
     if (e.len < 4 || e.nz < -0.5) return;   // the north face is the sign wall (landmarks.js)
     if (e.nx < -0.5) return;                 // the west face is against B
+    if (e.nz > 0.5) return;                  // the south face is adminSouth()'s (IMG_2392)
     for (const { t } of bays(e.len, 3.6, 1.2)) windowAt(W, e, t, 2.0, 2.6, 1.6);
   },
   gym(W, b, e, R) {
@@ -215,7 +216,7 @@ const KITS = {
 const WALL = {
   b: C.cream, r: color('#ece0c4'), caf: color('#efe6d0'), p: color('#efe5cf'), library: color('#efe5cf'),
   admin: color('#efe8d6'), gym: color('#eee6d3'), gymlobby: color('#eee6d3'), plain: color('#efe5cf'), mn: color('#f1efe7'),
-  yard: color('#efe6d0'), bentry: color('#f3f1ec'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
+  yard: color('#efe6d0'), bentry: color('#e6dfce'), s: color('#f3f3ef'), theatre: color('#eef0ef'), 'theatre-lobby': color('#3d4e5a'),
 };
 
 // ── Building R ──
@@ -553,6 +554,71 @@ function storefront(W, z, x0, x1, parts, top = 3.1) {
 }
 const cafPier = (W, z, x0, x1, top) => W.slab('stucco', x0, z, x1, z + 0.14, 0, top, CC.pier);
 
+// ── B's entry block (layout.js B-entry) ──
+// From Ethan's photos IMG_2372, IMG_2374, IMG_2387, IMG_2390, IMG_2392 and IMG_2394:
+//  · A tall cream precast block standing above B, with horizontal reveals.
+//  · East face, under the grey canopy: blank wall with a triangular lamp, a small BUILDING B
+//    sign and a vent. Then the entrance, set back in a full-height recess: glass double doors and
+//    a side light under a transom, a big grid window above, a cap closing the top. Then a narrow
+//    pier to the corner, with a camera. An accessibility push-button post stands by the doors.
+//  · North face: tall grid windows upstairs by the north-east corner, a window below.
+//  · Quad (south) face: nearly blank. A small louvered window high up, a triangular lamp, a small
+//    vent, a conduit along it and a camera on the south-east corner.
+const BE = { x0: -54.7, x1: -48.2, zN: -35.8, zS: -27.1, h: 11.0, rS: -32.0, rN: -34.6, rd: 0.6 };
+function bEntry(W) {
+  const rev = color('#cdc3ae'), frame = CC.frame, steelC = color('#b8bcc0');
+  const S = southWall(BE.x0, BE.x1, BE.zS);                        // t = x - x0
+  const E = rWall(BE.x1, BE.zS, BE.x1, BE.zN, 1, 0);               // t = zS - z
+  const N = rWall(BE.x1, BE.zN, BE.x0, BE.zN, 0, -1);              // t = x1 - x
+  const Rw = rWall(BE.x1 - BE.rd, BE.rS, BE.x1 - BE.rd, BE.rN, 1, 0); // the recess's back: t = rS - z
+  const w = BE.x1 - BE.x0, eS = BE.zS - BE.rS, eN = BE.rN - BE.zN;
+  const line = (e, t, len, y) => onWall(W, e, t + len / 2, y, 0.012, () => W.box('flat', 0, 0, 0, len, 0.05, 0.02, rev));
+  for (let y = 1.25; y < BE.h - 0.4; y += 1.25) {
+    line(S, 0, w, y); line(N, 0, w, y); line(E, 0, eS, y); line(E, BE.zS - BE.rN, eN, y);
+  }
+  for (const x of [-52.6, -50.4]) onWall(W, S, x - BE.x0, BE.h / 2, 0.012, () => W.box('flat', 0, 0, 0, 0.05, BE.h, 0.02, rev));
+  // the east face's top projects a little, and closes over the recess
+  onWall(W, E, (BE.zS - BE.zN) / 2, 10.2, 0.15, () => W.box('stucco', 0, 0, 0, BE.zS - BE.zN, 1.6, 0.3, WALL.bentry));
+  W.box('stucco', BE.x1 - BE.rd / 2, 9.9, (BE.rS + BE.rN) / 2, BE.rd, 2.2, BE.rS - BE.rN, WALL.bentry);
+  // the entrance: glass double doors, a side light to the north, a transom, a big grid window above
+  doorAt(W, Rw, 0.95, 1.8, 2.3, null, { glass: true, frameCol: frame });
+  onWall(W, Rw, 2.2, 1.2, 0.03, () => {
+    W.box('flat', 0, 0, 0, 0.62, 2.3, 0.08, frame);
+    W.quad('glass', [-0.25, -1.08, 0.05], [0.25, -1.08, 0.05], [0.25, 1.08, 0.05], [-0.25, 1.08, 0.05], color('#ffffff'), 'auto');
+  });
+  onWall(W, Rw, 1.3, 2.72, 0.03, () => {
+    W.box('flat', 0, 0, 0, 2.5, 0.62, 0.08, frame);
+    W.quad('glass', [-1.18, -0.24, 0.05], [1.18, -0.24, 0.05], [1.18, 0.24, 0.05], [-1.18, 0.24, 0.05], color('#ffffff'), 'auto');
+  });
+  gridWindow(W, Rw, 1.3, 6.7, 2.3, 3.9, [1 / 3, 1 / 3, 1 / 3], 3);
+  // east face, south of the entrance: lamp, sign, vent; the camera on the corner
+  sconce(W, E, BE.zS - -30.4, 2.7);
+  onWall(W, E, BE.zS - -31.1, 1.7, 0.02, () => W.box('flat', 0, 0, 0, 0.34, 0.12, 0.02, color('#f4f4f2')));
+  onWall(W, E, BE.zS - -29.6, 3.5, 0.02, () => W.box('flat', 0, 0, 0, 0.26, 0.26, 0.03, color('#dcd6c6')));
+  const cam = (x, y, z) => { W.box('flat', x, y + 0.12, z, 0.16, 0.2, 0.16, color('#f2f2f0')); W.blob('flat', x, y, z, 0.1, 0.08, 0.1, color('#e6e7e8')); };
+  cam(BE.x1 + 0.12, 4.4, BE.zS + 0.12);
+  cam(BE.x1 + 0.12, 4.4, BE.zN - 0.12);
+  W.box('flat', BE.x1 + 0.45, 0.55, BE.rN - 0.3, 0.12, 1.1, 0.1, steelC);      // push-button post
+  // north face: tall grid windows upstairs by the corner, a window below
+  gridWindow(W, N, 2.0, 6.7, 2.4, 3.9, [1 / 3, 1 / 3, 1 / 3], 3);
+  windowAt(W, N, 2.0, 1.95, 2.4, 2.1);
+  // quad face: louvered window high up, lamp, vent, conduit
+  onWall(W, S, -53.3 - BE.x0, 7.4, 0.02, () => {
+    W.box('flat', 0, 0, 0, 0.6, 1.5, 0.06, frame);
+    for (let k = 0; k < 9; k++) W.box('flat', 0, -0.6 + k * 0.15, 0.04, 0.5, 0.05, 0.04, color('#5d6166'));
+  });
+  sconce(W, S, -50.9 - BE.x0, 4.6);
+  onWall(W, S, -53.4 - BE.x0, 2.9, 0.02, () => W.box('flat', 0, 0, 0, 0.36, 0.28, 0.03, color('#dcd6c6')));
+  W.rod('flat', [BE.x0 + 0.3, 3.75, BE.zS + 0.05], [BE.x1 - 0.1, 3.75, BE.zS + 0.05], 0.035, color('#cfd1d3'));
+}
+
+// The front office's south wall, behind its covered walk (IMG_2392): plain cream with a yellow door.
+function adminSouth(W, b) {
+  const xs = b.poly.map((p) => p[0]), z = Math.max(...b.poly.map((p) => p[1]));
+  const e = southWall(Math.min(...xs), Math.max(...xs), z);
+  doorAt(W, e, COURT.officeDoor - Math.min(...xs), 1.0, 2.2, C.door, { frameCol: color('#d9ccb0') });
+}
+
 // The drinking fountain by the snack bar (IMG_2367, close up): a wide cream concrete base
 // against the wall with a thick flat top; a stainless back plate on its face, left of
 // centre; two stainless bowls sticking straight out toward the walkway, a high one and a
@@ -657,6 +723,8 @@ export function buildBuildings(W) {
     for (const e of edges(b.poly)) kit(W, b, e, R);
     if (b.style === 'r') buildR(W, b);
     if (b.id === 'CAF') cafFront(W);
+    if (b.id === 'B-entry') bEntry(W);
+    if (b.id === 'ADMIN') adminSouth(W, b);
     // single-storey wings get a flat overhang on the long sides (covered walks)
     if (b.style === 'p') overhangs(W, b, 3.7);
 

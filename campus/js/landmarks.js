@@ -9,11 +9,11 @@
 import * as THREE from 'three';
 import { color, rng } from './geo.js';
 import { canvasTex, decalMat } from './toon.js';
-import { FRONT, CARPORTS, BUILDINGS, COURT } from './layout.js';
+import { FRONT, CARPORTS, BUILDINGS, COURT, B_BED } from './layout.js';
 import { wallEdges } from './buildings.js';
 import { LIGHTS } from './lights.js';
-import { palm, flax, grassTuft, shrub, shadeTree, youngTree, G } from './nature.js';
-import { umbrellaTable } from './quad.js';
+import { palm, flax, grassTuft, shrub, shadeTree, youngTree, cards, G } from './nature.js';
+import { umbrellaTable, poppies } from './quad.js';
 import { addCircle, addPoly } from './collide.js';
 import { inPoly, ensureCCW } from './geo.js';
 
@@ -119,6 +119,7 @@ export function buildLandmarks(W, group, fontFamily) {
   W.blob('flat', fx, 12.35, fz, 0.16, 0.16, 0.16, color('#e2b53b'));
 
   court(W);
+  bEntryBed(W);
 
   // ── Building B's grey steel canopy, running to the snack bar (IMG_2391, Ethan) ──
   // A butterfly (V) roof on ONE row of posts: the row nearer the parking lot, under the
@@ -144,8 +145,8 @@ export function buildLandmarks(W, group, fontFamily) {
     W.slab('flat', c0, Math.min(zE, zE - s * 0.1), c1, Math.max(zE, zE - s * 0.1), ye - 0.1, ye + th + 0.12, soffit);   // fascia
   }
   W.slab('flat', c0, zp - 0.14, c1, zp + 0.14, yv - 0.3, yv + 0.02, post);                       // the beam along the valley
-  const nPost = Math.round((c1 - c0) / 6), gap = (c1 - c0) / nPost;
-  for (let x = c0 + gap / 2; x < c1; x += gap) {
+  // the first post stands just in front of B's doors (IMG_2390), then one every 6 m
+  for (let x = c0 + 1.0; x < c1 - 2; x += 6) {
     W.slab('flat', x - 0.15, zp - 0.15, x + 0.15, zp + 0.15, 0, yv - 0.3, post);                  // the post
     for (const s of [-1, 1]) {
       W.rod('flat', [x, yv - 0.8, zp + s * 0.1], [x, under(1.7) - 0.02, zp + s * 1.7], 0.14, post);   // the Y's arm
@@ -154,14 +155,7 @@ export function buildLandmarks(W, group, fontFamily) {
     W.slab('glow', x - 0.05, zp + 0.15, x + 0.05, zp + 0.2, 1.9, 2.6, color('#ffe6bd'));          // the light on the post
     LIGHTS.push([x, zp + 0.5, 2.3, 4]);
   }
-  // B's glass entry under the canopy's west end, with the triangular wall light
-  W.slab('flat', c0 + 0.02, -33.2, c0 + 0.14, -29, 0, 3.3, steel);
-  for (let i = 0; i < 3; i++) {
-    const zz = -32.9 + i * 1.4;
-    W.quad('glass', [c0 + 0.16, 0.1, zz + 1.2], [c0 + 0.16, 0.1, zz], [c0 + 0.16, 2.4, zz], [c0 + 0.16, 2.4, zz + 1.2], color('#fff'), 'auto');
-  }
-  W.quad('glass', [c0 + 0.16, 2.55, -29.1], [c0 + 0.16, 2.55, -33.1], [c0 + 0.16, 3.2, -33.1], [c0 + 0.16, 3.2, -29.1], color('#fff'), 'auto');
-  W.tris('flat', [[c0 + 0.2, 2.9, -34.2], [c0 + 0.2, 2.9, -34.9], [c0 + 0.2, 3.25, -34.55]], [[1, 0, 0], [1, 0, 0], [1, 0, 0]], null, color('#6b5a4a'));
+  // (B's entrance itself, on its entry block, is buildings.js bEntry())
 
 
   // ── the cafeteria's covered walkway along the quad ──
@@ -321,9 +315,62 @@ function court(W) {
   const [rx, rz] = COURT.redTree; youngTree(W, rx, rz, R, { h: 5.5, stake: false, cols: [color('#7a3b3f'), color('#8e4a45'), color('#6b3440')] }); addCircle(rx, rz, 0.2);
   const [sx, sz] = COURT.smallTree; youngTree(W, sx, sz, R, { h: 3.2, stake: false, cols: [color('#c7793f'), color('#b8683a')] }); addCircle(sx, sz, 0.15);
   const [tx, tz] = COURT.table; umbrellaTable(W, tx, tz, R);
+  // the bed under the trees: ferns and feather grass, and the small maple by B's entry block
+  const CB = ensureCCW(COURT.bed);
+  W.prism('flat', CB, 0, 0.07, soil, { top: true, topMat: 'flat', topCol: soil });
+  bedFill(W, CB, R, 70, (x, z) => (R() < 0.5 ? fern(W, x, z, R) : grassTuft(W, x, z, R, { y: 0.07, h: 0.7, cols: FEATHER })));
+  const [mx, mz] = COURT.maple;
+  youngTree(W, mx, mz, R, { h: 5.2, stake: false, cols: [color('#6f8a3f'), color('#7d9148'), color('#b8773a')] }); addCircle(mx, mz, 0.2);
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
   const nP = Math.round((c.x1 - c.x0) / 6);
   for (let i = 0; i <= nP; i++) { const x = c.x0 + 1 + (i * (c.x1 - c.x0 - 1.5)) / nP; W.slab('flat', x - 0.1, c.z1 - 0.35, x + 0.1, c.z1 - 0.15, 0, 3.2, fin); }
+}
+
+const FEATHER = ['#a9b86a', '#b7c27a', '#9aad5e'].map(color);            // Mexican feather grass
+const EUPHORBIA = ['#6f8f86', '#7b9a8f', '#62837b'].map(color);          // blue-green euphorbias
+// Scatter n plants over a bed polygon (points outside it are skipped).
+function bedFill(W, P, R, n, plant) {
+  const xs = P.map((p) => p[0]), zs = P.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
+  for (let k = 0; k < n; k++) { const x = x0 + R() * (x1 - x0), z = z0 + R() * (z1 - z0); if (inPoly(x, z, P)) plant(x, z); }
+}
+// A low fern: a rosette of arching fronds (leaf cards round a small core).
+function fern(W, x, z, R) {
+  const s = 0.55 + R() * 0.3;
+  W.blob('flat', x, 0.2, z, s * 0.35, s * 0.25, s * 0.35, color('#2f5a2c'));
+  cards(W, x, 0.3, z, s, s * 0.45, s, G.dark[Math.floor(R() * G.dark.length)], R, 26, 0.8, { droop: 0.4 });
+}
+// A ceramic totem pole (IMG_2374, IMG_2387): a thin rod threaded with glazed blocks and balls.
+function totem(W, x, z, R) {
+  const cols = ['#2f5fae', '#c8352e', '#e2b43b', '#f2efe6', '#3f8a5a', '#1f2a44', '#8a3b8e', '#d9772e'].map(color);
+  const h = 2.2 + R() * 0.8;
+  W.cyl('flat', x, 0, z, 0.02, 0.02, h + 0.3, 5, color('#3b3b3b'));
+  let y = 0.3;
+  while (y < h) {
+    const sz = 0.14 + R() * 0.08, c = cols[Math.floor(R() * cols.length)];
+    if (R() < 0.3) W.blob('flat', x, y + sz / 2, z, sz * 0.55, sz * 0.5, sz * 0.55, c);
+    else W.box('flat', x, y + sz / 2, z, sz, sz, sz, c, R() * Math.PI);
+    y += sz + 0.01;
+  }
+  W.blob('flat', x, h + 0.1, z, 0.08, 0.08, 0.08, cols[Math.floor(R() * 3)]);
+  addCircle(x, z, 0.12);
+}
+// The flower bed on the quad side of B's entry block (layout.js B_BED): mulch at grade, the totems
+// in its north end, blue-green euphorbias, feather grass, orange poppies, a red-leaf shrub, dark flax.
+export function bEntryBed(W) {
+  const R = rng(614), P = ensureCCW(B_BED.poly);
+  W.prism('flat', P, 0, 0.07, soil, { top: true, topMat: 'flat', topCol: soil });
+  for (const [x, z] of B_BED.totems) totem(W, x, z, R);
+  shrub(W, -52.6, -24.9, R, { y: 0.07, s: 1.5, cols: [color('#8e2f33'), color('#9c3a34')] });
+  bedFill(W, P, R, 110, (x, z) => {
+    if (B_BED.totems.some(([a, b]) => Math.hypot(a - x, b - z) < 0.45)) return;
+    const r = R();
+    if (r < 0.3) shrub(W, x, z, R, { y: 0.07, s: 0.8 + R() * 0.5, cols: EUPHORBIA });
+    else if (r < 0.66) grassTuft(W, x, z, R, { y: 0.07, h: 0.75, cols: FEATHER });
+    else if (r < 0.84) poppies(W, x, z, R);
+    else if (x < -52) flax(W, x, z, R, { y: 0.07, h: 1.2 });
+    else shrub(W, x, z, R, { y: 0.07, s: 0.6, cols: G.leaf });
+  });
 }
