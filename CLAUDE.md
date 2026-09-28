@@ -393,10 +393,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         landmarks.js) is a wedge along B, widest at the block, with a strip
         of paving between it and B. It holds ceramic totem poles, blue-green
         euphorbias, feather grass, poppies, flax, and two red-leaf trees
-        (3–3.6 m, Ethan: bigger than the shrub first drawn).
+        (3–3.6 m, Ethan: bigger than the shrub first drawn). They stand
+        clear of B's wall, the AC shaft and the totems.
       - B's grey steel canopy (landmarks.js) runs from the entry block to
-        the snack bar (x -17.8), over z -34.65..-28.65. Its first post
-        stands just in front of B's doors (IMG_2390). It is a butterfly (V) roof on ONE row of
+        the snack bar (x -17.8), over z -34.65..-28.65. No post stands in
+        front of B's doors (Ethan; it was once drawn there): its west end
+        rests on the block, and the first post is 7 m out. It is a butterfly (V) roof on ONE row of
         posts, under the valley (IMG_2391, Ethan). Each post splits into a
         Y whose arms hold the two wings, and carries a light. It is taller
         than the cafeteria walkway (valley 3.95 m, edges 4.6 m).
@@ -428,6 +430,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       The courtyard bed (`COURT.bed`) holds ferns and feather grass under the
       trees, with a maple by the entry block that spreads wide, up past the
       block's first floor (IMG_2392/2394).
+
+      No tree's leaves may cut through a wall, a roof or the umbrella
+      (Ethan). Leaf cards reach about 1.04 × the crown radius plus 0.9 ×
+      the card size past a tree's trunk, so keep that clear. The purple
+      tree has a set crown for this reason.
 
       B's glass doors at the walk's west end are drawn by `adminSouth()`, and
       B's facade kit leaves that stretch of B's east wall bare (no window,
@@ -470,7 +477,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         entrance with a storefront at the east end. The walk's roof reaches
         back over the step. B's glass doors close
         the walk's west end. The walk has round grey posts and lights, and
-        runs on over the gate.
+        runs on over the gate. The walk's roof reaches past the office by
+        the main entrance, so its front corner there has its own post.
       - The black steel fence (`steelFence()`, `COURT.fence`) is an L
         (Ethan). It starts where a cream wall standing out from the office's
         corner ends (`COURT.gateWall`, IMG_2396; flush with the east face, up
@@ -479,7 +487,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         it runs east in line with the teachers' yard's short side (z -44.9)
         to meet it. It has an open pedestrian gate right after the wall and a
         double gate in the east leg. The PTSA banner and no-smoking signs
-        face the passage, with a bike rack there. A crape myrtle and roses
+        face the passage, with the scooter/bike rack right by the flower
+        bed there (Ethan). A crape myrtle and roses
         grow on the courtyard side.
       - The cafeteria's west wall north of the yard has a yellow door under
         a small metal awning (IMG_2399).

@@ -230,12 +230,14 @@ export const PICNIC_COLOR = [[-20.5, -3.5, 0.2]];     // red top, yellow and blu
 export const COURT = {
   planter: [[-29.2, -52.8], [-33.7, -52.8], [-36.9, -49.6], [-33.7, -43.9], [-36.9, -40.4], [-33.4, -37.8], [-29.4, -43.5]],
   // the umbrella table sits by the B-side bed, clear of the way through (Ethan)
-  bigTree: [-49.2, -43.9], redTree: [-52.5, -51.8], smallTree: [-44.6, -42.6], table: [-42.8, -44.3],
+  // (the red and small trees and the maple stand clear of B's wall, the block, the walk's roof and
+  // the umbrella, so no leaves cut through them)
+  bigTree: [-49.2, -43.9], redTree: [-50.8, -50.8], smallTree: [-46.0, -41.4], table: [-42.8, -44.3],
   porch: { x0: -54.7, x1: -22.0, z0: -57.4, z1: -53.0 },          // from B's wall, past the office, over the gate (IMG_2396/2399)
   // the bed under the big trees north of B's entry block: ferns and feather grass, with a small
   // maple by the block (IMG_2392, IMG_2394)
   bed: [[-54.7, -36.0], [-46.5, -36.0], [-44.2, -39.5], [-44.2, -47.5], [-47.0, -52.5], [-54.7, -52.5]],
-  maple: [-51.4, -39.2],
+  maple: [-50.8, -39.6],
   // the office's courtyard side, behind the covered walk (IMG_2395/2396/2397), by x; the doors and
   // box are on the wider west half, the filler and the WHS entrance on the set-back east half
   yellowDoors: [-49.5, -43.5], box: -41.8, filler: -39.6, entry: [-37.2, -31.2],
@@ -247,7 +249,8 @@ export const COURT = {
   // side to meet it. A pedestrian gate by the office, a double gate in the east leg (IMG_2396/2398/2399).
   // Where it meets the office a cream wall stands out from the office's corner first, up to the
   // walk's roof, and the fence and its gate start where that ends (Ethan, IMG_2396).
-  fence: [[-31.0, -57.0], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-24.2, -52.5],
+  // the scooter/bike rack stands right by the flower bed on the passage side of the fence (Ethan)
+  fence: [[-31.0, -57.0], [-31.0, YARD.zn], [YARD.xn, YARD.zn]], bikeRack: [-28.4, -50.4],
   gateWall: { x0: -31.2, x1: -30.2, z0: -59.0, z1: -57.0, h: 3.2 },
   step: { x: -41.0, z: -59.0 },      // where the office's courtyard wall steps back (layout ADMIN)
 };

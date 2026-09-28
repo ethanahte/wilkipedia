@@ -169,8 +169,8 @@ export function buildLandmarks(W, group, fontFamily) {
     W.slab('flat', c0, Math.min(zE, zE - s * 0.1), c1, Math.max(zE, zE - s * 0.1), ye - 0.1, ye + th + 0.12, soffit);   // fascia
   }
   W.slab('flat', c0, zp - 0.14, c1, zp + 0.14, yv - 0.3, yv + 0.02, post);                       // the beam along the valley
-  // the first post stands just in front of B's doors (IMG_2390), then one every 6 m
-  for (let x = c0 + 1.0; x < c1 - 2; x += 6) {
+  // one post every 6 m; none in front of B's doors (Ethan) — the roof's west end rests on the block
+  for (let x = c0 + 7.0; x < c1 - 2; x += 6) {
     W.slab('flat', x - 0.15, zp - 0.15, x + 0.15, zp + 0.15, 0, yv - 0.3, post);                  // the post
     for (const s of [-1, 1]) {
       W.rod('flat', [x, yv - 0.8, zp + s * 0.1], [x, under(1.7) - 0.02, zp + s * 1.7], 0.14, post);   // the Y's arm
@@ -336,8 +336,16 @@ function court(W, group) {
   }
   // the trees: a big shade tree by B, a small reddish one north of it, a small orange one east of it
   const [bx, bz] = COURT.bigTree; shadeTree(W, bx, bz, R, { h: 11 }); addCircle(bx, bz, 0.45);
-  // the purple-leaf tree by the walk's west end is big, over the walk's roof (IMG_2392, IMG_2395)
-  const [rx, rz] = COURT.redTree; shadeTree(W, rx, rz, R, { h: 8.5, cols: [color('#5e2b3a'), color('#6b3440'), color('#532636')] }); addCircle(rx, rz, 0.3);
+  // the purple-leaf tree by the walk's west end is big, its crown high over the walk's roof
+  // (IMG_2392, IMG_2395); drawn with a set crown so no leaves cut into B or the roof
+  {
+    const [rx, rz] = COURT.redTree, pc = color('#5e2b3a');
+    W.cyl('flat', rx, 0, rz, 0.2, 0.13, 4.6, 7, G.barkDark);
+    for (const [dx, dz] of [[-0.7, 0.3], [0.6, -0.4]]) W.rod('flat', [rx, 3.2, rz], [rx + dx, 4.9, rz + dz], 0.09, G.barkDark);
+    W.blob('flat', rx, 6.2, rz, 2.3 * 0.62, 2.0 * 0.66, 2.3 * 0.62, darker(pc));
+    cards(W, rx, 6.2, rz, 2.3, 2.0, 2.3, pc, R, 190, 1.0);
+    addCircle(rx, rz, 0.3);
+  }
   const [sx, sz] = COURT.smallTree; youngTree(W, sx, sz, R, { h: 3.2, stake: false, cols: [color('#c7793f'), color('#b8683a')] }); addCircle(sx, sz, 0.15);
   const [tx, tz] = COURT.table; umbrellaTable(W, tx, tz, R);
   // the bed under the trees: ferns and feather grass, and the small maple by B's entry block
@@ -346,7 +354,7 @@ function court(W, group) {
   bedFill(W, CB, R, 70, (x, z) => (R() < 0.5 ? fern(W, x, z, R) : grassTuft(W, x, z, R, { y: 0.07, h: 0.7, cols: FEATHER })));
   const [mx, mz] = COURT.maple;
   // it spreads wide, up past the block's first floor (IMG_2392, IMG_2394)
-  youngTree(W, mx, mz, R, { h: 6.4, rx: 2.4, stake: false, cols: [color('#6f8a3f'), color('#7d9148'), color('#b8773a')] }); addCircle(mx, mz, 0.25);
+  youngTree(W, mx, mz, R, { h: 6.4, rx: 2.1, stake: false, cols: [color('#6f8a3f'), color('#7d9148'), color('#b8773a')] }); addCircle(mx, mz, 0.25);
   // the covered walk along the office's south face: a flat roof on slim posts
   const c = COURT.porch;
   W.slab('flat', c.x0, c.z0, c.x1, c.z1, 3.2, 3.45, fin);
@@ -358,6 +366,8 @@ function court(W, group) {
     W.cyl('flat', x, 0, c.z1 - 0.3, 0.09, 0.09, 3.2, 10, color('#8d9399')); addCircle(x, c.z1 - 0.3, 0.12);
     if (i < nP) { const lx = x + (c.x1 - c.x0 - 1.5) / nP / 2; W.slab('glow', lx - 0.25, c.z0 + 1.9, lx + 0.25, c.z0 + 2.3, 3.16, 3.2, color('#ffe6bd')); LIGHTS.push([lx, c.z0 + 2.1, 3.15, 4]); }
   }
+  // and one at its front corner past the office, by the main entrance, where nothing else holds it
+  W.cyl('flat', c.x1 - 0.3, 0, c.z0 + 0.3, 0.09, 0.09, 3.2, 10, color('#8d9399')); addCircle(c.x1 - 0.3, c.z0 + 0.3, 0.12);
   for (const [x, z, rot] of COURT.benches) bench(W, x, z, rot);
   // the black steel fence from the office to the teachers' yard, with its gates, the PTSA banner
   // and no-smoking signs on the passage side, and a bike rack there (IMG_2396, IMG_2398, IMG_2399)
@@ -425,8 +435,9 @@ export function bEntryBed(W) {
   for (const [x, z] of B_BED.totems) totem(W, x, z, R);
   // red-leaf trees: bigger and taller than first drawn (Ethan; IMG_2372, IMG_2374)
   const RED = [color('#8e2f33'), color('#9c3a34'), color('#7a2a33')];
-  youngTree(W, -52.4, -24.4, R, { h: 3.6, rx: 1.3, stake: false, y: 0.07, cols: RED }); addCircle(-52.4, -24.4, 0.15);
-  youngTree(W, -53.0, -19.4, R, { h: 3.2, rx: 1.1, stake: false, y: 0.07, cols: RED }); addCircle(-53.0, -19.4, 0.15);
+  // (set clear of B's wall, the AC shaft and the totems, so no leaves cut through them)
+  youngTree(W, -52.0, -20.4, R, { h: 3.6, rx: 1.0, stake: false, y: 0.07, cols: RED }); addCircle(-52.0, -20.4, 0.15);
+  youngTree(W, -51.8, -16.4, R, { h: 3.3, rx: 1.0, stake: false, y: 0.07, cols: RED }); addCircle(-51.8, -16.4, 0.15);
   bedFill(W, P, R, 110, (x, z) => {
     if (B_BED.totems.some(([a, b]) => Math.hypot(a - x, b - z) < 0.45)) return;
     const r = R();
