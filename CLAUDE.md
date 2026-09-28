@@ -415,11 +415,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
         buildings.js; IMG_2376–2386), has two storeys between tall tan
         piers (`BQ.piers`). Each pier has a grey louver on each floor, a
         triangle lamp and fine reveals. Between two piers are two or three
-        bays split by slim cream columns, each a grid of panes (glass over
-        white panels) on both floors.
-        - The glass double doors (IMG_2377) are in the middle of the face,
-          z 2.4, facing the quad's middle (Ethan). The next bay south has a
-          single door, a fire bell and a white standpipe.
+        bays split by slim cream columns. Each bay holds B's classroom
+        window on both floors (`lWin()`; IMG_2377/2382/2386): a row of clear
+        panes across the top, a narrow glass column down the side toward
+        the bay's pier (the middle bay: south), and white panels in the
+        rest. Not a plain grid.
+        - The entrance (IMG_2377) is in the middle of the face, z 2.4,
+          facing the quad's middle (Ethan). It is two pairs of glass doors
+          side by side under a transom of four panes, in a bay wider than
+          the rest (3.2 m; Ethan: it was too small). The next bay south has
+          a single door with white panels beside it, a ribbon of glass high
+          upstairs, a fire bell and a white standpipe.
         - The navy CAREER & COLLEGE RESOURCE CENTER / RM B-113 awning
           (IMG_2379) is at the SOUTH end, over the two bays next to the
           library's block, where the model always had it (Ethan: don't move

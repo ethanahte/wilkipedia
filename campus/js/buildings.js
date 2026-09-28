@@ -671,7 +671,7 @@ function bCourtAC(W) {
 // middle bay south of the entry block's bed, a single door the bay after; the navy CAREER &
 // COLLEGE RESOURCE CENTER awning (IMG_2379; its lettering is in landmarks.js) is at the south end,
 // over the two bays next to the library's block, where it always was (Ethan).
-const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: 2.4, side: 5.0, ccrc: [17.5, 22.6] };   // doors: the middle of the face, facing the quad's middle (Ethan)
+const BQ = { x: -54.7, z0: -26.5, z1: 24.6, piers: [-21.1, -11.7, -2.3, 7.1, 16.5, 23.6], pw: 2.0, doors: 2.4, side: 5.25, ccrc: [17.5, 22.6] };   // doors: the middle of the face, facing the quad's middle (Ethan)
 function bQuad(W, h) {
   const e = rWall(BQ.x, BQ.z1, BQ.x, BQ.z0, 1, 0), tz = (z) => BQ.z1 - z;
   const rev = color('#cdbf9e'), lvF = color('#7c8186'), lvS = color('#a3a8ad');
@@ -695,34 +695,63 @@ function bQuad(W, h) {
   for (let i = 0; i + 1 < cuts.length; i += 2) {
     const a = cuts[i], g = cuts[i + 1] - a;
     if (g < 1.5) continue;
-    const n = g > 6.5 ? 3 : g > 3.8 ? 2 : 1, w = (g - 0.4 * (n - 1)) / n;
+    const n = g > 6.5 ? 3 : g > 3.8 ? 2 : 1;
+    // the entrance's bay is the wide one: two pairs of doors side by side (IMG_2377)
+    const ws = n === 3 && BQ.doors > a && BQ.doors < a + g ? [(g - 4.0) / 2, 3.2, (g - 4.0) / 2] : Array(n).fill((g - 0.4 * (n - 1)) / n);
+    let z0 = a;
     for (let k = 0; k < n; k++) {
-      const z0 = a + k * (w + 0.4), c = z0 + w / 2;
+      const w = ws[k], c = z0 + w / 2;
       if (k < n - 1) onWall(W, e, tz(z0 + w + 0.2), 0, 0, () => W.box('stucco', 0, (h + 0.55) / 2, 0.12, 0.4, h + 0.55, 0.24, CC.white));
-      if (z0 < -24.9) continue;                                  // behind the entry block's AC shaft
-      const near = (z) => Math.abs(c - z) < 0.3;
-      panelWin(W, e, tz(c), 4.75, 7.95, w - 0.3, 2, 4, near(BQ.doors) ? [1, 3] : [1, 2, 3]);
+      const skip = z0 < -24.9;                                   // behind the entry block's AC shaft
+      z0 += w + 0.4;
+      if (skip) continue;
+      // each window's glass column runs down the side toward the bay's pier (the middle bay: south)
+      const side = k === 0 && n > 1 ? 1 : -1, near = (z) => Math.abs(c - z) < 0.3;
       if (near(BQ.doors)) {
-        doorAt(W, e, tz(c), 1.8, 2.4, null, { glass: true, frameCol: C.frame });
-        onWall(W, e, tz(c), 2.9, 0.03, () => {
-          W.box('flat', 0, 0, 0, 1.9, 0.6, 0.08, C.frame);
-          W.quad('glass', [-0.88, -0.24, 0.05], [0.88, -0.24, 0.05], [0.88, 0.24, 0.05], [-0.88, 0.24, 0.05], color('#ffffff'), 'auto');
+        for (const d of [-0.8, 0.8]) doorAt(W, e, tz(c) + d, 1.55, 2.4, null, { glass: true, frameCol: C.frame });
+        onWall(W, e, tz(c), 2.9, 0.03, () => {                 // a transom of four panes over them
+          W.box('flat', 0, 0, 0, 3.2, 0.7, 0.08, C.frame);
+          for (let q = 0; q < 4; q++) { const u = -1.55 + q * 0.775 + 0.03, v = u + 0.715; W.quad('glass', [u, -0.3, 0.05], [v, -0.3, 0.05], [v, 0.3, 0.05], [u, 0.3, 0.05], color('#ffffff'), 'auto'); }
         });
+        lWin(W, e, tz(c), 4.75, 7.95, w - 0.3, -1);
       } else if (near(BQ.side)) {
-        doorAt(W, e, tz(c) + 0.5, 0.95, 2.3, null, { glass: true, frameCol: C.frame, single: true });
-        panelWin(W, e, tz(c) - 0.55, 0.25, 3.35, w - 1.4, 1, 4, [2, 3]);
-      } else panelWin(W, e, tz(c), 0.25, 3.35, w - 0.3, 2, 4, [2, 3]);
+        // a single door, white panels under a strip of glass beside it, a ribbon of glass high upstairs
+        doorAt(W, e, tz(c) + 0.35, 0.9, 2.3, null, { glass: true, frameCol: C.frame, single: true });
+        panelWin(W, e, tz(c) - 0.45, 0.25, 3.35, 0.7, 1, 4, [3]);
+        panelWin(W, e, tz(c), 6.95, 7.95, w - 0.3, 3, 1, [0]);
+      } else {
+        lWin(W, e, tz(c), 4.75, 7.95, w - 0.3, side);
+        lWin(W, e, tz(c), 0.25, 3.35, w - 0.3, side);
+      }
     }
   }
   // by the side door: a fire bell and a white standpipe (IMG_2377)
   onWall(W, e, tz(BQ.side) - 0.6, 3.9, 0.02, () => W.box('flat', 0, 0, 0, 0.18, 0.18, 0.06, color('#c8352e')));
-  W.cyl('flat', BQ.x + 0.25, 0, BQ.side + 0.9, 0.06, 0.06, 0.85, 8, color('#eef0f0'));
-  W.rod('flat', [BQ.x + 0.25, 0.75, BQ.side + 0.9], [BQ.x + 0.02, 0.75, BQ.side + 0.9], 0.05, color('#eef0f0'));
+  W.cyl('flat', BQ.x + 0.25, 0, BQ.side + 0.55, 0.06, 0.06, 0.85, 8, color('#eef0f0'));
+  W.rod('flat', [BQ.x + 0.25, 0.75, BQ.side + 0.55], [BQ.x + 0.02, 0.75, BQ.side + 0.55], 0.05, color('#eef0f0'));
   // the CAREER & COLLEGE RESOURCE CENTER awning: a flat grey roof, a navy fascia (lettering: landmarks.js)
   const [ca, cb] = BQ.ccrc;
   onWall(W, e, tz((ca + cb) / 2), 3.45, 0, () => {
     W.box('flat', 0, 0, 0.75, cb - ca + 0.3, 0.12, 1.5, color('#8a8f94'));
     W.box('flat', 0, 0.02, 1.5, cb - ca + 0.3, 0.46, 0.06, color('#1f2f5c'));
+  });
+}
+// B's classroom window (IMG_2377, IMG_2382, IMG_2386): a row of clear panes across the top, a narrow
+// glass column down one side (side -1 toward smaller t, +1 toward larger), white panels in the rest.
+function lWin(W, e, t, y0, y1, w, side) {
+  const h = y1 - y0, th = h * 0.27, cw = Math.max(0.42, w * 0.22), panes = w > 1.8 ? 3 : 2, m = 0.04;
+  onWall(W, e, t, (y0 + y1) / 2, 0.03, () => {
+    const gl = (a, b, p, q) => W.quad('glass', [a, p, 0.05], [b, p, 0.05], [b, q, 0.05], [a, q, 0.05], pane(), [[0, 0], [b - a, 0], [b - a, q - p], [0, q - p]]);
+    W.box('flat', 0, 0, 0, w + 0.12, h + 0.12, 0.06, C.frame);
+    const L = -w / 2, split = h / 2 - th;
+    for (let k = 0; k < panes; k++) gl(L + (w * k) / panes + m, L + (w * (k + 1)) / panes - m, split + m, h / 2 - m);
+    const [ca, cb] = side < 0 ? [L, L + cw] : [-L - cw, -L], [pa, pb] = side < 0 ? [L + cw, -L] : [L, -L - cw];
+    const rh = (h - th) / 3;
+    for (let r = 0; r < 3; r++) {
+      const p = -h / 2 + r * rh + m, q = -h / 2 + (r + 1) * rh - m;
+      gl(ca + m, cb - m, p, q);
+      W.box('flat', (pa + pb) / 2, (p + q) / 2, 0.045, pb - pa - 2 * m, q - p, 0.02, CC.white);
+    }
   });
 }
 // A grid of panes on B's quad face: glass in the rows listed (0 = bottom), white panels in the rest.
