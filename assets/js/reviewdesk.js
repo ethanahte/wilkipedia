@@ -47,10 +47,10 @@ function payloadHtml(kind, p, before = null) {
   }).join('');
 }
 
-let pubList = [];
+let pubList = [], pendList = [];
 const tabs = {
   async submissions() {
-    const list = await s.pending();
+    const list = pendList = await s.pending();
     return list.length ? list.map((x) => `
       <article class="card review" data-id="${x.id}">
         <div class="r-head"><span class="tag">${esc(KINDS[x.kind].label)}</span>
@@ -68,6 +68,7 @@ const tabs = {
         <div class="r-actions">
           <button class="btn" data-act="approved">Approve</button>
           <button class="btn ghost" data-act="changes">Needs changes…</button>
+          <button class="btn ghost" data-editpub>Edit…</button>
           <button class="btn ghost danger" data-act="rejected">Reject…</button>
         </div>
       </article>`).join('') : '<div class="empty">Nothing waiting. Nice.</div>';
@@ -223,7 +224,7 @@ async function onClick(e) {
     await redraw(); paintAnnouncements(s); return;
   }
   const card = t.closest('[data-id]');
-  if ('editpub' in t.dataset && card) { openEditor(s, pubList.find((x) => String(x.id) === card.dataset.id), redraw); return; }
+  if ('editpub' in t.dataset && card) { openEditor(s, [...pubList, ...pendList].find((x) => String(x.id) === card.dataset.id), redraw); return; }
   if (t.dataset.act && card) {
     let note = null;
     if (t.dataset.act !== 'approved') {
