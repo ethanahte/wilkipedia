@@ -659,15 +659,16 @@ form.inline input { max-width: 260px; }
 .summer-item { padding: 8px 0; }
 .rules li { margin-bottom: 12px; max-width: 44em; }
 
-/* toasts (ui.js toast()): a stack at the bottom centre, above the page's + button */
-.toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 60; width: min(440px, calc(100% - 24px)); pointer-events: none; }
+/* toasts (ui.js toast()): bottom right on computers, in the margin beside the page and just above
+   the + button, so they never sit on what you're reading; at the top on phones (over the header) */
+.toasts { position: fixed; right: 24px; bottom: 92px; z-index: 60; width: min(380px, calc(100% - 48px)); pointer-events: none; }
 .toasts > div { display: flex; flex-direction: column; gap: 8px; }
 .toasts > div + div:not(:empty) { margin-top: 8px; }
 .toast { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 12px; border-radius: 12px;
   background: #1f1f1e; color: #f4f4f1; border: 1px solid rgba(255, 255, 255, .08); box-shadow: 0 8px 28px rgba(0, 0, 0, .22), 0 1px 3px rgba(0, 0, 0, .18); font-size: .92rem; line-height: 1.35;
-  opacity: 0; transform: translateY(12px) scale(.98); transition: opacity .18s ease, transform .22s cubic-bezier(.2, .9, .3, 1.2); }
+  opacity: 0; transform: translateX(24px); transition: opacity .18s ease, transform .24s cubic-bezier(.2, .9, .3, 1.1); }
 .toast.in { opacity: 1; transform: none; }
-.toast.out { opacity: 0; transform: translateY(8px) scale(.98); transition-duration: .18s; }
+.toast.out { opacity: 0; transform: translateX(24px); transition-duration: .18s; }
 .toast-ic { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; font-weight: 800; background: rgba(255, 255, 255, .16); }
 .toast-msg { flex: 1; min-width: 0; }
 .toast-n { flex: none; font-size: .78rem; opacity: .75; }
@@ -683,7 +684,11 @@ form.inline input { max-width: 260px; }
 .toast.info .toast-ic { background: rgba(255, 255, 255, .2); font-style: italic; font-family: Georgia, serif; }
 .toast.load .toast-ic { border: 2px solid rgba(255, 255, 255, .3); border-top-color: var(--gold); background: none; animation: toast-spin .8s linear infinite; }
 @keyframes toast-spin { to { transform: rotate(360deg); } }
-@media (max-width: 640px) { .toasts { bottom: 84px; } }            /* clear of the phone's + button */
+@media (max-width: 640px) {
+  .toasts { top: calc(env(safe-area-inset-top, 0px) + 10px); bottom: auto; right: 12px; left: 12px; width: auto; }
+  .toast, .toast.out { transform: translateY(-14px); }
+  .toast.in { transform: none; }
+}
 @media (prefers-reduced-motion: reduce) { .toast, .toast.out { transition: opacity .15s; transform: none; } .toast.load .toast-ic { animation: none; } }
 
 /* ── classes page sort bar ── */

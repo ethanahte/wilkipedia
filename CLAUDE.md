@@ -807,7 +807,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   version glared).
 - **Toasts (轻提示)**: `toast(msg, kind, opts)` in ui.js, with shorthands `toast.good/.bad/
   .warn/.info` and `toast.loading(msg)` → `.done(msg)` / `.fail(msg)` / `.close()`.
-  - Toasts stack bottom centre (at most 3, raised above the phone's + button). Each has a
+  - Toasts stack bottom right, above the + button, in the margin beside the page; on phones they
+    sit at the top, over the header (Ethan: bottom centre covered what he was reading). At most 3. Each has a
     close button and pauses on hover or focus. An exact repeat counts up (×2) instead of
     stacking, and `opts.id` replaces the toast with that id.
   - `opts.action: {label, run}` adds a button such as Undo, and `opts.duration` sets how long
