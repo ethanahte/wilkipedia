@@ -244,8 +244,8 @@ async function onClick(e) {
     return redraw();
   }
   const fc = t.closest('[data-fid]');
-  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus)); return redraw(); }
-  if (fc && 'fdel' in t.dataset) { if (!(await popconfirm(t, { title: 'Delete this feedback?', text: 'Marking it closed keeps it instead.', key: 'feedback-delete' }))) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return redraw(); }
+  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus), `Marked ${t.dataset.fstatus}.`); return redraw(); }
+  if (fc && 'fdel' in t.dataset) { if (!(await popconfirm(t, { title: 'Delete this feedback?', text: 'Marking it closed keeps it instead.', key: 'feedback-delete' }))) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid)), 'Deleted.'); return redraw(); }
   if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return redraw(); }
   if (t.dataset.tobounty) {
     const r = (await s.reports()).find((x) => String(x.id) === t.dataset.tobounty);
@@ -259,5 +259,5 @@ async function onClick(e) {
   }
   if ('newbounty' in t.dataset) { openBountyEditor(s, null, data.courses, redraw); return; }
   if (t.dataset.editb) { const b = (await s.bounties()).find((x) => x.id === t.dataset.editb); openBountyEditor(s, b, data.courses, redraw); return; }
-  if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to)); return redraw(); }
+  if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to), t.dataset.to === 'open' ? `${t.dataset.bstatus} is back on the board.` : `${t.dataset.bstatus} closed.`); return redraw(); }
 }

@@ -256,7 +256,7 @@ function mountInbox(el) {
         <button type="button" class="btn ghost small" data-read>Mark as read</button></div>` : ''}`;
     el.hidden = false;
     $('[data-read]', el)?.addEventListener('click', async () => {
-      if (await guard(() => s.markAllRead())) { setNoteCount(0); draw(); }
+      if (await guard(() => s.markAllRead(), 'All caught up.')) { setNoteCount(0); draw(); }
     });
   };
   s.onAuth(draw);
@@ -647,9 +647,10 @@ const pages = {
       if (!cp.prefs) $('#settings').insertAdjacentHTML('afterbegin', '<p class="set-warn"><b>Remember my settings is off</b>, so changes here last only until you leave this page. <a href="#cookies">Change</a></p>');
       wireAppearance(s);
 
+      const savedToast = () => toast(cp.prefs ? 'Saved.' : 'Changed for this visit. Remember my settings is off.', 'good', { id: 'set-saved', duration: 2600 });
       const segWire = (id, fn) => { $('#' + id)?.addEventListener('click', (e) => {
         const b = e.target.closest('[data-v]'); if (!b) return;
-        fn(b.dataset.v);
+        fn(b.dataset.v); savedToast();
         $$(`#${id} [data-v]`).forEach((x) => x.setAttribute('aria-checked', x === b));
       }); };
       segWire('set-text', (v) => setPref('text', v));
@@ -658,15 +659,15 @@ const pages = {
       segWire('set-homebg', (v) => setPref('homebg', v));
       segWire('set-bview', (v) => ls.set('wilkipedia-bounty-view', v));
       $('#set-lang').onchange = (e) => setLanguage(e.target.value);
-      $('#set-bell').onchange = (e) => setPref('bell', e.target.checked ? 'on' : 'off');
-      $('#set-fab').onchange = (e) => setPref('fab', e.target.checked ? 'on' : 'off');
+      $('#set-bell').onchange = (e) => { setPref('bell', e.target.checked ? 'on' : 'off'); savedToast(); };
+      $('#set-fab').onchange = (e) => { setPref('fab', e.target.checked ? 'on' : 'off'); savedToast(); };
       $('#set-tour').onclick = () => { scrollTo(0, 0); import('./tour.js').then((m) => m.startTour(s.user()?.name)); };
-      $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); draw(); };
+      $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); toast('Closed announcements will show again.', 'good'); draw(); };
       $('#set-ask').onclick = () => { resetConfirms(); toast('You’ll be asked before deleting again.', 'good'); draw(); };
       $('#set-lb')?.addEventListener('change', (e) => guard(() => s.updateProfile({ show_on_leaderboard: e.target.checked }),
         e.target.checked ? 'You’re on the leaderboard.' : 'You’re hidden from the leaderboard.'));
       for (const k of ['motion', 'labels', 'belt', 'photo']) {
-        $(`#set-o-${k}`)?.addEventListener('change', (e) => ls.set(ORR, JSON.stringify({ ...orrOpts(), [k]: e.target.checked })));
+        $(`#set-o-${k}`)?.addEventListener('change', (e) => { ls.set(ORR, JSON.stringify({ ...orrOpts(), [k]: e.target.checked })); savedToast(); });
       }
       $('#set-c-prefs').onchange = (e) => { setCookiePrefs({ prefs: e.target.checked }); draw(); };
       $('#set-c-history').onchange = (e) => { setCookiePrefs({ history: e.target.checked }); draw(); };
@@ -679,6 +680,7 @@ const pages = {
       $('#set-drafts').onclick = async (e) => {
         if (!(await popconfirm(e.currentTarget, { title: 'Delete every unsent draft?', text: 'Half-written forms and comments in this browser.' }))) return;
         ls.keys().filter((k) => k.startsWith(DRAFT)).forEach(ls.del);
+        toast('Drafts deleted.', 'good');
         draw();
       };
       $('#set-reset').onclick = async (e) => {

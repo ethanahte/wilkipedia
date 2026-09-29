@@ -814,6 +814,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - `guard()` shows its success message as a success toast, and turns network failures
     into a plain "you're offline" error. Going offline or online shows a toast too.
   - PDF uploads show a loading toast. Use toasts, never alert().
+  - Every action that changes something without a visible sign gets a toast (Ethan: "I haven't seen
+    the toast"): each Settings change ("Saved.", one toast id so they don't stack), Mark all read,
+    feedback/bounty status on the desk, deleting drafts, the .ics download, and "Signed in as …"
+    after returning from Google (a `sessionStorage` flag set on the Sign in click). Things you can
+    already see change (likes, night mode, language) stay quiet.
 - **Feedback while things happen** (ui.js), added 2026-09-29:
   - `popconfirm(anchor, {title, text, ok, danger, key})` is the "Are you sure?" bubble next to
     a button; never use confirm(). `key` offers "Don't ask me again", stored in localStorage

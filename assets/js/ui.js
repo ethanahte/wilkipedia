@@ -641,7 +641,9 @@ export async function initHeader() {
                <hr><a role="menuitem" href="${root}account/">Account</a><a role="menuitem" href="${root}settings/">Settings</a>
                <button type="button" role="menuitem" data-signout>Sign out</button></div></div>`
         : `<button class="btn small" id="signin">Sign in</button>`;
-      $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
+      // a welcome once you're back from signing in (Google's page comes in between, so remember it for this tab)
+      $('#signin', slot)?.addEventListener('click', () => { try { sessionStorage.setItem('wilkipedia-hello', '1'); } catch { /* ignore */ } guard(() => s.signIn()); });
+      try { if (u && sessionStorage.getItem('wilkipedia-hello')) { sessionStorage.removeItem('wilkipedia-hello'); toast(`Signed in as ${u.name}.`, 'good'); } } catch { /* ignore */ }
       $('[data-signout]', slot)?.addEventListener('click', () => guard(() => s.signOut(), 'Signed out.'));
       paintThemeToggle();
       // what's waiting for the review team shows on the menu and as a dot on your picture

@@ -16,6 +16,7 @@
 import { popconfirm, initHeader, dataUrl, esc, $, toast } from './ui.js';
 
 const s = await initHeader();
+$('.cal-ics')?.addEventListener('click', () => toast('Downloading the calendar. Open the file to add every date to your phone or Google Calendar.', 'good'));
 const [cal, extra] = await Promise.all([
   fetch(dataUrl('data/calendar.json')).then((r) => r.json()),
   fetch(dataUrl('data/calendar-extra.json')).then((r) => r.json()).catch(() => ({ sources: {}, events: [] })),
