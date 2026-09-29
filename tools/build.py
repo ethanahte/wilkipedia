@@ -950,12 +950,8 @@ def build_static():
 
     page("guides/", "Study guides", f"""
 <h1>Study guides</h1>
-<p class="lede">Every study guide and resource students have shared. The graph links each guide to its classes and subjects; the archive files every class at Wilcox by subject, and the ones with guides glow gold.</p>
-<div class="gv-views" role="tablist" aria-label="How to show the guides">
-  <button type="button" role="tab" id="tab-graph" aria-controls="gv-graph" aria-selected="true" data-view="graph">Graph</button>
-  <button type="button" role="tab" id="tab-archive" aria-controls="ar" aria-selected="false" data-view="archive">Archive</button>
-</div>
-<div class="gv" id="gv-graph" role="tabpanel" aria-labelledby="tab-graph" translate="no">
+<p class="lede">Every study guide and resource students have shared, as a graph. The big dots are subjects, each class hangs off its subject, and each guide hangs off every class it’s for.</p>
+<div class="gv" id="gv-graph" translate="no">
   <div class="gv-bar">
     <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>
     <span class="gv-count" id="gv-count"></span>
@@ -967,7 +963,6 @@ def build_static():
   <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
   <p class="gv-legend" id="gv-legend" aria-hidden="true"><span><i class="s"></i>Subject</span><span class="ap"><i class="a"></i>AP class</span><span><i class="c"></i>Class</span><span><i class="g"></i>Study guide</span></p>
 </div>
-<div class="ar" id="ar" role="tabpanel" aria-labelledby="tab-archive" hidden></div>
 <section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
   <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",
          desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
@@ -997,7 +992,6 @@ def build_static():
   <li>Cafeteria menu: Santa Clara Unified Nutrition Services (live)</li>
   <li>Class colours: Wikipedia, “Adrian C. Wilcox High School”</li>
   <li>Typeface: Newsreader (SIL Open Font License)</li>
-  <li>The study guide archive’s motion is adapted from <a href="https://github.com/LBEILC/RhineLabUI" target="_blank" rel="noopener">RhineLabUI</a> by LBEILC (MIT License). Wilkipedia isn’t connected to Arknights or Hypergryph and uses none of their names, logos or designs.</li>
   <li>Orrery sky: Milky Way panorama, <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier ↗</a></li>
 </ul></section>""", data={"page": "credits"}, desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
 

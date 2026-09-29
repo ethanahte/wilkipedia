@@ -868,20 +868,6 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   <colour>` or `inset Npx 0 0` accent edges on cards, rows, modals or nav items. Show a category or
   state with a soft all-round tint (`color-mix(... var(--cc) 7%, var(--card))`), a small dot, or a
   tag instead. Neutral grey thread/quote lines, tab underlines and the header's gold rule are fine.
-- **Study guides: Graph · Archive** (Ethan). Tabs on guides/ (`showView` in guides.js, remembered in
-  `wilkipedia-guides-view`, `#archive` opens it). The archive (`archive.js`, loaded on first use) is a
-  three.js scene using campus/vendor's three (import by absolute URL: a relative `import()` resolves
-  against the module, not the page). Every class is a card lying on the ground (a fine grid floor),
-  seen from above at an angle, one row per subject (Ethan: on the ground; not towers, not standing
-  shelves). Rows wrap round; ← → along a row, ↑ ↓ to the row behind / in front. Subject names are
-  printed on the floor beside each row. Classes with guides are gold and sort first. Pick one and it
-  comes up off the floor towards you, a wave rolls through its neighbours (`ripple`), and a real-text panel lists its guides with a "decryption" reveal (bars
-  pulling back per line, CSS only). Keyboard (arrows, Enter, Esc, Home/End), drag, wheel, jump box.
-  The loop pauses off screen and in hidden tabs, and idles under reduced motion.
-  - The idea came from RhineLabUI (LBEILC, MIT), a fan recreation of an Arknights terminal. Only its
-    MIT motion maths is used (the ripple), with the notice at the top of archive.js and a line on
-    Credits. NEVER bring in its models, logo, name, fonts, sound or boot sequence: its own notice
-    says those belong to their rights holders (Hypergryph).
 - **More panel** (build.py `page()`, style.css "More: one calm panel"): centred under the whole bar
   (`.more` is `position: static`, so the sticky header places it). A featured page on the left over
   Ethan's courtyard painting (night painting at night), then the three `MORE_GROUPS` columns with
