@@ -805,6 +805,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   { ground: true })`), since painted stars never sit where rendered ones do.
   The day faces are still dimmed a little in pano.js (Ethan: the bright
   version glared).
+- **Toasts (轻提示)**: `toast(msg, kind, opts)` in ui.js, with shorthands `toast.good/.bad/
+  .warn/.info` and `toast.loading(msg)` → `.done(msg)` / `.fail(msg)` / `.close()`.
+  - Toasts stack bottom centre (at most 3, raised above the phone's + button). Each has a
+    close button and pauses on hover or focus. An exact repeat counts up (×2) instead of
+    stacking, and `opts.id` replaces the toast with that id.
+  - `opts.action: {label, run}` adds a button such as Undo, and `opts.duration` sets how long
+    it stays (0 = until closed). Errors are announced at once to screen readers.
+  - `guard()` shows its success message as a success toast, and turns network failures
+    into a plain "you're offline" error. Going offline or online shows a toast too.
+  - PDF uploads show a loading toast. Use toasts, never alert().
 - There is no node here, so check JS syntax with osascript (see git history of
   this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage

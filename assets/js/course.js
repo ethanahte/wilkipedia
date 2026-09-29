@@ -180,7 +180,7 @@ $('#comment-form').addEventListener('submit', async (e) => {
   delete $('#comment-form').dataset.parent;
   $('#replying').hidden = true;
   const mine = (await s.comments(page.slug)).filter((c) => c.user_id === s.user().id).pop();
-  toast(mine?.status === 'held' ? 'Thanks! Your comment will appear after a reviewer approves it.' : 'Posted.');
+  toast(mine?.status === 'held' ? 'Thanks! Your comment will appear after a reviewer approves it.' : 'Posted.', 'good');
   drawComments();
 });
 

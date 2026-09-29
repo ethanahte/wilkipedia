@@ -279,7 +279,7 @@ function openEditor(ev, onDay) {
   $('input[name=title]', dlg).focus();
 }
 async function act(fn, msg) {
-  try { await fn(); await loadEdits(); merge(); toast(msg); }
+  try { await fn(); await loadEdits(); merge(); toast(msg, 'good'); }
   catch (err) { toast(/calendar_events|relation|schema cache/.test(err.message) ? 'Calendar editing needs migration 011 run in Supabase first.' : err.message, 'bad'); throw err; }
 }
 const find = (id) => events.find((e) => e.id === id);

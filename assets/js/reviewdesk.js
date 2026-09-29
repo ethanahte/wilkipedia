@@ -2,7 +2,7 @@
 // for review, published work, held comments, reports, feedback, announcements and bounties.
 // The database only answers these queries for reviewers (see is_reviewer() in schema.sql).
 
-import { courses, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
+import { courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
 
 let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
@@ -188,9 +188,9 @@ function wireAnnounceForm() {
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const link = f.link.value.trim();
-    if (link && !link.startsWith('/') && !safeUrl(link)) return alert('The link must start with https:// or with / for a page on this site.');
+    if (link && !link.startsWith('/') && !safeUrl(link)) return toast('The link must start with https:// or with / for a page on this site.', 'bad');
     const fields = { kind: f.kind.value, message: f.message.value.trim(), link: link || null, ends_on: f.ends_on.value || null };
-    if (fields.message.length < 3) return alert('Write the announcement first.');
+    if (fields.message.length < 3) return toast('Write the announcement first.', 'bad');
     const ok = f.id.value
       ? await guard(() => s.updateAnnouncement(Number(f.id.value), fields), 'Announcement saved.')
       : await guard(() => s.postAnnouncement(fields), 'Announcement posted. It’s live now.');

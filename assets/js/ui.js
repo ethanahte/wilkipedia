@@ -36,21 +36,80 @@ export function ago(iso) {
   return fmtDate(iso);
 }
 
-export function toast(msg, kind = '') {
-  let t = $('#toast');
-  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
-  t.className = 'show ' + kind;
-  t.textContent = msg;
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => (t.className = ''), 3800);
+// ── toasts (轻提示) ──
+// Short messages that stack at the bottom of the screen and go away on their own.
+//   toast('Saved.')                          plain; kinds: 'good' (success), 'bad' (error), 'warn', 'info'
+//   toast('Deleted.', 'good', { action: { label: 'Undo', run: () => … } })
+//   toast.good / .bad / .warn / .info (msg, opts)
+//   const t = toast.loading('Uploading…'); … t.done('Uploaded.') or t.fail('It didn’t upload.')
+// opts: duration (ms, 0 = stay), id (a toast with the same id is replaced, not stacked), action.
+// The same message twice in a row counts up (×2) instead of stacking. Hovering or focusing
+// one pauses it. Errors are announced at once to screen readers; the rest politely.
+const TOAST_ICON = { good: '✓', bad: '✕', warn: '!', info: 'i', load: '' };
+const TOAST_KIND = { success: 'good', error: 'bad', ok: 'good' };
+function toastHost() {
+  let h = $('#toasts');
+  if (!h) {
+    h = document.createElement('div'); h.id = 'toasts'; h.className = 'toasts';
+    h.innerHTML = '<div class="toasts-polite" aria-live="polite"></div><div class="toasts-urgent" aria-live="assertive"></div>';
+    document.body.append(h);
+  }
+  return h;
 }
+export function toast(msg, kind = '', opts = {}) {
+  kind = TOAST_KIND[kind] || kind || 'info';
+  const host = toastHost(), lane = $(kind === 'bad' ? '.toasts-urgent' : '.toasts-polite', host);
+  const all = () => $$('.toast', host);
+  // the same thing again: count it on the one already showing
+  const same = opts.id ? all().find((t) => t.dataset.id === opts.id) : all().find((t) => t.dataset.msg === msg && t.dataset.kind === kind && !t.classList.contains('out'));
+  if (same && !opts.id) { const n = Number(same.dataset.n || 1) + 1; same.dataset.n = n; $('.toast-n', same).textContent = `×${n}`; same.restart(); return same.api; }
+  if (same) same.remove();
+  const t = document.createElement('div');
+  t.className = `toast ${kind}`; t.dataset.msg = msg; t.dataset.kind = kind; if (opts.id) t.dataset.id = opts.id;
+  t.setAttribute('role', kind === 'bad' ? 'alert' : 'status');
+  t.innerHTML = `<span class="toast-ic" aria-hidden="true">${TOAST_ICON[kind] ?? ''}</span><span class="toast-msg"></span><span class="toast-n"></span>
+    ${opts.action ? '<button type="button" class="toast-act"></button>' : ''}<button type="button" class="toast-x" aria-label="Dismiss">✕</button>`;
+  $('.toast-msg', t).textContent = msg;
+  if (opts.action) { const b = $('.toast-act', t); b.textContent = opts.action.label; b.onclick = () => { close(); opts.action.run?.(); }; }
+  let timer = 0, left = opts.duration ?? (kind === 'bad' ? 6500 : kind === 'load' ? 0 : opts.action ? 6000 : 3600), started = 0;
+  const close = () => { clearTimeout(timer); t.classList.add('out'); setTimeout(() => t.remove(), 220); };
+  const run = () => { if (!left) return; started = Date.now(); clearTimeout(timer); timer = setTimeout(close, left); };
+  const pause = () => { if (!left || !started) return; clearTimeout(timer); left = Math.max(1200, left - (Date.now() - started)); started = 0; };
+  t.restart = () => { left = opts.duration ?? 3600; run(); };
+  $('.toast-x', t).onclick = close;
+  t.addEventListener('mouseenter', pause); t.addEventListener('mouseleave', run);
+  t.addEventListener('focusin', pause); t.addEventListener('focusout', run);
+  lane.append(t);
+  while (all().filter((x) => !x.classList.contains('out')).length > 3) all().find((x) => !x.classList.contains('out')).remove();   // oldest go first
+  requestAnimationFrame(() => t.classList.add('in'));
+  run();
+  // a loading toast turns into its result
+  const settle = (k, m) => { t.className = `toast ${k} in`; t.dataset.kind = k; t.setAttribute('role', k === 'bad' ? 'alert' : 'status');
+    $('.toast-ic', t).textContent = TOAST_ICON[k]; $('.toast-msg', t).textContent = m; left = k === 'bad' ? 6500 : 3000; run(); };
+  t.api = { close, done: (m) => settle('good', m), fail: (m) => settle('bad', m), el: t };
+  return t.api;
+}
+toast.good = (m, o) => toast(m, 'good', o);
+toast.bad = (m, o) => toast(m, 'bad', o);
+toast.warn = (m, o) => toast(m, 'warn', o);
+toast.info = (m, o) => toast(m, 'info', o);
+toast.loading = (m, o) => toast(m, 'load', { duration: 0, ...o });
 
 // Runs fn, toasting any error. Resolves to fn's result (or true) on success and
 // to undefined on failure, so callers can write `if (!(await guard(...))) return`.
 export async function guard(fn, okMsg) {
-  try { const r = await fn(); if (okMsg) toast(okMsg); return r ?? true; }
-  catch (e) { console.error(e); toast(e.message || 'Something went wrong.', 'bad'); return undefined; }
+  try { const r = await fn(); if (okMsg) toast(okMsg, 'good'); return r ?? true; }
+  catch (e) {
+    console.error(e);
+    const offline = !navigator.onLine || /failed to fetch|networkerror|load failed/i.test(e.message || '');
+    toast(offline ? 'You’re offline, so that didn’t save. Try again when you’re back online.' : e.message || 'Something went wrong.', 'bad');
+    return undefined;
+  }
 }
+
+// Losing the connection gets a toast that stays until it's back
+addEventListener('offline', () => toast('You’re offline. Reading still works; saving waits until you’re back.', 'warn', { id: 'net', duration: 0 }));
+addEventListener('online', () => { if ($('#toasts .toast[data-id="net"]')) toast('Back online.', 'good', { id: 'net' }); });
 
 // Data files carry the build's content hash so a deploy is never half-cached.
 const DATA_V = document.querySelector('meta[name="data-version"]')?.content;
@@ -862,7 +921,10 @@ export function renderFields(el, kind, preset = {}, files = {}) {
 
 // Upload the PDFs picked in a form (see files()) and put where they went into the payload
 export async function withUploads(st, form, payload) {
-  for (const [k, file] of Object.entries(form.files?.() || {})) payload[k] = await st.uploadPdf(file);
+  for (const [k, file] of Object.entries(form.files?.() || {})) {
+    const t = toast.loading(`Uploading ${file.name}…`);
+    try { payload[k] = await st.uploadPdf(file); } finally { t.close(); }
+  }
   return payload;
 }
 
