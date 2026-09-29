@@ -862,7 +862,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **More panel** (build.py `page()`, style.css "More: one calm panel"): centred under the whole bar
   (`.more` is `position: static`, so the sticky header places it). A featured page on the left over
   Ethan's courtyard painting (night painting at night), then the three `MORE_GROUPS` columns with
-  icons in soft tiles that fill gold on hover, then a footer (the Wilcox site; Language, Night mode).
+  icons in soft tiles that fill gold on hover, then a footer (the Wilcox site; Language).
   No underlines or coloured edges. Below 1000px the card hides and its `.mega-alt` entry shows.
 - **Dropdowns can be typed in** (`combo.js`, Jonathan): every `<select>` on the site, including ones
   added later, gets a text box that filters its options (accent-blind, any word). The real select
@@ -876,17 +876,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     crowded, and "Study guides" wrapped at ~1000px): logo · plain text links (the current one has
     a gold underline) · More · one search control · Dashboard bell · your picture. No rings on the
     icons, and the name is hidden (it shows in the account menu's head).
-  - Language and night mode are NOT in the bar. They're `[data-act="lang"]`/`[data-act="theme"]`
-    buttons in three places: the More panel's bottom row (`.mega-acts`), the account menu and the
-    drawer footer. One click handler in `wireHeader()` serves all of them; the lang ones click the
-    hidden `#lang-btn` that translate.js owns (`#lang-menu` sits at body level). A new place
-    needs only the attribute.
+  - Night mode is ONE sun/moon button in the bar (`#theme-toggle`, next to search), Ethan's call
+    after the 极简 pass. Both icons ship in the HTML and CSS shows the right one from the first
+    paint; `paintThemeToggle()` only sets its label. It is not repeated anywhere else (More,
+    account menu and drawer had copies; removed as repeats).
+  - Language is not in the bar: `[data-act="lang"]` buttons in the More footer, the account menu
+    and the drawer footer, served by one handler in `wireHeader()` that clicks the hidden
+    `#lang-btn` translate.js owns (`#lang-menu` sits at body level).
   - Your picture opens the account menu: Dashboard with its count, My work, To review with a
-    count plus a gold dot on the picture, Bounty board, night mode, Language, Account, Settings,
+    count plus a gold dot on the picture, Bounty board, Language, Account, Settings,
     Sign out.
   - Narrower screens: at ≤1120px the search pill shrinks to a round button (`.search-btn` is
     never shown in the bar, so there's only ever one). At ≤760px the page links move into the
-    ☰ drawer (`#drawer`: every page grouped like More, footer: night mode, Language, Settings).
+    ☰ drawer (`#drawer`: every page grouped like More, footer: Language, Settings).
   - The header gets a shadow when scrolled. On phones it tucks away while scrolling down and
     comes back on scroll up.
   - Decided: no site-wide sidebar. Reading pages stay a centred column, the Dashboard has its

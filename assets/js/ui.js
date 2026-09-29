@@ -435,12 +435,12 @@ const isDark = () => (document.documentElement.dataset.theme
   : matchMedia('(prefers-color-scheme: dark)').matches);
 const SUN = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>';
-// Night mode lives in the More menu, the account menu and the phone drawer: every
-// [data-act="theme"] button shows the mode it switches to
+// Night mode is the sun/moon button in the header (#theme-toggle; CSS picks the icon). Any
+// [data-act="theme"] button elsewhere shows the mode it switches to.
 function paintThemeToggle() {
   const dark = isDark();
-  const b = $('#theme-toggle');                                 // (pages that still have the round button)
-  if (b) { b.innerHTML = dark ? SUN : MOON; b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode'); b.title = b.getAttribute('aria-label'); }
+  const b = $('#theme-toggle');
+  if (b) { b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode'); b.title = dark ? 'Day mode' : 'Night mode'; }
   $$('[data-act="theme"]').forEach((x) => { x.innerHTML = `${dark ? SUN : MOON}<span>${dark ? 'Day mode' : 'Night mode'}</span>`; });
 }
 
@@ -680,7 +680,7 @@ export async function initHeader() {
                <a role="menuitem" href="${root}dashboard/#work">My work</a>
                ${isTeam ? `<a role="menuitem" href="${root}dashboard/#review">To review<span class="acct-n gold" data-n="review" hidden></span></a>
                <a role="menuitem" href="${root}bounties/">Bounty board</a>` : ''}
-               <hr><button type="button" role="menuitem" data-act="theme"></button><button type="button" role="menuitem" data-act="lang">Language</button>
+               <hr><button type="button" role="menuitem" data-act="lang">Language</button>
                <hr><a role="menuitem" href="${root}account/">Account</a><a role="menuitem" href="${root}settings/">Settings</a>
                <button type="button" role="menuitem" data-signout>Sign out</button></div></div>`
         : `<button class="btn small" id="signin">Sign in</button>`;

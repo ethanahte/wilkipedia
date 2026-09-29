@@ -21,7 +21,8 @@ const STEPS = (name) => [
   { sel: ['.hsearch', '.search-btn', '.hero .big-search'], title: 'Search',
     text: navigator.platform?.startsWith('Mac') ? 'Classes, teachers, rooms, clubs and more. Press ⌘K from any page.'
       : 'Classes, teachers, rooms, clubs and more. Press Ctrl K from any page.' },
-  { sel: ['.main-nav .more summary', '.menu-btn'], title: 'Language and night mode', text: 'Read Wilkipedia in 15 other languages, or switch to night mode: both are at the bottom of More.' },
+  { sel: ['#theme-toggle'], title: 'Night mode', text: 'The moon switches Wilkipedia to night mode, and the sun switches it back.' },
+  { sel: ['.main-nav .more summary', '.menu-btn'], title: 'Language', text: 'Read Wilkipedia in 15 other languages: it’s at the bottom of More.' },
   { sel: ['.acct .who', '.menu-btn'], title: 'Your menu', text: 'Your Dashboard, account and Settings (text size, motion, class colour, cookies and the rest) are all in here.' },
   { sel: ['#contribute-fab'], title: 'Contribute',
     text: 'Know something about a class? Add info, a tip or a study guide. Reviewers check it, and you earn points on the Leaderboard.' },

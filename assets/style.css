@@ -142,6 +142,14 @@ header.site.tucked { transform: translateY(-100%); }
 header.site .icon-btn { border-color: transparent; color: var(--bar-muted); }            /* 极简: no rings in the bar */
 header.site .icon-btn:hover { background: rgba(255, 255, 255, .08); color: var(--bar-ink); }
 .menu-btn { display: none; }
+.theme-btn .tb-sun { display: none; }
+:root[data-theme="dark"] .theme-btn .tb-sun { display: block; }
+:root[data-theme="dark"] .theme-btn .tb-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-btn .tb-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-btn .tb-moon { display: none; } }
+.theme-btn svg { transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+.theme-btn:hover svg { transform: rotate(-18deg); }
 /* your picture and its menu */
 .acct { position: relative; }
 .auth .who { display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border: 1px solid transparent; border-radius: 999px;

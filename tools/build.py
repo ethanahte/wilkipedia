@@ -299,7 +299,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
                                 for href, label, icon, sub in items) + '</div>'
                       for group, items in MORE_GROUPS)
             + f'<div class="mega-foot"><a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
-            + f'<div class="mega-acts"><button type="button" data-act="lang">{ICONS["globe"]}<span>Language</span></button><button type="button" data-act="theme">Night mode</button></div></div>'
+            + f'<div class="mega-acts"><button type="button" data-act="lang">{ICONS["globe"]}<span>Language</span></button></div></div>'
             + '</div></details>')
     v = VERSIONS
     importmap = json.dumps({"imports": {f"{r}assets/{k}": f"{r}assets/{k}?v={h}"
@@ -337,6 +337,8 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div class="bar-tools">
       <a class="hsearch" href="{r}search/" role="button" aria-label="Search Wilkipedia">{ICONS["search"]}<span class="hs-t">Search classes, teachers, clubs…</span><kbd class="hs-k"></kbd></a>
       <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
+      <!-- night mode: both icons ship, CSS shows the one for the mode it switches to (right from the first paint) -->
+      <button type="button" class="icon-btn theme-btn" id="theme-toggle" aria-label="Switch night mode"><svg class="tb-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><svg class="tb-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
       <button type="button" class="lang-btn" id="lang-btn" hidden aria-label="Language" aria-haspopup="true" aria-expanded="false"><span class="lang-code" translate="no"></span></button>
       <div id="auth" class="auth"></div>
       <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="drawer">{ICONS["menu"]}</button>
@@ -353,7 +355,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
       {"".join(f'<div class="dr-group"><div class="dr-h">{group}</div>' + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon, _sub in items) + '</div>' for group, items in MORE_GROUPS)}
       <div class="dr-group"><a href="{WILCOX_SITE}" target="_blank" rel="noopener">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a></div>
     </nav>
-    <div class="drawer-foot"><button type="button" class="btn ghost small" data-act="theme">Night mode</button><button type="button" class="btn ghost small" data-act="lang">{ICONS["globe"]}<span>Language</span></button><a class="btn ghost small" href="{r}settings/">Settings</a></div>
+    <div class="drawer-foot"><button type="button" class="btn ghost small" data-act="lang">{ICONS["globe"]}<span>Language</span></button><a class="btn ghost small" href="{r}settings/">Settings</a></div>
   </div>
 </div>
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
