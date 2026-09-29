@@ -11,6 +11,24 @@
 // Classes with no guides yet are dim, like Obsidian's unresolved notes.
 
 import { initHeader, $, esc, courses, courseUrl, safeUrl, root, lessMotion } from './ui.js';
+import { GUIDE } from './forms.js';
+
+// Each kind of resource has its own colour (Ethan), from the Type the poster picked on the form.
+// The legend's type chips show or hide that kind.
+const TYPES = [
+  ['guide', 'Study guide', '#f4efe2'],
+  ['textbook', 'Textbook', '#b58cff'],
+  ['practice', 'Practice problems', '#5fd4a6'],
+  ['video', 'Video', '#ff8a7a'],
+  ['website', 'Website', '#4fc7c7'],
+  ['other', 'Other', '#9c948a'],
+];
+const TYPE = Object.fromEntries(TYPES.map(([k, label, color]) => [k, { label, color }]));
+const typeOf = (g) => {
+  const t = g.payload?.type || '';
+  return t === GUIDE || g.payload?.pdf || /study guide/i.test(t) ? 'guide' : /textbook/i.test(t) ? 'textbook'
+    : /practice/i.test(t) ? 'practice' : /video/i.test(t) ? 'video' : /website/i.test(t) ? 'website' : 'other';
+};
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
@@ -24,15 +42,15 @@ const classesOf = (g) => [...new Set([g.course_slug, ...(g.payload.also || [])])
 const pdfLinks = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
 const openUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] : null) || safeUrl(g.payload.url);
 
-let opts = { orphans: false, apColor: true, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08 };
+let opts = { orphans: false, apColor: true, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08, hide: [] };
 try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
 const save = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 
 // ── build the graph ──
 function graph(filter = '') {
   const q = filter.trim().toLowerCase();
-  const G = guides.map((g) => ({ ...g, classes: classesOf(g),
-    hit: !q || `${g.payload.title} ${g.payload.note || ''} ${classesOf(g).map((c) => `${bySlug[c].name} ${dept[bySlug[c].department] || ''}`).join(' ')}`.toLowerCase().includes(q) }));
+  const G = guides.filter((g) => !(opts.hide || []).includes(typeOf(g))).map((g) => ({ ...g, type: typeOf(g), classes: classesOf(g),
+    hit: !q || `${g.payload.title} ${g.payload.note || ''} ${TYPE[typeOf(g)].label} ${classesOf(g).map((c) => `${bySlug[c].name} ${dept[bySlug[c].department] || ''}`).join(' ')}`.toLowerCase().includes(q) }));
   const withGuides = new Set(G.flatMap((g) => g.classes));
   const nodes = [], links = [], deg = {};
   const link = (a, b, kind) => { links.push({ source: a, target: b, kind }); deg[a] = (deg[a] || 0) + 1; deg[b] = (deg[b] || 0) + 1; };
@@ -49,8 +67,9 @@ function graph(filter = '') {
     link('c:' + c.slug, 'd:' + c.department, 'subject');
   }
   G.forEach((g, i) => {
-    nodes.push({ id: 'g:' + i, kind: 'guide', g, name: g.payload.title, hit: g.hit });
-    for (const c of g.classes) link('g:' + i, 'c:' + c, 'class');
+    const gid = 'g:' + (g.id ?? i);                           // the post's own id, so a dot keeps its place when types are hidden
+    nodes.push({ id: gid, kind: 'guide', g, type: g.type, name: g.payload.title, hit: g.hit });
+    for (const c of g.classes) link(gid, 'c:' + c, 'class');
   });
   return { nodes, links, deg, G };
 }
@@ -159,7 +178,7 @@ function render() {
   }
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .15);
-    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? C.guide : n.ap && opts.apColor ? C.ap : C.node;
+    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? TYPE[n.type]?.color || C.guide : n.ap && opts.apColor ? C.ap : C.node;
     ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (n === hover ? 1 + .25 * fade : 1), 0, Math.PI * 2); ctx.fill();
   }
   // titles fade out as you zoom out (Obsidian's text fade threshold); the dot
@@ -293,11 +312,11 @@ function info(n) {
   if (n.kind === 'guide') {
     const g = n.g, u = openUrl(g);
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k">${esc(g.payload.type)}${g.payload.pdf ? ' · PDF' : ''}</div><h3>${esc(g.payload.title)}</h3>
+      <div class="gv-k"><i class="gv-dot" style="background:${TYPE[g.type].color}"></i>${esc(TYPE[g.type].label)}${g.payload.pdf ? ' · PDF' : ''}</div><h3>${esc(g.payload.title)}</h3>
       <p class="gv-m">${g.classes.map((c) => `<a href="${courseUrl(c)}">${esc(bySlug[c].name)}</a>`).join(' · ')}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p>
       ${g.payload.note ? `<p>${esc(g.payload.note)}</p>` : ''}
       <p class="gv-m">${g.payload.author ? `Made by ${esc(g.payload.author)} · shared by ${esc(g.author)}` : `Made by ${esc(g.author)}`}</p>
-      ${u ? `<a class="gv-open" href="${esc(u)}" target="_blank" rel="noopener nofollow">Open ${g.payload.pdf ? 'the PDF' : 'study guide'} ↗</a>` : ''}`;
+      ${u ? `<a class="gv-open" href="${esc(u)}" target="_blank" rel="noopener nofollow">Open ${g.payload.pdf ? 'the PDF' : TYPE[g.type].label.toLowerCase()} ↗</a>` : ''}`;
   } else if (n.kind === 'class') {
     const list = current.G.filter((g) => g.classes.includes(n.slug));
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
@@ -323,7 +342,7 @@ function list() {
   for (const slug of Object.keys(by)) (subj[bySlug[slug].department] ||= []).push(slug);
   const card = (g) => { const u = openUrl(g); return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
       <b>${esc(g.payload.title)}</b>${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
-      <span class="meta">${g.payload.pdf ? 'PDF · ' : ''}${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? `<span class="arrow" aria-hidden="true">${g.payload.pdf ? '📄' : '↗'}</span>` : ''}</a>`; };
+      <span class="meta"><span class="rtype" style="--c:${TYPE[typeOf(g)].color}">${esc(TYPE[typeOf(g)].label)}</span>${g.payload.pdf ? 'PDF · ' : ''}${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? `<span class="arrow" aria-hidden="true">${g.payload.pdf ? '📄' : '↗'}</span>` : ''}</a>`; };
   $('#gv-list').innerHTML = Object.keys(by).length ? data.departments.filter((d) => subj[d.slug]).map((d) => `
     <h2 class="gv-subject">${esc(d.name)}</h2>
     ${subj[d.slug].sort((a, b) => bySlug[a].name.localeCompare(bySlug[b].name)).map((slug) => `
@@ -332,7 +351,21 @@ function list() {
 }
 
 // ── wire up ──
-$('#gv-legend')?.classList.toggle('no-ap', !opts.apColor);
+// the legend: what each dot is, and a chip per kind of resource (only kinds there are) to hide or show it
+function legend() {
+  const present = TYPES.filter(([k]) => guides.some((g) => typeOf(g) === k));
+  const hidden = new Set(opts.hide || []);
+  $('#gv-legend').innerHTML = `<span><i class="s"></i>Subject</span><span class="ap"><i class="a"></i>AP class</span><span><i class="c"></i>Class</span>`
+    + present.map(([k, label, color]) => `<button type="button" class="gv-type" data-type="${k}" aria-pressed="${!hidden.has(k)}" title="${hidden.has(k) ? 'Show' : 'Hide'} ${esc(label.toLowerCase())}"><i style="background:${color}"></i>${esc(label)}</button>`).join('');
+  $('#gv-legend').classList.toggle('no-ap', !opts.apColor);
+}
+$('#gv-legend').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-type]'); if (!b) return;
+  const k = b.dataset.type, h = new Set(opts.hide || []);
+  h.has(k) ? h.delete(k) : h.add(k);
+  opts.hide = [...h]; save(); legend(); info(null); draw();
+});
+legend();
 list();
 panel();
 new ResizeObserver(size).observe(box);

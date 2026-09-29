@@ -224,6 +224,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Study guides graph** (`guides/`, `guides.js`): Obsidian's graph view,
   hand-written on a canvas. It has no library; ECharts was dropped at Ethan's
   request for Obsidian behaviour.
+  - Resource types are colours (Ethan): `TYPES` in guides.js maps the form's Type to Study guide,
+    Textbook, Practice problems, Video, Website, Other (`typeOf`; a PDF counts as a study guide).
+    The legend (built in JS) has a chip per type present; clicking hides/shows it, saved in
+    `opts.hide`. The info card and the list name the type. Guide node ids are `g:<submission id>`
+    so dots keep their place when a type is hidden. A new Type option needs a `TYPES` entry.
   - Physics: a force simulation (repel, springs, centre pull, cooling alpha).
     Node size grows with link count, dragging a dot pulls its neighbours, and
     scroll or pinch zooms toward the pointer.

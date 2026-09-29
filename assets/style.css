@@ -1792,6 +1792,16 @@ html.pal-open { overflow: hidden; }
 .gv-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .gv-legend .s { background: #c9a227; width: 12px; height: 12px; } .gv-legend .a { background: #7aa7ff; } .gv-legend .c { background: #a8a8a8; } .gv-legend .g { background: #dcddde; width: 7px; height: 7px; }
 .gv-legend.no-ap .ap { display: none; }
+.gv-legend { flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 28px); row-gap: 6px; }
+.gv-type { pointer-events: auto; display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px 2px 6px; border-radius: 999px;
+  border: 1px solid #3a3a3a; background: rgba(30, 30, 30, .85); color: #c8c8c8; font: inherit; cursor: pointer; transition: opacity .15s, border-color .15s; }
+.gv-type:hover { border-color: #6a6a6a; }
+.gv-type[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.gv-type:focus-visible { outline: 2px solid #f5c400; outline-offset: 2px; }
+.gv-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: .05em; }
+/* the kind of resource in the list below the graph */
+.rtype { display: inline-flex; align-items: center; gap: 5px; margin-right: 8px; font-weight: 600; color: var(--ink); }
+.rtype::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(0, 0, 0, .12); }
 .gv-class h3 { margin: 18px 0 4px; font-size: 1.2rem; }
 .gv-class h3 a { color: var(--ink); text-decoration: none; }
 @media (max-width: 640px) { .gv-chart { height: 64vh; } .gv-hint, .gv-count { display: none; } .gv-legend { left: 14px; right: auto; flex-wrap: wrap; } .gv-bar { justify-content: space-between; } .gv-panel { left: 12px; width: auto; } }
