@@ -292,12 +292,17 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     more_active = any(active == href for href, _, _ in MORE)
     nav += (f'<details class="more"><summary{" class=is-active" if more_active else ""} aria-label="More pages">'
             f'{ICONS["menu"]}<span>More</span>{ICONS["chev"]}</summary><div class="menu mega">'
+            # a featured page on the left, over Ethan's painting of the courtyard (not an invented picture)
+            + f'<a class="mega-feature" href="{r}campus/"{cur("campus/")}><span class="mf-img" aria-hidden="true"></span>'
+              f'<span class="mf-k">Explore</span><b>3D campus</b><span class="mf-sub">Walk the whole school, drawn like an anime.</span>'
+              f'<span class="mf-go">Step inside <span aria-hidden="true">→</span></span></a>'
             + "".join(f'<div class="mega-col"><div class="mega-h">{group}</div>'
-                      + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span class="mt"><span>{label}</span><small>{sub}</small></span></a>'
+                      # the featured page keeps a plain entry for when the panel is too narrow for the card
+                      + "".join(f'<a href="{r}{href}"{cur(href)}{" class=mega-alt" if href == "campus/" else ""}><span class="mi">{ICONS[icon]}</span><span class="mt"><span>{label}</span><small>{sub}</small></span></a>'
                                 for href, label, icon, sub in items) + '</div>'
                       for group, items in MORE_GROUPS)
-            + f'<a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
-            + f'<div class="mega-acts"><button type="button" data-act="lang">{ICONS["globe"]}<span>Language</span></button><button type="button" data-act="theme">Night mode</button></div>'
+            + f'<div class="mega-foot"><a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
+            + f'<div class="mega-acts"><button type="button" data-act="lang">{ICONS["globe"]}<span>Language</span></button><button type="button" data-act="theme">Night mode</button></div></div>'
             + '</div></details>')
     v = VERSIONS
     importmap = json.dumps({"imports": {f"{r}assets/{k}": f"{r}assets/{k}?v={h}"

@@ -847,6 +847,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).
+- **More panel** (build.py `page()`, style.css "More: one calm panel"): centred under the whole bar
+  (`.more` is `position: static`, so the sticky header places it). A featured page on the left over
+  Ethan's courtyard painting (night painting at night), then the three `MORE_GROUPS` columns with
+  icons in soft tiles that fill gold on hover, then a footer (the Wilcox site; Language, Night mode).
+  No underlines or coloured edges. Below 1000px the card hides and its `.mega-alt` entry shows.
 - **Dropdowns can be typed in** (`combo.js`, Jonathan): every `<select>` on the site, including ones
   added later, gets a text box that filters its options (accent-blind, any word). The real select
   stays underneath as the source of truth, so keep reading/setting `select.value` and listening for
