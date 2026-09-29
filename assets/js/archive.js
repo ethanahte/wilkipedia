@@ -1,9 +1,9 @@
-// The study guides archive (Ethan): every class at Wilcox as a card, one shelf per subject, the
-// cards standing side by side like files in a drawer (Ethan: not towers), and the classes that
-// have study guides glow gold. Left and right, a drag or the wheel move along a shelf; up and down
-// move between subjects, and the shelves wrap round. Picking a card lifts it out towards you, a
-// ripple runs through its neighbours, and a normal page panel beside it lists that class's guides
-// (real text, so it can be read, zoomed and translated).
+// The study guides archive (Ethan): every class at Wilcox as a card lying on the ground, seen from
+// above at an angle, one row per subject (Ethan: on the ground, not towers or shelves), and the
+// classes that have study guides glow gold. Left and right, a drag or the wheel move along a row;
+// up and down move to the row behind or in front, and the rows wrap round. Picking a card lifts it
+// up off the floor and turns it towards you, a wave rolls out across its neighbours, and a normal
+// page panel beside it lists that class's guides (real text, so it can be read and translated).
 //
 // The idea and the motion come from RhineLabUI, a fan recreation of an Arknights terminal. Only
 // the MIT-licensed motion maths is adapted here (the ripple below). None of its models, logo,
@@ -24,9 +24,9 @@
 
 import { $, esc, courseUrl, root, lessMotion } from './ui.js';
 
-const COL = 2.5, SHELF = 2.45, W = 2.2, H = 1.5, D = 0.16;  // card spacing, shelf spacing, card size
+const COL = 2.45, SHELF = 2.05, W = 2.2, H = 1.5, D = 0.12;  // card spacing, row spacing, card size
 const CW = 224, CH = 152, PER = 9;                          // label cells in the texture atlas
-const SHOW = 1.3, SIDE = 8.5;                               // shelves above/below, cards either side
+const SHOW = 3.2, SIDE = 9;                                  // rows behind/in front, cards either side
 
 const smooth = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * t * (10 + t * (-15 + 6 * t)); };
 const bell = (x, w) => Math.exp(-0.5 * (x / w) ** 2);
@@ -156,8 +156,12 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
   const sky = new THREE.HemisphereLight(0xffffff, 0xd9d4c7, 1.3); scene.add(sky);
-  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-2, 3, 12); scene.add(sun);   // mostly from the front: the card faces are the point
+  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 12, 6); scene.add(sun);   // from above and in front: the card faces point up
   scene.add(sun.target);
+  // the floor: a fine grid that fades into the fog
+  const floor = new THREE.GridHelper(240, 98);
+  floor.material.transparent = true; floor.material.opacity = 0.16; floor.position.y = -0.02;
+  scene.add(floor);
 
   // blocks: one instanced box; their front labels: one instanced plane reading a texture atlas
   const blocks = new THREE.InstancedMesh(new THREE.BoxGeometry(W, H, D),
@@ -183,11 +187,12 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   const labels = new THREE.InstancedMesh(labelGeo, labelMat, cells.length);
   labels.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   scene.add(labels);
-  // a heading over each shelf
+  // each row's subject, printed on the floor at its left
   const heads = lanes.map(() => {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 96;
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6 * 96 / 1024), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false }));
+    m.rotation.x = -Math.PI / 2;
     scene.add(m); return { c, t, m };
   });
 
@@ -202,7 +207,8 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
       ink: dark ? '#ecebe6' : '#171717', inkGold: '#171717', muted: dark ? '#9a9892' : '#6b6a66',
     };
     scene.background = palette.bg;
-    scene.fog = new THREE.Fog(palette.bg, 12, 26);
+    scene.fog = new THREE.Fog(palette.bg, 11, 27);
+    floor.material.color.set(dark ? 0x8a8a84 : 0x6b6a66);
     sky.groundColor.set(dark ? 0x202020 : 0xd9d4c7); sky.intensity = dark ? 0.9 : 1.3; sun.intensity = dark ? 1.1 : 1.5;
     const g = atlas.getContext('2d');
     g.clearRect(0, 0, atlas.width, atlas.height);
@@ -271,8 +277,8 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     drag.x = e.clientX; drag.y = e.clientY; drag.ax += dx; drag.ay += dy;
     while (drag.ax <= -70) { drag.ax += 70; move(0, 1); }
     while (drag.ax >= 70) { drag.ax -= 70; move(0, -1); }
-    while (drag.ay <= -90) { drag.ay += 90; move(1, 0); }
-    while (drag.ay >= 90) { drag.ay -= 90; move(-1, 0); }
+    while (drag.ay <= -80) { drag.ay += 80; move(-1, 0); }      // drag up: the row behind
+    while (drag.ay >= 80) { drag.ay -= 80; move(1, 0); }
   });
   renderer.domElement.addEventListener('pointerup', (e) => {
     const was = drag; drag = null;
@@ -312,38 +318,37 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     cells.forEach((x, i) => {
       const dl = nearest(x.lane, camLane, NL), across = x.row - scroll[x.lane];
       if (Math.abs(dl - camLane) > SHOW || Math.abs(across) > SIDE) { M.makeScale(0, 0, 0); blocks.setMatrixAt(i, M); labels.setMatrixAt(i, M); return; }
-      const target = i === openCell ? 1.9 : i === fc ? 0.45 : 0;
-      lift[i] = damp(lift[i], target, 9 * k, dt);
+      const target = i === openCell ? 1 : i === fc ? 0.18 : 0;
+      lift[i] = damp(lift[i], target, 8 * k, dt);
       if (Math.abs(lift[i] - target) > 1e-3) moving = true;
-      let z = lift[i] - (1 - laneW[x.lane]) * 0.9;
-      if (!still) z += 0.04 * Math.sin(t * 0.9 + x.row * 0.55 + x.lane * 1.3);
-      let y = 0;
+      const up = smooth(lift[i]);
+      let y = i === openCell ? 1.35 * up : 0.9 * lift[i];      // the focused card floats a little; the opened one comes up
+      if (!still) y += 0.035 * Math.sin(t * 0.9 + x.row * 0.55 + x.lane * 1.3);
       if (open && i !== openCell && !still) {
         const od = nearest(open.lane, dl, NL);
-        z += 0.7 * ripple(Math.hypot(x.row - open.row, (dl - od) * 2), age);
+        y += 0.55 * ripple(Math.hypot(x.row - open.row, (dl - od) * 1.2), age);
       }
-      if (i === fc && openCell !== i) y = 0.08 * smooth(lift[i] / 0.45);    // the focused card rises a touch
-      const up = smooth(lift[i] / 1.9);
-      P.set(across * COL, -dl * SHELF + y + (i === openCell ? 0.25 * up : 0), z);
-      E.set(i === openCell ? -0.06 * up : 0, i === openCell ? -0.2 * up : 0, 0);
+      P.set(across * COL, D / 2 + y, dl * SHELF + (i === openCell ? 2.0 * up : 0));
+      // lying face up; the opened card turns most of the way towards you
+      E.set(-Math.PI / 2 + (i === openCell ? 0.85 * up : 0), 0, 0);
       Q.setFromEuler(E);
-      S.setScalar(1 + (i === openCell ? 0.14 * up : 0));
+      S.setScalar(1 + (i === openCell ? 0.18 * up : 0));
       M.compose(P, Q, S);
       blocks.setMatrixAt(i, M);
       labels.setMatrixAt(i, M.multiply(LM));
     });
     blocks.instanceMatrix.needsUpdate = labels.instanceMatrix.needsUpdate = true;
-    // wide screens look along the shelves a little from the right and above; tall ones head-on
     const tall = camera.aspect < 1;
     heads.forEach(({ m }, l) => {
       const dl = nearest(l, camLane, NL);
       m.visible = Math.abs(dl - camLane) <= SHOW;
-      // the shelf names stay put on screen when the cards shift over for the panel
-      m.position.set((tall ? -0.4 : -1.35) * COL + 1.2 + (tall ? 0 : camOff.pan), -dl * SHELF + H / 2 + 0.32, -(1 - laneW[l]) * 0.9);
+      // on the floor in the gap before each row, fixed to the left of the view
+      m.position.set((tall ? -1.2 : -3.1) + (tall ? 0 : camOff.pan), 0.01, dl * SHELF - H / 2 - 0.22);
     });
-    T.set(tall ? 0 : camOff.pan, -camLane * SHELF, 0);
-    camera.position.set(T.x + (tall ? 0.5 : 2.2) + camOff.x, T.y + (tall ? 0.9 : 1.4) - camOff.y, tall ? 14.5 : 13.5);
-    camera.lookAt(T.x + (tall ? 0.1 : 0.5), T.y - 0.15, 0);
+    T.set(tall ? 0 : camOff.pan, 0, camLane * SHELF);
+    camera.position.set(T.x + (tall ? 0.3 : 1.6) + camOff.x, (tall ? 10.5 : 8.6) - camOff.y, T.z + (tall ? 6.8 : 7.6));
+    camera.lookAt(T.x + (tall ? 0.1 : 0.4), 0, T.z + (tall ? 0.6 : 1.3));   // aim a little in front, so the focused row sits mid-frame
+    floor.position.x = Math.round(T.x / 2.45) * 2.45; floor.position.z = Math.round(T.z / 2.45) * 2.45;   // an endless floor
     renderer.render(scene, camera);
     dirty = false;
     if (visible && (moving || dirty || !still)) raf = requestAnimationFrame(frame);

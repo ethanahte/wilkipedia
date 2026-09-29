@@ -862,10 +862,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Study guides: Graph · Archive** (Ethan). Tabs on guides/ (`showView` in guides.js, remembered in
   `wilkipedia-guides-view`, `#archive` opens it). The archive (`archive.js`, loaded on first use) is a
   three.js scene using campus/vendor's three (import by absolute URL: a relative `import()` resolves
-  against the module, not the page). Every class is a card, one horizontal shelf per subject, cards
-  standing side by side (Ethan: not vertical towers); shelves wrap round, ← → along a shelf, ↑ ↓
-  between subjects. Classes with guides are gold and sort first. Pick one and it lifts out, a ripple runs
-  through its neighbours, and a real-text panel lists its guides with a "decryption" reveal (bars
+  against the module, not the page). Every class is a card lying on the ground (a fine grid floor),
+  seen from above at an angle, one row per subject (Ethan: on the ground; not towers, not standing
+  shelves). Rows wrap round; ← → along a row, ↑ ↓ to the row behind / in front. Subject names are
+  printed on the floor beside each row. Classes with guides are gold and sort first. Pick one and it
+  comes up off the floor towards you, a wave rolls through its neighbours (`ripple`), and a real-text panel lists its guides with a "decryption" reveal (bars
   pulling back per line, CSS only). Keyboard (arrows, Enter, Esc, Home/End), drag, wheel, jump box.
   The loop pauses off screen and in hidden tabs, and idles under reduced motion.
   - The idea came from RhineLabUI (LBEILC, MIT), a fan recreation of an Arknights terminal. Only its
