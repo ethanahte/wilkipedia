@@ -23,6 +23,8 @@ export function parseSchedule(text) {
   return Object.keys(out).length && !/[a-z0-9]/i.test(rest) ? out : null;
 }
 
+export const GUIDE = 'Study guide (student-made)';
+
 export const KINDS = {
   course_overview: {
     label: 'Course overview',
@@ -96,9 +98,13 @@ export const KINDS = {
     fields: [
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'type', label: 'Type', type: 'select', required: true,
-        options: ['Study guide (student-made)', 'Textbook (link)', 'Practice problems', 'Video', 'Website', 'Other'] },
+        options: [GUIDE, 'Textbook (link)', 'Practice problems', 'Video', 'Website', 'Other'] },
+      // A study guide is uploaded, so it outlives the author's school account; a link
+      // to its live version is optional. Guides shared as links before PDFs keep working.
+      { key: 'pdf', label: 'The study guide (PDF)', type: 'pdf', required: true, when: ['type', GUIDE],
+        hint: 'In Google Docs: File → Download → PDF Document. Up to 5 MB. Check it doesn’t show your full name or email if you’d rather it didn’t.' },
       { key: 'url', label: 'Link', type: 'url', required: true,
-        hint: 'For a study guide, share it from Google Drive as "Anyone with the link can view".' },
+        whenAlt: ['type', GUIDE, 'Link to the live version (optional)', 'If you keep updating a Google Doc, link it here too. The PDF stays up even if the link stops working.'] },
       { key: 'author', label: 'Who made it?', type: 'text',
         hint: 'Leave blank if you made it yourself. If someone else made it, put their name so they get the credit, and check they’re OK with it being shared.' },
       { key: 'note', label: 'What it is good for', type: 'textarea' },

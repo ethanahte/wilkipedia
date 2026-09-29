@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, drafts, openEditor, suggestLink, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -97,6 +97,18 @@ async function draw() {
         `<button type="button" class="chip" data-res-t="${i ? esc(t) : ''}" aria-pressed="${!i}">${esc(t)}</button>`).join('')}</div>` : '';
   $('#resources').innerHTML = res.length ? `${resFilter}<div class="res-list">${res.map((r) => {
     const u = safeUrl(r.payload.url);
+    const meta = `<span class="meta">${r.payload.author
+        ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
+        : `Made by ${byline(r.author, r.verified)}`}${unpub(r)}</span>`;
+    // An uploaded study guide: the card opens the PDF, and a link to its live version sits beside it
+    if (r.payload.pdf?.path) {
+      return `<div class="res-card has-pdf" data-teacher="${esc(r.teacher || '')}">
+        <span class="res-tags"><span class="tag">${esc(r.payload.type)}</span><span class="tag">PDF</span>${r.teacher ? `<span class="tag teacher-tag">For ${esc(r.teacher)}’s class</span>` : ''}</span>
+        <a class="res-main" data-pdf="${esc(r.payload.pdf.path)}" href="#" aria-disabled="true" target="_blank" rel="noopener"><b>${esc(r.payload.title)}</b></a>
+        ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
+        ${meta}${u ? `<a class="res-alt" href="${esc(u)}" target="_blank" rel="noopener nofollow">Live version ↗</a>` : ''}
+        <span class="arrow" aria-hidden="true">📄</span></div>`;
+    }
     return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card" data-teacher="${esc(r.teacher || '')}">
       <span class="res-tags"><span class="tag">${esc(r.payload.type)}</span>${r.teacher ? `<span class="tag teacher-tag">For ${esc(r.teacher)}’s class</span>` : ''}</span><b>${esc(r.payload.title)}</b>
       ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
@@ -105,6 +117,7 @@ async function draw() {
         : `Made by ${byline(r.author, r.verified)}`}${unpub(r)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
   }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>`
     : empty('No resources yet. Made a study guide or found a great video?', 'resource', null, 'Share one');
+  linkPdfs($('#resources'), s);
 
   // Tips
   const tips = subs.filter((x) => x.kind === 'tip');

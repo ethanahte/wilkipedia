@@ -36,6 +36,16 @@ export const TRUSTED_ROLES = ['trusted', 'reviewer', 'admin'];
 // added submissions.replaces; until then the buttons stay hidden
 export const canEditOwn = (x) => MODE === 'demo' || (!!x && 'replaces' in x);
 
+// A study guide PDF: 5 MB at most (the bucket enforces it too), and really a PDF
+export const PDF_MAX = 5 * 1024 * 1024;
+async function checkPdf(file) {
+  if (!file || !file.size) throw new Error('Choose a PDF file.');
+  if (file.size > PDF_MAX) throw new Error(`That PDF is ${(file.size / 1048576).toFixed(1)} MB. The limit is 5 MB: in Google Docs, File → Download → PDF usually makes a small one.`);
+  const head = await file.slice(0, 5).text();
+  if (head !== '%PDF-') throw new Error('That file isn’t a PDF. In Google Docs use File → Download → PDF Document.');
+}
+const pdfInfo = (path, file) => ({ path, name: String(file.name || 'study-guide.pdf').replace(/[^\w .()\-]+/g, '').slice(0, 120) || 'study-guide.pdf', size: file.size });
+
 // Mirrors on_comment_insert() in schema.sql: personal accounts are always reviewed.
 export const postsInstantly = (u) => REVIEWER_ROLES.includes(u.role) || (u.role === 'trusted' && !!u.school);
 const FORMER = 'Former student';
@@ -220,6 +230,22 @@ async function live() {
     // live work gets an update that waits for review, and approving it copies the
     // update onto the live submission (on_review() in schema.sql).
     async editOwn(id, payload) { ok014(await sb.rpc('edit_own_submission', { p_id: id, p_payload: payload })); },
+    // Study guide PDFs (migration 016): a private bucket. A file opens for its uploader and
+    // reviewers, and for everyone once the submission pointing at it is published.
+    async uploadPdf(file) {
+      await checkPdf(file);
+      const path = `${me.id}/${crypto.randomUUID()}.pdf`;
+      const { error } = await sb.storage.from('guides').upload(path, file, { contentType: 'application/pdf', upsert: false });
+      if (error) throw new Error(/bucket not found/i.test(error.message)
+        ? 'PDF uploads need migration 016 run in Supabase first.' : `Upload failed: ${error.message}`);
+      return pdfInfo(path, file);
+    },
+    // → { path: signed link } for the files this viewer may open (others are left out)
+    async pdfUrls(paths) {
+      if (!paths.length) return {};
+      const { data } = await sb.storage.from('guides').createSignedUrls(paths, 6 * 3600);
+      return Object.fromEntries((data || []).filter((x) => x.signedUrl && !x.error).map((x) => [x.path, x.signedUrl]));
+    },
     async withdraw(id) { ok014(await sb.rpc('withdraw_submission', { p_id: id })); },
     async proposeUpdate(orig, payload) {
       ok014(await sb.from('submissions').insert({ user_id: me.id, kind: orig.kind, course_slug: orig.course_slug,
@@ -541,6 +567,21 @@ async function demo() {
     },
 
     // Mirrors edit_own_submission(), withdraw_submission() and on_submission_insert()
+    async uploadPdf(file) {
+      const u = need();
+      await checkPdf(file);
+      if (file.size > 2 * 1024 * 1024) throw new Error('In demo mode a PDF can be up to 2 MB (this browser keeps it).');
+      const path = `${u.id}/${crypto.randomUUID()}.pdf`;
+      db.files ??= {};
+      db.files[path] = await new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(file); });
+      save();
+      return pdfInfo(path, file);
+    },
+    async pdfUrls(paths) {
+      const out = {};
+      for (const p of paths) if (db.files?.[p]) out[p] = URL.createObjectURL(await (await fetch(db.files[p])).blob());
+      return out;
+    },
     async editOwn(sid, payload) {
       const u = need();
       const x = db.submissions.find((y) => y.id === sid);

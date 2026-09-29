@@ -2,7 +2,7 @@
 //   ?course=<slug>&kind=<kind>&teacher=<name>   (from a course page)
 //   ?bounty=<id>                                 (from a claimed bounty)
 
-import { initHeader, requireUser, renderFields, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
+import { initHeader, requireUser, renderFields, withUploads, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
 import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
@@ -78,7 +78,9 @@ function paint() {
   const scope = state.kind && KINDS[state.kind].scope;
   $('#step2').hidden = !state.kind;
   if (!state.kind) return;
-  const keep = form && $('#fields').dataset.kind === state.kind ? form.values() : null;   // never wipe typing
+  const same = form && $('#fields').dataset.kind === state.kind;
+  const keep = same ? form.values() : null;                          // never wipe typing
+  const keepFiles = same ? form.files() : {};                        // nor a PDF already picked
   $('#course-row').hidden = noCourse(scope);
   paintTeacher();
   const preset = {};
@@ -88,7 +90,7 @@ function paint() {
   const draft = drafts.get(draftKey());
   if (draft?.teacher && !state.teacher) state.teacher = draft.teacher;
   periodSuggestions();
-  form = renderFields($('#fields'), state.kind, { ...preset, ...(draft?.values || {}), ...(keep || {}) });
+  form = renderFields($('#fields'), state.kind, { ...preset, ...(draft?.values || {}), ...(keep || {}) }, keepFiles);
   $('#fields').dataset.kind = state.kind;
   $('#draft-note').hidden = !draft;
   const mine = bounties.filter((b) => b.status === 'open' && (b.claims.some((c) => c.user_id === s.user()?.id) || b.id === state.bounty));
@@ -130,13 +132,16 @@ $('#submit-form').addEventListener('submit', async (e) => {
   if (!$('#rules-ok').checked) return err('Please confirm the two rules at the bottom.');
   if (!(await requireUser(s, 'to submit'))) return;
 
-  const ok = await guard(() => s.submit({
+  const btn = $('#submit-form button[type="submit"], #submit-form .btn:not([type="button"])');
+  if (btn) btn.disabled = true;
+  const ok = await guard(async () => s.submit({
     kind: state.kind,
     course_slug: noCourse(scope) ? null : state.course,
     teacher,
     bounty_id: $('#bounty').value || null,
-    payload: form.values(),
+    payload: await withUploads(s, form, form.values()),              // a study guide's PDF goes up first
   }));
+  if (btn) btn.disabled = false;
   if (!ok) return;
   drafts.clear(draftKey());
   $('#submit-form').hidden = true;

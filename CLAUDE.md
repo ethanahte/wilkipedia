@@ -936,6 +936,26 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     author's own live items (not for reviewers, who have Edit). `openEditor(…,
     'author')` in ui.js is the pop-up. `canEditOwn()` (store.js) hides all of it
     until the database has the `replaces` column.
+- **Study guide PDFs** (migration 016, 2026-09-28). A student-made study guide
+  (resource type `GUIDE` in forms.js) is uploaded as a PDF, not linked: school
+  Google accounts are closed at graduation and often can't share outside the
+  district (Ethan). Other resource types stay links.
+  - Storage: private bucket `guides`, PDFs only, 5 MB (also checked in the browser,
+    with the `%PDF-` header). Files go to `<user id>/<uuid>.pdf`, and payload.pdf is
+    `{path, name, size}`. The `submissions_pdf` trigger refuses a path outside the
+    author's folder. A file opens for its uploader, reviewers, and anyone once a
+    published submission points at it. So a sent-back or rejected guide can't be
+    shared as a link to our storage. Files are never deleted.
+  - UI: field type `pdf` in renderFields. `when` shows a field only for one value of
+    another field; `whenAlt` relabels it and makes it optional (the link becomes
+    "live version" for guides). `form.files()` + `withUploads()` upload on submit
+    (submit page and `openEditor`). `linkPdfs(el)` turns `<a data-pdf>` into
+    six-hour signed links. It's used on class pages (the card opens the PDF, with
+    "Live version ↗"), the review desk and the editor.
+  - Guides shared as links before this keep their link and need no PDF, even when
+    edited (`legacyLink`). Supabase's free plan has about 1 GB of storage and a
+    monthly download limit. Watch Usage, and move files to Cloudflare R2 if it
+    gets close (only `uploadPdf`/`pdfUrls` in store.js know where files live).
 - Links between pages are relative (`body[data-root]`), so the site works at
   `username.github.io/wilkipedia/` and at a custom domain root.
 

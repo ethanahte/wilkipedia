@@ -2,7 +2,7 @@
 // bounties. The page is visible to anyone, but the database only answers these
 // queries for reviewers (see is_reviewer() in supabase/schema.sql).
 
-import { initHeader, courses, placeOf, openEditor, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
+import { initHeader, courses, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -21,6 +21,8 @@ function payloadHtml(kind, p, before = null) {
   return KINDS[kind].fields.filter((f) => p[f.key] || (before && before[f.key])).map((f) => {
     const v = p[f.key];
     const body = !v ? '<span class="meta">(removed)</span>'
+      : f.type === 'pdf' ? `<a class="btn ghost small" data-pdf="${esc(v.path || '')}" href="#" aria-disabled="true" target="_blank" rel="noopener">📄 Open ${esc(v.name || 'PDF')}</a>
+          <span class="meta">${fileSize(v.size)} · read it all the way through</span>`
       : f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])
       : f.type === 'url' ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span class="bad">${esc(v)}</span>`)
       : f.type === 'textarea' ? prose(v) : esc(v);
@@ -46,7 +48,7 @@ const tabs = {
           : 'The live version it was meant to update has been unpublished, so approving publishes this on its own.'}</p>` : ''}
         ${x.review_note ? `<p class="upd-note meta">Resubmitted. Last time a reviewer asked: “${esc(x.review_note)}”</p>` : ''}
         ${payloadHtml(x.kind, x.payload, x.original?.status === 'approved' ? x.original.payload : null)}
-        <div class="checklist meta">Check: facts have a source · no real test questions or answer keys · nothing personal about a teacher · links work</div>
+        <div class="checklist meta">Check: facts have a source · no real test questions or answer keys · nothing personal about a teacher · links work${x.payload?.pdf ? ' · the whole PDF, including any names or emails in it' : ''}</div>
         <div class="r-actions">
           <button class="btn" data-act="approved">Approve</button>
           <button class="btn ghost" data-act="changes">Needs changes…</button>
@@ -172,6 +174,7 @@ async function draw() {
     return;
   }
   $('#panel').innerHTML = await guard(() => (tabs[tab] || tabs.submissions)()) || '';
+  linkPdfs($('#panel'), s);
   wireAnnounceForm();
   $('#pub-q')?.addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();

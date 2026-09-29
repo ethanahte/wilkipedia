@@ -1,7 +1,7 @@
 // Shared DOM helpers: escaping, the header's sign-in slot, toasts, and the
 // form renderer used by the submit page and the course page's quick-add.
 
-import { store, MODE, REVIEWER_ROLES, TERMS_VERSION, canEditOwn } from './store.js';
+import { store, MODE, REVIEWER_ROLES, TERMS_VERSION, canEditOwn, PDF_MAX } from './store.js';
 import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear } from './forms.js';
 import { AVATAR_LINES } from './avatar-art.js';
 
@@ -569,7 +569,7 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
     const payload = { ...sub.payload, ...fields.values() };
     if (own) {
       if (sub.status !== 'changes' && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
-      const ok = await guard(() => (live ? store.proposeUpdate(sub, payload) : store.editOwn(sub.id, payload)),
+      const ok = await guard(async () => { await withUploads(store, fields, payload); return live ? store.proposeUpdate(sub, payload) : store.editOwn(sub.id, payload); },
         live ? 'Sent for review. Your live version stays up until it’s approved.'
           : sub.status === 'changes' ? 'Resubmitted. It’s back with the reviewers.' : 'Saved.');
       if (ok) { close(); onSaved?.(); }
@@ -668,16 +668,26 @@ export const drafts = {
 export const suggestions = {};
 // Renders KINDS[kind] into `el`. Returns {values(), check()}; check() marks and
 // returns the first missing required field.
-export function renderFields(el, kind, preset = {}) {
+export const fileSize = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round((n || 0) / 1024))} KB`);
+
+// `files`: {key: File} to put back into PDF pickers when the form is drawn again
+export function renderFields(el, kind, preset = {}, files = {}) {
   const def = KINDS[kind];
   // A legacy field only appears when editing something that already has it
   const fields = def.fields.filter((f) => !f.legacy || preset[f.key]);
+  // A study guide shared as a link before PDFs existed keeps its link, and needs no PDF
+  const legacyLink = fields.some((f) => f.type === 'pdf') && preset.url && !preset.pdf;
   el.innerHTML = fields.map((f) => {
     const id = `f-${f.key}`;
     const req = f.required ? ' <span class="req" aria-hidden="true">*</span>' : '';
     const val = preset[f.key] ?? '';
     let input;
-    if (f.type === 'periods') {
+    if (f.type === 'pdf') {
+      const cur = val && typeof val === 'object' && val.path ? val : null;
+      input = `<div class="pdf-in">${cur ? `<div class="pdf-cur">📄 <a data-pdf="${esc(cur.path)}" href="#" aria-disabled="true" target="_blank" rel="noopener">${esc(cur.name)}</a>
+          <span class="meta">${fileSize(cur.size)}</span></div>` : ''}
+        <input id="${id}" name="${f.key}" type="file" accept="application/pdf,.pdf">${cur ? '<div class="hint">Choose a file only to replace this one.</div>' : ''}</div>`;
+    } else if (f.type === 'periods') {
       const cur = val && typeof val === 'object' ? val : {};
       input = `<div class="periods-in" id="${id}" role="group" aria-label="${esc(f.label)}">${PERIODS.map((n) =>
         `<label><span>Period ${n}</span><input name="${f.key}.${n}" value="${esc(cur[n] || '')}" list="dl-periods" maxlength="60" autocomplete="off" placeholder="—"></label>`).join('')}</div>
@@ -694,9 +704,40 @@ export function renderFields(el, kind, preset = {}) {
       input = `<input id="${id}" name="${f.key}" type="${f.type === 'url' ? 'url' : 'text'}" value="${esc(val)}" ${list} autocomplete="off" ${f.max ? `maxlength="${f.max}"` : ''} ${f.required ? 'required' : ''} ${f.type === 'url' ? 'placeholder="https://…"' : ''}>`
         + (list ? `<datalist id="dl-${f.key}">${suggestions[f.suggest].map((o) => `<option value="${esc(o)}">`).join('')}</datalist>` : '');
     }
-    return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label>
-      ${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}${input}</div>`;
+    return `<div class="field" data-f="${f.key}"><label for="${id}"><span class="lbl">${esc(f.label)}</span>${req}</label>
+      <div class="hint"${f.hint ? '' : ' hidden'}>${esc(f.hint || '')}</div>${input}</div>`;
   }).join('');
+  // Fields that depend on another one (`when`: only then; `whenAlt`: then optional, relabelled)
+  const valueOf = (k) => $(`[name="${k}"]`, el)?.value;
+  const on = (w) => !!w && valueOf(w[0]) === w[1];
+  const curPdf = (f) => (preset[f.key] && typeof preset[f.key] === 'object' && preset[f.key].path ? preset[f.key] : null);
+  const chosen = (f) => $(`[name="${f.key}"]`, el)?.files?.[0] || null;
+  const shown = (f) => !f.when || on(f.when);
+  const needed = (f) => {
+    if (!shown(f)) return false;
+    if (f.type === 'pdf') return f.required && !legacyLink;
+    if (on(f.whenAlt)) return legacyLink && !fields.some((g) => g.type === 'pdf' && chosen(g));
+    return f.required;
+  };
+  const apply = () => {
+    for (const f of fields) {
+      const box = $(`[data-f="${f.key}"]`, el);
+      box.hidden = !shown(f);
+      if (!f.whenAlt) continue;
+      const alt = on(f.whenAlt) && !legacyLink;
+      $('.lbl', box).textContent = alt ? f.whenAlt[2] : f.label;
+      $('.req', box)?.toggleAttribute('hidden', alt);
+      const h = $('.hint', box); h.textContent = alt ? f.whenAlt[3] : f.hint || ''; h.hidden = !h.textContent;
+      $(`[name="${f.key}"]`, el).required = !alt && !!f.required;
+    }
+  };
+  for (const [k, file] of Object.entries(files)) {
+    const input = $(`[name="${k}"][type="file"]`, el);
+    if (input && file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; }
+  }
+  el.addEventListener('change', (e) => { if (fields.some((f) => (f.when || f.whenAlt)?.[0] === e.target.name)) apply(); });
+  apply();
+  linkPdfs(el);
   // Period boxes take a class's catalog name or an approved everyday name, or
   // "Prep", and save the catalog name. A section (Chamber Orchestra) is its own
   // class, so it keeps its own name.
@@ -714,14 +755,30 @@ export function renderFields(el, kind, preset = {}) {
     values() {
       const out = {};
       for (const f of fields) {
+        if (!shown(f)) continue;
+        if (f.type === 'pdf') { if (curPdf(f)) out[f.key] = curPdf(f); continue; }   // a new file is uploaded on submit
         if (f.type === 'periods') { const v = periodsOf(f); if (Object.keys(v).length) out[f.key] = v; continue; }
         const v = $(`[name="${f.key}"]`, el).value.trim();
         if (v) out[f.key] = v;
       }
       return out;
     },
+    // New PDFs picked in this form, {key: File}: upload them with withUploads() before saving
+    files() {
+      return Object.fromEntries(fields.filter((f) => f.type === 'pdf' && shown(f) && chosen(f)).map((f) => [f.key, chosen(f)]));
+    },
     check() {
       for (const f of fields) {
+        if (!shown(f)) continue;
+        if (f.type === 'pdf') {
+          const input = $(`[name="${f.key}"]`, el), file = chosen(f);
+          const bad = file && file.size > PDF_MAX ? `That PDF is ${fileSize(file.size)}. The limit is 5 MB.`
+            : file && !/\.pdf$/i.test(file.name) && file.type !== 'application/pdf' ? 'Choose a PDF file (File → Download → PDF in Google Docs).'
+            : needed(f) && !file && !curPdf(f) ? 'Upload the study guide as a PDF.' : null;
+          input.classList.toggle('invalid', !!bad);
+          if (bad) { input.focus(); return bad; }
+          continue;
+        }
         if (f.type === 'periods') {
           const vals = periodsOf(f);
           const bad = f.required && !Object.keys(vals).length;
@@ -745,11 +802,35 @@ export function renderFields(el, kind, preset = {}) {
         }
         const input = $(`[name="${f.key}"]`, el);
         const v = input.value.trim();
-        const bad = (f.required && !v) || (f.type === 'url' && v && !safeUrl(v));
+        const bad = (needed(f) && !v) || (f.type === 'url' && v && !safeUrl(v));
         input.classList.toggle('invalid', bad);
         if (bad) { input.focus(); return f.type === 'url' && v ? `“${f.label}” needs to be a full link starting with https://` : `“${f.label}” is required.`; }
       }
       return null;
     },
   };
+}
+
+// Upload the PDFs picked in a form (see files()) and put where they went into the payload
+export async function withUploads(st, form, payload) {
+  for (const [k, file] of Object.entries(form.files?.() || {})) payload[k] = await st.uploadPdf(file);
+  return payload;
+}
+
+// Point every <a data-pdf="path"> under el at a short-lived link to that file. A file this
+// viewer may not open (or that's missing) stays a dead link with a note.
+export async function linkPdfs(el, st = null) {
+  const links = $$('a[data-pdf]', el);
+  if (!links.length) return;
+  if (!el.dataset.pdfWired) {
+    el.dataset.pdfWired = '1';
+    el.addEventListener('click', (e) => { if (e.target.closest('a[data-pdf][aria-disabled="true"]')) e.preventDefault(); });
+  }
+  let urls = {};
+  try { urls = await (st || await store()).pdfUrls([...new Set(links.map((a) => a.dataset.pdf))]); } catch { /* leave them dead */ }
+  for (const a of links) {
+    const u = urls[a.dataset.pdf];
+    if (u) { a.href = u; a.setAttribute('aria-disabled', 'false'); a.removeAttribute('title'); }
+    else a.title = 'This PDF isn’t available right now';
+  }
 }

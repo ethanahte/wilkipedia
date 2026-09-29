@@ -822,6 +822,16 @@ button.panel { font: inherit; text-align: left; cursor: pointer; width: 100%; }
 a.res-card:hover b { text-decoration: underline 2px var(--gold); text-underline-offset: 4px; }
 .res-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .res-card .arrow { position: absolute; right: 4px; top: 14px; color: var(--muted); }
+/* an uploaded study guide: the whole card opens the PDF; "Live version" sits on top of that */
+.res-card.has-pdf .res-main { color: inherit; text-decoration: none; }
+.res-card.has-pdf .res-main::after { content: ''; position: absolute; inset: 0; }
+.res-card.has-pdf:hover .res-main b { text-decoration: underline 2px var(--gold); text-underline-offset: 4px; }
+.res-card .res-alt { position: relative; z-index: 1; justify-self: start; font-size: .88rem; color: var(--accent); }
+.res-card a[aria-disabled="true"] { cursor: default; }
+.pdf-in { display: grid; gap: 6px; }
+.pdf-in input[type="file"] { font: inherit; padding: 8px; border: 1px dashed var(--rule); border-radius: 8px; background: var(--paper, transparent); }
+.pdf-in input[type="file"].invalid { border-color: var(--bad, #c0392b); }
+.pdf-cur { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .note-line { font-size: .94rem; }
 .tip-list { margin-top: 6px; }
 .tip-card { position: relative; margin: 0; padding: 14px 0 12px 1.6em; border-top: 1px solid var(--rule); }
