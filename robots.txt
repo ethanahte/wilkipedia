@@ -2,5 +2,6 @@ User-agent: *
 Disallow: /review/
 Disallow: /account/
 Disallow: /inbox/
+Disallow: /dashboard/
 Disallow: /submit/
 Sitemap: https://wilcoxwiki.org/sitemap.xml

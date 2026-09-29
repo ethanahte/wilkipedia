@@ -202,7 +202,7 @@ async function activities(kind) {
     if (sg) { openEditor(s, subs.find((x) => String(x.id) === sg.dataset.suggest), null, 'author'); return; }
     const u = e.target.closest('[data-unpub]');
     if (u) {
-      const note = prompt('Unpublish this info? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
+      const note = prompt('Unpublish this info? It stays saved and can be republished from Dashboard → Published.\n\nReason (the author will see this):');
       if (note === null) return;
       if (await guard(() => s.review(Number(u.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) location.reload();
       return;
@@ -243,16 +243,16 @@ function mountInbox(el) {
       : /edited/.test(m) ? ['', '✎'] : ['bad', '✕']);
     const what = (x) => `${KINDS[x.kind]?.label.toLowerCase() || 'submission'} for ${placeOf(x, name)[0]}`;
     el.innerHTML = `<div class="inbox-head"><b>For you</b>
-        <a href="${root}inbox/">Open your Inbox <span aria-hidden="true">→</span></a></div>
+        <a href="${root}dashboard/">Open your Dashboard <span aria-hidden="true">→</span></a></div>
       <ul class="inbox-list">${back.map((x) => `<li class="inbox-item back"><span class="inbox-ic" aria-hidden="true">↩</span>
         <div><b>A reviewer sent back your ${esc(what(x))}.</b>
           ${x.review_note ? `<q class="inbox-note">${esc(x.review_note)}</q>` : ''}
-          <div class="inbox-act"><a class="btn small" href="${root}inbox/#edit-${x.id}">Make changes</a>
+          <div class="inbox-act"><a class="btn small" href="${root}dashboard/#edit-${x.id}">Make changes</a>
             <span class="meta">Stays here until you resubmit or withdraw it.</span></div></div></li>`).join('')}
       ${fresh.slice(0, 3).map((n) => { const [cls, ic] = icon(n.message); return `<li class="inbox-item ${cls}">
         <span class="inbox-ic" aria-hidden="true">${ic}</span><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
         <span class="meta"> · ${ago(n.created_at)}</span></div></li>`; }).join('')}</ul>
-      ${fresh.length ? `<div class="inbox-foot">${fresh.length > 3 ? `<a href="${root}inbox/">+${fresh.length - 3} more</a>` : ''}
+      ${fresh.length ? `<div class="inbox-foot">${fresh.length > 3 ? `<a href="${root}dashboard/">+${fresh.length - 3} more</a>` : ''}
         <button type="button" class="btn ghost small" data-read>Mark as read</button></div>` : ''}`;
     el.hidden = false;
     $('[data-read]', el)?.addEventListener('click', async () => {
@@ -416,7 +416,7 @@ const pages = {
       if (sg) { openEditor(s, list.find((x) => String(x.id) === sg.dataset.suggest), null, 'author'); return; }
       const u = e.target.closest('[data-unpub]');
       if (!u) return;
-      const note = prompt('Unpublish this article? It stays saved and can be republished from Review → Published.\n\nReason (the author will see this):');
+      const note = prompt('Unpublish this article? It stays saved and can be republished from Dashboard → Published.\n\nReason (the author will see this):');
       if (note === null) return;
       if (await guard(() => s.review(Number(u.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) location.reload();
     });
@@ -446,14 +446,14 @@ const pages = {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
           <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${themeCard}${demoTools}`;
       } else {
-        // Notifications and your work live in the Inbox now; this is just the way in
+        // Notifications, your work and the review desk live in the Dashboard; this is just the way in
         const [mine, unread] = await Promise.all([s.mySubmissions().catch(() => []), s.unreadCount ? s.unreadCount().catch(() => 0) : 0]);
         const todo = mine.filter((x) => x.status === 'changes').length, review = mine.filter((x) => x.status === 'pending').length;
-        const inboxCard = `<a class="card inbox-card" href="${root}inbox/"><div><h2>Inbox</h2>
+        const inboxCard = `<a class="card inbox-card" href="${root}dashboard/"><div><h2>Dashboard</h2>
             <p class="meta">${[unread ? `<b>${unread} new</b>` : 'No new notifications', todo ? `<b>${todo} sent back to you</b>` : '', review ? `${review} in review` : '',
               `${mine.length} post${mine.length === 1 ? '' : 's'} in all`].filter(Boolean).join(' · ')}</p>
             <p class="meta">Notifications, everything you’ve sent in, and your conversations with the review team.</p></div>
-          <span class="btn small">Open the Inbox →</span></a>`;
+          <span class="btn small">Open the Dashboard →</span></a>`;
         $('#account').innerHTML = `
           ${inboxCard}
           <section class="card profile">
@@ -518,9 +518,9 @@ const pages = {
                                         show_on_leaderboard: $('#lb').checked }), 'Profile saved.');
         };
         $('#signout').onclick = () => guard(() => s.signOut());
-        // Old links (#notifications, #my-subs, #edit-<id>) now belong to the Inbox
+        // Old links (#notifications, #my-subs, #edit-<id>) now belong to the Dashboard
         const old = /^#(notifications|my-subs|edit-(\d+))$/.exec(location.hash);
-        if (old) location.replace(`${root}inbox/${old[2] ? `#edit-${old[2]}` : old[1] === 'my-subs' ? '#work' : ''}`);
+        if (old) location.replace(`${root}dashboard/${old[2] ? `#edit-${old[2]}` : old[1] === 'my-subs' ? '#work' : ''}`);
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
@@ -587,7 +587,7 @@ const pages = {
       if (me) sections.push(['account', 'Your account', [
         row('Show me on the leaderboard', 'Your name and points on the Leaderboard. Your work keeps your name either way.', tgl('set-lb', 'Show me on the leaderboard', me.show_on_leaderboard)),
         row('Name, picture and class year', 'Edited on your account page.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
-        row('Inbox', 'Notifications, everything you’ve sent in, and your conversations with the review team.', `<a class="btn ghost small" href="${root}inbox/">Open the Inbox</a>`),
+        row('Dashboard', 'Notifications, everything you’ve sent in, and your conversations with the review team.', `<a class="btn ghost small" href="${root}dashboard/">Open the Dashboard</a>`),
       ].join(''), 'Saved to your account, so it follows you to every device.']);
       if (team) sections.push(['bounties', 'Bounty board', [
         row('Open the board on', 'The view the bounty page starts with.', seg('set-bview', 'Bounty board view', ls.get('wilkipedia-bounty-view', 'board'), [['board', 'Board'], ['agenda', 'Agenda'], ['ledger', 'Ledger'], ['orrery', 'Orrery']])),

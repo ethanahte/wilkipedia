@@ -211,7 +211,7 @@ document.addEventListener('click', async (e) => {
   }
   if (t.dataset.unpub) {
     e.preventDefault();                       // it may sit inside a resource link
-    const note = prompt('Unpublish this? It comes off the page but stays saved (you can republish it from Review → Published).\n\nReason (the author will see this):');
+    const note = prompt('Unpublish this? It comes off the page but stays saved (you can republish it from Dashboard → Published).\n\nReason (the author will see this):');
     if (note === null) return;
     if (await guard(() => s.review(Number(t.dataset.unpub), 'rejected', note || 'Unpublished by a reviewer'), 'Unpublished.')) draw();
     return;

@@ -1,26 +1,27 @@
-// The Inbox: one page for everything that happens around your work (Ethan, 2026-09-28).
+// The Dashboard: one page for everything around your work (Ethan, 2026-09-28/29). It started
+// as the Inbox and took in the review desk, so it's more than notifications.
 //
-//   Updates        every notification, grouped by day, filterable, read/unread
-//   My work        everything you sent in (posts, comments, feedback, reports) with its state
-//                  and what you can do next
-//   Conversations  one thread per post / feedback / report, between whoever sent it in and the
-//                  review team (reviewer decisions and edits are part of the thread). Not a chat
-//                  between students: they talk in public class-page comments.
-//   Review queue   reviewers and admins: what's waiting, and authors waiting on an answer
-//   People         admins: every member, their whole history, and their role
+//   You      Updates (every notification, by day), My work (everything you sent in, with its
+//            state and next step), Conversations (one thread per post / feedback / report,
+//            between whoever sent it in and the review team; not a chat between students)
+//   Review   reviewers and admins: To review (overview + the queue), Comments, Reports,
+//            Feedback, Published (reviewdesk.js draws these)
+//   Site     Announcements, Bounties (admins edit, reviewers see), People (admins only)
 //
-// Routes live in the hash: #updates #work #threads #thread/<subject> #queue #people
-// #person/<id> #edit-<submission id> (opens the editor, from the home page's "Make changes").
+// Routes live in the hash: #updates #work #threads #thread/<subject> #review #comments #reports
+// #feedback #published(-off) #announcements #bounties #people #person/<id> #edit-<submission id>.
+// Old /inbox/ and /review/ addresses forward here.
 
 import { initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
          guard, courseUrl, roleLabel, avatarHtml, root } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES, canEditOwn } from './store.js';
+import { deskTab } from './reviewdesk.js';
 
 const s = await initHeader();
 const data = await courses();
 const cname = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
-const app = $('#inbox-app');
+const app = $('#dash-app');
 
 const STATUS = { pending: 'In review', changes: 'Sent back', approved: 'Published', rejected: 'Not accepted', withdrawn: 'Withdrawn', merged: 'Update published' };
 const FB = { new: 'Received', planned: 'Planned', done: 'Done', closed: 'Closed' };
@@ -61,25 +62,39 @@ function dayLabel(iso) {
   return diff <= 0 ? 'Today' : diff === 1 ? 'Yesterday' : diff < 7 ? d.toLocaleDateString(undefined, { weekday: 'long' }) : fmtDate(iso);
 }
 
-// ── the tabs ──
-const TABS = () => [['updates', 'Updates'], ['work', 'My work'], ['threads', 'Conversations'],
-  ...(isTeam() ? [['queue', 'Review queue']] : []), ...(isAdmin() ? [['people', 'People']] : [])];
+// ── the menu ──
+const SECTIONS = () => [
+  ['You', [['updates', 'Updates'], ['work', 'My work'], ['threads', 'Conversations']]],
+  ...(isTeam() ? [['Review', [['review', 'To review'], ['comments', 'Comments'], ['reports', 'Reports'], ['feedback', 'Feedback'], ['published', 'Published']]]] : []),
+  ...(isTeam() ? [['Site', [['announcements', 'Announcements'], ['bounties', 'Bounties'], ...(isAdmin() ? [['people', 'People']] : [])]]] : []),
+];
+const DESK = { review: 'submissions', comments: 'comments', reports: 'reports', feedback: 'feedback', published: 'published', announcements: 'announcements', bounties: 'bounties' };
 
 let unread = 0;
+const badge = (k, n) => { const b = $(`[data-tab="${k}"] .ib-n`, app); if (b) { b.textContent = n > 99 ? '99+' : n || ''; b.hidden = !n; } };
 async function refreshCount() {
   try { unread = await s.unreadCount(); } catch { unread = 0; }
   setNoteCount(unread);
-  const b = $('[data-tab="updates"] .ib-n', app);
-  if (b) { b.textContent = unread > 99 ? '99+' : unread || ''; b.hidden = !unread; }
+  badge('updates', unread);
+}
+// What's waiting for the review team, on the menu
+async function refreshTeamCounts() {
+  if (!isTeam()) return;
+  const n = (p) => p.then((l) => l.length).catch(() => 0);
+  const [rev, com, rep, fb] = await Promise.all([n(s.pending()), n(s.heldComments()), n(s.reports()),
+    s.feedbackList().then((l) => l.filter((f) => f.status === 'new').length).catch(() => 0)]);
+  badge('review', rev); badge('comments', com); badge('reports', rep); badge('feedback', fb);
 }
 
-function frame(active) {
+function frame() {
   const me = s.user();
-  return `<div class="ib-head">
+  return `<div class="db-layout">
+    <aside class="db-side">
       <div class="ib-me">${avatarHtml(me, 'md')}<div><b>${esc(me.name)}</b><div class="meta">${esc(roleLabel(me.role))}</div></div></div>
-      <nav class="ib-tabs" role="tablist" aria-label="Inbox">${TABS().map(([k, l]) => `<a role="tab" data-tab="${k}" href="#${k}" aria-selected="${active === k}">
-        ${l}${k === 'updates' ? '<span class="ib-n" hidden></span>' : ''}</a>`).join('')}</nav></div>
-    <div class="ib-panel" id="ib-panel"><div class="meta">Loading…</div></div>`;
+      <nav class="db-nav" aria-label="Dashboard">${SECTIONS().map(([group, items]) => `<div class="db-group"><div class="db-gh">${group}</div>
+        ${items.map(([k, l]) => `<a data-tab="${k}" href="#${k}">${l}<span class="ib-n" hidden></span></a>`).join('')}</div>`).join('')}</nav>
+    </aside>
+    <div class="ib-panel" id="ib-panel"><div class="meta">Loading…</div></div></div>`;
 }
 
 // ── Updates ──
@@ -266,7 +281,7 @@ async function thread(panel, subject) {
   panel.innerHTML = `<p><a href="#threads" class="ib-back">← All conversations</a></p>
     <article class="ib-card ib-subject">${head}
       <div class="r-actions">${type === 'submission' && mine && canEditOwn(x) && x.status === 'changes' ? '<button type="button" class="btn small" data-fix>Make changes and resubmit</button>' : ''}
-        ${team && type === 'submission' && x.status === 'pending' ? `<a class="btn ghost small" href="${root}review/">Review it on the review desk</a>` : ''}
+        ${team && type === 'submission' && x.status === 'pending' ? '<a class="btn ghost small" href="#review">Review it in To review</a>' : ''}
         ${team && !mine && x.user_id && isAdmin() ? `<a class="btn ghost small" href="#person/${x.user_id}">All of ${esc(x.author)}’s activity</a>` : ''}</div></article>
     <ol class="ib-timeline">${started}${ms.map(item).join('')}</ol>
     ${canWrite ? `<form class="ib-compose" id="ib-compose">
@@ -284,32 +299,24 @@ async function thread(panel, subject) {
   linkPdfs(panel, s);
 }
 
-// ── Review queue (reviewers and admins) ──
-async function queue(panel) {
-  const [pending, held, reports, feedback, msgs] = await Promise.all([s.pending(), s.heldComments(), s.reports(), s.feedbackList().catch(() => []), s.recentMessages()]);
+// ── To review: an overview, then the queue itself (reviewdesk.js) ──
+async function review(panel) {
+  const [held, reports, feedback, msgs] = await Promise.all([s.heldComments().catch(() => []), s.reports().catch(() => []),
+    s.feedbackList().catch(() => []), s.recentMessages()]);
   const fresh = feedback.filter((f) => f.status === 'new');
-  // conversations where the author spoke last
   const last = new Map();
   for (const m of msgs) if (!last.has(m.subject)) last.set(m.subject, m);
-  const waiting = [...last.values()].filter((m) => !m.team && m.kind === 'note');
-  const tile = (n, label, href, hot) => `<a class="ib-tile ${hot && n ? 'hot' : ''}" href="${href}"><b>${n}</b><span>${label}</span></a>`;
+  const waiting = [...last.values()].filter((m) => !m.team && m.kind === 'note');   // the author spoke last
+  const tile = (n, label, href) => `<a class="ib-tile ${n ? 'hot' : ''}" href="${href}"><b>${n}</b><span>${label}</span></a>`;
   panel.innerHTML = `<div class="ib-tiles">
-      ${tile(pending.length, plural(pending.length, 'post').replace(/^\d+ /, '') + ' to review', `${root}review/#submissions`, true)}
-      ${tile(waiting.length, 'waiting for a reply', '#threads', true)}
-      ${tile(held.length, plural(held.length, 'comment').replace(/^\d+ /, '') + ' to approve', `${root}review/#comments`, true)}
-      ${tile(reports.length, plural(reports.length, 'open report').replace(/^\d+ /, ''), `${root}review/#reports`, true)}
-      ${tile(fresh.length, 'new feedback', `${root}review/#feedback`, false)}</div>
-    <section class="ib-sec"><h2>Waiting for a reply</h2>
-      ${waiting.length ? `<ul class="ib-threads">${waiting.map((m) => `<li><a class="ib-thread waiting" href="${threadHref(m.subject)}">
-          <span class="ib-t-last"><b>${esc(m.author)}</b>: ${esc(m.body.slice(0, 140))}</span><span class="meta">${ago(m.created_at)}</span></a></li>`).join('')}</ul>`
-        : '<p class="meta">Nobody is waiting on the review team.</p>'}</section>
-    <section class="ib-sec"><h2>Posts to review</h2>
-      ${pending.length ? `<ul class="ib-list">${pending.map((x) => `<li><span class="tag">${esc(what(x))}</span>
-          <a href="${placeOf(x, cname)[1]}">${esc(placeOf(x, cname)[0])}</a><span class="ib-snip">${esc(summary(x).slice(0, 90))}</span>
-          <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span>
-          <a href="${threadHref('submission:' + x.id)}">Conversation</a></li>`).join('')}</ul>
-          <p><a class="btn small" href="${root}review/">Open the review desk</a></p>`
-        : '<p class="meta">Nothing waiting. Nice.</p>'}</section>`;
+      ${tile(waiting.length, 'waiting for a reply', '#threads')}
+      ${tile(held.length, `comment${held.length === 1 ? '' : 's'} to approve`, '#comments')}
+      ${tile(reports.length, `open report${reports.length === 1 ? '' : 's'}`, '#reports')}
+      ${tile(fresh.length, 'new feedback', '#feedback')}</div>
+    ${waiting.length ? `<section class="ib-sec"><h2>Waiting for a reply</h2><ul class="ib-threads">${waiting.map((m) => `<li><a class="ib-thread waiting" href="${threadHref(m.subject)}">
+        <span class="ib-t-last"><b>${esc(m.author)}</b>: ${esc(m.body.slice(0, 140))}</span><span class="meta">${ago(m.created_at)}</span></a></li>`).join('')}</ul></section>` : ''}
+    <h2 class="db-h">Posts waiting for review</h2><div id="db-desk"><div class="meta">Loading…</div></div>`;
+  await deskTab($('#db-desk', panel), s, 'submissions', () => { refreshTeamCounts(); return route(); });
 }
 
 // ── People (admins) ──
@@ -365,24 +372,28 @@ async function person(panel, uid) {
 async function route() {
   const me = s.user();
   if (!me) {
-    app.innerHTML = `<div class="empty"><p>Your Inbox has everything about your work on Wilkipedia: what’s published, what a reviewer said, replies to your comments and what happened to your feedback.</p>
+    app.innerHTML = `<div class="empty"><p>Your Dashboard has everything about your work on Wilkipedia: what’s published, what a reviewer said, replies to your comments and what happened to your feedback.</p>
       <p><button class="btn js-signin">Sign in</button></p></div>`;
     return;
   }
-  let h = location.hash.slice(1) || 'updates';
+  let h = decodeURIComponent(location.hash.slice(1)) || 'updates';
+  h = { queue: 'review', submissions: 'review', notifications: 'updates' }[h] || h;          // older addresses
   const edit = /^edit-(\d+)$/.exec(h);
   if (edit) { history.replaceState(null, '', '#work'); h = 'work'; }
-  const [tab, arg] = h.startsWith('thread/') ? ['threads', h.slice(7)] : h.startsWith('person/') ? ['people', h.slice(7)] : [h, null];
-  const allowed = TABS().map(([k]) => k);
+  const [tab, arg] = h.startsWith('thread/') ? ['threads', h.slice(7)] : h.startsWith('person/') ? ['people', h.slice(7)]
+    : h === 'published-off' ? ['published', 'off'] : [h, null];
+  const allowed = SECTIONS().flatMap(([, items]) => items.map(([k]) => k));
   const active = allowed.includes(tab) ? tab : 'updates';
-  if (!$('.ib-tabs', app) || app.dataset.role !== me.role) { app.innerHTML = frame(active); app.dataset.role = me.role; }
-  $$('[data-tab]', app).forEach((a) => a.setAttribute('aria-selected', String(a.dataset.tab === active)));
+  if (!$('.db-nav', app) || app.dataset.role !== me.role) { app.innerHTML = frame(); app.dataset.role = me.role; refreshTeamCounts(); }
+  $$('[data-tab]', app).forEach((a) => (a.dataset.tab === active ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   const panel = $('#ib-panel', app);
   panel.onclick = panel.onchange = null;
   panel.innerHTML = '<div class="meta">Loading…</div>';
   refreshCount();
-  const run = { updates: () => updates(panel), work: () => work(panel), queue: () => queue(panel),
-    threads: () => (arg ? thread(panel, arg) : threads(panel)), people: () => (arg ? person(panel, arg) : people(panel)) }[active];
+  const redraw = () => { refreshTeamCounts(); return route(); };
+  const run = { updates: () => updates(panel), work: () => work(panel), review: () => review(panel),
+    threads: () => (arg ? thread(panel, arg) : threads(panel)), people: () => (arg ? person(panel, arg) : people(panel)) }[active]
+    || (() => deskTab(panel, s, DESK[active], redraw));
   await guard(run);
   if (edit) {                                                         // "Make changes" from the home page
     const x = (await s.mySubmissions()).find((y) => String(y.id) === edit[1]);

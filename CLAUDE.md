@@ -920,19 +920,31 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   is resubmitted or withdrawn) and unread notifications. Its "Make changes"
   button links to `account/#edit-<id>`, which opens that submission's editor.
   No email notifications, by decision (2026-09-27): authors are told on-site only.
-- **The Inbox** (`inbox/`, `inbox.js`, migration 017, 2026-09-28). This is the one place for
-  everything around your work (Ethan: 集成化, like Bilibili's message centre but not chat-style).
-  The header has a bell with the unread count; the count used to sit on the avatar. The home
-  "For you" card and Settings link here. The account page keeps only an Inbox card, and old
-  `account/#notifications|#my-subs|#edit-<id>` links redirect here.
-  - Tabs, by role:
-    - Updates (everyone): notifications by day, with filters and per-item/all read.
-    - My work (everyone): posts with a Sent in → In review → Published track, sorted so
-      "Needs you" comes first, plus your comments, feedback and reports with their state.
-    - Conversations (everyone).
-    - Review queue (reviewers and admins): counts, and threads whose author spoke last.
-    - People (admins): every member, their whole history, and their role via `set_role()`.
-      Admins can never change their own role.
+- **The Dashboard** (`dashboard/`, `dashboard.js` + `reviewdesk.js`, migration 017,
+  2026-09-28/29). This is the one place for everything around your work (Ethan: 集成化, like
+  Bilibili's message centre but not chat-style). It began as the Inbox, then took in the
+  review desk, and was renamed because it does more than notifications.
+  - Old addresses: `/inbox/` and `/review/` are tiny redirect pages (build.py) that keep the
+    `#…` part. Notification links stored in the database still say `inbox/…` and `review/`,
+    so keep those redirects.
+  - Layout: a side menu grouped You / Review / Site, with counts. On phones it becomes a
+    scrolling strip.
+    - Review group (reviewers and admins): To review (overview tiles, "waiting for a reply",
+      then the queue), Comments, Reports, Feedback, Published.
+    - Site group: Announcements and Bounties (admins edit, reviewers see), People (admins).
+    - `reviewdesk.js` is the old review page as a module: `deskTab(panel, store, name,
+      again)` draws one section and wires its buttons on that panel.
+  - The header has a bell with the unread count; the count used to sit on the avatar. The
+    "Review" header link goes to `dashboard/#review`. The home "For you" card and Settings link
+    here. The account page keeps only a Dashboard card, and old
+    `account/#notifications|#my-subs|#edit-<id>` links redirect here.
+  - You group (everyone):
+    - Updates: notifications by day, with filters and per-item/all read.
+    - My work: posts with a Sent in → In review → Published track, sorted so "Needs you" comes
+      first, plus your comments, feedback and reports with their state.
+    - Conversations.
+  - People (admins): every member, their whole history, and their role via `set_role()`.
+    Admins can never change their own role.
   - Conversations: table `messages`, one thread per subject (`submission:<id>`,
     `feedback:<id>`, `report:<id>`). Only the sender and the review team can read it (the
     whole team sees every thread), and people can write only `kind='note'`.
@@ -983,7 +995,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     "live version" for guides). `form.files()` + `withUploads()` upload on submit
     (submit page and `openEditor`). `linkPdfs(el)` turns `<a data-pdf>` into
     six-hour signed links. It's used on class pages (the card opens the PDF, with
-    "Live version ↗"), the review desk and the editor.
+    "Live version ↗"), Dashboard → To review and the editor.
   - Guides shared as links before this keep their link and need no PDF, even when
     edited (`legacyLink`). Supabase's free plan has about 1 GB of storage and a
     monthly download limit. Watch Usage, and move files to Cloudflare R2 if it

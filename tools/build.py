@@ -39,7 +39,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides", "numbers",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "terms", "map",
-                  "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar", "inbox"]
+                  "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar", "inbox", "dashboard"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -626,7 +626,7 @@ def build_static():
 </form>
 <div id="done" class="done" hidden>
   <h2>Submitted. Thank you!</h2>
-  <p>A reviewer will look at it soon. Track it in your <a href="../inbox/#work">Inbox</a>. If they ask for changes, you’ll get a notification and can reply to them there.</p>
+  <p>A reviewer will look at it soon. Track it in your <a href="../dashboard/#work">Dashboard</a>. If they ask for changes, you’ll get a notification and can reply to them there.</p>
   <p><button class="btn" id="again">Add something else</button> <span id="done-course"></span></p>
 </div>
 <article class="nb-card dark nb-contrib">
@@ -634,11 +634,6 @@ def build_static():
   <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects. Click a grey dot to see a class nobody has written up yet.</p>
   <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
 </article>""", script="submit.js")
-
-    page("review/", "Review", """
-<h1>Review</h1>
-<div class="chips tabs"><button class="chip" data-tab="submissions">Submissions</button><button class="chip" data-tab="published">Published</button><button class="chip" data-tab="comments">Comments</button><button class="chip" data-tab="reports">Reports</button><button class="chip" data-tab="bounties">Bounties</button><button class="chip" data-tab="feedback">Feedback</button><button class="chip" data-tab="announcements">Announcements</button></div>
-<div id="panel"></div>""", script="review.js")
 
     page("leaderboard/", "Leaderboard", """
 <h1>Leaderboard</h1>
@@ -663,10 +658,20 @@ def build_static():
 <p><a class="btn ghost" href="../submit/?kind=school_info">Add school info</a></p>""",
          active="school/", data={"page": "school"})
 
-    page("inbox/", "Inbox", """
-<h1>Inbox</h1>
+    page("dashboard/", "Dashboard", """
+<h1>Dashboard</h1>
 <p class="lede">Everything about your work on Wilkipedia in one place: what’s published, what a reviewer said, your conversations with the review team, and what happened to your comments, feedback and reports.</p>
-<div id="inbox-app" class="inbox-app"><div class="meta">Loading…</div></div>""", script="inbox.js")
+<div id="dash-app" class="inbox-app"><div class="meta">Loading…</div></div>""", script="dashboard.js")
+
+    # The Inbox and the review desk became the Dashboard. Old addresses (including links
+    # stored in notifications) forward there, keeping the part after # where it still means something.
+    for old, js in (("inbox", "location.hash"), ("review", "({submissions: '#review', '': '#review'})[location.hash.slice(1)] ?? location.hash")):
+        (ROOT / old).mkdir(exist_ok=True)
+        (ROOT / old / "index.html").write_text('<!doctype html><meta charset="utf-8"><title>Moved to the Dashboard</title>'
+            '<meta name="robots" content="noindex"><link rel="canonical" href="../dashboard/">'
+            f'<script>location.replace("../dashboard/" + ({js}))</script>'
+            '<noscript><meta http-equiv="refresh" content="0; url=../dashboard/"></noscript>'
+            '<p>This page moved to your <a href="../dashboard/">Dashboard</a>.</p>\n')
 
     page("account/", "Your account", """
 <h1>Your account</h1>
@@ -777,7 +782,7 @@ def build_static():
 <p>If you pick a language other than English (the 🌐 button), the page is translated by Google Translate: the page’s text is sent to Google to translate, and Google sets a cookie remembering your language. Choosing English turns this off.</p>
 <h2>What you post</h2>
 <p>Submissions are private until a reviewer approves them, and then they're public. Comments are public once they're visible. Reviewers can see pending submissions and held comments.</p>
-<p>Conversations in your Inbox (about something you sent in: a post, feedback or a report) are private between you and the review team. Every reviewer and admin can read them, so the team can answer together and keep them safe. There are no private messages between students.</p>
+<p>Conversations in your Dashboard (about something you sent in: a post, feedback or a report) are private between you and the review team. Every reviewer and admin can read them, so the team can answer together and keep them safe. There are no private messages between students.</p>
 <h2>Deleting your data</h2>
 <p>Ask a Wilkipedia admin to delete your account. We'll remove your account and your email address. Pages you helped write stay on the site, credited to "Former student". If you'd rather your submissions and comments be removed too, say so and we'll delete them.</p>
 <p>School accounts are usually closed after graduation. Your work stays on Wilkipedia afterwards.</p>
@@ -873,7 +878,7 @@ def build_static():
   <p id="fb-error" class="error" hidden></p>
   <button class="btn big">Send feedback</button>
 </form>
-<div id="fb-done" class="done" hidden><h2>Thanks! We got it.</h2><p>The team reads every message on the review desk.</p>
+<div id="fb-done" class="done" hidden><h2>Thanks! We got it.</h2><p>The team reads every message. If you were signed in, you can follow what happens to it in your <a href="../dashboard/#work">Dashboard</a>.</p>
   <p><button type="button" class="btn ghost" id="fb-again">Send another</button></p></div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
 
@@ -979,7 +984,7 @@ SEARCH_PAGES = [
     ("Leaderboard", "leaderboard/", "Top contributors", "leaderboard points top"),
     ("Teachers", "teachers/", "Every teacher", "teachers staff"),
     ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
-    ("Inbox", "inbox/", "Notifications, your work, conversations", "inbox notifications messages my work posts submissions status reviewer reply conversation"),
+    ("Dashboard", "dashboard/", "Notifications, your work, conversations, reviewing", "dashboard inbox notifications messages my work posts submissions status review reviewer reply conversation"),
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
     ("Privacy", "privacy/", "What we store", "privacy data delete account cookies tracking"),
     ("Terms of Service", "terms/", "The deal for using Wilkipedia", "terms of service tos agreement conditions legal sign up rules"),
@@ -1036,7 +1041,7 @@ def build_seo(courses, teachers, depts):
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")
-    (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /review/\nDisallow: /account/\nDisallow: /inbox/\nDisallow: /submit/\nSitemap: {base}/sitemap.xml\n")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /review/\nDisallow: /account/\nDisallow: /inbox/\nDisallow: /dashboard/\nDisallow: /submit/\nSitemap: {base}/sitemap.xml\n")
 
 
 CAMPUS = ROOT / "campus"

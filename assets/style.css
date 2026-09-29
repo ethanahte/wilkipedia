@@ -1941,3 +1941,26 @@ a.ib-tile:hover { border-color: var(--gold); }
   .ib-card-h .meta { margin-left: 0; width: 100%; }
 }
 .ib-people select { width: auto; min-width: 150px; margin-left: auto; }
+/* Dashboard: a grouped side menu (You / Review / Site) beside the panel; a scrolling strip on phones */
+.db-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; }
+.db-side { position: sticky; top: 84px; display: grid; gap: 14px; }
+.db-nav { display: grid; gap: 14px; }
+.db-group { display: grid; gap: 2px; }
+.db-gh { font: 600 .72rem/1 var(--sans, inherit); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 10px 4px; }
+.db-nav a { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-weight: 500; }
+.db-nav a:hover { background: var(--card); }
+.db-nav a[aria-current="page"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--gold); font-weight: 650; }
+.db-nav .ib-n { margin-left: auto; }
+.db-layout .ib-panel { padding-top: 0; }
+.db-h { margin: 26px 0 10px; }
+.r-talk { margin-left: 8px; font-size: .85rem; }
+@media (max-width: 800px) {
+  .db-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .db-side { position: static; }
+  .db-side .ib-me { display: none; }
+  .db-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .db-group { display: flex; gap: 2px; align-items: center; }
+  .db-gh { display: none; }
+  .db-group + .db-group { border-left: 1px solid var(--rule); padding-left: 6px; }
+  .db-nav a { white-space: nowrap; padding: 7px 10px; }
+}

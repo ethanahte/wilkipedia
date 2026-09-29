@@ -88,13 +88,13 @@ export const AVATAR_COLORS = {
 // Accepts a User ({avatar, color, name}) or a row ({avatar, color, author}).
 // An icon carries both looks: the one-line drawing (default) and the emoji, and
 // html[data-avatars] (Settings → Appearance) decides which one shows.
-// The red count on the header's Inbox bell (0 hides it)
+// The red count on the header's Dashboard bell (0 hides it)
 export function setNoteCount(n) {
   const b = $('.auth .bell-n'), bell = $('.auth .inbox-btn');
   if (!b) return;
   b.hidden = !n;
   b.textContent = n > 9 ? '9+' : n || '';
-  bell.title = n ? `Inbox · ${n} new` : 'Inbox';
+  bell.title = n ? `Dashboard · ${n} new` : 'Dashboard';
   bell.setAttribute('aria-label', bell.title);
 }
 
@@ -432,13 +432,13 @@ export async function initHeader() {
     if (u) applyClassTheme(u);
     if (slot) {
       slot.innerHTML = u
-        ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}review/" class="nav-review">Review</a>` : ''}
-           <a href="${root}inbox/" class="icon-btn inbox-btn" title="Inbox" aria-label="Inbox"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="who-n bell-n" hidden></span></a>
+        ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}dashboard/#review" class="nav-review">Review</a>` : ''}
+           <a href="${root}dashboard/" class="icon-btn inbox-btn" title="Dashboard" aria-label="Dashboard"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="who-n bell-n" hidden></span></a>
            <a href="${root}account/" class="who" title="Your account"><span class="who-av">${avatarHtml(u)}</span><span class="who-name">${esc(u.name)}</span></a>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
     }
-    // Unread notifications show as a red count on the Inbox bell next to your picture.
+    // Unread notifications show as a red count on the Dashboard bell next to your picture.
     if (u && s.unreadCount) s.unreadCount().then(setNoteCount).catch(() => {});
     // The bounty board belongs to the review team: its button only appears for them.
     const team = !!u && REVIEWER_ROLES.includes(u.role);
@@ -463,7 +463,7 @@ export async function initHeader() {
 // ── announcement bar ──
 // Live announcements sit under the header on every page. Closing one hides it
 // in this browser only (a per-reader convenience); admins manage them on
-// Review → Announcements.
+// Dashboard → Announcements.
 const DISMISSED = 'wilkipedia-dismissed-announcements';
 const dismissed = () => { try { return JSON.parse(localStorage.getItem(DISMISSED)) || []; } catch { return []; } };
 export const ANNOUNCE_KINDS = { school: 'School news', site: 'Wilkipedia' };

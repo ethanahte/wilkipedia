@@ -1,17 +1,26 @@
-// The reviewer desk: pending submissions, held comments, reports, and posting
-// bounties. The page is visible to anyone, but the database only answers these
-// queries for reviewers (see is_reviewer() in supabase/schema.sql).
+// The review desk, as sections of the Dashboard (dashboard.js calls deskTab): posts waiting
+// for review, published work, held comments, reports, feedback, announcements and bounties.
+// The database only answers these queries for reviewers (see is_reviewer() in schema.sql).
 
-import { initHeader, courses, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
+import { courses, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
-import { REVIEWER_ROLES } from './store.js';
 
-const s = await initHeader();
-const data = await courses();
-const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
+let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
 const courseName = (slug) => bySlug[slug]?.name || slug || 'School-wide';
-let tab = (location.hash.slice(1) || 'submissions').replace('published-off', 'published');
-window.addEventListener('hashchange', () => { tab = location.hash.slice(1).replace('published-off', 'published') || 'submissions'; draw(); });
+
+// Draw one desk section into `panel`. `again` redraws it (after an action).
+export async function deskTab(panel, store, name, again) {
+  s = store; tab = name; panelEl = panel; redraw = again;
+  if (!data) { data = await courses(); bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c])); }
+  panel.innerHTML = await guard(() => (tabs[name] || tabs.submissions)()) || '';
+  linkPdfs(panel, s);
+  wireAnnounceForm();
+  $('#pub-q', panel)?.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    $$('.pub-row', panel).forEach((r) => (r.hidden = q && !r.dataset.hay.includes(q)));
+  });
+  panel.onclick = onClick;
+}
 
 // `before`: the live version an author's update would replace. Changed fields are
 // marked, with what's live now underneath.
@@ -43,7 +52,8 @@ const tabs = {
           ${(([w, h]) => `<a href="${h}" target="_blank">${esc(w)}</a>`)(placeOf(x, Object.fromEntries(data.courses.map((c) => [c.slug, c.name]))))}
           ${x.teacher ? ` · ${esc(x.teacher)}` : ''}
           ${x.bounty_id ? ` · <span class="tag">${esc(x.bounty_id)}</span>` : ''}
-          <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span></div>
+          <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.created_at)}</span>
+          <a class="r-talk" href="#thread/submission:${x.id}">Conversation</a></div>
         ${x.replaces ? `<p class="upd-note"><span class="tag st-changes">Update to live work</span> ${x.original?.status === 'approved'
           ? 'The author wants to change something already on the site. Approving replaces the live version; it stays up until then.'
           : 'The live version it was meant to update has been unpublished, so approving publishes this on its own.'}</p>` : ''}
@@ -167,22 +177,6 @@ const tabs = {
   },
 };
 
-async function draw() {
-  const me = s.user();
-  $$('[data-tab]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tab === tab));
-  if (!me || !REVIEWER_ROLES.includes(me.role)) {
-    $('#panel').innerHTML = `<div class="empty">This page is for reviewers. ${me ? 'Your account isn’t a reviewer yet.' : 'Sign in first.'}</div>`;
-    return;
-  }
-  $('#panel').innerHTML = await guard(() => (tabs[tab] || tabs.submissions)()) || '';
-  linkPdfs($('#panel'), s);
-  wireAnnounceForm();
-  $('#pub-q')?.addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    document.querySelectorAll('.pub-row').forEach((r) => (r.hidden = q && !r.dataset.hay.includes(q)));
-  });
-}
-
 let annList = [];
 function wireAnnounceForm() {
   const f = $('#ann-form');
@@ -190,7 +184,7 @@ function wireAnnounceForm() {
   s.allAnnouncements().then((l) => { annList = l; }).catch(() => {});
   const count = () => { $('#an-count').textContent = `${f.message.value.length} / 280`; };
   f.message.addEventListener('input', count);
-  $('#an-cancel').addEventListener('click', () => draw());
+  $('#an-cancel').addEventListener('click', () => redraw());
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const link = f.link.value.trim();
@@ -200,11 +194,11 @@ function wireAnnounceForm() {
     const ok = f.id.value
       ? await guard(() => s.updateAnnouncement(Number(f.id.value), fields), 'Announcement saved.')
       : await guard(() => s.postAnnouncement(fields), 'Announcement posted. It’s live now.');
-    if (ok) { await draw(); paintAnnouncements(s); }
+    if (ok) { await redraw(); paintAnnouncements(s); }
   });
 }
 
-document.addEventListener('click', async (e) => {
+async function onClick(e) {
   const t = e.target.closest('button');
   if (!t) return;
   const ac = t.closest('[data-aid]');
@@ -221,11 +215,10 @@ document.addEventListener('click', async (e) => {
     }
     if ('atoggle' in t.dataset && a) { await guard(() => s.updateAnnouncement(aid, { active: !a.active }), a.active ? 'Hidden from the site.' : 'Showing again.'); }
     if ('adel' in t.dataset) { if (!confirm('Delete this announcement for good?')) return; await guard(() => s.deleteAnnouncement(aid), 'Deleted.'); }
-    await draw(); paintAnnouncements(s); return;
+    await redraw(); paintAnnouncements(s); return;
   }
-  if (t.dataset.tab) { tab = t.dataset.tab; history.replaceState(null, '', '#' + tab); return draw(); }
   const card = t.closest('[data-id]');
-  if ('editpub' in t.dataset && card) { openEditor(s, pubList.find((x) => String(x.id) === card.dataset.id), draw); return; }
+  if ('editpub' in t.dataset && card) { openEditor(s, pubList.find((x) => String(x.id) === card.dataset.id), redraw); return; }
   if (t.dataset.act && card) {
     let note = null;
     if (t.dataset.act !== 'approved') {
@@ -235,35 +228,30 @@ document.addEventListener('click', async (e) => {
     }
     await guard(() => s.review(Number(card.dataset.id), t.dataset.act, note),
                 t.dataset.act === 'approved' ? 'Published.' : tab === 'published' ? 'Unpublished.' : 'Sent back with your note.');
-    return draw();
+    return redraw();
   }
   const cc = t.closest('[data-cid]');
   if (t.dataset.cact && cc) {
     const id = Number(cc.dataset.cid);
     if (t.dataset.cact === 'delete' && !confirm('Delete this comment for good?')) return;
     await guard(() => (t.dataset.cact === 'delete' ? s.deleteComment(id) : s.moderateComment(id, 'visible')));
-    return draw();
+    return redraw();
   }
   const fc = t.closest('[data-fid]');
-  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus)); return draw(); }
-  if (fc && 'fdel' in t.dataset) { if (!confirm('Delete this feedback?')) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return draw(); }
-  if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return draw(); }
+  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus)); return redraw(); }
+  if (fc && 'fdel' in t.dataset) { if (!confirm('Delete this feedback?')) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return redraw(); }
+  if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return redraw(); }
   if (t.dataset.tobounty) {
     const r = (await s.reports()).find((x) => String(x.id) === t.dataset.tobounty);
     // a new bounty, pre-filled from the report (id stays empty for the admin to pick)
-    openBountyEditor(s, null, data.courses, draw);
+    openBountyEditor(s, null, data.courses, redraw);
     const f = $('#bounty-form');
     f.track.value = 'Fix outdated'; f.size.value = 'S'; f.title.value = 'Update outdated info';
     if (r?.course_slug) f.course.value = data.courses.find((c) => c.slug === r.course_slug)?.name || '';
     if (r?.note) f.done_means.value = `Check and update: ${r.note}`;
     return;
   }
-  if ('newbounty' in t.dataset) { openBountyEditor(s, null, data.courses, draw); return; }
-  if (t.dataset.editb) { const b = (await s.bounties()).find((x) => x.id === t.dataset.editb); openBountyEditor(s, b, data.courses, draw); return; }
-  if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to)); return draw(); }
-});
-
-
-
-s.onAuth(draw);
-draw();
+  if ('newbounty' in t.dataset) { openBountyEditor(s, null, data.courses, redraw); return; }
+  if (t.dataset.editb) { const b = (await s.bounties()).find((x) => x.id === t.dataset.editb); openBountyEditor(s, b, data.courses, redraw); return; }
+  if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to)); return redraw(); }
+}

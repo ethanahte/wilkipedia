@@ -27,7 +27,7 @@ const STEPS = (name) => [
   { sel: ['#contribute-fab'], title: 'Contribute',
     text: 'Know something about a class? Add info, a tip or a study guide. Reviewers check it, and you earn points on the Leaderboard.' },
   { sel: ['#bounty-tab'], title: 'Bounties', text: 'Pages that still need writing. Claim one and write it up.' },
-  { sel: ['.nav-review'], title: 'Review desk', text: 'Check what students send in before it’s published.' },
+  { sel: ['.nav-review'], title: 'Review', text: 'Check what students send in before it’s published. It opens the review part of your Dashboard.' },
   { sel: ['.auth .who'], title: 'Your account', text: 'Change your name, pick a picture, set your class year and see your notifications.' },
   { title: 'That’s it!', text: 'You can take this tour again any time from Settings. Thanks for helping build Wilkipedia.', next: 'Done' },
 ];
