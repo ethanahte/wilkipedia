@@ -366,6 +366,31 @@ export const lessMotion = () => {
 // `from` (optional): the button that was clicked. The new theme then grows out
 // of it in a circle (View Transitions). Browsers without it, and readers who ask
 // for reduced motion, get the instant switch.
+//
+// Clicking again before a circle finishes (Ethan: "波纹 when you click fast") starts a new one
+// straight away without the old one snapping to the end. A new transition always begins from the
+// last whole theme, so its clip starts as exactly what was on screen: every band the old circle
+// had drawn stays put, and the new circle grows from the centre across them, like ripples in water.
+// The screen is described by distance from the centre: `bands` are the radii where the theme flips
+// and `outer` says whether the far corners already show the new theme.
+const RIPPLE_MS = 650;
+const rippleEase = (t) => 1 - Math.pow(1 - t, 3);
+let ripple = null;                    // { x, y, R, t0, bands, outer } while a circle is growing
+let vtCount = 0;
+function rippleClip({ x, y }, bands, outer) {
+  const W = innerWidth, H = innerHeight;
+  const circle = (r) => `M${x - r} ${y}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+  const d = (outer ? `M-1 -1H${W + 1}V${H + 1}H-1Z` : '') + bands.filter((r) => r > 0).map(circle).join('');
+  return `path(evenodd, '${d || 'M0 0Z'}')`;
+}
+// the region inside radius r, joined with a fixed region {bands, outer}
+function withDisc(r, bands, outer) {
+  const out = bands.filter((b) => b > r);
+  // inside the disc everything is the new theme; just past it, the fixed region decides
+  const insideJustPast = outer !== (out.length % 2 === 1);
+  if (!insideJustPast) out.unshift(r);
+  return { bands: out, outer };
+}
 export function setThemePref(pref, from) {
   try { pref === 'system' ? localStorage.removeItem(THEME_KEY) : localStorage.setItem(THEME_KEY, pref); }
   catch { /* storage blocked: still applies for this page */ }
@@ -374,17 +399,35 @@ export function setThemePref(pref, from) {
     else document.documentElement.dataset.theme = pref;
     paintThemeToggle();
   };
-  if (!from || !document.startViewTransition || lessMotion()) return apply();
+  if (!from || !document.startViewTransition || lessMotion()) { ripple = null; return apply(); }
+  const now = performance.now();
   const r = from.getBoundingClientRect();
-  const x = r.left + r.width / 2, y = r.top + r.height / 2;
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const W = innerWidth, H = innerHeight;
+  let x = r.left + r.width / 2, y = r.top + r.height / 2;
+  // what the new theme covers at the start: nothing, or (mid-ripple) everything the last one didn't
+  let fixed = { bands: [], outer: false };
+  if (ripple && now - ripple.t0 < RIPPLE_MS) {
+    ({ x, y } = ripple);                                   // keep one centre so the rings stay concentric
+    const shown = withDisc(rippleEase((now - ripple.t0) / RIPPLE_MS) * ripple.R, ripple.bands, ripple.outer);
+    fixed = { bands: shown.bands, outer: !shown.outer };
+  }
+  const R = Math.hypot(Math.max(x, W - x), Math.max(y, H - y)) + 2;
+  const me = ripple = { x, y, R, t0: now, bands: fixed.bands, outer: fixed.outer };
+  const frames = Array.from({ length: 49 }, (_, i) => {
+    const k = withDisc(rippleEase(i / 48) * R, fixed.bands, fixed.outer);
+    return { clipPath: rippleClip(me, k.bands, k.outer) };
+  });
+  frames[frames.length - 1] = { clipPath: 'none' };
   document.documentElement.classList.add('theme-vt');
+  vtCount++;
   const t = document.startViewTransition(apply);
-  t.finished.finally(() => document.documentElement.classList.remove('theme-vt'));
+  t.finished.finally(() => {
+    if (--vtCount === 0) document.documentElement.classList.remove('theme-vt');
+    if (ripple === me) ripple = null;
+  });
   t.ready.then(() => {
-    document.documentElement.animate(
-      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-      { duration: 650, easing: 'cubic-bezier(.4, 0, .2, 1)', pseudoElement: '::view-transition-new(root)' });
+    document.documentElement.animate(frames,
+      { duration: RIPPLE_MS, easing: 'linear', pseudoElement: '::view-transition-new(root)' });
   }).catch(() => {});
 }
 const isDark = () => (document.documentElement.dataset.theme

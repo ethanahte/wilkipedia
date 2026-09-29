@@ -192,6 +192,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - **Page transitions**: `@view-transition` in style.css; ui.js names the
     clicked class name `class-title` in `pageswap` so it glides into the class
     page's h1. The theme circle reveal is scoped to `html.theme-vt`.
+    Clicking night/day again mid-circle starts a new circle at once (Ethan: 波纹): the new
+    transition's clip begins as exactly what was on screen (`bands`/`outer` in `setThemePref`,
+    radii from the first click's centre) and a new disc grows across the old rings, so nothing
+    snaps. The clip is a 49-keyframe `path(evenodd, …)`, one per ~13 ms.
   - One signature moment only (the map). Don't add competing spectacle.
 - **Clubs and sports** (`activities()` in pages.js): official list plus
   student info merged by name, as before. Clubs open with a field: one dot per
