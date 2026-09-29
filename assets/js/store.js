@@ -197,7 +197,8 @@ async function live() {
     },
     async approved({ course_slug, kind } = {}) {
       let q = sb.from('submissions').select(SUB).eq('status', 'approved');
-      if (course_slug) q = q.eq('course_slug', course_slug);
+      // a class's own work, plus guides shared into it from another class (payload.also)
+      if (course_slug) q = q.or(`course_slug.eq.${course_slug},payload->also.cs.["${course_slug}"]`);
       if (kind) q = q.eq('kind', kind);
       return ok(await q.order('reviewed_at', { ascending: false })).map(withAuthor);
     },
@@ -206,8 +207,8 @@ async function live() {
         .order('reviewed_at', { ascending: false }).limit(limit)).map(withAuthor);
     },
     async contentIndex() {
-      const rows = ok(await sb.from('submissions').select('course_slug').eq('status', 'approved'));
-      return new Set(rows.map((r) => r.course_slug).filter(Boolean));
+      const rows = ok(await sb.from('submissions').select('course_slug, also:payload->also').eq('status', 'approved'));
+      return new Set(rows.flatMap((r) => [r.course_slug, ...(Array.isArray(r.also) ? r.also : [])]).filter(Boolean));
     },
     async pending() {
       const list = ok(await sb.from('submissions').select(SUB).eq('status', 'pending')
@@ -449,15 +450,15 @@ async function demo() {
     },
     async approved({ course_slug, kind } = {}) {
       return db.submissions.filter((s) => s.status === 'approved'
-        && (!course_slug || s.course_slug === course_slug) && (!kind || s.kind === kind))
+        && (!course_slug || s.course_slug === course_slug || (s.payload?.also || []).includes(course_slug)) && (!kind || s.kind === kind))
         .sort(byReviewed).map(sub);
     },
     async recent(limit = 6) {
       return db.submissions.filter((s) => s.status === 'approved').sort(byReviewed).slice(0, limit).map(sub);
     },
     async contentIndex() {
-      return new Set(db.submissions.filter((s) => s.status === 'approved' && s.course_slug)
-        .map((s) => s.course_slug));
+      return new Set(db.submissions.filter((s) => s.status === 'approved')
+        .flatMap((s) => [s.course_slug, ...(s.payload?.also || [])]).filter(Boolean));
     },
     async pending() {
       reviewer();

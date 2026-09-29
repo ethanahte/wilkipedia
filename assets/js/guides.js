@@ -1,102 +1,57 @@
 // Study guides as a graph, modelled on Obsidian's graph view: a force layout
-// drawn on a canvas, dark card, node size by links, titles that fade out as you
-// zoom out (the "text fade threshold"), hover to light a node and its
-// neighbours while the rest fades back, drag a node and its neighbours follow,
-// scroll to zoom toward the cursor. Every dot is a real record: a study guide
-// someone shared, or a class.
+// drawn on a canvas, dark card, titles that fade out as you zoom out (the "text
+// fade threshold"), hover to light a dot and its neighbours while the rest fades
+// back, drag a dot and its neighbours follow, scroll to zoom toward the cursor.
 //
-// How dots connect:
-//   guide → its class      the class works like an Obsidian folder/tag hub
-//   guide ↔ guide          they share meaningful words in their titles or
-//                          "what it's good for" notes (see keywords())
-//   class ↔ class          a prerequisite link from the course catalog
-//                          (data/pathways.json, same as the home page map)
+// One kind of link only: hubs (Ethan). Three sizes of dot:
+//   subject area (Math, English, Science…)  the biggest hubs
+//   class (AP Biology, English 9…)          linked to its subject area
+//   study guide or resource                 linked to every class it's for
+// A guide shared across classes (payload.also) links to each, so it sits between them.
 // Classes with no guides yet are dim, like Obsidian's unresolved notes.
 
-import { initHeader, $, esc, courses, dataUrl, courseUrl, safeUrl, root, lessMotion } from './ui.js';
+import { initHeader, $, esc, courses, courseUrl, safeUrl, root, lessMotion } from './ui.js';
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
-const C = { bg: '#1e1e1e', node: '#a8a8a8', guide: '#dcddde', hub: '#dcddde', empty: '#4a4a4a', line: '#3f3f3f', accent: '#f5c400', text: '#dcddde' };
+const C = { bg: '#1e1e1e', node: '#a8a8a8', guide: '#dcddde', subject: '#c9a227', empty: '#4a4a4a', line: '#3f3f3f', accent: '#f5c400', text: '#dcddde' };
 
-// Words that say nothing about the topic (so they never create a link)
-const STOP = new Set(`a an the and or of for to in on at by with from into over under about as is are was were be been it its this that these those
-  you your we our they their i me my he she his her them us all any each every both more most other some such no not only own same so than too very can will just
-  also there here what which who whom when where why how do does did done doing have has had having make made makes using use used
-  study guide guides notes note review reviews reviewing practice test tests quiz quizzes exam exams final finals midterm unit units chapter chapters ch sec section sections
-  part parts sheet sheets packet answer answers key keys flashcard flashcards quizlet video videos lesson lessons class classes course ap honors semester
-  worksheet worksheets summary outline prep complete full best good great help helps helpful covers cover covering includes including everything things thing
-  interactive built slides slide warm warmups warm-ups problems problem example examples question questions hidden labeled textbook lecture lectures data set sets
-  same numbers line up come comes which usually hardest facts one two three four five first second new way`.split(/\s+/));
-const stem = (w) => w.replace(/ies$/, 'y').replace(/(?<=[a-z]{3})s$/, '');
-function keywords(text) {
-  const out = new Set();
-  const t = String(text || '').toLowerCase();
-  for (const m of t.matchAll(/\b(?:unit|chapter|ch|section|sec)\.?\s*(\d+[a-z]?)/g)) out.add(`#${m[1]}`);   // "Ch. 6", "Unit 2"
-  for (const w of t.replace(/[’']/g, '').split(/[^a-z0-9]+/)) {
-    if (w.length < 3 || /^\d/.test(w) || STOP.has(w)) continue;
-    const st = stem(w);
-    if (!STOP.has(st)) out.add(st);
-  }
-  return out;
-}
-
-const [data, pw, guides] = await Promise.all([courses(), fetch(dataUrl('data/pathways.json')).then((r) => r.json()).catch(() => ({ edges: [] })),
-                                              s.approved({ kind: 'resource' }).catch(() => [])]);
+const [data, guides] = await Promise.all([courses(), s.approved({ kind: 'resource' }).catch(() => [])]);
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
 const dept = Object.fromEntries(data.departments.map((d) => [d.slug, d.name]));
+const classesOf = (g) => [...new Set([g.course_slug, ...(g.payload.also || [])])].filter((x) => bySlug[x]);
+// Uploaded study guides open through short-lived links, fetched once for the page
+const pdfLinks = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
+const openUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] : null) || safeUrl(g.payload.url);
 
-let opts = { orphans: true, prereq: true, words: true, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08 };
+let opts = { orphans: false, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08 };
 try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
 const save = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 
 // ── build the graph ──
 function graph(filter = '') {
   const q = filter.trim().toLowerCase();
-  const G = guides.map((g) => ({ ...g, words: keywords(g.payload.title), note: keywords(g.payload.note),
-                                 hit: !q || `${g.payload.title} ${g.payload.note || ''} ${bySlug[g.course_slug]?.name || ''}`.toLowerCase().includes(q) }));
-  const withGuides = new Set(G.map((g) => g.course_slug));
-  const prereqLinks = pw.edges.filter((e) => !e.kind && bySlug[e.from] && bySlug[e.to]);   // catalog prerequisites only, not the grade-order lines
-  const linked = new Set(prereqLinks.flatMap((e) => [e.from, e.to]));
+  const G = guides.map((g) => ({ ...g, classes: classesOf(g),
+    hit: !q || `${g.payload.title} ${g.payload.note || ''} ${classesOf(g).map((c) => `${bySlug[c].name} ${dept[bySlug[c].department] || ''}`).join(' ')}`.toLowerCase().includes(q) }));
+  const withGuides = new Set(G.flatMap((g) => g.classes));
   const nodes = [], links = [], deg = {};
-  const bump = (id) => { deg[id] = (deg[id] || 0) + 1; };
-
-  // classes (hubs); classes without guides are "unresolved": dim, hollow
-  for (const c of data.courses) {
-    if (!withGuides.has(c.slug) && !(opts.orphans && linked.has(c.slug))) continue;
-    nodes.push({ id: 'c:' + c.slug, kind: 'class', slug: c.slug, name: c.name, has: withGuides.has(c.slug),
-                 hit: !q || c.name.toLowerCase().includes(q) });
+  const link = (a, b, kind) => { links.push({ source: a, target: b, kind }); deg[a] = (deg[a] || 0) + 1; deg[b] = (deg[b] || 0) + 1; };
+  // classes (with guides, or all of them with "Classes without guides" on), each under its subject area
+  const cls = data.courses.filter((c) => withGuides.has(c.slug) || opts.orphans);
+  const subjects = new Set(cls.map((c) => c.department));
+  for (const d of data.departments) if (subjects.has(d.slug)) {
+    nodes.push({ id: 'd:' + d.slug, kind: 'subject', slug: d.slug, name: d.name, has: cls.some((c) => c.department === d.slug && withGuides.has(c.slug)),
+                 hit: !q || d.name.toLowerCase().includes(q) });
   }
-  const shown = new Set(nodes.map((n) => n.id));
-  if (opts.prereq) for (const e of prereqLinks) {
-    const a = 'c:' + e.from, b = 'c:' + e.to;
-    if (shown.has(a) && shown.has(b)) { links.push({ source: a, target: b, kind: 'prereq' }); bump(a); bump(b); }
+  for (const c of cls) {
+    nodes.push({ id: 'c:' + c.slug, kind: 'class', slug: c.slug, name: c.name, has: withGuides.has(c.slug),
+                 hit: !q || `${c.name} ${dept[c.department] || ''}`.toLowerCase().includes(q) });
+    link('c:' + c.slug, 'd:' + c.department, 'subject');
   }
   G.forEach((g, i) => {
-    const id = 'g:' + i;
-    nodes.push({ id, kind: 'guide', g, name: g.payload.title, hit: g.hit });
-    links.push({ source: id, target: 'c:' + g.course_slug, kind: 'class' }); bump(id); bump('c:' + g.course_slug);
+    nodes.push({ id: 'g:' + i, kind: 'guide', g, name: g.payload.title, hit: g.hit });
+    for (const c of g.classes) link('g:' + i, 'c:' + c, 'class');
   });
-  // guide ↔ guide: a shared title word counts 2, a shared note word 1; chapter
-  // numbers ("#6") only count inside the same class
-  if (opts.words) {
-    const cand = [];
-    for (let i = 0; i < G.length; i++) for (let j = i + 1; j < G.length; j++) {
-      const a = G[i], b = G[j], same = a.course_slug === b.course_slug, shared = new Set();
-      let score = 0;
-      for (const w of a.words) if (b.words.has(w) && (same || !w.startsWith('#'))) { score += 2; shared.add(w); }
-      for (const w of a.note) if ((b.note.has(w) || b.words.has(w)) && !shared.has(w) && (same || !w.startsWith('#'))) { score += 1; shared.add(w); }
-      for (const w of a.words) if (b.note.has(w) && !shared.has(w) && (same || !w.startsWith('#'))) { score += 1; shared.add(w); }
-      if (score >= 2) cand.push({ i, j, score, shared: [...shared].map((w) => (w.startsWith('#') ? `unit/ch. ${w.slice(1)}` : w)) });
-    }
-    const per = {};
-    cand.sort((x, y) => y.score - x.score).forEach((c) => {
-      if ((per[c.i] || 0) >= 6 || (per[c.j] || 0) >= 6) return;            // keep it a web, not a hairball
-      per[c.i] = (per[c.i] || 0) + 1; per[c.j] = (per[c.j] || 0) + 1;
-      links.push({ source: 'g:' + c.i, target: 'g:' + c.j, kind: 'words', shared: c.shared, score: c.score });
-      bump('g:' + c.i); bump('g:' + c.j);
-    });
-  }
   return { nodes, links, deg, G };
 }
 
@@ -114,9 +69,12 @@ const still = lessMotion();
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toWorld = (sx, sy) => [(sx - W / 2 - view.x) / view.k, (sy - H / 2 - view.y) / view.k];
 
+// Three sizes: subject areas biggest, then classes, then guides. Hubs grow a little with what hangs off them.
 function radius(n) {
   const d = current.deg[n.id] || 0;
-  return (n.kind === 'guide' ? 4.2 + Math.sqrt(d) * 1.9 : n.has ? 5 + Math.sqrt(d) * 1.7 : 2.6 + Math.sqrt(d) * 0.7) * opts.size;
+  return (n.kind === 'subject' ? 12 + Math.sqrt(d) * 1.6
+    : n.kind === 'class' ? (n.has ? 6.5 + Math.sqrt(d) * 1.2 : 3.2)
+    : 3.8 + Math.max(0, d - 1) * .8) * opts.size;                     // a guide shared across classes is a touch bigger
 }
 
 // Rebuild the nodes, keeping where every surviving dot already is
@@ -124,18 +82,31 @@ function load(replay) {
   current = graph($('#gv-q').value);
   const old = byId;
   byId = new Map(); nbr = new Map();
-  N = current.nodes.map((n, i) => {
-    const was = !replay && old.get(n.id);
-    const a = i * 2.39996, r = 14 * Math.sqrt(i + 1);              // a sunflower to start from
-    const o = { ...n, x: was ? was.x : Math.cos(a) * r, y: was ? was.y : Math.sin(a) * r, vx: 0, vy: 0, fx: null, fy: null };
+  // Start from the hierarchy: subjects round a circle, their classes round each subject,
+  // guides round their (first) class. The forces then only have to relax it.
+  const seed = new Map(), subs = current.nodes.filter((n) => n.kind === 'subject');
+  const R = subs.length < 2 ? 0 : 70 + 32 * subs.length;
+  subs.forEach((n, i) => { const a = i / subs.length * Math.PI * 2 - Math.PI / 2; seed.set(n.id, [Math.cos(a) * R, Math.sin(a) * R, a]); });
+  for (const d of subs) {
+    const cls = current.nodes.filter((n) => n.kind === 'class' && bySlug[n.slug].department === d.slug), [dx, dy, da] = seed.get(d.id);
+    cls.forEach((n, i) => { const a = da + (i - (cls.length - 1) / 2) * Math.min(.7, 2.6 / cls.length); seed.set(n.id, [dx + Math.cos(a) * 80, dy + Math.sin(a) * 80, a]); });
+  }
+  for (const n of current.nodes.filter((x) => x.kind === 'guide')) {
+    const sibs = current.G.filter((g) => g.classes[0] === n.g.classes[0]), k = sibs.indexOf(n.g), home = seed.get('c:' + n.g.classes[0]) || [0, 0, 0];
+    const a = home[2] + (k - (sibs.length - 1) / 2) * Math.min(.9, 3.2 / sibs.length);   // fanned out, away from the subject
+    seed.set(n.id, [home[0] + Math.cos(a) * 42, home[1] + Math.sin(a) * 42, a]);
+  }
+  N = current.nodes.map((n) => {
+    const was = !replay && old.get(n.id), [sx, sy] = seed.get(n.id) || [0, 0];
+    const o = { ...n, x: was ? was.x : sx, y: was ? was.y : sy, vx: 0, vy: 0, fx: null, fy: null };
     byId.set(n.id, o); nbr.set(n.id, new Set([n.id]));
     return o;
   });
   L = current.links.map((l) => ({ ...l, a: byId.get(l.source), b: byId.get(l.target) })).filter((l) => l.a && l.b);
   for (const l of L) { nbr.get(l.a.id).add(l.b.id); nbr.get(l.b.id).add(l.a.id); }
-  for (const n of N) n.r = radius(n);
-  const guidesN = current.G.length, wordLinks = L.filter((l) => l.kind === 'words').length;
-  $('#gv-count').textContent = `${guidesN} study guide${guidesN === 1 ? '' : 's'} · ${N.length - guidesN} classes · ${wordLinks} keyword link${wordLinks === 1 ? '' : 's'}`;
+  for (const n of N) { n.r = radius(n); n.w = n.kind === 'subject' ? 3.2 : n.kind === 'class' ? 1.7 : 1; }   // hubs push harder, so subjects spread out
+  const count = (k) => N.filter((n) => n.kind === k).length, g = count('guide'), c = count('class'), d = count('subject');
+  $('#gv-count').textContent = `${g} study guide${g === 1 ? '' : 's'} & resources · ${c} class${c === 1 ? '' : 'es'} · ${d} subject${d === 1 ? '' : 's'}`;
 }
 
 function tick() {
@@ -146,15 +117,15 @@ function tick() {
       const b = N[j];
       let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
       if (d2 < 1) { dx = Math.random() - .5; dy = Math.random() - .5; d2 = 1; }
-      if (d2 > 90000) continue;
-      const f = rep * alpha / d2, d = Math.sqrt(d2);
+      if (d2 > 250000) continue;
+      const f = rep * alpha * a.w * b.w / d2, d = Math.sqrt(d2);
       a.vx -= dx / d * f; a.vy -= dy / d * f; b.vx += dx / d * f; b.vy += dy / d * f;
     }
     a.vx -= a.x * grav * alpha; a.vy -= a.y * grav * alpha;       // and the centre pulls gently
   }
   for (const l of L) {                                              // links act as springs
     const dx = l.b.x - l.a.x, dy = l.b.y - l.a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const want = dist * (l.kind === 'class' ? .8 : 1.2), f = (d - want) / d * .09 * alpha;
+    const want = dist * (l.kind === 'class' ? .75 : 1.6), f = (d - want) / d * .09 * alpha;   // guides close to their class, classes further out from their subject
     l.a.vx += dx * f; l.a.vy += dy * f; l.b.vx -= dx * f; l.b.vy -= dy * f;
   }
   for (const n of N) {
@@ -181,16 +152,14 @@ function render() {
   const dim = (id) => (near && !near.has(id) ? 1 - .85 * fade : 1);
   for (const l of L) {
     const on = near && (l.a === hover || l.b === hover);
-    ctx.globalAlpha = (on ? 1 : Math.min(dim(l.a.id), dim(l.b.id)) * (l.kind === 'prereq' ? .55 : .8)) * ((l.a.hit && l.b.hit) ? 1 : .2);
-    ctx.strokeStyle = on ? C.accent : l.kind === 'words' ? '#6b6b6b' : C.line;
-    ctx.lineWidth = ((on ? 1.6 : l.kind === 'words' ? .8 + l.score * .25 : .8) * opts.thick) / Math.max(.5, k);
-    ctx.setLineDash(l.kind === 'prereq' ? [3 / k, 3 / k] : []);
+    ctx.globalAlpha = (on ? 1 : Math.min(dim(l.a.id), dim(l.b.id)) * .8) * ((l.a.hit && l.b.hit) ? 1 : .2);
+    ctx.strokeStyle = on ? C.accent : C.line;
+    ctx.lineWidth = ((on ? 1.6 : l.kind === 'subject' ? 1.1 : .8) * opts.thick) / Math.max(.5, k);
     ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
   }
-  ctx.setLineDash([]);
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .15);
-    ctx.fillStyle = n === hover ? C.accent : n.has === false ? C.empty : n.kind === 'guide' ? C.guide : C.node;
+    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? C.guide : C.node;
     ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (n === hover ? 1 + .25 * fade : 1), 0, Math.PI * 2); ctx.fill();
   }
   // titles fade out as you zoom out (Obsidian's text fade threshold); the dot
@@ -199,11 +168,12 @@ function render() {
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
   for (const n of N) {
     const focus = near?.has(n.id);
-    let a = focus ? Math.max(base, fade) : (n.has === false ? faint * .7 : base) * dim(n.id);
+    // subject names stay readable when zoomed right out
+    let a = focus ? Math.max(base, fade) : (n.kind === 'subject' ? 1 : n.has === false ? faint * .7 : base) * dim(n.id);
     if (!n.hit) a *= .2;
     if (a < .02) continue;
-    const size = n.kind === 'guide' ? 11 : 10;
-    ctx.font = `${n === hover ? 600 : 400} ${size / Math.max(1, k * .9)}px ui-sans-serif, system-ui, sans-serif`;
+    const size = n.kind === 'subject' ? 14 : n.kind === 'guide' ? 11 : 10;
+    ctx.font = `${n === hover || n.kind === 'subject' ? 600 : 400} ${size / Math.max(n.kind === 'subject' ? .5 : 1, k * .9)}px ui-sans-serif, system-ui, sans-serif`;
     ctx.globalAlpha = a;
     ctx.fillStyle = n === hover ? '#fff' : n.has === false ? '#8a8a8a' : C.text;
     const label = n.name.length > 34 ? n.name.slice(0, 32) + '…' : n.name;
@@ -233,7 +203,7 @@ function size() {
 function draw(replay = false) {
   load(replay);
   alpha = 1;
-  const warm = still ? 400 : replay ? 30 : 140;                     // settle most of the way first (less for Animate, to watch it settle)
+  const warm = still ? 500 : replay ? 30 : 320;                     // settle most of the way first (less for Animate, to watch it settle)
   for (let i = 0; i < warm; i++) tick();
   fit();
   wake();
@@ -299,7 +269,8 @@ cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomAt(e.offsetX, e.of
 cv.addEventListener('dblclick', (e) => {
   const n = hit(e.offsetX, e.offsetY);
   if (!n) return;
-  const u = n.kind === 'guide' ? safeUrl(n.g.payload.url) : courseUrl(n.slug);
+  if (n.kind === 'subject') return;
+  const u = n.kind === 'guide' ? openUrl(n.g) : courseUrl(n.slug);
   if (u) window.open(u, n.kind === 'guide' ? '_blank' : '_self', 'noopener');
 });
 
@@ -308,7 +279,7 @@ function panel() {
   const sl = (k, label, min, max, step) => `<label class="gv-sl"><span>${label}</span><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${opts[k]}"></label>`;
   const tg = (k, label) => `<label class="gv-tg"><span>${label}</span><span class="tgl"><input type="checkbox" data-k="${k}" ${opts[k] ? 'checked' : ''}><span aria-hidden="true"></span></span></label>`;
   $('#gv-panel').innerHTML = `
-    <details open><summary>Filters</summary>${tg('orphans', 'Classes without guides')}${tg('prereq', 'Prerequisite links')}${tg('words', 'Keyword links')}</details>
+    <details open><summary>Filters</summary>${tg('orphans', 'Classes without guides')}</details>
     <details><summary>Display</summary>${sl('labels', 'Text fade threshold', .4, 3, .1)}${sl('size', 'Node size', .5, 2, .1)}${sl('thick', 'Link thickness', .5, 3, .1)}</details>
     <details><summary>Forces</summary>${sl('gravity', 'Center force', 0, .4, .01)}${sl('repel', 'Repel force', 10, 200, 5)}${sl('link', 'Link distance', 10, 120, 5)}</details>
     <button type="button" class="gv-animate" id="gv-animate">Animate</button>`;
@@ -318,37 +289,45 @@ function panel() {
 function info(n) {
   const card = $('#gv-info');
   if (!n) { card.hidden = true; return; }
+  const count = (list) => `${list.length} study guide${list.length === 1 ? '' : 's'} & resource${list.length === 1 ? '' : 's'}`;
   if (n.kind === 'guide') {
-    const g = n.g, u = safeUrl(g.payload.url), c = bySlug[g.course_slug];
-    const near = current.links.filter((l) => l.kind === 'words' && (l.source === n.id || l.target === n.id))
-      .map((l) => current.nodes.find((x) => x.id === (l.source === n.id ? l.target : l.source)));
+    const g = n.g, u = openUrl(g);
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k">${esc(g.payload.type)}</div><h3>${esc(g.payload.title)}</h3>
-      <p class="gv-m"><a href="${courseUrl(g.course_slug)}">${esc(c?.name || '')}</a>${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p>
+      <div class="gv-k">${esc(g.payload.type)}${g.payload.pdf ? ' · PDF' : ''}</div><h3>${esc(g.payload.title)}</h3>
+      <p class="gv-m">${g.classes.map((c) => `<a href="${courseUrl(c)}">${esc(bySlug[c].name)}</a>`).join(' · ')}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p>
       ${g.payload.note ? `<p>${esc(g.payload.note)}</p>` : ''}
       <p class="gv-m">${g.payload.author ? `Made by ${esc(g.payload.author)} · shared by ${esc(g.author)}` : `Made by ${esc(g.author)}`}</p>
-      ${near.length ? `<p class="gv-m">Connected to: ${near.map((x) => esc(x.name)).join(' · ')}</p>` : ''}
-      ${u ? `<a class="gv-open" href="${esc(u)}" target="_blank" rel="noopener nofollow">Open study guide ↗</a>` : ''}`;
-  } else {
-    const list = current.G.filter((g) => g.course_slug === n.slug);
+      ${u ? `<a class="gv-open" href="${esc(u)}" target="_blank" rel="noopener nofollow">Open ${g.payload.pdf ? 'the PDF' : 'study guide'} ↗</a>` : ''}`;
+  } else if (n.kind === 'class') {
+    const list = current.G.filter((g) => g.classes.includes(n.slug));
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
       <div class="gv-k">${esc(dept[bySlug[n.slug]?.department] || 'Class')}</div><h3>${esc(n.name)}</h3>
-      <p class="gv-m">${list.length ? `${list.length} study guide${list.length === 1 ? '' : 's'}` : 'No study guides yet.'}</p>
+      <p class="gv-m">${list.length ? count(list) : 'Nothing shared yet.'}</p>
       <a class="gv-open" href="${list.length ? courseUrl(n.slug) + '#s-resources' : `${root}submit/?course=${n.slug}&kind=resource`}">${list.length ? 'Open the class page →' : 'Share the first one →'}</a>`;
+  } else {
+    const cls = data.courses.filter((c) => c.department === n.slug)
+      .map((c) => [c, current.G.filter((g) => g.classes.includes(c.slug)).length]).filter(([, k]) => k).sort((a, b) => b[1] - a[1]);
+    card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
+      <div class="gv-k">Subject</div><h3>${esc(n.name)}</h3>
+      <p class="gv-m">${cls.length ? `${count(current.G.filter((g) => g.classes.some((c) => bySlug[c].department === n.slug)))} in ${cls.length} class${cls.length === 1 ? '' : 'es'}` : 'Nothing shared yet.'}</p>
+      ${cls.length ? `<p class="gv-m">${cls.map(([c, k]) => `<a href="${courseUrl(c.slug)}#s-resources">${esc(c.name)}</a> (${k})`).join(' · ')}</p>` : ''}`;
   }
   card.hidden = false;
 }
 
-// The accessible version: every guide, by class
+// The accessible version: every guide, by subject and class (a shared one is listed under each class)
 function list() {
   const by = {};
-  for (const g of guides) (by[g.course_slug] ||= []).push(g);
-  $('#gv-list').innerHTML = Object.keys(by).length ? Object.entries(by).sort(([a], [b]) => (bySlug[a]?.name || '').localeCompare(bySlug[b]?.name || '')).map(([slug, gs]) => `
-    <section class="gv-class"><h3><a href="${courseUrl(slug)}">${esc(bySlug[slug]?.name || slug)}</a></h3>
-      ${gs.map((g) => { const u = safeUrl(g.payload.url); return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
-        <b>${esc(g.payload.title)}</b>${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
-        <span class="meta">${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</a>`; }).join('')}
-    </section>`).join('')
+  for (const g of guides) for (const c of classesOf(g)) (by[c] ||= []).push(g);
+  const subj = {};
+  for (const slug of Object.keys(by)) (subj[bySlug[slug].department] ||= []).push(slug);
+  const card = (g) => { const u = openUrl(g); return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
+      <b>${esc(g.payload.title)}</b>${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
+      <span class="meta">${g.payload.pdf ? 'PDF · ' : ''}${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? `<span class="arrow" aria-hidden="true">${g.payload.pdf ? '📄' : '↗'}</span>` : ''}</a>`; };
+  $('#gv-list').innerHTML = Object.keys(by).length ? data.departments.filter((d) => subj[d.slug]).map((d) => `
+    <h2 class="gv-subject">${esc(d.name)}</h2>
+    ${subj[d.slug].sort((a, b) => bySlug[a].name.localeCompare(bySlug[b].name)).map((slug) => `
+    <section class="gv-class"><h3><a href="${courseUrl(slug)}">${esc(bySlug[slug].name)}</a></h3>${by[slug].map(card).join('')}</section>`).join('')}`).join('')
     : `<p class="empty-line">No study guides yet. Made one? <a class="add-link" href="${root}submit/?kind=resource">Share it →</a></p>`;
 }
 

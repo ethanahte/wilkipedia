@@ -17,10 +17,11 @@ window.addEventListener('hashchange', () => { tab = location.hash.slice(1).repla
 // marked, with what's live now underneath.
 function payloadHtml(kind, p, before = null) {
   const same = (k) => JSON.stringify(p[k] ?? '') === JSON.stringify(before[k] ?? '');
-  const plain = (v) => (typeof v === 'string' ? v : Object.entries(v || {}).map(([k, x]) => `${k}: ${x}`).join(' · '));
+  const plain = (v) => (typeof v === 'string' ? v : Array.isArray(v) ? v.map(courseName).join(' · ') : v?.path ? v.name : Object.entries(v || {}).map(([k, x]) => `${k}: ${x}`).join(' · '));
   return KINDS[kind].fields.filter((f) => p[f.key] || (before && before[f.key])).map((f) => {
     const v = p[f.key];
     const body = !v ? '<span class="meta">(removed)</span>'
+      : f.type === 'courses' ? (Array.isArray(v) ? v.map((x) => esc(courseName(x))).join(' · ') : esc(v))
       : f.type === 'pdf' ? `<a class="btn ghost small" data-pdf="${esc(v.path || '')}" href="#" aria-disabled="true" target="_blank" rel="noopener">📄 Open ${esc(v.name || 'PDF')}</a>
           <span class="meta">${fileSize(v.size)} · read it all the way through</span>`
       : f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])

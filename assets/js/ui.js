@@ -682,7 +682,11 @@ export function renderFields(el, kind, preset = {}, files = {}) {
     const req = f.required ? ' <span class="req" aria-hidden="true">*</span>' : '';
     const val = preset[f.key] ?? '';
     let input;
-    if (f.type === 'pdf') {
+    if (f.type === 'courses') {
+      input = `<div class="courses-in" id="${id}-box"><div class="cin-chips"></div>
+        <input id="${id}" name="${f.key}" list="dl-${f.key}" autocomplete="off" placeholder="Type a class name, then pick it">
+        <datalist id="dl-${f.key}"></datalist></div>`;
+    } else if (f.type === 'pdf') {
       const cur = val && typeof val === 'object' && val.path ? val : null;
       input = `<div class="pdf-in">${cur ? `<div class="pdf-cur">📄 <a data-pdf="${esc(cur.path)}" href="#" aria-disabled="true" target="_blank" rel="noopener">${esc(cur.name)}</a>
           <span class="meta">${fileSize(cur.size)}</span></div>` : ''}
@@ -731,6 +735,43 @@ export function renderFields(el, kind, preset = {}, files = {}) {
       $(`[name="${f.key}"]`, el).required = !alt && !!f.required;
     }
   };
+  // Class pickers: chosen classes are chips (click one to take it off); names come from the catalog
+  const picked = {};
+  let catalog = [];
+  const nameOf = (slug) => catalog.find((c) => c.slug === slug)?.name || slug;
+  const findClass = (text) => { const t = text.trim().toLowerCase(); return t && catalog.find((c) => c.name.toLowerCase() === t || (c.call || '').toLowerCase() === t); };
+  const paintChips = (f) => {
+    $(`#f-${f.key}-box .cin-chips`, el).innerHTML = picked[f.key].map((slug) =>
+      `<button type="button" class="chip" aria-pressed="true" data-slug="${esc(slug)}" aria-label="Remove ${esc(nameOf(slug))}">${esc(nameOf(slug))} <span aria-hidden="true">✕</span></button>`).join('');
+    $(`[name="${f.key}"]`, el).disabled = picked[f.key].length >= (f.max || 3);
+  };
+  const addTyped = (f) => {
+    const input = $(`[name="${f.key}"]`, el), c = findClass(input.value);
+    if (!c) return false;
+    if (!picked[f.key].includes(c.slug) && picked[f.key].length < (f.max || 3)) picked[f.key].push(c.slug);
+    input.value = '';
+    paintChips(f);
+    return true;
+  };
+  for (const f of fields.filter((x) => x.type === 'courses')) {
+    picked[f.key] = Array.isArray(preset[f.key]) ? [...preset[f.key]] : [];
+    const input = $(`[name="${f.key}"]`, el);
+    input.addEventListener('change', () => addTyped(f));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTyped(f); } });
+    $(`#f-${f.key}-box .cin-chips`, el).addEventListener('click', (e) => {
+      const b = e.target.closest('[data-slug]'); if (!b) return;
+      picked[f.key] = picked[f.key].filter((x) => x !== b.dataset.slug);
+      paintChips(f); input.dispatchEvent(new Event('input', { bubbles: true }));   // so drafts notice
+    });
+    paintChips(f);
+  }
+  if (fields.some((f) => f.type === 'courses')) courses().then((d) => {
+    catalog = d.courses;
+    for (const f of fields.filter((x) => x.type === 'courses')) {
+      $(`#dl-${f.key}`, el).innerHTML = catalog.map((c) => `<option value="${esc(c.name)}">`).join('');
+      paintChips(f);
+    }
+  });
   for (const [k, file] of Object.entries(files)) {
     const input = $(`[name="${k}"][type="file"]`, el);
     if (input && file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; }
@@ -757,6 +798,7 @@ export function renderFields(el, kind, preset = {}, files = {}) {
       for (const f of fields) {
         if (!shown(f)) continue;
         if (f.type === 'pdf') { if (curPdf(f)) out[f.key] = curPdf(f); continue; }   // a new file is uploaded on submit
+        if (f.type === 'courses') { if (picked[f.key].length) out[f.key] = [...picked[f.key]]; continue; }
         if (f.type === 'periods') { const v = periodsOf(f); if (Object.keys(v).length) out[f.key] = v; continue; }
         const v = $(`[name="${f.key}"]`, el).value.trim();
         if (v) out[f.key] = v;
@@ -770,6 +812,13 @@ export function renderFields(el, kind, preset = {}, files = {}) {
     check() {
       for (const f of fields) {
         if (!shown(f)) continue;
+        if (f.type === 'courses') {
+          const input = $(`[name="${f.key}"]`, el);
+          const bad = input.value.trim() && !addTyped(f) ? `Pick “${input.value.trim()}” from the class list, or clear it.` : null;
+          input.classList.toggle('invalid', !!bad);
+          if (bad) { input.focus(); return bad; }
+          continue;
+        }
         if (f.type === 'pdf') {
           const input = $(`[name="${f.key}"]`, el), file = chosen(f);
           const bad = file && file.size > PDF_MAX ? `That PDF is ${fileSize(file.size)}. The limit is 5 MB.`

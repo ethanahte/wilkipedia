@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, courses, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -90,6 +90,10 @@ async function draw() {
 
   // Resources
   const res = subs.filter((x) => x.kind === 'resource');
+  // A guide shared across classes says which others it's for
+  const classNames = res.some((r) => r.payload.also?.length) ? Object.fromEntries((await courses()).courses.map((c) => [c.slug, c.name])) : {};
+  const alsoFor = (r) => { const o = [r.course_slug, ...(r.payload.also || [])].filter((x) => x && x !== page.slug);
+    return o.length ? ` · Also for ${o.map((x) => esc(classNames[x] || x)).join(', ')}` : ''; };
   // Filter chips when resources are tied to more than one teacher
   const resTeachers = [...new Set(res.map((r) => r.teacher).filter(Boolean))];
   const resFilter = resTeachers.length >= 2 || (resTeachers.length === 1 && res.some((r) => !r.teacher))
@@ -99,7 +103,7 @@ async function draw() {
     const u = safeUrl(r.payload.url);
     const meta = `<span class="meta">${r.payload.author
         ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
-        : `Made by ${byline(r.author, r.verified)}`}${unpub(r)}</span>`;
+        : `Made by ${byline(r.author, r.verified)}`}${alsoFor(r)}${unpub(r)}</span>`;
     // An uploaded study guide: the card opens the PDF, and a link to its live version sits beside it
     if (r.payload.pdf?.path) {
       return `<div class="res-card has-pdf" data-teacher="${esc(r.teacher || '')}">
@@ -114,7 +118,7 @@ async function draw() {
       ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
       <span class="meta">${r.payload.author
         ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
-        : `Made by ${byline(r.author, r.verified)}`}${unpub(r)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
+        : `Made by ${byline(r.author, r.verified)}`}${alsoFor(r)}${unpub(r)}</span>${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
   }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>`
     : empty('No resources yet. Made a study guide or found a great video?', 'resource', null, 'Share one');
   linkPdfs($('#resources'), s);

@@ -116,6 +116,14 @@ $('#discard-draft').addEventListener('click', () => {
   paint();
 });
 
+// "Also useful for" never repeats the class it's filed under
+const alsoWithout = (p, main) => {
+  if (!p.also) return p;
+  const also = p.also.filter((x) => x !== main);
+  const { also: _, ...rest } = p;
+  return also.length ? { ...rest, also } : rest;
+};
+
 $('#submit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const scope = KINDS[state.kind].scope;
@@ -139,7 +147,7 @@ $('#submit-form').addEventListener('submit', async (e) => {
     course_slug: noCourse(scope) ? null : state.course,
     teacher,
     bounty_id: $('#bounty').value || null,
-    payload: await withUploads(s, form, form.values()),              // a study guide's PDF goes up first
+    payload: await withUploads(s, form, alsoWithout(form.values(), state.course)),   // a study guide's PDF goes up first
   }));
   if (btn) btn.disabled = false;
   if (!ok) return;

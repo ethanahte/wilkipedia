@@ -219,11 +219,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Hover: the pointed-at dot and its neighbours light up and label while
     everything else fades back.
   - Click opens the info card; double-click opens the guide or class.
-  - Links: guide→class hub, guide↔guide by shared title/note keywords (STOP
-    list filters study filler; "unit/ch N" only links inside one class), and
-    class↔class by catalog prerequisites only (pathways.json edges with no
-    `kind`; the grade-order lines are left out). The list below the graph is
-    the accessible version.
+  - Links (Ethan, 2026-09-28): hubs only, three tiers. Subject area
+    (department: Math, English…) is the biggest dot, then classes linked to their
+    subject, then guides and resources linked to every class they're for. The
+    keyword links and prerequisite links were dropped. The list below the graph
+    (by subject, then class) is the accessible version.
+  - A resource can be for several classes: the `also` field (type `courses`, up
+    to 3 more slugs in payload.also) on the submit form. `approved({course_slug})`
+    also returns rows whose payload.also has that class, so the guide shows on
+    each class page ("Also for …"). No migration: it's payload only.
 - **Calendar** (`calendar/`, `assets/js/calendar.js`, `build_calendar` in
   build.py): the school year from Wilcox's OFFICIAL activities calendar (a
   Google Sheet the school links from its bell schedule page).
