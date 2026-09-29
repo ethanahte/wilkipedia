@@ -392,15 +392,13 @@ const isDark = () => (document.documentElement.dataset.theme
   : matchMedia('(prefers-color-scheme: dark)').matches);
 const SUN = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>';
+// Night mode lives in the More menu, the account menu and the phone drawer: every
+// [data-act="theme"] button shows the mode it switches to
 function paintThemeToggle() {
-  const b = $('#theme-toggle');
-  if (!b) return;
   const dark = isDark();
-  b.innerHTML = dark ? SUN : MOON;
-  b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode');
-  b.title = b.getAttribute('aria-label');
-  const d = $('#drawer-theme');
-  if (d) d.textContent = dark ? 'Day mode' : 'Night mode';
+  const b = $('#theme-toggle');                                 // (pages that still have the round button)
+  if (b) { b.innerHTML = dark ? SUN : MOON; b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode'); b.title = b.getAttribute('aria-label'); }
+  $$('[data-act="theme"]').forEach((x) => { x.innerHTML = `${dark ? SUN : MOON}<span>${dark ? 'Day mode' : 'Night mode'}</span>`; });
 }
 
 // ── room schedules ──
@@ -631,11 +629,13 @@ export async function initHeader() {
                <a role="menuitem" href="${root}dashboard/#work">My work</a>
                ${isTeam ? `<a role="menuitem" href="${root}dashboard/#review">To review<span class="acct-n gold" data-n="review" hidden></span></a>
                <a role="menuitem" href="${root}bounties/">Bounty board</a>` : ''}
+               <hr><button type="button" role="menuitem" data-act="theme"></button><button type="button" role="menuitem" data-act="lang">Language</button>
                <hr><a role="menuitem" href="${root}account/">Account</a><a role="menuitem" href="${root}settings/">Settings</a>
                <button type="button" role="menuitem" data-signout>Sign out</button></div></div>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
       $('[data-signout]', slot)?.addEventListener('click', () => guard(() => s.signOut(), 'Signed out.'));
+      paintThemeToggle();
       // what's waiting for the review team shows on the menu and as a dot on your picture
       if (u && isTeam) s.pending().then((l) => { const b = $('[data-n="review"]', slot); if (b) { b.textContent = l.length || ''; b.hidden = !l.length; } $('.who-dot', slot).hidden = !l.length; }).catch(() => {});
     }
@@ -693,8 +693,18 @@ function wireHeader() {
     btn?.addEventListener('click', () => set(true));
     drawer.addEventListener('click', (e) => { if (e.target === drawer || e.target.closest('.drawer-x')) set(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) set(false); });
-    $('#drawer-theme')?.addEventListener('click', (e) => setThemePref(isDark() ? 'light' : 'dark', e.currentTarget));
   }
+  // Language and night mode buttons, wherever they are (More menu, account menu, drawer)
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-act="theme"], [data-act="lang"]');
+    if (!a) return;
+    if (a.dataset.act === 'theme') { setThemePref(isDark() ? 'light' : 'dark', a); paintThemeToggle(); return; }
+    e.stopPropagation();
+    $$('details.more[open]').forEach((d) => { d.open = false; });
+    $('.acct-menu') && ($('.acct-menu').hidden = true);
+    if (!drawer?.hidden) $('.drawer-x', drawer)?.click();
+    $('#lang-btn')?.click();                                    // translate.js opens its language panel
+  });
   // A shadow once the page scrolls under the header; on phones it slides away while you
   // scroll down and comes back as soon as you scroll up
   if (header) {

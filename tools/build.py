@@ -284,6 +284,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
                                 for href, label, icon, sub in items) + '</div>'
                       for group, items in MORE_GROUPS)
             + f'<a href="{WILCOX_SITE}" target="_blank" rel="noopener" class="ext">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a>'
+            + f'<div class="mega-acts"><button type="button" data-act="lang">{ICONS["globe"]}<span>Language</span></button><button type="button" data-act="theme">Night mode</button></div>'
             + '</div></details>')
     v = VERSIONS
     importmap = json.dumps({"imports": {f"{r}assets/{k}": f"{r}assets/{k}?v={h}"
@@ -321,14 +322,13 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
     <div class="bar-tools">
       <a class="hsearch" href="{r}search/" role="button" aria-label="Search Wilkipedia">{ICONS["search"]}<span class="hs-t">Search classes, teachers, clubs…</span><kbd class="hs-k"></kbd></a>
       <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
-      <div class="lang"><button type="button" class="icon-btn lang-btn" id="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false" title="Language / Idioma">{ICONS["globe"]}<span class="lang-code" translate="no"></span></button>
-        <div class="lang-menu" id="lang-menu" role="menu" hidden></div></div>
-      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
+      <button type="button" class="lang-btn" id="lang-btn" hidden aria-label="Language" aria-haspopup="true" aria-expanded="false"><span class="lang-code" translate="no"></span></button>
       <div id="auth" class="auth"></div>
       <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="drawer">{ICONS["menu"]}</button>
     </div>
   </div>
 </header>
+<div class="lang-menu" id="lang-menu" role="menu" hidden></div>
 <div class="drawer" id="drawer" hidden>
   <div class="drawer-panel" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="drawer-top"><a class="brand" href="{r}" translate="no"><span class="w">W</span>ilkipedia</a>
@@ -338,7 +338,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
       {"".join(f'<div class="dr-group"><div class="dr-h">{group}</div>' + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon, _sub in items) + '</div>' for group, items in MORE_GROUPS)}
       <div class="dr-group"><a href="{WILCOX_SITE}" target="_blank" rel="noopener">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a></div>
     </nav>
-    <div class="drawer-foot"><button type="button" class="btn ghost small" id="drawer-theme">Night mode</button><a class="btn ghost small" href="{r}settings/">Settings</a></div>
+    <div class="drawer-foot"><button type="button" class="btn ghost small" data-act="theme">Night mode</button><button type="button" class="btn ghost small" data-act="lang">{ICONS["globe"]}<span>Language</span></button><a class="btn ghost small" href="{r}settings/">Settings</a></div>
   </div>
 </div>
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>

@@ -58,13 +58,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - Schema changes: add a numbered file in `supabase/migrations/` for the live
   database AND fold the change into `schema.sql` for fresh setups.
 - **Navigation:** header = Map + Classes + a "More" panel grouped into columns (`NAV`/`MORE_GROUPS` in build.py).
-  The header's icon buttons are search (phones), language, night mode and a Settings
-  gear. On phones under 440px the gear shows only on the home page, where the
-  search button steps aside; otherwise "Sign in" wraps to a second line.
-  The header sits in the 1040px `.wrap`, so on wide screens (≥1000px) the bar is
-  `nowrap`. The search box shrinks (down to 130px), then the member's name is cut
-  with an ellipsis. Reviewers' long "Review + avatar + name" once wrapped it at
-  every window size.
+  The bar itself is minimal (极简, Ethan): see **Header** below for what is on it.
 - **Account → Notifications** starts with the review queue for reviewers
   ("Waiting for review: N submissions · comments · reports →"). Their own
   approvals never notify them, so the list alone was always empty.
@@ -834,14 +828,21 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).
 - **Header** (build.py `page()` + `wireHeader()` in ui.js, 2026-09-29):
-  - Layout: one row everywhere. Logo · page pills (the current one lit with a gold underline) ·
-    More · search pill (opens the ⌘K palette) · language · night mode · Dashboard bell · your
-    picture. Your picture opens the account menu: Dashboard with its count, My work, To review
-    with a count plus a gold dot on the picture, Bounty board, Account, Settings, Sign out. That
-    replaced the gear and the "Review" link.
-  - Narrower screens: at ≤1000px the pill becomes a search button. At ≤760px the page links
-    move into the ☰ drawer (`#drawer`: every page grouped like More, plus Night mode and
-    Settings); night mode leaves the bar too.
+  - Layout, 极简 (Ethan: the bar with language + night mode + search pill + search icon was too
+    crowded, and "Study guides" wrapped at ~1000px): logo · plain text links (the current one has
+    a gold underline) · More · one search control · Dashboard bell · your picture. No rings on the
+    icons, and the name is hidden (it shows in the account menu's head).
+  - Language and night mode are NOT in the bar. They're `[data-act="lang"]`/`[data-act="theme"]`
+    buttons in three places: the More panel's bottom row (`.mega-acts`), the account menu and the
+    drawer footer. One click handler in `wireHeader()` serves all of them; the lang ones click the
+    hidden `#lang-btn` that translate.js owns (`#lang-menu` sits at body level). A new place
+    needs only the attribute.
+  - Your picture opens the account menu: Dashboard with its count, My work, To review with a
+    count plus a gold dot on the picture, Bounty board, night mode, Language, Account, Settings,
+    Sign out.
+  - Narrower screens: at ≤1120px the search pill shrinks to a round button (`.search-btn` is
+    never shown in the bar, so there's only ever one). At ≤760px the page links move into the
+    ☰ drawer (`#drawer`: every page grouped like More, footer: night mode, Language, Settings).
   - The header gets a shadow when scrolled. On phones it tucks away while scrolling down and
     comes back on scroll up.
   - Decided: no site-wide sidebar. Reading pages stay a centred column, the Dashboard has its
