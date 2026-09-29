@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { popconfirm, confirmSkips, resetConfirms, toast, showResult, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
@@ -263,8 +263,23 @@ function mountInbox(el) {
   draw();
 }
 
+// The hero search suggests real things to look for (class and club names from our own data),
+// one after another, while the box is empty and not being typed in
+async function heroExamples(input) {
+  if (!input || lessMotion()) return;
+  const [data, acts] = await Promise.all([courses(), fetch(dataUrl('data/activities.json')).then((r) => r.json()).catch(() => ({}))]);
+  const pick = (list, n) => list.map((x) => [Math.random(), x]).sort((a, b) => a[0] - b[0]).slice(0, n).map(([, x]) => x);
+  const ex = pick([...pick(data.courses.map((c) => c.name), 5), ...pick((acts.clubs || []).map((c) => c.name), 2), 'Bell schedule'], 8);
+  let i = 0;
+  setInterval(() => {
+    if (document.activeElement === input || input.value) return;
+    input.placeholder = `Try “${ex[i++ % ex.length]}”`;
+  }, 3200);
+}
+
 const pages = {
   async home() {
+    heroExamples($('#home-q'));
     if (getPref('homebg') === 'pano') import('./pano.js').then((m) => m.mountPano(root));   // the turning quad behind the page
     mountInbox($('#inbox'));
     mountBellStrip($('#bell'));

@@ -278,7 +278,8 @@ export const AVATAR_COLORS = {
 // html[data-avatars] (Settings → Appearance) decides which one shows.
 // The red count on the header's Dashboard bell (0 hides it)
 export function setNoteCount(n) {
-  const b = $('.auth .bell-n'), bell = $('.auth .inbox-btn');
+  const b = $('.auth .bell-n'), bell = $('.auth .inbox-btn'), m = $('.auth [data-n="notes"]');
+  if (m) { m.textContent = n > 99 ? '99+' : n || ''; m.hidden = !n; }
   if (!b) return;
   b.hidden = !n;
   b.textContent = n > 9 ? '9+' : n || '';
@@ -398,6 +399,8 @@ function paintThemeToggle() {
   b.innerHTML = dark ? SUN : MOON;
   b.setAttribute('aria-label', dark ? 'Switch to day mode' : 'Switch to night mode');
   b.title = b.getAttribute('aria-label');
+  const d = $('#drawer-theme');
+  if (d) d.textContent = dark ? 'Day mode' : 'Night mode';
 }
 
 // ── room schedules ──
@@ -599,15 +602,13 @@ export async function initHeader() {
 
   // Search palette (⌘K). The header box and the phone search button open it.
   const pal = import('./palette.js').then((m) => { m.init(s); return m; });
-  const hs = $('.hsearch input');
+  const hs = $('.hsearch');
   if (hs) {
-    hs.setAttribute('readonly', '');                 // typing happens in the palette
-    hs.placeholder = navigator.platform?.startsWith('Mac') ? 'Search…  ⌘K' : 'Search…  Ctrl K';
-    const go = (e) => { e.preventDefault(); hs.blur(); pal.then((m) => m.open()); };
-    hs.addEventListener('focus', go);
-    hs.addEventListener('mousedown', go);
+    $('.hs-k', hs).textContent = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K';
+    hs.addEventListener('click', (e) => { e.preventDefault(); pal.then((m) => m.open()); });
   }
   $('.search-btn')?.addEventListener('click', (e) => { e.preventDefault(); pal.then((m) => m.open()); });
+  wireHeader();
   import('./peek.js').then((m) => m.init(s));
   pageTransitions();
   // Any "Sign in" button outside the header (home panel, bounty gate…)
@@ -619,12 +620,24 @@ export async function initHeader() {
     document.body.classList.toggle('signed-in', !!u);
     if (u) applyClassTheme(u);
     if (slot) {
+      const isTeam = REVIEWER_ROLES.includes(u?.role);
+      // Signed in: the Dashboard bell, and your picture, which opens the account menu
       slot.innerHTML = u
-        ? `${REVIEWER_ROLES.includes(u.role) ? `<a href="${root}dashboard/#review" class="nav-review">Review</a>` : ''}
-           <a href="${root}dashboard/" class="icon-btn inbox-btn" title="Dashboard" aria-label="Dashboard"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="who-n bell-n" hidden></span></a>
-           <a href="${root}account/" class="who" title="Your account"><span class="who-av">${avatarHtml(u)}</span><span class="who-name">${esc(u.name)}</span></a>`
+        ? `<a href="${root}dashboard/" class="icon-btn inbox-btn" title="Dashboard" aria-label="Dashboard"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="who-n bell-n" hidden></span></a>
+           <div class="acct"><button type="button" class="who" aria-haspopup="menu" aria-expanded="false" aria-label="Your account menu"><span class="who-av">${avatarHtml(u)}<span class="who-dot" hidden></span></span><span class="who-name">${esc(u.name)}</span><svg class="who-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+             <div class="acct-menu" role="menu" hidden>
+               <div class="acct-head">${avatarHtml(u, 'md')}<div><b>${esc(u.name)}</b><span class="meta">${esc(roleLabel(u.role))}</span></div></div>
+               <a role="menuitem" href="${root}dashboard/">Dashboard<span class="acct-n" data-n="notes" hidden></span></a>
+               <a role="menuitem" href="${root}dashboard/#work">My work</a>
+               ${isTeam ? `<a role="menuitem" href="${root}dashboard/#review">To review<span class="acct-n gold" data-n="review" hidden></span></a>
+               <a role="menuitem" href="${root}bounties/">Bounty board</a>` : ''}
+               <hr><a role="menuitem" href="${root}account/">Account</a><a role="menuitem" href="${root}settings/">Settings</a>
+               <button type="button" role="menuitem" data-signout>Sign out</button></div></div>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       $('#signin', slot)?.addEventListener('click', () => guard(() => s.signIn()));
+      $('[data-signout]', slot)?.addEventListener('click', () => guard(() => s.signOut(), 'Signed out.'));
+      // what's waiting for the review team shows on the menu and as a dot on your picture
+      if (u && isTeam) s.pending().then((l) => { const b = $('[data-n="review"]', slot); if (b) { b.textContent = l.length || ''; b.hidden = !l.length; } $('.who-dot', slot).hidden = !l.length; }).catch(() => {});
     }
     // Unread notifications show as a red count on the Dashboard bell next to your picture.
     if (u && s.unreadCount) s.unreadCount().then(setNoteCount).catch(() => {});
@@ -646,6 +659,59 @@ export async function initHeader() {
   termsGate(s, s.user());
   s.onAuth((u) => termsGate(s, u));
   return s;
+}
+
+// ── the header: account menu, phone drawer, scrolling ──
+function wireHeader() {
+  const header = $('#site-header'), drawer = $('#drawer');
+  // Account menu (your picture): opens on click, closes on a click outside or Escape
+  document.addEventListener('click', (e) => {
+    const who = e.target.closest('.acct .who');
+    const menu = $('.acct-menu');
+    if (who) { const open = menu.hidden; menu.hidden = !open; who.setAttribute('aria-expanded', open); if (open) $('a, button', menu)?.focus({ preventScroll: true }); return; }
+    if (menu && !menu.hidden && !e.target.closest('.acct-menu')) { menu.hidden = true; $('.acct .who')?.setAttribute('aria-expanded', 'false'); }
+  });
+  document.addEventListener('keydown', (e) => {
+    const menu = $('.acct-menu');
+    if (!menu || menu.hidden) return;
+    if (e.key === 'Escape') { menu.hidden = true; $('.acct .who').setAttribute('aria-expanded', 'false'); $('.acct .who').focus(); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const items = $$('[role="menuitem"]', menu), i = items.indexOf(document.activeElement);
+      items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+    }
+  });
+  // Phone drawer (☰): every page, grouped like the More menu
+  if (drawer) {
+    const btn = $('#menu-btn');
+    const set = (open) => {
+      if (open) { drawer.hidden = false; requestAnimationFrame(() => drawer.classList.add('open')); $('.drawer-x', drawer).focus(); }
+      else { drawer.classList.remove('open'); setTimeout(() => { drawer.hidden = true; }, 220); btn?.focus(); }
+      btn?.setAttribute('aria-expanded', open);
+      document.documentElement.classList.toggle('drawer-open', open);
+    };
+    btn?.addEventListener('click', () => set(true));
+    drawer.addEventListener('click', (e) => { if (e.target === drawer || e.target.closest('.drawer-x')) set(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) set(false); });
+    $('#drawer-theme')?.addEventListener('click', (e) => setThemePref(isDark() ? 'light' : 'dark', e.currentTarget));
+  }
+  // A shadow once the page scrolls under the header; on phones it slides away while you
+  // scroll down and comes back as soon as you scroll up
+  if (header) {
+    let last = scrollY, ticking = false;
+    addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = scrollY;
+        header.classList.toggle('scrolled', y > 4);
+        const phone = innerWidth <= 760, menuOpen = !$('.acct-menu')?.hidden;
+        header.classList.toggle('tucked', phone && !menuOpen && y > 120 && y > last + 4);
+        if (y < last - 4 || y < 120) header.classList.remove('tucked');
+        last = y; ticking = false;
+      });
+    }, { passive: true });
+  }
 }
 
 // ── announcement bar ──

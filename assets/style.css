@@ -111,41 +111,91 @@ code { font-family: var(--mono); font-size: .88em; }
 /* ── header / footer ── */
 .demo-banner { background: var(--warn-soft); color: var(--warn); font-size: .85rem; padding: 6px 16px; text-align: center; }
 .demo-banner a { color: inherit; }
-header.site { background: var(--bar); color: var(--bar-ink); border-bottom: 3px solid var(--gold); position: sticky; top: 0; z-index: 5; }
-.bar { display: flex; align-items: center; gap: 20px; min-height: 58px; flex-wrap: wrap; }
-.brand { font: 600 1.45rem var(--serif); color: var(--bar-ink); text-decoration: none; letter-spacing: -.01em; }
+/* The header: one row everywhere. Desktop: logo · pages · More · search pill · language ·
+   night mode · bell · your picture (account menu). Phones: logo · search · language · bell ·
+   picture · ☰ (a drawer with every page). It casts a shadow once the page scrolls under it,
+   and on phones slides away while you scroll down. */
+header.site { background: var(--bar); color: var(--bar-ink); border-bottom: 3px solid var(--gold); position: sticky; top: 0; z-index: 30;
+  transition: transform .25s ease, box-shadow .2s ease; }
+header.site.scrolled { box-shadow: 0 6px 22px rgba(0, 0, 0, .22); }
+header.site.tucked { transform: translateY(-100%); }
+.bar { display: flex; align-items: center; gap: 22px; min-height: 60px; }
+.brand { flex: none; font: 600 1.45rem var(--serif); color: var(--bar-ink); text-decoration: none; letter-spacing: -.01em; }
 .brand:hover { color: var(--gold); }
 .brand .w { color: var(--gold); }
-.main-nav { display: flex; gap: 18px; font-size: .92rem; }
-.main-nav a { color: var(--bar-muted); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
-.main-nav > a:hover, .main-nav > a[aria-current] { color: var(--bar-ink); border-color: var(--gold); }
-.hsearch { margin-left: auto; }
-.hsearch input { width: 220px; }
-.auth { display: flex; gap: 12px; align-items: center; font-size: .9rem; }
-.auth .who { color: var(--bar-ink); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-.icon-btn { background: none; border: 1px solid #3a3a3a; color: var(--bar-ink); width: 34px; height: 34px; border-radius: 50%;
-  display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
+.main-nav { display: flex; align-items: center; gap: 4px; font-size: .92rem; }
+.main-nav > a { color: var(--bar-muted); text-decoration: none; padding: 7px 11px; border-radius: 999px; transition: color .15s, background .15s; }
+.main-nav > a:hover { color: var(--bar-ink); background: rgba(255, 255, 255, .07); }
+.main-nav > a[aria-current] { color: var(--bar-ink); background: rgba(255, 255, 255, .1); box-shadow: inset 0 -2px 0 var(--gold); }
+.bar-tools { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.hsearch { display: flex; align-items: center; gap: 8px; width: 250px; min-width: 150px; height: 36px; padding: 0 8px 0 12px; border-radius: 999px;
+  background: #1c1c1b; border: 1px solid #333; color: #9a9a95; text-decoration: none; font-size: .86rem; cursor: text; transition: border-color .15s, background .15s; }
+.hsearch:hover { border-color: #555; background: #222; color: #c9c9c4; }
+.hsearch svg { flex: none; width: 15px; height: 15px; }
+.hs-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-k { flex: none; font: 600 .7rem var(--mono); color: #b8b8b2; background: #2b2b29; border: 1px solid #3c3c39; border-radius: 6px; padding: 2px 6px; }
+.search-btn { display: none; }
+.auth { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
+.icon-btn { background: none; border: 1px solid #3a3a3a; color: var(--bar-ink); width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; text-decoration: none; transition: border-color .15s, color .15s, background .15s; }
 .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
-.set-btn { text-decoration: none; }
-.set-btn svg { width: 17px; height: 17px; }
-/* Narrow phones have room for it only where the search button steps aside (home) */
-@media (max-width: 440px) { body:not(.home) .set-btn { display: none; } }
-/* …and on mid-size screens the search box gives up the room the gear takes, so the bar wraps no sooner than before */
-@media (min-width: 761px) and (max-width: 999px) { .hsearch input { width: 160px; } }
-/* Wide screens: the header sits in the 1040px column, so it must never wrap however
-   long the signed-in part gets (Review + avatar + name). The search box shrinks
-   first, then a long name is cut with an ellipsis. */
-@media (min-width: 1000px) {
-  .bar { flex-wrap: nowrap; }
-  .bar > * { flex: none; }
-  .bar > .hsearch { flex: 0 1 220px; min-width: 130px; }
-  .hsearch input { width: 100%; }
-  .bar > .auth { flex: 0 1 auto; min-width: 0; }
-  .auth .who { min-width: 0; }
-  .who-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 11em; }
+.menu-btn { display: none; }
+/* your picture and its menu */
+.acct { position: relative; }
+.auth .who { display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 3px; border: 1px solid transparent; border-radius: 999px;
+  background: none; color: var(--bar-ink); font: 600 .9rem var(--sans); cursor: pointer; }
+.auth .who:hover, .auth .who[aria-expanded="true"] { border-color: #3a3a3a; background: rgba(255, 255, 255, .06); }
+.who-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 9em; }
+.who-chev { color: var(--bar-muted); transition: transform .15s; }
+.who[aria-expanded="true"] .who-chev { transform: rotate(180deg); }
+.who-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); border: 2px solid var(--bar); }
+.who-dot[hidden] { display: none; }
+.acct-menu { position: absolute; right: 0; top: calc(100% + 10px); width: 240px; padding: 6px; background: var(--card); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 14px 40px rgba(0, 0, 0, .2); z-index: 40; display: grid; }
+.acct-menu[hidden] { display: none; }
+.acct-head { display: flex; gap: 10px; align-items: center; padding: 8px 8px 10px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
+.acct-head b { display: block; } .acct-head .meta { font-size: .8rem; }
+.acct-menu a, .acct-menu button { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; border-radius: 8px;
+  color: var(--ink); text-decoration: none; font: 500 .92rem var(--sans); background: none; border: 0; cursor: pointer; text-align: left; }
+.acct-menu a:hover, .acct-menu button:hover, .acct-menu a:focus-visible, .acct-menu button:focus-visible { background: var(--accent-soft); outline: none; }
+.acct-menu hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; }
+.acct-menu [data-signout] { color: var(--bad); }
+.acct-n { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--bad); color: #fff; font-size: .72rem; line-height: 20px; text-align: center; }
+.acct-n.gold { background: var(--gold); color: #111; }
+.acct-n[hidden] { display: none; }
+.nav-review { display: none; }
+/* narrower screens: the search pill gives way to a button, then the name, then the page links move into ☰ */
+@media (max-width: 1180px) { .hsearch { width: 190px; } .who-name { display: none; } }
+@media (max-width: 1000px) { .hsearch { display: none; } .search-btn { display: grid; } .bar { gap: 14px; } }
+@media (max-width: 760px) {
+  .bar { gap: 8px; min-height: 56px; padding: 0 12px; }
+  .main-nav { display: none; }
+  .menu-btn { display: grid; }
+  .bar-tools { gap: 6px; }
+  #theme-toggle { display: none; }                       /* it's in the drawer */
+  .icon-btn { width: 34px; height: 34px; }
+  .auth .who { padding: 2px; }
+  .who-chev { display: none; }
 }
-/* Review + Inbox bell + picture don't leave room for the name on mid-size screens: the picture is enough */
-@media (min-width: 1000px) and (max-width: 1320px) { body.is-team .who-name { display: none; } }
+@media (max-width: 360px) { .lang { display: none; } }   /* language is in Settings, via the drawer */
+/* the phone drawer */
+.drawer { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, 0); transition: background .22s; }
+.drawer.open { background: rgba(0, 0, 0, .45); }
+.drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(330px, 88vw); background: var(--paper); color: var(--ink);
+  display: flex; flex-direction: column; transform: translateX(100%); transition: transform .24s cubic-bezier(.2, .8, .2, 1); box-shadow: -10px 0 40px rgba(0, 0, 0, .25); }
+.drawer.open .drawer-panel { transform: none; }
+.drawer-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 3px solid var(--gold); background: var(--bar); }
+.drawer-top .icon-btn { color: var(--bar-ink); }
+.drawer-nav { flex: 1; overflow-y: auto; padding: 8px 10px 16px; overscroll-behavior: contain; }
+.dr-group { display: grid; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.dr-h { font: 600 .7rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px 6px; }
+.drawer-nav a { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-weight: 500; }
+.drawer-nav a svg { flex: none; color: var(--accent); }
+.drawer-nav a svg:last-child:not(:first-child) { margin-left: auto; color: var(--muted); }
+.drawer-nav a:hover, .drawer-nav a[aria-current] { background: var(--accent-soft); }
+.drawer-foot { display: flex; gap: 8px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); }
+html.drawer-open { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { header.site, .drawer, .drawer-panel { transition: none; } }
 
 /* "More" menu */
 .more { position: relative; }
@@ -206,21 +256,8 @@ html[data-avatars="emoji"] .avatar .av-emoji { display: inline; }
 /* Picking an icon on the Account page draws it, one stroke, start to finish */
 @keyframes av-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 .avatar.draw .av-line path { stroke-dasharray: 1; animation: av-draw 1.3s cubic-bezier(.45, .05, .3, 1) both; }
-.nav-review { font: 600 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); text-decoration: none; }
-.nav-review:hover { color: var(--bar-ink); }
-.hsearch input { background: #1f1f1f; border-color: #333; color: var(--bar-ink); }
-.hsearch input::placeholder { color: #8d8d88; }
 footer.site { border-top: 1px solid var(--rule); margin-top: 80px; padding: 28px 0 40px; font-size: .9rem; }
 footer.site p { max-width: 50em; }
-
-@media (max-width: 760px) {
-  .bar { gap: 10px 14px; padding: 10px 16px; }
-  .main-nav { order: 3; width: 100%; gap: 20px; padding-bottom: 2px; }
-  .hsearch { display: none; }
-  #theme-toggle { margin-left: auto; }
-  .who-name { display: none; }
-  .more .menu { left: auto; right: -40px; }
-}
 
 /* ── inputs & buttons ── */
 input, select, textarea {
@@ -266,6 +303,27 @@ textarea { resize: vertical; }
 
 /* ── home ── */
 .hero { padding: 28px 0 8px; }
+/* The home page hero, split: the headline, search and shortcuts on the left, "Right now" (the
+   live bell strip) on the right. One column on narrow screens, or when the bell is turned off. */
+.hero-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr); gap: 18px; align-items: stretch; padding: 22px 0 4px; }
+html[data-bell="off"] .hero-split { grid-template-columns: minmax(0, 1fr); }
+html[data-bell="off"] .hero-side { display: none; }
+.hero-main { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.hero-kicker { margin: 0; font: 600 .72rem/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.hero-split h1 { margin: 10px 0 12px; }
+.hero-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.hero-quick a { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--ink); text-decoration: none; font-size: .88rem; font-weight: 500;
+  transition: border-color .15s, transform .15s, background .15s; }
+.hero-quick a:hover { border-color: var(--gold); background: var(--accent-soft); transform: translateY(-1px); }
+.hero-quick svg { width: 15px; height: 15px; color: var(--accent); }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 20px 0 0; color: var(--muted); font-size: .88rem; }
+.hero-stats b { font: 600 1.35rem/1 var(--serif); color: var(--ink); margin-right: 5px; }
+.hero-side { display: flex; flex-direction: column; min-width: 0; }
+.hero-side-h { margin: 0 0 6px; font: 600 .72rem/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.hero-side .bell { margin: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 16px 18px; border-radius: 14px; }
+.hero-side .bell-status { font-size: 1.05rem; }
+@media (max-width: 900px) { .hero-split { grid-template-columns: minmax(0, 1fr); } .hero-side .bell { padding: 12px 14px; } }
 .hero h1 { font-size: clamp(2.3rem, 7vw, 3.8rem); max-width: 14em; margin-top: 6px; text-wrap: balance; }
 .hero .lede { max-width: 38em; }
 .hero-trust { margin: 14px 0 0; max-width: 40em; font-size: .88rem; color: var(--muted); }
@@ -319,17 +377,12 @@ textarea { resize: vertical; }
 .results-pop { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: var(--card); color: var(--ink);
   border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.2); padding: 6px; max-height: 70vh; overflow-y: auto; }
 .results-pop .empty { padding: 12px; }
-.hsearch { position: relative; }
-.hsearch .results-pop { width: min(460px, 90vw); left: auto; right: 0; }
 .big-search-field { position: relative; flex: 1; }
-.search-btn { display: none; text-decoration: none; }
 /* The home page has its own big search box, so the header one steps aside there. */
 body.home .hsearch, body.home .search-btn { display: none !important; }
-body.home .lang { margin-left: auto; }
 .results.page .result { border-bottom: 1px solid var(--rule); border-radius: 0; padding: 10px 4px; }
 .r-group { margin-bottom: 8px; }
 .r-group .label-h { margin: 1.6em 0 .4em; }
-@media (max-width: 760px) { .search-btn { display: grid; margin-left: auto; } #theme-toggle { margin-left: 0; } }
 .subjects { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
 .subject { padding: 18px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px; }
 .subject b { font: 500 1.2rem var(--serif); }
@@ -1335,13 +1388,14 @@ body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer
   opacity: 0; transition: opacity 1.4s ease; }
 .pano-bg.on { opacity: 1; }
 :root[data-homebg="plain"] body.home::before { display: none; }
-:root:not([data-homebg="plain"]) body.home .hero, :root:not([data-homebg="plain"]) body.home .home-sec, :root:not([data-homebg="plain"]) body.home footer.site,
+:root:not([data-homebg="plain"]) body.home .hero-main, :root:not([data-homebg="plain"]) body.home .home-sec, :root:not([data-homebg="plain"]) body.home footer.site,
 :root:not([data-homebg="plain"]) body.home .bell, :root:not([data-homebg="plain"]) body.home .inbox, :root:not([data-homebg="plain"]) body.home .tile {
   background: var(--paper); background: color-mix(in srgb, var(--paper) 15%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2); }
 :root:not([data-homebg="plain"]) body.home .nm-tile { background: color-mix(in srgb, var(--paper) 12%, transparent); }
-:root:not([data-homebg="plain"]) body.home .hero, :root:not([data-homebg="plain"]) body.home .home-sec { border-radius: 14px; padding: 22px 22px 24px; }
-:root:not([data-homebg="plain"]) body.home .hero { margin-top: 14px; }
+:root:not([data-homebg="plain"]) body.home .hero-main, :root:not([data-homebg="plain"]) body.home .home-sec { border-radius: 14px; padding: 26px 26px 24px; }
+:root:not([data-homebg="plain"]) body.home .hero-split { margin-top: 8px; }
+:root:not([data-homebg="plain"]) body.home .hero-quick a { background: color-mix(in srgb, var(--paper) 30%, transparent); }
 :root:not([data-homebg="plain"]) body.home footer.site { border-top: 0; }
 :root:not([data-homebg="plain"]) body.home .bell, :root:not([data-homebg="plain"]) body.home .inbox { box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
 
@@ -2049,3 +2103,16 @@ a.ib-tile:hover { border-color: var(--gold); }
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity .2s ease; }
 .result-sheet.in { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .result .result-ic { animation: none; } .result-sheet { transition: none; } }
+/* the hero search: an icon inside the box */
+.big-search-field > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+.big-search-field > input { padding-left: 42px; border-radius: 10px; }
+.hero-split .big-search { max-width: none; margin-top: 18px; }
+.hero-split .big-search .btn { border-radius: 10px; padding: 0 20px; }
+/* "Right now" in the hero: today's periods as a list, the current one lit */
+.hero-side .bell { justify-content: flex-start; }
+.hero-side .bell-top { align-items: flex-start; }
+.hero-side .bell-chips { flex-direction: column; gap: 3px; overflow: visible; margin-top: 12px; }
+.hero-side .bell-chips li { display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: 10px; min-width: 0; padding: 7px 10px; border-radius: 8px; }
+.hero-side .bell-chips li small { font-variant-numeric: tabular-nums; }
+.hero-split .hero-kicker { color: color-mix(in srgb, var(--ink) 70%, var(--accent)); }
+.hero-split .lede { color: color-mix(in srgb, var(--ink) 78%, transparent); }

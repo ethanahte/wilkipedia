@@ -176,6 +176,9 @@ MORE_GROUPS = [
                           ("settings/", "Settings", "settings", "Theme, text size, language")]),
 ]
 MORE = [(href, label, icon) for _, items in MORE_GROUPS for href, label, icon, _ in items]
+# The home page hero's shortcuts (paths relative to the home page)
+HERO_QUICK = [("bell/", "bell", "Bell schedule"), ("menu/", "food", "Today’s menu"), ("map/", "pin", "Campus map"),
+              ("guides/", "book", "Study guides"), ("clubs/", "clubs", "Clubs")]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -311,19 +314,33 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None):
 </head>
 <body data-root="{r}"{' class="home"' if path == "" else ""}>
 <a class="skip" href="#main">Skip to content</a>
-<header class="site">
+<header class="site" id="site-header">
   <div class="wrap bar">
     <a class="brand" href="{r}" translate="no"><span class="w">W</span>ilkipedia</a>
     <nav class="main-nav" aria-label="Main">{nav}</nav>
-    <form class="hsearch" action="{r}search/" role="search"><input name="q" type="search" placeholder="Search anything…" aria-label="Search Wilkipedia" autocomplete="off"><div class="results-pop" role="listbox" hidden></div></form>
-    <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
-    <div class="lang"><button type="button" class="icon-btn lang-btn" id="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false" title="Language / Idioma">{ICONS["globe"]}<span class="lang-code" translate="no"></span></button>
-      <div class="lang-menu" id="lang-menu" role="menu" hidden></div></div>
-    <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
-    <a class="icon-btn set-btn" href="{r}settings/" aria-label="Settings" title="Settings">{ICONS["settings"]}</a>
-    <div id="auth" class="auth"></div>
+    <div class="bar-tools">
+      <a class="hsearch" href="{r}search/" role="button" aria-label="Search Wilkipedia">{ICONS["search"]}<span class="hs-t">Search classes, teachers, clubs…</span><kbd class="hs-k"></kbd></a>
+      <a class="icon-btn search-btn" href="{r}search/" aria-label="Search">{ICONS["search"]}</a>
+      <div class="lang"><button type="button" class="icon-btn lang-btn" id="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false" title="Language / Idioma">{ICONS["globe"]}<span class="lang-code" translate="no"></span></button>
+        <div class="lang-menu" id="lang-menu" role="menu" hidden></div></div>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch to night mode"></button>
+      <div id="auth" class="auth"></div>
+      <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="drawer">{ICONS["menu"]}</button>
+    </div>
   </div>
 </header>
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="drawer-top"><a class="brand" href="{r}" translate="no"><span class="w">W</span>ilkipedia</a>
+      <button type="button" class="icon-btn drawer-x" aria-label="Close menu">✕</button></div>
+    <nav class="drawer-nav" aria-label="All pages">
+      <div class="dr-group">{"".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in NAV)}</div>
+      {"".join(f'<div class="dr-group"><div class="dr-h">{group}</div>' + "".join(f'<a href="{r}{href}"{cur(href)}>{ICONS[icon]}<span>{label}</span></a>' for href, label, icon, _sub in items) + '</div>' for group, items in MORE_GROUPS)}
+      <div class="dr-group"><a href="{WILCOX_SITE}" target="_blank" rel="noopener">{ICONS["school"]}<span>Official Wilcox website</span>{ICONS["external"]}</a></div>
+    </nav>
+    <div class="drawer-foot"><button type="button" class="btn ghost small" id="drawer-theme">Night mode</button><a class="btn ghost small" href="{r}settings/">Settings</a></div>
+  </div>
+</div>
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
 <a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
@@ -385,23 +402,33 @@ HOME_TILES = [
 ]
 
 
-def build_home(depts):
+def build_home(depts, courses, teachers):
     tiles = "".join(f'<a class="tile" href="{href}">{ICONS[icon]}<b>{e(label)}</b><span>{e(sub)}</span></a>'
                     for href, icon, label, sub in HOME_TILES)
+    acts = json.loads((DATA / "activities.json").read_text())
+    n_clubs, n_sports = len(acts.get("clubs", [])), len(acts.get("sports", []))
     page("", "Wilkipedia", f"""
-<section id="inbox" class="inbox" aria-label="Your notifications" hidden></section>
-<section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
-<section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
-<section class="hero">
-  <h1>Everything Wilcox, in one place.</h1>
-  <p class="lede">Classes, teachers, rooms, the bell schedule, clubs and sports, written by Wilcox students for Wilcox students.</p>
-  <form class="big-search" action="search/" role="search">
-    <div class="big-search-field"><input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
-    <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
-    <button class="btn">Search</button>
-  </form>
-  <p class="hero-trust">Checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
+<section class="hero hero-split" aria-labelledby="hero-h">
+  <div class="hero-main">
+    <p class="hero-kicker">Wilcox High School · Santa Clara</p>
+    <h1 id="hero-h">Everything Wilcox, in one place.</h1>
+    <p class="lede">Classes, teachers, rooms, the bell schedule, clubs and sports, written by Wilcox students for Wilcox students.</p>
+    <form class="big-search" action="search/" role="search">
+      <div class="big-search-field">{ICONS["search"]}<input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
+      <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
+      <button class="btn">Search</button>
+    </form>
+    <nav class="hero-quick" aria-label="Jump to">{"".join(f'<a href="{href}">{ICONS[icon]}<span>{label}</span></a>' for href, icon, label in HERO_QUICK)}</nav>
+    <p class="hero-stats"><span><b>{len(courses)}</b> classes</span><span><b>{len(teachers)}</b> teachers</span><span><b>{n_clubs}</b> clubs</span><span><b>{n_sports}</b> teams</span></p>
+    <p class="hero-trust">Checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
+  </div>
+  <aside class="hero-side" aria-label="Right now at Wilcox">
+    <p class="hero-side-h">Right now</p>
+    <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
+  </aside>
 </section>
+<section id="inbox" class="inbox" aria-label="Your notifications" hidden></section>
+<section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
 
 <nav class="tiles" aria-label="Explore Wilkipedia">{tiles}</nav>
 
@@ -1237,7 +1264,7 @@ def main():
     depts, courses, teachers = load()
     build_data(depts, courses, teachers)       # first, so its output is in the data hash
     VERSIONS.update(asset_versions())
-    build_home(depts)
+    build_home(depts, courses, teachers)
     build_subjects(depts)
     build_courses(depts, courses)
     build_teachers(teachers, courses)

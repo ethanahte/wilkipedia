@@ -833,6 +833,25 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).
+- **Header** (build.py `page()` + `wireHeader()` in ui.js, 2026-09-29):
+  - Layout: one row everywhere. Logo · page pills (the current one lit with a gold underline) ·
+    More · search pill (opens the ⌘K palette) · language · night mode · Dashboard bell · your
+    picture. Your picture opens the account menu: Dashboard with its count, My work, To review
+    with a count plus a gold dot on the picture, Bounty board, Account, Settings, Sign out. That
+    replaced the gear and the "Review" link.
+  - Narrower screens: at ≤1000px the pill becomes a search button. At ≤760px the page links
+    move into the ☰ drawer (`#drawer`: every page grouped like More, plus Night mode and
+    Settings); night mode leaves the bar too.
+  - The header gets a shadow when scrolled. On phones it tucks away while scrolling down and
+    comes back on scroll up.
+  - Decided: no site-wide sidebar. Reading pages stay a centred column, the Dashboard has its
+    side menu, and class pages have their "On this page" list.
+- **Home hero**: split screen (分屏), the only new layout pattern.
+  - Left: kicker, headline, search (the placeholder rotates through real class and club names
+    from our data, never invented), quick links (`HERO_QUICK`), and counts from the data files.
+  - Right: "Right now", the live bell strip shown as today's periods in a column. It goes back
+    to one column below 900px, or when the home bell is turned off in Settings.
+  - "For you" and the cafeteria card follow under it.
 - **Breadcrumbs**: `crumbs(trail, here, path)` in build.py. Subject, class and teacher pages
   already had them; they gained `aria-label` and schema.org BreadcrumbList JSON-LD for search
   results. The current page isn't repeated, since its <h1> sits right under. Dashboard views
