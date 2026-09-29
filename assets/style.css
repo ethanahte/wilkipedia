@@ -452,6 +452,8 @@ details:not(.more)[open] > summary::after { content: ' −'; }
 .kv { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); }
 .kv .k { font: 600 .72rem/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .kv .v p:last-child { margin: 0; }
+/* long links (Drive, Docs) have no spaces to break at: let them wrap anywhere instead of running out of the card */
+.kv .v, .flist dd { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 560px) { .kv { grid-template-columns: 1fr; gap: 2px; } }
 .empty { color: var(--muted); padding: 14px 0; }
 .edit { font-size: .86rem; display: inline-block; margin-top: 8px; }

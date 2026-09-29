@@ -37,7 +37,7 @@ function payloadHtml(kind, p, before = null) {
     const body = !v ? '<span class="meta">(removed)</span>'
       : f.type === 'courses' ? (Array.isArray(v) ? v.map((x) => esc(courseName(x))).join(' · ') : esc(v))
       : f.type === 'pdf' ? `<a class="btn ghost small" data-pdf="${esc(v.path || '')}" href="#" aria-disabled="true" target="_blank" rel="noopener">📄 Open ${esc(v.name || 'PDF')}</a>
-          <span class="meta">${fileSize(v.size)} · read it all the way through</span>`
+          <span class="meta">${fileSize(v.size)} · ${f.reviewOnly ? 'only the review team can open this; check the facts against it' : 'read it all the way through'}</span>`
       : f.type === 'periods' ? scheduleBlock([{ year: p.school_year, periods: v }])
       : f.type === 'url' ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span class="bad">${esc(v)}</span>`)
       : f.type === 'textarea' ? prose(v) : esc(v);

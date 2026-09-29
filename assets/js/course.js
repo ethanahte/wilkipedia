@@ -31,7 +31,7 @@ function meta(sub, target) {
 
 function fieldList(kind, payload, skip = []) {
   const facts = KINDS[kind].fields
-    .filter((f) => payload[f.key] && !skip.includes(f.key) && f.key !== 'school_year')
+    .filter((f) => payload[f.key] && !skip.includes(f.key) && f.key !== 'school_year' && !f.reviewOnly)   // review-only files stay off the page
     .map((f) => {
       const v = payload[f.key];
       const body = f.type === 'url'

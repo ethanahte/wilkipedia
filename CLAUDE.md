@@ -1120,6 +1120,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     author's folder. A file opens for its uploader, reviewers, and anyone once a
     published submission points at it. So a sent-back or rejected guide can't be
     shared as a link to our storage. Files are never deleted.
+  - **Syllabus PDFs are review-only** (`syllabus_pdf` on teacher sections, `reviewOnly: true`). Ethan:
+    students post school-Drive syllabus links reviewers can't open. The file is proof for the facts,
+    never shown on the class page (`fieldList` skips `reviewOnly`), because a syllabus is the
+    teacher's own document and often has their email or phone. Storage keeps it private by itself:
+    only a published `payload.pdf` path becomes public, so any other key stays uploader + reviewers.
+    Never rename it to `pdf` or render it publicly.
   - UI: field type `pdf` in renderFields. `when` shows a field only for one value of
     another field; `whenAlt` relabels it and makes it optional (the link becomes
     "live version" for guides). `form.files()` + `withUploads()` upload on submit

@@ -61,7 +61,13 @@ export const KINDS = {
       { key: 'retakes', label: 'Retakes / test corrections', type: 'textarea' },
       { key: 'routine', label: 'Class routine', type: 'textarea',
         hint: 'e.g. "Warm-up quiz every Monday." Describe the class, not the person.' },
-      { key: 'syllabus_url', label: 'Link to the syllabus', type: 'url' },
+      { key: 'syllabus_url', label: 'Link to the syllabus', type: 'url',
+        hint: 'School Google Drive links usually only open for SCUSD accounts, so reviewers can’t check them. Uploading the PDF below is surer.' },
+      // Private to the review team: proof for the facts above, never shown on the class page. A
+      // syllabus is the teacher's own document and often lists their email or phone, which the
+      // site doesn't publish. (Only the `pdf` key ever becomes public in storage; this one never does.)
+      { key: 'syllabus_pdf', label: 'The syllabus (PDF, only reviewers see it)', type: 'pdf', reviewOnly: true,
+        hint: 'Only the review team can open it, to check the facts above. It’s never shown on the class page. Up to 5 MB.' },
       { key: 'room', label: 'Room number', type: 'text',
         hint: 'As it appears on the campus map, e.g. B204 or P116. This puts the class on the map. The period-by-period schedule is its own form: Room schedule.' },
       // Replaced by the room_schedule kind. Old sections keep and show theirs; new forms don't ask.
