@@ -909,6 +909,7 @@ def build_static():
   <div class="gv-panel" id="gv-panel" hidden></div>
   <aside class="gv-info" id="gv-info" hidden></aside>
   <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
+  <p class="gv-legend" id="gv-legend" aria-hidden="true"><span><i class="s"></i>Subject</span><span class="ap"><i class="a"></i>AP class</span><span><i class="c"></i>Class</span><span><i class="g"></i>Study guide</span></p>
 </div>
 <section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
   <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",

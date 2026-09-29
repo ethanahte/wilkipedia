@@ -107,8 +107,8 @@ export const KINDS = {
         whenAlt: ['type', GUIDE, 'Link to the live version (optional)', 'If you keep updating a Google Doc, link it here too. The PDF stays up even if the link stops working.'] },
       // One guide can serve several classes (Chemistry and AP Chemistry): it shows on each
       // class page and links to each class in the Study guides graph
-      { key: 'also', label: 'Also useful for other classes', type: 'courses', max: 3,
-        hint: 'Optional. If it works for more than one class, add up to 3 more. Type a class name and pick it from the list.' },
+      { key: 'also', label: 'Which other classes does it apply to?', type: 'courses', max: 3,
+        hint: 'Optional, up to 3 more. For example, an AP Spanish conjugation guide also works for Spanish III. Type a class name and pick it from the list.' },
       { key: 'author', label: 'Who made it?', type: 'text',
         hint: 'Leave blank if you made it yourself. If someone else made it, put their name so they get the credit, and check they’re OK with it being shared.' },
       { key: 'note', label: 'What it is good for', type: 'textarea' },

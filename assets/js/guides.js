@@ -14,7 +14,7 @@ import { initHeader, $, esc, courses, courseUrl, safeUrl, root, lessMotion } fro
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
-const C = { bg: '#1e1e1e', node: '#a8a8a8', guide: '#dcddde', subject: '#c9a227', empty: '#4a4a4a', line: '#3f3f3f', accent: '#f5c400', text: '#dcddde' };
+const C = { bg: '#1e1e1e', node: '#a8a8a8', guide: '#dcddde', subject: '#c9a227', ap: '#7aa7ff', empty: '#4a4a4a', line: '#3f3f3f', accent: '#f5c400', text: '#dcddde' };
 
 const [data, guides] = await Promise.all([courses(), s.approved({ kind: 'resource' }).catch(() => [])]);
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
@@ -24,7 +24,7 @@ const classesOf = (g) => [...new Set([g.course_slug, ...(g.payload.also || [])])
 const pdfLinks = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
 const openUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] : null) || safeUrl(g.payload.url);
 
-let opts = { orphans: false, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08 };
+let opts = { orphans: false, apColor: true, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08 };
 try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
 const save = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 
@@ -44,7 +44,7 @@ function graph(filter = '') {
                  hit: !q || d.name.toLowerCase().includes(q) });
   }
   for (const c of cls) {
-    nodes.push({ id: 'c:' + c.slug, kind: 'class', slug: c.slug, name: c.name, has: withGuides.has(c.slug),
+    nodes.push({ id: 'c:' + c.slug, kind: 'class', slug: c.slug, name: c.name, has: withGuides.has(c.slug), ap: /^AP\b/.test(c.name),
                  hit: !q || `${c.name} ${dept[c.department] || ''}`.toLowerCase().includes(q) });
     link('c:' + c.slug, 'd:' + c.department, 'subject');
   }
@@ -159,7 +159,7 @@ function render() {
   }
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .15);
-    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? C.guide : C.node;
+    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? C.guide : n.ap && opts.apColor ? C.ap : C.node;
     ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (n === hover ? 1 + .25 * fade : 1), 0, Math.PI * 2); ctx.fill();
   }
   // titles fade out as you zoom out (Obsidian's text fade threshold); the dot
@@ -280,7 +280,7 @@ function panel() {
   const tg = (k, label) => `<label class="gv-tg"><span>${label}</span><span class="tgl"><input type="checkbox" data-k="${k}" ${opts[k] ? 'checked' : ''}><span aria-hidden="true"></span></span></label>`;
   $('#gv-panel').innerHTML = `
     <details open><summary>Filters</summary>${tg('orphans', 'Classes without guides')}</details>
-    <details><summary>Display</summary>${sl('labels', 'Text fade threshold', .4, 3, .1)}${sl('size', 'Node size', .5, 2, .1)}${sl('thick', 'Link thickness', .5, 3, .1)}</details>
+    <details><summary>Display</summary>${tg('apColor', 'Colour AP classes')}${sl('labels', 'Text fade threshold', .4, 3, .1)}${sl('size', 'Node size', .5, 2, .1)}${sl('thick', 'Link thickness', .5, 3, .1)}</details>
     <details><summary>Forces</summary>${sl('gravity', 'Center force', 0, .4, .01)}${sl('repel', 'Repel force', 10, 200, 5)}${sl('link', 'Link distance', 10, 120, 5)}</details>
     <button type="button" class="gv-animate" id="gv-animate">Animate</button>`;
 }
@@ -332,6 +332,7 @@ function list() {
 }
 
 // ── wire up ──
+$('#gv-legend')?.classList.toggle('no-ap', !opts.apColor);
 list();
 panel();
 new ResizeObserver(size).observe(box);
@@ -347,7 +348,8 @@ $('#gv-panel').addEventListener('input', (e) => {
   const k = e.target.dataset.k; if (!k) return;
   opts[k] = e.target.type === 'checkbox' ? e.target.checked : Number(e.target.value);
   save();
-  if (e.target.type === 'checkbox') draw();                       // filters change what's on the graph
+  if (k === 'apColor') { $('#gv-legend').classList.toggle('no-ap', !opts.apColor); wake(); }   // just a colour
+  else if (e.target.type === 'checkbox') draw();                  // filters change what's on the graph
   else if (['repel', 'link', 'gravity'].includes(k)) { alpha = Math.max(alpha, .5); wake(); }   // forces: let it resettle
   else { for (const n of N) n.r = radius(n); wake(); }            // display: just redraw
 });

@@ -224,6 +224,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     subject, then guides and resources linked to every class they're for. The
     keyword links and prerequisite links were dropped. The list below the graph
     (by subject, then class) is the accessible version.
+  - AP classes (name starts "AP ") are blue (`C.ap`); Display → "Colour AP classes"
+    turns it off, and a legend sits bottom right. Guides get no text tag on the graph
+    (Jonathan asked; decided 2026-09-29): the link to their class is the tag, and pointing
+    at a guide lights up its classes.
   - A resource can be for several classes: the `also` field (type `courses`, up
     to 3 more slugs in payload.also) on the submit form. `approved({course_slug})`
     also returns rows whose payload.also has that class, so the guide shows on

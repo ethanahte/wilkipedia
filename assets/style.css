@@ -1596,9 +1596,14 @@ html.pal-open { overflow: hidden; }
 .gv-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; background: none; color: #8a8a8a; cursor: pointer; }
 .gv-hint { position: absolute; left: 14px; bottom: 10px; margin: 0; z-index: 2; font-size: .72rem; color: #6f6f6f; pointer-events: none; }
 .gv-fail { padding: 80px 24px; text-align: center; color: #b3b3b3; }
+.gv-legend { position: absolute; right: 14px; bottom: 10px; margin: 0; z-index: 2; display: flex; gap: 12px; font-size: .72rem; color: #8a8a8a; pointer-events: none; }
+.gv-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.gv-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.gv-legend .s { background: #c9a227; width: 12px; height: 12px; } .gv-legend .a { background: #7aa7ff; } .gv-legend .c { background: #a8a8a8; } .gv-legend .g { background: #dcddde; width: 7px; height: 7px; }
+.gv-legend.no-ap .ap { display: none; }
 .gv-class h3 { margin: 18px 0 4px; font-size: 1.2rem; }
 .gv-class h3 a { color: var(--ink); text-decoration: none; }
-@media (max-width: 640px) { .gv-chart { height: 64vh; } .gv-hint, .gv-count { display: none; } .gv-bar { justify-content: space-between; } .gv-panel { left: 12px; width: auto; } }
+@media (max-width: 640px) { .gv-chart { height: 64vh; } .gv-hint, .gv-count { display: none; } .gv-legend { left: 14px; right: auto; flex-wrap: wrap; } .gv-bar { justify-content: space-between; } .gv-panel { left: 12px; width: auto; } }
 
 /* ── By the numbers (numbers.js): lieflat-charts cards ──
    Card = conclusion title + legend line + chart + source line (all caps).
