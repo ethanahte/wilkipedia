@@ -243,16 +243,16 @@ function mountInbox(el) {
       : /edited/.test(m) ? ['', '✎'] : ['bad', '✕']);
     const what = (x) => `${KINDS[x.kind]?.label.toLowerCase() || 'submission'} for ${placeOf(x, name)[0]}`;
     el.innerHTML = `<div class="inbox-head"><b>For you</b>
-        <a href="${root}account/#notifications">All notifications <span aria-hidden="true">→</span></a></div>
+        <a href="${root}inbox/">Open your Inbox <span aria-hidden="true">→</span></a></div>
       <ul class="inbox-list">${back.map((x) => `<li class="inbox-item back"><span class="inbox-ic" aria-hidden="true">↩</span>
         <div><b>A reviewer sent back your ${esc(what(x))}.</b>
           ${x.review_note ? `<q class="inbox-note">${esc(x.review_note)}</q>` : ''}
-          <div class="inbox-act"><a class="btn small" href="${root}account/#edit-${x.id}">Make changes</a>
+          <div class="inbox-act"><a class="btn small" href="${root}inbox/#edit-${x.id}">Make changes</a>
             <span class="meta">Stays here until you resubmit or withdraw it.</span></div></div></li>`).join('')}
       ${fresh.slice(0, 3).map((n) => { const [cls, ic] = icon(n.message); return `<li class="inbox-item ${cls}">
         <span class="inbox-ic" aria-hidden="true">${ic}</span><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
         <span class="meta"> · ${ago(n.created_at)}</span></div></li>`; }).join('')}</ul>
-      ${fresh.length ? `<div class="inbox-foot">${fresh.length > 3 ? `<a href="${root}account/#notifications">+${fresh.length - 3} more</a>` : ''}
+      ${fresh.length ? `<div class="inbox-foot">${fresh.length > 3 ? `<a href="${root}inbox/">+${fresh.length - 3} more</a>` : ''}
         <button type="button" class="btn ghost small" data-read>Mark as read</button></div>` : ''}`;
     el.hidden = false;
     $('[data-read]', el)?.addEventListener('click', async () => {
@@ -446,34 +446,16 @@ const pages = {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
           <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${themeCard}${demoTools}`;
       } else {
-        const team = REVIEWER_ROLES.includes(me.role);
-        const [mine, data, notes, queue] = await Promise.all([s.mySubmissions(), courses(), s.notifications ? s.notifications() : [],
-          // Reviewers: what's waiting for them (a failed count just leaves the line out)
-          team ? Promise.all([s.pending(), s.heldComments(), s.reports()]).then((l) => l.map((x) => x.length)).catch(() => null) : null]);
-        const plural = (n, one) => `${n} ${one}${n === 1 ? '' : 's'}`;
-        const queueLine = !queue ? '' : queue.some(Boolean)
-          ? `<a class="queue-line" href="${root}review/"><b>Waiting for review:</b> ${[[queue[0], 'submission'], [queue[1], 'comment'], [queue[2], 'report']]
-              .filter(([n]) => n).map(([n, w]) => plural(n, w)).join(' · ')} <span aria-hidden="true">→</span></a>`
-          : `<p class="queue-line meta">The review queue is empty. <a href="${root}review/">Review desk →</a></p>`;
-        const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
-        // What you can still do with your own work: edit or withdraw it before it's
-        // live, or send a change to live work (it stays up until that's approved)
-        const waiting = new Set(mine.filter((x) => x.replaces && ['pending', 'changes'].includes(x.status)).map((x) => x.replaces));
-        const ownActions = (x) => {
-          if (!canEditOwn(x)) return '';
-          const btn = (act, text, cls = '') => `<button type="button" class="btn ghost small ${cls}" data-own="${act}">${text}</button>`;
-          if (x.status === 'pending') return `<div class="r-actions">${btn('edit', 'Edit')}${btn('withdraw', 'Withdraw', 'danger')}</div>`;
-          if (x.status === 'changes') return `<div class="r-actions">${btn('edit', 'Make changes and resubmit')}${btn('withdraw', 'Withdraw', 'danger')}</div>`;
-          if (x.status === 'approved') return waiting.has(x.id) ? '<div class="meta">Your change to this is waiting for review.</div>'
-            : `<div class="r-actions">${btn('edit', 'Suggest a change')}</div>`;
-          return '';
-        };
+        // Notifications and your work live in the Inbox now; this is just the way in
+        const [mine, unread] = await Promise.all([s.mySubmissions().catch(() => []), s.unreadCount ? s.unreadCount().catch(() => 0) : 0]);
+        const todo = mine.filter((x) => x.status === 'changes').length, review = mine.filter((x) => x.status === 'pending').length;
+        const inboxCard = `<a class="card inbox-card" href="${root}inbox/"><div><h2>Inbox</h2>
+            <p class="meta">${[unread ? `<b>${unread} new</b>` : 'No new notifications', todo ? `<b>${todo} sent back to you</b>` : '', review ? `${review} in review` : '',
+              `${mine.length} post${mine.length === 1 ? '' : 's'} in all`].filter(Boolean).join(' · ')}</p>
+            <p class="meta">Notifications, everything you’ve sent in, and your conversations with the review team.</p></div>
+          <span class="btn small">Open the Inbox →</span></a>`;
         $('#account').innerHTML = `
-          <section class="card" id="notifications"><h2>Notifications</h2>${queueLine}${notes.length ? `<ul class="notes">${notes.map((n) =>
-            `<li class="${n.read ? '' : 'unread'}"><div>${SENT_BACK.test(n.message) ? `<a href="#my-subs">${esc(n.message)}</a>`
-              : n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
-              <div class="meta">${ago(n.created_at)}</div></div></li>`).join('')}</ul>`
-            : '<p class="meta">Nothing yet. You’ll hear here when your work is published or a reviewer edits it.</p>'}</section>
+          ${inboxCard}
           <section class="card profile">
             <div class="profile-head">${avatarHtml(me, 'lg')}
               <div><b class="profile-name">${esc(me.name)}</b>${badge(me.school)}
@@ -508,14 +490,6 @@ const pages = {
 
           ${themeCard}
 
-          <section><h2>Your submissions</h2>${mine.length ? `<ul class="subs" id="my-subs">${mine.map((x) => `<li data-sid="${x.id}">
-            <span class="tag st-${x.status}">${label[x.status] || esc(x.status)}</span> ${x.replaces ? `Update to your ${esc(KINDS[x.kind].label.toLowerCase())}` : esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}
-            · ${(([w, h]) => `<a href="${h}">${esc(w)}</a>`)(placeOf(x, name))}
-            <span class="meta">${ago(x.created_at)}</span>
-            ${x.review_note ? `<div class="note">${x.status === 'pending' ? 'You were asked' : 'Reviewer'}: ${esc(x.review_note)}</div>` : ''}
-            ${ownActions(x)}</li>`).join('')}</ul>`
-            : `<p class="meta">Nothing yet. <a href="${root}bounties/">Find a bounty</a>.</p>`}</section>
-
           <section class="card"><h2>Account</h2>
             <p><button type="button" class="btn ghost" id="signout">Sign out</button></p>
             <p class="meta">To delete your account, ask a Wilkipedia admin. See <a href="${root}privacy/">Privacy</a> for what that removes.</p>
@@ -544,24 +518,9 @@ const pages = {
                                         show_on_leaderboard: $('#lb').checked }), 'Profile saved.');
         };
         $('#signout').onclick = () => guard(() => s.signOut());
-        $('#my-subs')?.addEventListener('click', async (e) => {
-          const b = e.target.closest('[data-own]');
-          const x = b && mine.find((y) => String(y.id) === b.closest('[data-sid]').dataset.sid);
-          if (!x) return;
-          if (b.dataset.own === 'edit') { openEditor(s, x, draw, 'author'); return; }
-          if (!confirm('Withdraw this? Reviewers won’t see it and it won’t be published. This can’t be undone.')) return;
-          if (await guard(() => s.withdraw(x.id), 'Withdrawn.')) draw();
-        });
-        if (notes.some((n) => !n.read)) s.markAllRead().then(() => setNoteCount(0));
-        // #edit-<id> (from the home page's "Make changes"): open that submission's editor
-        const want = /^#edit-(\d+)$/.exec(location.hash);
-        if (want) {
-          history.replaceState(null, '', location.pathname + location.search + '#my-subs');
-          const x = mine.find((y) => String(y.id) === want[1]);
-          const li = x && $(`#my-subs [data-sid="${x.id}"]`);
-          if (li) { li.scrollIntoView({ block: 'center' }); li.classList.add('flash'); }
-          if (x && canEditOwn(x) && ['pending', 'changes'].includes(x.status)) openEditor(s, x, draw, 'author');
-        }
+        // Old links (#notifications, #my-subs, #edit-<id>) now belong to the Inbox
+        const old = /^#(notifications|my-subs|edit-(\d+))$/.exec(location.hash);
+        if (old) location.replace(`${root}inbox/${old[2] ? `#edit-${old[2]}` : old[1] === 'my-subs' ? '#work' : ''}`);
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
@@ -628,7 +587,7 @@ const pages = {
       if (me) sections.push(['account', 'Your account', [
         row('Show me on the leaderboard', 'Your name and points on the Leaderboard. Your work keeps your name either way.', tgl('set-lb', 'Show me on the leaderboard', me.show_on_leaderboard)),
         row('Name, picture and class year', 'Edited on your account page.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
-        row('Notifications', 'When your work is published, sent back or edited by a reviewer.', `<a class="btn ghost small" href="${root}account/#notifications">See notifications</a>`),
+        row('Inbox', 'Notifications, everything you’ve sent in, and your conversations with the review team.', `<a class="btn ghost small" href="${root}inbox/">Open the Inbox</a>`),
       ].join(''), 'Saved to your account, so it follows you to every device.']);
       if (team) sections.push(['bounties', 'Bounty board', [
         row('Open the board on', 'The view the bounty page starts with.', seg('set-bview', 'Bounty board view', ls.get('wilkipedia-bounty-view', 'board'), [['board', 'Board'], ['agenda', 'Agenda'], ['ledger', 'Ledger'], ['orrery', 'Orrery']])),

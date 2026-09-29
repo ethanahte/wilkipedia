@@ -920,6 +920,34 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   is resubmitted or withdrawn) and unread notifications. Its "Make changes"
   button links to `account/#edit-<id>`, which opens that submission's editor.
   No email notifications, by decision (2026-09-27): authors are told on-site only.
+- **The Inbox** (`inbox/`, `inbox.js`, migration 017, 2026-09-28). This is the one place for
+  everything around your work (Ethan: 集成化, like Bilibili's message centre but not chat-style).
+  The header has a bell with the unread count; the count used to sit on the avatar. The home
+  "For you" card and Settings link here. The account page keeps only an Inbox card, and old
+  `account/#notifications|#my-subs|#edit-<id>` links redirect here.
+  - Tabs, by role:
+    - Updates (everyone): notifications by day, with filters and per-item/all read.
+    - My work (everyone): posts with a Sent in → In review → Published track, sorted so
+      "Needs you" comes first, plus your comments, feedback and reports with their state.
+    - Conversations (everyone).
+    - Review queue (reviewers and admins): counts, and threads whose author spoke last.
+    - People (admins): every member, their whole history, and their role via `set_role()`.
+      Admins can never change their own role.
+  - Conversations: table `messages`, one thread per subject (`submission:<id>`,
+    `feedback:<id>`, `report:<id>`). Only the sender and the review team can read it (the
+    whole team sees every thread), and people can write only `kind='note'`.
+    `on_status_notify` writes each reviewer decision into the thread (`kind='decision'`,
+    `status`), and `edit_submission` writes its note (`kind='edit'`), so a post keeps its whole
+    history. A resubmission is written too, and tells the reviewer who sent it back.
+  - No private messages between students, by design: they talk in public class-page
+    comments. A reply to your comment notifies you. The Privacy page says the team reads
+    conversations.
+  - notifications gained `kind`, `subject` and `actor_id`, and `notify()` writes them. New
+    sources: comment replies, comments approved or hidden by a reviewer, feedback
+    planned/done/closed, reports handled, new messages, role changes. People can now read
+    their own feedback and reports.
+  - Before 017 is run: `inboxNotes` falls back to the old columns, conversations are empty,
+    and the page shows a note asking for the migration.
 - **Authors' own work** (migration 014). Authors never write to `submissions`
   directly (only reviewers have an update policy):
   - `edit_own_submission` edits your own work while it's 'pending' or 'changes'.

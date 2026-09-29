@@ -319,6 +319,71 @@ async function live() {
       return error ? [] : data;          // before migration 006, just show none
     },
     async deleteFeedback(id) { ok(await sb.from('feedback').delete().eq('id', id)); },
+
+    // ── the Inbox (migration 017) ──
+    // Before 017 the new columns and tables don't exist: say so, and fall back quietly
+    async inboxReady() { const r = await sb.from('messages').select('id').limit(1); return !r.error; },
+    async inboxNotes(limit = 200) {
+      if (!me) return [];
+      const r = await sb.from('notifications').select(`*, actor:profiles!notifications_actor_id_fkey(${WHO})`)
+        .order('created_at', { ascending: false }).limit(limit);
+      if (!r.error) return r.data.map((n) => ({ ...n, actorName: n.actor?.display_name ?? null, actor: undefined }));
+      const old = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(limit);
+      return old.error ? [] : old.data;
+    },
+    async markRead(ids) { if (me && ids.length) await sb.from('notifications').update({ read: true }).in('id', ids); },
+    async markSubjectRead(subject) { if (me) await sb.from('notifications').update({ read: true }).eq('subject', subject).eq('read', false); },
+    async myComments() {
+      if (!me) return [];
+      return ok(await sb.from('comments').select('id, course_slug, parent_id, body, status, created_at')
+        .eq('user_id', me.id).order('created_at', { ascending: false }).limit(100));
+    },
+    async myFeedback() {
+      if (!me) return [];
+      const r = await sb.from('feedback').select('*').eq('user_id', me.id).order('created_at', { ascending: false });
+      return r.error ? [] : r.data;
+    },
+    async myReports() {
+      if (!me) return [];
+      const r = await sb.from('reports').select('*').eq('user_id', me.id).order('created_at', { ascending: false });
+      return r.error ? [] : r.data;
+    },
+    // One conversation, oldest first. `team`: the writer was a reviewer or admin.
+    async thread(subject) {
+      const r = await sb.from('messages').select(`*, profiles!messages_user_id_fkey(${WHO}, role)`).eq('subject', subject).order('created_at');
+      if (r.error) return [];
+      return r.data.map((m) => ({ ...withAuthor(m), team: REVIEWER_ROLES.includes(m.profiles?.role) }));
+    },
+    async sendMessage(subject, body) { ok(await sb.from('messages').insert({ subject, body })); },
+    // The latest messages this viewer may read (theirs, or everything for the team), newest first
+    async recentMessages(limit = 500) {
+      const r = await sb.from('messages').select(`id, subject, kind, status, body, created_at, user_id, profiles!messages_user_id_fkey(${WHO}, role)`)
+        .order('created_at', { ascending: false }).limit(limit);
+      if (r.error) return [];
+      return r.data.map((m) => ({ ...withAuthor(m), team: REVIEWER_ROLES.includes(m.profiles?.role) }));
+    },
+    // What a conversation is about
+    async subjectInfo(subject) {
+      const [type, sid] = subject.split(':'), idn = Number(sid);
+      if (type === 'submission') { const r = await sb.from('submissions').select(SUB).eq('id', idn).maybeSingle(); return r.data ? { type, ...withAuthor(r.data) } : null; }
+      if (type === 'feedback') { const r = await sb.from('feedback').select('*, profiles(display_name)').eq('id', idn).maybeSingle(); return r.data ? { type, ...withAuthor(r.data) } : null; }
+      if (type === 'report') { const r = await sb.from('reports').select('*, profiles(display_name)').eq('id', idn).maybeSingle(); return r.data ? { type, ...withAuthor(r.data) } : null; }
+      return null;
+    },
+    // Admins: every member, and everything one of them has done
+    async people() {
+      return ok(await sb.from('profiles').select('id, display_name, role, school_verified, grad_year, avatar, avatar_color, created_at')
+        .order('created_at', { ascending: false }));
+    },
+    async personActivity(uid) {
+      const [subs, comments, reports, feedback] = await Promise.all([
+        sb.from('submissions').select(SUB).eq('user_id', uid).order('created_at', { ascending: false }),
+        sb.from('comments').select('id, course_slug, body, status, created_at').eq('user_id', uid).order('created_at', { ascending: false }),
+        sb.from('reports').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+        sb.from('feedback').select('*').eq('user_id', uid).order('created_at', { ascending: false })]);
+      return { subs: (subs.data || []).map(withAuthor), comments: comments.data || [], reports: reports.data || [], feedback: feedback.data || [] };
+    },
+    async setRole(uid, role) { ok(await sb.rpc('set_role', { p_user: uid, p_role: role })); },
   };
 }
 
@@ -626,6 +691,49 @@ async function demo() {
 
     async sendFeedback(f) {
       (db.feedback ??= []).unshift({ id: id(), status: 'new', created_at: now(), user_id: db.me, ...f }); save();
+    },
+    // the Inbox, in this browser only
+    async inboxReady() { return true; },
+    async inboxNotes() { return (db.notes ?? []).filter((n) => n.user_id === db.me); },
+    async markRead(ids) { (db.notes ?? []).forEach((n) => { if (ids.includes(n.id)) n.read = true; }); save(); },
+    async markSubjectRead(subject) { (db.notes ?? []).forEach((n) => { if (n.user_id === db.me && n.subject === subject) n.read = true; }); save(); },
+    async myComments() { return db.comments.filter((c) => c.user_id === db.me).reverse(); },
+    async myFeedback() { return (db.feedback ?? []).filter((f) => f.user_id === db.me); },
+    async myReports() { return db.reports.filter((r) => r.user_id === db.me).reverse(); },
+    async thread(subject) {
+      return (db.messages ?? []).filter((m) => m.subject === subject)
+        .map((m) => ({ ...m, ...who(m.user_id), team: REVIEWER_ROLES.includes(db.users[m.user_id]?.role) }));
+    },
+    async sendMessage(subject, body) {
+      const u = need();
+      (db.messages ??= []).push({ id: id(), subject, kind: 'note', status: null, body: body.trim(), user_id: u.id, created_at: now() });
+      save();
+    },
+    async recentMessages() {
+      const u = db.users[db.me], team = u && REVIEWER_ROLES.includes(u.role);
+      const own = (subj) => { const [t, x] = subj.split(':'); const list = { submission: db.submissions, feedback: db.feedback ?? [], report: db.reports }[t] || [];
+        return list.find((y) => String(y.id) === x)?.user_id === db.me; };
+      return (db.messages ?? []).filter((m) => team || own(m.subject)).slice().reverse()
+        .map((m) => ({ ...m, ...who(m.user_id), team: REVIEWER_ROLES.includes(db.users[m.user_id]?.role) }));
+    },
+    async subjectInfo(subject) {
+      const [type, x] = subject.split(':');
+      const row = ({ submission: db.submissions, feedback: db.feedback ?? [], report: db.reports }[type] || []).find((y) => String(y.id) === x);
+      return row ? { type, ...(type === 'submission' ? sub(row) : { ...row, ...who(row.user_id) }) } : null;
+    },
+    async people() {
+      return Object.values(db.users).map((u) => ({ id: u.id, display_name: u.name, role: u.role, school_verified: u.school, grad_year: u.grad_year,
+        avatar: u.avatar, avatar_color: u.color, created_at: u.created_at || now() }));
+    },
+    async personActivity(uid) {
+      return { subs: db.submissions.filter((x) => x.user_id === uid).map(sub), comments: db.comments.filter((c) => c.user_id === uid),
+               reports: db.reports.filter((r) => r.user_id === uid), feedback: (db.feedback ?? []).filter((f) => f.user_id === uid) };
+    },
+    async setRole(uid, role) {
+      const me = db.users[db.me];
+      if (me?.role !== 'admin') throw new Error('Only admins change roles');
+      if (uid === db.me) throw new Error('You can’t change your own role');
+      db.users[uid].role = role; save();
     },
     async feedbackList() { reviewer(); return db.feedback ?? []; },
     async setFeedbackStatus(fid, status) { reviewer(); db.feedback.find((f) => f.id === fid).status = status; save(); },
