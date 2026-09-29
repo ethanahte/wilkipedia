@@ -831,6 +831,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).
+- **Dropdowns can be typed in** (`combo.js`, Jonathan): every `<select>` on the site, including ones
+  added later, gets a text box that filters its options (accent-blind, any word). The real select
+  stays underneath as the source of truth, so keep reading/setting `select.value` and listening for
+  `change` as usual. Opt a select out with `data-native`.
+- **Teachers are listed by last name** (`surname`/`byLastName` in ui.js, `surname()` in build.py:
+  the same rule twice). Last word, skipping Jr/Sr/II/III/IV. Two-part surnames go in `SURNAMES`, and
+  only from an official source (Velia **Gandara** Solis: the AVID page lists "Velia Gandara").
 - **Header** (build.py `page()` + `wireHeader()` in ui.js, 2026-09-29):
   - Layout, 极简 (Ethan: the bar with language + night mode + search pill + search icon was too
     crowded, and "Study guides" wrapped at ~1000px): logo · plain text links (the current one has

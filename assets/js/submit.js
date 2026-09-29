@@ -2,7 +2,7 @@
 //   ?course=<slug>&kind=<kind>&teacher=<name>   (from a course page)
 //   ?bounty=<id>                                 (from a claimed bounty)
 
-import { initHeader, requireUser, renderFields, withUploads, showResult, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
+import { initHeader, requireUser, renderFields, withUploads, showResult, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root, byLastName } from './ui.js';
 import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
@@ -16,7 +16,7 @@ suggestions.sports = acts?.sports?.map((c) => c.name) ?? [];
 // 'staff' (a room schedule) names a teacher but no course: a schedule spans several
 const noCourse = (scope) => scope === 'school' || scope === 'activity' || scope === 'staff';
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
-const allTeachers = [...new Set(data.courses.flatMap((c) => c.teachers || []))].sort((a, b) => a.localeCompare(b));
+const allTeachers = [...new Set(data.courses.flatMap((c) => c.teachers || []))].sort(byLastName);
 // The Period grid suggests the chosen teacher's classes first, then every class
 function periodSuggestions() {
   // each class followed by any separate sections Wilcox runs under it (String Orchestra, Chamber Orchestra)
@@ -55,7 +55,7 @@ function paintTeacher() {
   const wants = scope === 'teacher' || scope === 'course-or-teacher' || scope === 'staff';
   $('#teacher-row').hidden = !wants;
   if (!wants) return;
-  const list = scope === 'staff' ? allTeachers : bySlug[state.course]?.teachers || [];
+  const list = scope === 'staff' ? allTeachers : [...(bySlug[state.course]?.teachers || [])].sort(byLastName);
   $('#teacher-label').innerHTML = scope === 'teacher' || scope === 'staff'
     ? 'Teacher <span class="req">*</span>' : 'Teacher <span class="hint-inline">(optional)</span>';
   $('#teacher').innerHTML = `<option value="">${scope === 'teacher' || scope === 'staff' ? 'Choose…' : 'All teachers / not specific'}</option>`

@@ -44,6 +44,19 @@ GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "revi
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
 
+# Teachers are listed by last name (Jonathan). The surname is the last word, skipping Jr/Sr/II/III/IV,
+# except where the school's own pages show a two-part one: the AVID page lists "Velia Gandara".
+# assets/js/ui.js (surname) has the same rule for the dropdowns.
+SURNAMES = {"Velia Gandara Solis": "Gandara Solis"}
+def surname(name):
+    if name in SURNAMES:
+        return SURNAMES[name]
+    w = name.split()
+    if len(w) > 1 and re.fullmatch(r"(jr|sr|ii|iii|iv)\.?", w[-1], re.I):
+        w = w[:-1]
+    return w[-1] if w else ""
+
+
 def slugify(s):
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 
@@ -85,7 +98,7 @@ def load():
     if unmapped:
         print("  note: directory courses with no alias entry:", ", ".join(unmapped))
 
-    teacher_list = sorted(teachers.values(), key=lambda t: t["name"].split()[-1] + t["name"])
+    teacher_list = sorted(teachers.values(), key=lambda t: (surname(t["name"]).lower(), t["name"]))
     for t in teacher_list:
         t["slug"] = slugify(t["name"])
         for c in t["courses"]:

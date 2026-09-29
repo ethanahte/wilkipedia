@@ -487,6 +487,13 @@ export function collectSchedules(schedules, sections = []) {
   return by;
 }
 
+// Teachers are listed by last name (Jonathan). The surname is the last word, skipping Jr/Sr/II/III/IV,
+// except where the school's own pages show a two-part one: the AVID page lists "Velia Gandara".
+// tools/build.py has the same rule for the Teachers page.
+const SURNAMES = { 'Velia Gandara Solis': 'Gandara Solis' };
+export const surname = (name) => SURNAMES[name]
+  || String(name || '').trim().split(/\s+/).filter((w, i, a) => !(i && i === a.length - 1 && /^(jr|sr|ii|iii|iv)\.?$/i.test(w))).pop() || '';
+export const byLastName = (a, b) => surname(a).localeCompare(surname(b)) || String(a).localeCompare(String(b));
 export const slugify = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 // Where a submission lives, as [label, url]: its class page, a club/team card, or School info.
@@ -607,6 +614,7 @@ export async function initHeader() {
   }
   $('.search-btn')?.addEventListener('click', (e) => { e.preventDefault(); pal.then((m) => m.open()); });
   wireHeader();
+  import('./combo.js').then((m) => m.init());                  // every dropdown can be typed in
   import('./peek.js').then((m) => m.init(s));
   pageTransitions();
   // Any "Sign in" button outside the header (home panel, bounty gate…)
