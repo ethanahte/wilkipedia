@@ -2,7 +2,7 @@
 //   ?course=<slug>&kind=<kind>&teacher=<name>   (from a course page)
 //   ?bounty=<id>                                 (from a claimed bounty)
 
-import { initHeader, requireUser, renderFields, withUploads, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
+import { initHeader, requireUser, renderFields, withUploads, showResult, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root } from './ui.js';
 import { KINDS, schoolYear } from './forms.js';
 
 const s = await initHeader();
@@ -153,20 +153,22 @@ $('#submit-form').addEventListener('submit', async (e) => {
   if (!ok) return;
   drafts.clear(draftKey());
   $('#submit-form').hidden = true;
-  $('#done').hidden = false;
-  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'], room_schedule: [`${root}map/`, 'the map'] }[state.kind];
-  $('#done-course').innerHTML = back ? `<a class="btn ghost" href="${back[0]}">Back to ${back[1]}</a>`
-    : !noCourse(scope) && state.course
-      ? `<a class="btn ghost" href="${courseUrl(state.course)}">Back to ${esc(bySlug[state.course].name)}</a>` : '';
+  // a clear result, and the way back to where it'll live
+  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'], room_schedule: [`${root}map/`, 'the map'] }[state.kind]
+    || (!noCourse(scope) && state.course ? [courseUrl(state.course), bySlug[state.course].name] : null);
+  const again = () => {
+    $('#submit-form').reset();
+    if (state.course) $('#course').value = bySlug[state.course].name;
+    $('#submit-form').hidden = false;
+    $('#done').hidden = true;
+    paint();
+    scrollTo(0, 0);
+  };
+  showResult($('#done'), { status: 'good', title: 'Sent for review. Thank you!',
+    text: 'A reviewer will look at it soon. You’ll get a notification when it’s published, or if they ask for a change. You can reply to them in your Dashboard.',
+    actions: [back ? { label: `Back to ${back[1]}`, href: back[0], primary: true } : { label: 'Back to the home page', href: root, primary: true },
+      { label: 'Track it in your Dashboard', href: `${root}dashboard/#work` }, { label: 'Share something else', run: again }] });
   scrollTo(0, 0);
-});
-
-$('#again').addEventListener('click', () => {
-  $('#submit-form').reset();
-  if (state.course) $('#course').value = bySlug[state.course].name;
-  $('#submit-form').hidden = false;
-  $('#done').hidden = true;
-  paint();
 });
 
 bounties = await s.bounties();

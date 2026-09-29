@@ -233,12 +233,30 @@ async function live() {
     async editOwn(id, payload) { ok014(await sb.rpc('edit_own_submission', { p_id: id, p_payload: payload })); },
     // Study guide PDFs (migration 016): a private bucket. A file opens for its uploader and
     // reviewers, and for everyone once the submission pointing at it is published.
-    async uploadPdf(file) {
+    // Sent with XMLHttpRequest rather than supabase-js, because only XHR reports upload progress
+    // (onProgress gets 0..1). Same request supabase-js would make.
+    async uploadPdf(file, onProgress) {
       await checkPdf(file);
       const path = `${me.id}/${crypto.randomUUID()}.pdf`;
-      const { error } = await sb.storage.from('guides').upload(path, file, { contentType: 'application/pdf', upsert: false });
-      if (error) throw new Error(/bucket not found/i.test(error.message)
-        ? 'PDF uploads need migration 016 run in Supabase first.' : `Upload failed: ${error.message}`);
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) throw new Error('Sign in again to upload.');
+      await new Promise((ok, bad) => {
+        const x = new XMLHttpRequest();
+        x.open('POST', `${SUPABASE_URL}/storage/v1/object/guides/${path}`);
+        x.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
+        x.setRequestHeader('apikey', SUPABASE_KEY);
+        x.setRequestHeader('Content-Type', 'application/pdf');
+        x.setRequestHeader('x-upsert', 'false');
+        x.setRequestHeader('cache-control', '3600');
+        x.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(e.loaded / e.total); };
+        x.onload = () => {
+          if (x.status >= 200 && x.status < 300) { onProgress?.(1); return ok(); }
+          let msg = x.statusText; try { const j = JSON.parse(x.responseText); msg = j.message || j.error || msg; } catch { /* not JSON */ }
+          bad(new Error(/bucket not found/i.test(msg) ? 'PDF uploads need migration 016 run in Supabase first.' : `Upload failed: ${msg}`));
+        };
+        x.onerror = () => bad(new Error('Upload failed: check your connection and try again.'));
+        x.send(file);
+      });
       return pdfInfo(path, file);
     },
     // → { path: signed link } for the files this viewer may open (others are left out)
@@ -633,13 +651,14 @@ async function demo() {
     },
 
     // Mirrors edit_own_submission(), withdraw_submission() and on_submission_insert()
-    async uploadPdf(file) {
+    async uploadPdf(file, onProgress) {
       const u = need();
       await checkPdf(file);
       if (file.size > 2 * 1024 * 1024) throw new Error('In demo mode a PDF can be up to 2 MB (this browser keeps it).');
       const path = `${u.id}/${crypto.randomUUID()}.pdf`;
       db.files ??= {};
-      db.files[path] = await new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(file); });
+      db.files[path] = await new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad;
+        r.onprogress = (e) => { if (e.lengthComputable) onProgress?.(e.loaded / e.total); }; r.readAsDataURL(file); });
       save();
       return pdfInfo(path, file);
     },

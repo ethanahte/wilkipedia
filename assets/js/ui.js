@@ -86,7 +86,16 @@ export function toast(msg, kind = '', opts = {}) {
   // a loading toast turns into its result
   const settle = (k, m) => { t.className = `toast ${k} in`; t.dataset.kind = k; t.setAttribute('role', k === 'bad' ? 'alert' : 'status');
     $('.toast-ic', t).textContent = TOAST_ICON[k]; $('.toast-msg', t).textContent = m; left = k === 'bad' ? 6500 : 3000; run(); };
-  t.api = { close, done: (m) => settle('good', m), fail: (m) => settle('bad', m), el: t };
+  // progress(0..1): a bar and a percentage inside the toast (uploads)
+  const progress = (f) => {
+    let bar = $('.toast-bar', t);
+    if (!bar) { t.insertAdjacentHTML('beforeend', '<span class="toast-bar" aria-hidden="true"><i></i></span>'); bar = $('.toast-bar', t); }
+    const pct = Math.round(Math.min(1, Math.max(0, f)) * 100);
+    $('i', bar).style.width = `${pct}%`;
+    $('.toast-n', t).textContent = `${pct}%`;
+  };
+  t.api = { close, done: (m) => { $('.toast-bar', t)?.remove(); $('.toast-n', t).textContent = ''; settle('good', m); },
+            fail: (m) => { $('.toast-bar', t)?.remove(); $('.toast-n', t).textContent = ''; settle('bad', m); }, progress, el: t };
   return t.api;
 }
 toast.good = (m, o) => toast(m, 'good', o);
@@ -104,8 +113,8 @@ toast.loading = (m, o) => toast(m, 'load', { duration: 0, ...o });
 const NOASK = 'wilkipedia-noconfirm';
 export const confirmSkips = () => { try { return JSON.parse(localStorage.getItem(NOASK)) || []; } catch { return []; } };
 export const resetConfirms = () => { try { localStorage.removeItem(NOASK); } catch { /* storage blocked */ } };
-let lastPress = null;                                   // the button just pressed, when the caller can't say
-document.addEventListener('pointerdown', (e) => { lastPress = e.target.closest?.('button, a, select, [role="button"]') || null; }, true);
+let lastPress = null, lastPressAt = 0;                  // the button just pressed, when the caller can't say
+document.addEventListener('pointerdown', (e) => { lastPress = e.target.closest?.('button, a, select, [role="button"]') || null; lastPressAt = Date.now(); }, true);
 export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = 'Cancel', danger = true, key = null } = {}) {
   if (key && confirmSkips().includes(key)) return Promise.resolve(true);
   document.querySelector('.popc')?.dispatchEvent(new Event('popc-cancel'));
@@ -171,8 +180,54 @@ export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = '
 
 // Runs fn, toasting any error. Resolves to fn's result (or true) on success and
 // to undefined on failure, so callers can write `if (!(await guard(...))) return`.
+// ── the busy bar ──
+// A thin gold line across the top of the screen while something is being saved or sent.
+// It creeps towards the end while you wait and snaps full when done. Several at once share it.
+// guard() shows it for anything slower than a moment; busy(fn) does the same for other work.
+let busyN = 0, busyTimer = 0, busyAt = 0;
+function busyBar() {
+  let b = $('#busybar');
+  if (!b) { b = document.createElement('div'); b.id = 'busybar'; b.setAttribute('role', 'progressbar'); b.setAttribute('aria-label', 'Working'); b.innerHTML = '<i></i>'; document.body.append(b); }
+  return b;
+}
+export const progress = {
+  start() {
+    if (busyN++) return;
+    const b = busyBar(), i = $('i', b);
+    busyAt = 0.08; b.className = 'on'; i.style.width = '8%';
+    clearInterval(busyTimer);
+    busyTimer = setInterval(() => { busyAt += (0.9 - busyAt) * 0.08; i.style.width = `${busyAt * 100}%`; }, 250);   // never quite gets there
+  },
+  done() {
+    if (!busyN || --busyN) return;
+    clearInterval(busyTimer);
+    const b = busyBar(); $('i', b).style.width = '100%'; b.className = 'on end';
+    setTimeout(() => { if (!busyN) { b.className = ''; $('i', b).style.width = '0'; } }, 380);
+  },
+};
+// busy(fn): while fn runs (if it's slower than a moment, so quick things don't flicker), the
+// button you just pressed pulses its outline ring and can't be pressed again. With no button to
+// point at (a keyboard shortcut, something in the background), the busy bar shows instead.
+const pressedButton = () => {
+  const b = lastPress && Date.now() - lastPressAt < 1500 ? lastPress : document.activeElement;
+  return b?.isConnected && b.matches?.('button, .btn, [role="button"], input[type="submit"]') ? b : null;
+};
+export async function busy(fn) {
+  const btn = pressedButton();
+  let on = false;
+  const t = setTimeout(() => {
+    on = true;
+    if (btn) { btn.classList.add('is-loading'); btn.setAttribute('aria-busy', 'true'); } else progress.start();
+  }, 180);
+  try { return await fn(); }
+  finally {
+    clearTimeout(t);
+    if (on) { if (btn) { btn.classList.remove('is-loading'); btn.removeAttribute('aria-busy'); } else progress.done(); }
+  }
+}
+
 export async function guard(fn, okMsg) {
-  try { const r = await fn(); if (okMsg) toast(okMsg, 'good'); return r ?? true; }
+  try { const r = await busy(fn); if (okMsg) toast(okMsg, 'good'); return r ?? true; }
   catch (e) {
     console.error(e);
     const offline = !navigator.onLine || /failed to fetch|networkerror|load failed/i.test(e.message || '');
@@ -703,9 +758,16 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
     if (own) {
       if (sub.status !== 'changes' && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
       const ok = await guard(async () => { await withUploads(store, fields, payload); return live ? store.proposeUpdate(sub, payload) : store.editOwn(sub.id, payload); },
-        live ? 'Sent for review. Your live version stays up until it’s approved.'
-          : sub.status === 'changes' ? 'Resubmitted. It’s back with the reviewers.' : 'Saved.');
-      if (ok) { close(); onSaved?.(); }
+        live || sub.status === 'changes' ? null : 'Saved.');
+      if (!ok) return;
+      close(); onSaved?.();
+      // resubmitting or suggesting a change gets a clear answer, then back to where you were
+      if (live || sub.status === 'changes') {
+        showResult(null, { status: 'good', title: live ? 'Your change is with the reviewers' : 'Resubmitted. It’s back with the reviewers.',
+          text: live ? 'Your live version stays on the site until a reviewer approves the change. You’ll get a notification either way.'
+            : 'You’ll get a notification when they’ve looked again. If you want to explain what you changed, write to them in the conversation.',
+          actions: [{ label: 'Back to the page', primary: true }, { label: 'Open the conversation', href: `${root}dashboard/#thread/submission:${sub.id}` }] });
+      }
       return;
     }
     const note = $('#ed-note', wrap).value.trim();
@@ -993,11 +1055,52 @@ export function renderFields(el, kind, preset = {}, files = {}) {
   };
 }
 
+// ── result pages ──
+// One clear answer after something big (sent a post, sent feedback, resubmitted): a large
+// icon, what happened, what happens next, and where to go. In a container (it replaces what's
+// there) or, with no container, as a full-screen sheet over the page.
+//   showResult(null, { status: 'good', title: 'Sent for review', text: '…',
+//                      actions: [{ label: 'Back to the page', primary: true }, { label: 'Open your Dashboard', href: root + 'dashboard/' }] })
+// status: good | bad | warn | info. An action is a link (href), a function (run), or neither
+// (it just closes the sheet). Resolves when the sheet closes.
+const RESULT_ICON = { good: '✓', bad: '✕', warn: '!', info: 'i' };
+export function showResult(container, { status = 'good', title, text = '', note = '', actions = [] } = {}) {
+  const sheet = !container;
+  const wrap = document.createElement('div');
+  wrap.className = `result ${status}${sheet ? ' result-sheet' : ''}`;
+  if (sheet) { wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); }
+  wrap.setAttribute('aria-labelledby', 'result-t');
+  wrap.innerHTML = `<div class="result-card"><div class="result-ic" aria-hidden="true">${RESULT_ICON[status] || '✓'}</div>
+      <h2 id="result-t"></h2>${text ? '<p class="result-text"></p>' : ''}${note ? '<p class="result-note meta"></p>' : ''}
+      <div class="result-act">${actions.map((a, i) => a.href
+        ? `<a class="btn ${a.primary ? '' : 'ghost'}" data-i="${i}" href="${esc(a.href)}">${esc(a.label)}</a>`
+        : `<button type="button" class="btn ${a.primary ? '' : 'ghost'}" data-i="${i}">${esc(a.label)}</button>`).join('')}</div></div>`;
+  $('h2', wrap).textContent = title;
+  if (text) $('.result-text', wrap).textContent = text;
+  if (note) $('.result-note', wrap).textContent = note;
+  return new Promise((resolve) => {
+    const close = () => { if (sheet) { wrap.classList.remove('in'); setTimeout(() => wrap.remove(), 200); document.removeEventListener('keydown', onKey); } resolve(); };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    wrap.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-i]'); if (!b) return;
+      const a = actions[Number(b.dataset.i)];
+      if (a.href) return;                                     // a real link: let it go
+      if (a.run) a.run();
+      if (sheet || a.close !== false) close();
+    });
+    if (sheet) { document.body.append(wrap); document.addEventListener('keydown', onKey); requestAnimationFrame(() => wrap.classList.add('in')); }
+    else { container.replaceChildren(wrap); container.hidden = false; }
+    ($('.result-act .btn', wrap) || wrap).focus?.({ preventScroll: !sheet });
+  });
+}
+
 // Upload the PDFs picked in a form (see files()) and put where they went into the payload
 export async function withUploads(st, form, payload) {
   for (const [k, file] of Object.entries(form.files?.() || {})) {
-    const t = toast.loading(`Uploading ${file.name}…`);
-    try { payload[k] = await st.uploadPdf(file); } finally { t.close(); }
+    const t = toast.loading(`Uploading ${file.name}`);
+    t.progress(0);
+    try { payload[k] = await st.uploadPdf(file, (f) => t.progress(f)); t.done('Uploaded.'); }
+    catch (e) { t.close(); throw e; }
   }
   return payload;
 }

@@ -278,7 +278,7 @@ async function thread(panel, subject) {
       <div><b>${name}</b>${m.team ? ' <span class="tag team">Review team</span>' : ''} <span class="meta">· ${ago(m.created_at)}</span></div>${prose(m.body)}</div></li>`;
   };
   const canWrite = mine || team;
-  panel.innerHTML = `<p><a href="#threads" class="ib-back">← All conversations</a></p>
+  panel.innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><a href="#updates">Dashboard</a> / <a href="#threads">Conversations</a></nav>
     <article class="ib-card ib-subject">${head}
       <div class="r-actions">${type === 'submission' && mine && canEditOwn(x) && x.status === 'changes' ? '<button type="button" class="btn small" data-fix>Make changes and resubmit</button>' : ''}
         ${team && type === 'submission' && x.status === 'pending' ? '<a class="btn ghost small" href="#review">Review it in To review</a>' : ''}
@@ -349,7 +349,7 @@ async function person(panel, uid) {
   const convo = new Map();
   for (const m of msgs) if (subjects.has(m.subject)) (convo.get(m.subject) || convo.set(m.subject, []).get(m.subject)).push(m);
   const cstat = { held: 'Waiting', visible: 'Live', hidden: 'Hidden' };
-  panel.innerHTML = `<p><a href="#people" class="ib-back">← Everyone</a></p>
+  panel.innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><a href="#updates">Dashboard</a> / <a href="#people">People</a></nav>
     <div class="ib-me big">${avatarHtml(p, 'lg')}<div><h2>${esc(p.display_name)}</h2>
       <div class="meta">${esc(roleLabel(p.role))}${p.school_verified ? ' · SCUSD ✓' : ''}${p.grad_year ? ` · Class of ${p.grad_year}` : ''} · joined ${fmtDate(p.created_at)}</div></div></div>
     <div class="ib-tiles small">${[[act.subs.length, 'posts'], [act.subs.filter((x) => x.status === 'approved').length, 'published'], [act.comments.length, 'comments'],

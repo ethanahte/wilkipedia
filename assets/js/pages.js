@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { popconfirm, confirmSkips, resetConfirms, toast, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { popconfirm, confirmSkips, resetConfirms, toast, showResult, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
@@ -718,9 +718,14 @@ const pages = {
       if (!ok) return;
       drafts.clear('feedback');
       $('#fb-form').hidden = true;
-      $('#fb-done').hidden = false;
+      const from = $('#fb-page').value.trim();
+      showResult($('#fb-done'), { status: 'good', title: 'Thanks! We got it.',
+        text: s.user() ? 'The team reads every message. When it’s planned or done, you’ll get a notification, and you can add to it in your Dashboard.'
+          : 'The team reads every message. Sign in next time and you can follow what happens to it.',
+        actions: [from && from.startsWith('/') ? { label: 'Back to the page you were on', href: from, primary: true } : { label: 'Back to the home page', href: root, primary: true },
+          ...(s.user() ? [{ label: 'Follow it in your Dashboard', href: `${root}dashboard/#work` }] : []),
+          { label: 'Send more feedback', run: () => { $('#fb-form').reset(); $('#fb-form').hidden = false; $('#fb-done').hidden = true; } }] });
     });
-    $('#fb-again').onclick = () => { $('#fb-form').reset(); $('#fb-form').hidden = false; $('#fb-done').hidden = true; };
   },
 
   async credits() {

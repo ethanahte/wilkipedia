@@ -237,6 +237,30 @@ THEME_BOOT = ("<script>try{var d=document.documentElement,t=localStorage.getItem
               "}catch(e){}</script>")
 
 
+def crumbs(trail, here, here_path):
+    """The breadcrumb above a page's heading: [(label, relative href), …]. The page itself isn't
+    repeated (its <h1> sits right under it), but it's in the search engines' copy (BreadcrumbList)."""
+    nav = '<nav class="crumbs" aria-label="Breadcrumb">' + " / ".join(f'<a href="{h}">{e(l)}</a>' for l, h in trail) + "</nav>"
+    if not SITE_URL:
+        return nav
+    base = SITE_URL.rstrip("/") + "/"
+    items = [("Wilkipedia", "")] + [(label, path) for (label, _href), path in trail_paths(trail, here_path)] + [(here, here_path)]
+    ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i + 1, "name": l, "item": base + p} for i, (l, p) in enumerate(items)]}
+    return nav + f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+
+
+def trail_paths(trail, here_path):
+    """Turns each crumb's relative href into a path from the site root."""
+    depth = here_path.rstrip("/").count("/") + 1
+    out = []
+    for item in trail:
+        up, rest = item[1].count("../"), item[1].replace("../", "")
+        parts = here_path.rstrip("/").split("/")[: max(0, depth - up)]
+        out.append((item, "/".join(parts + ([rest.rstrip("/")] if rest else [])).strip("/") + "/"))
+    return out
+
+
 def page(path, title, body, *, desc="", script=None, active=None, data=None):
     """Writes ROOT/path/index.html (or ROOT/path if it ends in .html)."""
     out = ROOT / path if path.endswith(".html") else ROOT / path / "index.html"
@@ -417,7 +441,7 @@ def build_subjects(depts):
     for d in depts:
         svcte = d["slug"] == "svcte"
         page(f"subjects/{d['slug']}/", short_dept(d["name"]), f"""
-<nav class="crumbs"><a href="../">All classes</a></nav>
+{crumbs([("All classes", "../")], short_dept(d["name"]), f"subjects/{d['slug']}/")}
 <h1>{e(short_dept(d['name']))}</h1>
 {'<p class="note">SVCTE programs are taught at the Silicon Valley Career Technical Education campus, not at Wilcox. Ask your counselor about signing up.</p>' if svcte else ''}
 <p class="lede">{len(d['courses'])} classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
@@ -455,7 +479,7 @@ def build_courses(depts, courses):
         is_ap = c["name"].startswith("AP ")
         where = "" if c.get("offeredAtListed", True) else '<p class="note">This program is taught off campus at SVCTE, not at Wilcox.</p>'
         page(f"courses/{c['slug']}/", c["name"], f"""
-<nav class="crumbs"><a href="../../subjects/">All classes</a> / <a href="../../subjects/{e(c['department'])}/">{e(dept_name[c['department']])}</a></nav>
+{crumbs([("All classes", "../../subjects/"), (dept_name[c['department']], f"../../subjects/{c['department']}/")], c["name"], f"courses/{c['slug']}/")}
 <header class="entry-head">
   <div class="entry-title"><h1>{e(c['name'])}</h1><div class="c-badges">{course_badges(c)}</div></div>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}
@@ -508,7 +532,7 @@ def build_teachers(teachers, courses):
         cs = "".join(f'<li><a href="../../courses/{e(s)}/">{e(courses[s]["name"])}</a></li>' for s in t["courses"])
         others = [r for r in t["raw"] if r not in [None]]
         page(f"teachers/{t['slug']}/", t["name"], f"""
-<nav class="crumbs"><a href="../">Teachers</a></nav>
+{crumbs([("Teachers", "../")], t["name"], f"teachers/{t['slug']}/")}
 <h1>{e(t['name'])}</h1>
 <p class="meta">{e(', '.join(t['departments']))}</p>
 <h2>Classes</h2>
@@ -624,11 +648,7 @@ def build_static():
     <button class="btn big">Submit for review</button>
   </div>
 </form>
-<div id="done" class="done" hidden>
-  <h2>Submitted. Thank you!</h2>
-  <p>A reviewer will look at it soon. Track it in your <a href="../dashboard/#work">Dashboard</a>. If they ask for changes, you’ll get a notification and can reply to them there.</p>
-  <p><button class="btn" id="again">Add something else</button> <span id="done-course"></span></p>
-</div>
+<div id="done" class="done" hidden aria-live="polite"></div>
 <article class="nb-card dark nb-contrib">
   <h2 id="h-cascade">How much of Wilcox is written</h2>
   <p class="nb-sub">One dot = one class · <span class="nb-gold">gold</span> = students have written about it · columns = subjects. Click a grey dot to see a class nobody has written up yet.</p>
@@ -878,8 +898,7 @@ def build_static():
   <p id="fb-error" class="error" hidden></p>
   <button class="btn big">Send feedback</button>
 </form>
-<div id="fb-done" class="done" hidden><h2>Thanks! We got it.</h2><p>The team reads every message. If you were signed in, you can follow what happens to it in your <a href="../dashboard/#work">Dashboard</a>.</p>
-  <p><button type="button" class="btn ghost" id="fb-again">Send another</button></p></div>""", data={"page": "feedback"},
+<div id="fb-done" class="done" hidden aria-live="polite"></div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
 
     page("bell/", "Bell schedule", """

@@ -816,6 +816,27 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - `guard()` shows its success message as a success toast, and turns network failures
     into a plain "you're offline" error. Going offline or online shows a toast too.
   - PDF uploads show a loading toast. Use toasts, never alert().
+- **Feedback while things happen** (ui.js), added 2026-09-29:
+  - `popconfirm(anchor, {title, text, ok, danger, key})` is the "Are you sure?" bubble next to
+    a button; never use confirm(). `key` offers "Don't ask me again", stored in localStorage
+    `wilkipedia-noconfirm`; Settings → Pages → "Ask before deleting" clears it. Leave `key` out
+    for big or permanent actions (withdrawing a post, roles, erasing data, resetting settings),
+    so they always ask.
+  - `busy(fn)` (and so `guard()`): after 180 ms the button just pressed pulses its outline ring
+    gold (`.is-loading`, no spinner, by Ethan's choice) and can't be pressed twice. With no
+    button to point at, the thin gold busy bar across the top (`progress.start/done`) shows
+    instead. Never both.
+  - Uploads report real progress: `uploadPdf(file, onProgress)` uses XHR against the storage
+    REST endpoint (supabase-js can't report upload progress), and the loading toast gets a bar
+    with a percentage (`toast.loading(…).progress(0..1)`).
+  - `showResult(container | null, {status, title, text, actions})` is a clear result page
+    (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
+    (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
+    change (a full-screen sheet; "Back to the page" closes it).
+- **Breadcrumbs**: `crumbs(trail, here, path)` in build.py. Subject, class and teacher pages
+  already had them; they gained `aria-label` and schema.org BreadcrumbList JSON-LD for search
+  results. The current page isn't repeated, since its <h1> sits right under. Dashboard views
+  deeper than a tab (a conversation, a person) use the same `.crumbs`.
 - There is no node here, so check JS syntax with osascript (see git history of
   this note): an object-literal typo (`},,`) once broke the Review page silently.
 - **Night mode** is a reader choice (`html[data-theme]`, localStorage
