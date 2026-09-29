@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { popconfirm, confirmSkips, resetConfirms, toast, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
@@ -526,7 +526,7 @@ const pages = {
       }
       wireAppearance(s);
       $('#demo-reset')?.addEventListener('click', async () => {
-        if (!confirm('Erase all demo claims, submissions and comments in this browser?')) return;
+        if (!(await popconfirm($('#demo-reset'), { title: 'Erase all demo data?', text: 'Claims, submissions and comments in this browser.', ok: 'Erase' }))) return;
         await s.resetDemo(); location.reload();
       });
     };
@@ -562,6 +562,7 @@ const pages = {
       const team = !!me && REVIEWER_ROLES.includes(me.role);
       const drafts_ = ls.keys().filter((k) => k.startsWith(DRAFT)).length;
       const closed = ls.json('wilkipedia-dismissed-announcements', []).length;
+      const skips = confirmSkips().length;
       const o = orrOpts();
       const sections = [
         ['appearance', 'Appearance', [
@@ -580,6 +581,9 @@ const pages = {
           row('Contribute button', 'The round + button in the corner of every page. You can still contribute from the More menu or your account.', tgl('set-fab', 'Contribute button', getPref('fab') === 'on')),
           row('Tour of the site', 'The speech bubbles from your first sign-in that show where everything is.',
             '<button type="button" class="btn ghost small" id="set-tour">Start the tour</button>'),
+          row('Ask before deleting', skips ? `You turned off ${skips} “Are you sure?” question${skips === 1 ? '' : 's'} with “Don’t ask me again”. Bring them back to be asked every time.`
+            : 'Delete and withdraw buttons ask “Are you sure?” first. Some let you tick “Don’t ask me again”; this brings those back.',
+            `<button type="button" class="btn ghost small" id="set-ask" ${skips ? '' : 'disabled'}>Ask me again</button>`),
           row('Closed announcements', closed ? `You closed ${closed} announcement${closed === 1 ? '' : 's'}. Bring them back if they’re still running.` : 'Announcements you close with ✕ stay hidden in this browser.',
             `<button type="button" class="btn ghost small" id="set-ann" ${closed ? '' : 'disabled'}>Show them again</button>`),
         ].join('')],
@@ -643,6 +647,7 @@ const pages = {
       $('#set-fab').onchange = (e) => setPref('fab', e.target.checked ? 'on' : 'off');
       $('#set-tour').onclick = () => { scrollTo(0, 0); import('./tour.js').then((m) => m.startTour(s.user()?.name)); };
       $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); draw(); };
+      $('#set-ask').onclick = () => { resetConfirms(); toast('You’ll be asked before deleting again.', 'good'); draw(); };
       $('#set-lb')?.addEventListener('change', (e) => guard(() => s.updateProfile({ show_on_leaderboard: e.target.checked }),
         e.target.checked ? 'You’re on the leaderboard.' : 'You’re hidden from the leaderboard.'));
       for (const k of ['motion', 'labels', 'belt', 'photo']) {
@@ -651,20 +656,20 @@ const pages = {
       $('#set-c-prefs').onchange = (e) => { setCookiePrefs({ prefs: e.target.checked }); draw(); };
       $('#set-c-history').onchange = (e) => { setCookiePrefs({ history: e.target.checked }); draw(); };
       $('#set-c-gt')?.addEventListener('click', () => setLanguage('en'));
-      $('#set-c-clear').onclick = () => {
-        if (!confirm('Delete everything Wilkipedia saved in this browser? You stay signed in.')) return;
+      $('#set-c-clear').onclick = async (e) => {
+        if (!(await popconfirm(e.currentTarget, { title: 'Delete everything saved here?', text: 'Every setting, draft and choice in this browser. You stay signed in.' }))) return;
         storedKeys().filter((k) => storeGroup(k) !== 'need' || k === 'wilkipedia-cookies').forEach(ls.del);
         if (gt) setLanguage('en'); else location.reload();
       };
-      $('#set-drafts').onclick = () => {
-        if (!confirm('Delete every unsent draft saved in this browser?')) return;
+      $('#set-drafts').onclick = async (e) => {
+        if (!(await popconfirm(e.currentTarget, { title: 'Delete every unsent draft?', text: 'Half-written forms and comments in this browser.' }))) return;
         ls.keys().filter((k) => k.startsWith(DRAFT)).forEach(ls.del);
         draw();
       };
-      $('#set-reset').onclick = () => {
-        if (!confirm('Reset every setting in this browser back to normal?')) return;
+      $('#set-reset').onclick = async (e) => {
+        if (!(await popconfirm(e.currentTarget, { title: 'Reset every setting?', text: 'Theme, text size, language and the rest go back to normal.', ok: 'Reset' }))) return;
         ['wilkipedia-theme', 'wilkipedia-class', 'wilkipedia-class-applied', 'wilkipedia-dismissed-announcements',
-         'wilkipedia-orrery', 'wilkipedia-bounty-view', ...Object.keys(PREF_KEYS)].forEach(ls.del);
+         'wilkipedia-orrery', 'wilkipedia-bounty-view', 'wilkipedia-noconfirm', ...Object.keys(PREF_KEYS)].forEach(ls.del);
         if (currentLang() !== 'en') setLanguage('en'); else location.reload();
       };
     };
@@ -674,7 +679,7 @@ const pages = {
       'wilkipedia-class-applied': 'Class colour', 'wilkipedia-text': 'Text size', 'wilkipedia-motion': 'Motion',
       'wilkipedia-bell': 'Bell schedule on the home page', 'wilkipedia-fab': 'Contribute button', 'wilkipedia-homebg': 'Home page background',
       'wilkipedia-dismissed-announcements': 'Closed announcements', 'wilkipedia-bounty-view': 'Bounty board view',
-      'wilkipedia-orrery': 'Orrery display', 'wilkipedia-graph': 'Study-guide graph display',
+      'wilkipedia-orrery': 'Orrery display', 'wilkipedia-graph': 'Study-guide graph display', 'wilkipedia-noconfirm': '“Don’t ask me again” choices',
       'wilkipedia-recent-classes': 'Recently opened classes', 'wilcox-campus-quality': '3D campus quality',
       'wilcox-campus-sky2': '3D campus time and weather', 'wilcox-campus-sky': '3D campus time and weather (old)', 'wilcox-campus-style': '3D campus style',
     };

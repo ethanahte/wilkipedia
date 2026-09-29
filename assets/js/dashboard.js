@@ -12,7 +12,7 @@
 // #feedback #published(-off) #announcements #bounties #people #person/<id> #edit-<submission id>.
 // Old /inbox/ and /review/ addresses forward here.
 
-import { initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
+import { popconfirm, initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
          guard, courseUrl, roleLabel, avatarHtml, root } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES, canEditOwn } from './store.js';
@@ -209,7 +209,7 @@ async function work(panel) {
     const x = b && mine.find((y) => String(y.id) === b.closest('[data-sid]').dataset.sid);
     if (!x) return;
     if (b.dataset.own === 'edit') return openEditor(s, x, () => work(panel), 'author');
-    if (!confirm('Withdraw this? Reviewers won’t see it and it won’t be published. This can’t be undone.')) return;
+    if (!(await popconfirm(b, { title: 'Withdraw this post?', text: 'Reviewers won’t see it and it won’t be published. This can’t be undone.', ok: 'Withdraw' }))) return;
     if (await guard(() => s.withdraw(x.id), 'Withdrawn.')) work(panel);
   };
 }
@@ -336,7 +336,7 @@ async function people(panel) {
   panel.onchange = async (e) => {
     const sel = e.target.closest('[data-role]'); if (!sel) return;
     const p = list.find((y) => y.id === sel.closest('[data-uid]').dataset.uid);
-    if (!confirm(`Make ${p.display_name} a ${roleLabel(sel.value)}? They’ll get a notification.`)) { sel.value = p.role; return; }
+    if (!(await popconfirm(sel, { title: `Make ${p.display_name} a ${roleLabel(sel.value)}?`, text: 'They’ll get a notification.', ok: 'Change role', danger: false }))) { sel.value = p.role; return; }
     if (!(await guard(() => s.setRole(p.id, sel.value), 'Role changed.'))) sel.value = p.role;
   };
 }

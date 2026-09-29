@@ -2,7 +2,7 @@
 // for review, published work, held comments, reports, feedback, announcements and bounties.
 // The database only answers these queries for reviewers (see is_reviewer() in schema.sql).
 
-import { courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
+import { popconfirm, courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
 
 let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
@@ -214,7 +214,7 @@ async function onClick(e) {
       return;
     }
     if ('atoggle' in t.dataset && a) { await guard(() => s.updateAnnouncement(aid, { active: !a.active }), a.active ? 'Hidden from the site.' : 'Showing again.'); }
-    if ('adel' in t.dataset) { if (!confirm('Delete this announcement for good?')) return; await guard(() => s.deleteAnnouncement(aid), 'Deleted.'); }
+    if ('adel' in t.dataset) { if (!(await popconfirm(t, { title: 'Delete this announcement?', text: 'To take it down for now, Hide it instead.', key: 'announcement-delete' }))) return; await guard(() => s.deleteAnnouncement(aid), 'Deleted.'); }
     await redraw(); paintAnnouncements(s); return;
   }
   const card = t.closest('[data-id]');
@@ -233,13 +233,13 @@ async function onClick(e) {
   const cc = t.closest('[data-cid]');
   if (t.dataset.cact && cc) {
     const id = Number(cc.dataset.cid);
-    if (t.dataset.cact === 'delete' && !confirm('Delete this comment for good?')) return;
+    if (t.dataset.cact === 'delete' && !(await popconfirm(t, { title: 'Delete this comment?', text: 'It’s gone for good.', key: 'review-comment-delete' }))) return;
     await guard(() => (t.dataset.cact === 'delete' ? s.deleteComment(id) : s.moderateComment(id, 'visible')));
     return redraw();
   }
   const fc = t.closest('[data-fid]');
   if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus)); return redraw(); }
-  if (fc && 'fdel' in t.dataset) { if (!confirm('Delete this feedback?')) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return redraw(); }
+  if (fc && 'fdel' in t.dataset) { if (!(await popconfirm(t, { title: 'Delete this feedback?', text: 'Marking it closed keeps it instead.', key: 'feedback-delete' }))) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid))); return redraw(); }
   if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return redraw(); }
   if (t.dataset.tobounty) {
     const r = (await s.reports()).find((x) => String(x.id) === t.dataset.tobounty);

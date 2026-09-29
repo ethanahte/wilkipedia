@@ -1,7 +1,7 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, courses, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { popconfirm, initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, courses, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
 import { REVIEWER_ROLES } from './store.js';
 
@@ -232,7 +232,7 @@ document.addEventListener('click', async (e) => {
     $('#replying').hidden = false;
     $('#comment-body').focus();
   } else if (t.dataset.del) {
-    if (!confirm('Delete this comment?')) return;
+    if (!(await popconfirm(t, { title: 'Delete this comment?', ok: 'Delete', key: 'comment-delete' }))) return;
     await guard(() => s.deleteComment(Number(t.dataset.del)), 'Deleted.');
     drawComments();
   } else if (t.dataset.flag) {

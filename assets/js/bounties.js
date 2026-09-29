@@ -11,7 +11,7 @@
 // the size: S ~30 min, M ~2 hrs, L ~5+ hrs, which is also what it pays.
 // Only the review team sees this page; only admins post, edit, complete and close.
 
-import { initHeader, requireUser, courses, openBountyEditor, $, $$, esc, guard, fmtDate, courseUrl, root, RANKS, rankOf } from './ui.js';
+import { popconfirm, initHeader, requireUser, courses, openBountyEditor, $, $$, esc, guard, fmtDate, courseUrl, root, RANKS, rankOf } from './ui.js';
 import { SIZE_POINTS, REVIEWER_ROLES } from './store.js';
 import { createOrrery, hash01 } from './orrery.js';
 
@@ -337,10 +337,10 @@ async function act_(act, id, fromOrrery = false) {
     openBountyEditor(s, all.find((b) => b.id === id), courseList, load);
   } else if (act === 'done') {
     const who = t.doneBy.length ? ` Credited so far: ${t.doneBy.join(', ')}.` : ' No approved work is linked to it yet.';
-    if (!confirm(`Mark ${id} complete? It moves to the Ledger (and the Orrery's belt).${who}`)) return;
+    if (!(await popconfirm(null, { title: `Mark ${id} complete?`, text: `It moves to the Ledger (and the Orrery’s belt).${who}`, ok: 'Mark complete', danger: false, key: 'bounty-complete' }))) return;
     if (await guard(() => s.setBountyStatus(id, 'done'), `${id} completed.`)) { if (fromOrrery) orrery.focus(null); await load(); }
   } else if (act === 'close') {
-    if (!confirm(`Withdraw ${id}? It leaves the board and is listed as withdrawn in the Ledger.`)) return;
+    if (!(await popconfirm(null, { title: `Withdraw ${id}?`, text: 'It leaves the board and is listed as withdrawn in the Ledger. You can repost it.', ok: 'Withdraw', key: 'bounty-withdraw' }))) return;
     if (await guard(() => s.setBountyStatus(id, 'closed'), `${id} withdrawn.`)) { if (fromOrrery) orrery.focus(null); await load(); }
   } else if (act === 'repost') {
     if (await guard(() => s.setBountyStatus(id, 'open'), `${id} is back on the board.`)) { if (fromOrrery) orrery.focus(null); await load(); }

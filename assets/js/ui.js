@@ -95,6 +95,80 @@ toast.warn = (m, o) => toast(m, 'warn', o);
 toast.info = (m, o) => toast(m, 'info', o);
 toast.loading = (m, o) => toast(m, 'load', { duration: 0, ...o });
 
+// ── confirm bubbles (popconfirm) ──
+// A small bubble next to the button that asks "Are you sure?", instead of the browser's
+// OK/Cancel box. `key` offers "Don't ask me again" (kept in this browser; Settings → Pages →
+// "Ask before deleting" brings them all back). Leave `key` out for anything big or permanent,
+// so it always asks. Resolves to true (go ahead) or false.
+//   if (!(await popconfirm(button, { title: 'Delete this comment?', ok: 'Delete', key: 'comment-delete' }))) return;
+const NOASK = 'wilkipedia-noconfirm';
+export const confirmSkips = () => { try { return JSON.parse(localStorage.getItem(NOASK)) || []; } catch { return []; } };
+export const resetConfirms = () => { try { localStorage.removeItem(NOASK); } catch { /* storage blocked */ } };
+let lastPress = null;                                   // the button just pressed, when the caller can't say
+document.addEventListener('pointerdown', (e) => { lastPress = e.target.closest?.('button, a, select, [role="button"]') || null; }, true);
+export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = 'Cancel', danger = true, key = null } = {}) {
+  if (key && confirmSkips().includes(key)) return Promise.resolve(true);
+  document.querySelector('.popc')?.dispatchEvent(new Event('popc-cancel'));
+  anchor = anchor?.isConnected ? anchor : lastPress?.isConnected ? lastPress : document.activeElement !== document.body ? document.activeElement : null;
+  return new Promise((resolve) => {
+    const el = document.createElement('div'), uid = `popc-${Date.now()}`;
+    el.className = 'popc';
+    el.setAttribute('role', 'alertdialog');
+    el.setAttribute('aria-labelledby', `${uid}-t`);
+    if (text) el.setAttribute('aria-describedby', `${uid}-d`);
+    el.innerHTML = `<span class="popc-arrow" aria-hidden="true"></span>
+      <div class="popc-body"><span class="popc-ic ${danger ? 'danger' : ''}" aria-hidden="true">!</span>
+        <div><b id="${uid}-t"></b>${text ? `<p id="${uid}-d"></p>` : ''}</div></div>
+      ${key ? '<label class="popc-skip"><input type="checkbox"> Don’t ask me again</label>' : ''}
+      <div class="popc-act"><button type="button" class="btn ghost small" data-no></button><button type="button" class="btn small ${danger ? 'go-danger' : ''}" data-yes></button></div>`;
+    $('b', el).textContent = title;
+    if (text) $('p', el).textContent = text;
+    $('[data-no]', el).textContent = cancel;
+    $('[data-yes]', el).textContent = ok;
+    document.body.append(el);
+    const place = () => {
+      const w = el.offsetWidth, h = el.offsetHeight, r = anchor?.getBoundingClientRect();
+      if (!r || (!r.width && !r.height)) {                             // nothing to point at: the middle of the screen
+        el.style.left = `${Math.max(8, (innerWidth - w) / 2) + scrollX}px`; el.style.top = `${Math.max(8, (innerHeight - h) / 2) + scrollY}px`;
+        el.classList.add('free'); return;
+      }
+      const below = r.bottom + 10 + h <= innerHeight - 8 || r.top - 10 - h < 8;
+      const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+      el.style.left = `${left + scrollX}px`;
+      el.style.top = `${(below ? r.bottom + 10 : r.top - 10 - h) + scrollY}px`;
+      el.classList.toggle('above', !below);
+      $('.popc-arrow', el).style.left = `${Math.min(Math.max(14, r.left + r.width / 2 - left), w - 14)}px`;
+    };
+    place();
+    requestAnimationFrame(() => el.classList.add('in'));
+    const done = (v) => {
+      if (v && key && $('.popc-skip input', el)?.checked) {
+        try { localStorage.setItem(NOASK, JSON.stringify([...new Set([...confirmSkips(), key])])); } catch { /* storage blocked */ }
+      }
+      removeEventListener('resize', place); document.removeEventListener('keydown', onKey, true); document.removeEventListener('pointerdown', onOut, true);
+      const hadFocus = el.contains(document.activeElement);
+      el.remove();
+      if (hadFocus && anchor?.isConnected) anchor.focus?.({ preventScroll: true });   // back where you were
+      resolve(v);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); done(false); }
+      if (e.key === 'Tab') {                                           // keep Tab inside the bubble
+        const f = $$('input, button', el), i = f.indexOf(document.activeElement);
+        e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+      }
+    };
+    const onOut = (e) => { if (!el.contains(e.target) && !anchor?.contains?.(e.target)) done(false); };
+    addEventListener('resize', place);
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(() => document.addEventListener('pointerdown', onOut, true));
+    el.addEventListener('popc-cancel', () => done(false));
+    $('[data-no]', el).onclick = () => done(false);
+    $('[data-yes]', el).onclick = () => done(true);
+    $(danger ? '[data-no]' : '[data-yes]', el).focus({ preventScroll: true });   // Enter on a danger bubble never deletes by accident
+  });
+}
+
 // Runs fn, toasting any error. Resolves to fn's result (or true) on success and
 // to undefined on failure, so callers can write `if (!(await guard(...))) return`.
 export async function guard(fn, okMsg) {

@@ -13,7 +13,7 @@
 //                             edits or hides of file events (by their `id`)
 // The full file list is also in the page's HTML (#cal-list) for anyone without JS.
 
-import { initHeader, dataUrl, esc, $, toast } from './ui.js';
+import { popconfirm, initHeader, dataUrl, esc, $, toast } from './ui.js';
 
 const s = await initHeader();
 const [cal, extra] = await Promise.all([
@@ -309,7 +309,8 @@ app.addEventListener('click', async (e) => {
         : s.saveCalendarEvent({ id: ev.rowId, ...(ev.src !== 'site' ? { replaces: ev.id } : {}), hidden: false })), 'Back on the calendar.');
     }
     else if (a.dataset.act === 'undo') run(() => s.deleteCalendarEvent(ev.rowId), 'Back to the original.');
-    else if (a.dataset.act === 'delete' && confirm(`Delete “${ev.title}” from the calendar?`)) run(() => s.deleteCalendarEvent(ev.rowId), 'Deleted.');
+    else if (a.dataset.act === 'delete') popconfirm(a, { title: `Delete “${ev.title}”?`, text: 'It comes off the calendar for everyone.', key: 'calendar-delete' })
+      .then((yes) => yes && run(() => s.deleteCalendarEvent(ev.rowId), 'Deleted.'));
     return;
   }
   const g = e.target.closest('[data-go]');
