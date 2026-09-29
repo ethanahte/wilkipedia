@@ -120,7 +120,8 @@ export const KINDS = {
     blurb: 'One piece of advice for next year’s students.',
     scope: 'course-or-teacher',
     fields: [
-      { key: 'text', label: 'Your tip', type: 'textarea', required: true, max: 500 },
+      { key: 'text', label: 'Your tip', type: 'textarea', required: true, max: 500,
+        hint: 'How to do well: what to start early, what counts most, how to study. Not ways to skip the work or get around the teacher.' },
     ],
   },
 

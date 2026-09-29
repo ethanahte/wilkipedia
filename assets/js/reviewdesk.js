@@ -6,6 +6,11 @@ import { popconfirm, courses, toast, placeOf, openEditor, linkPdfs, fileSize, op
 import { KINDS } from './forms.js';
 
 let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
+// Words that often mean "how to get credit without doing the work" (Community rule 2). Only a
+// hint for the reviewer: it never blocks or rejects anything, and plenty of fine tips match.
+const SHORTCUT = /\bfull (points|credit|marks)\b|\bwithout (doing|reading|studying|actually)\b|\b(don'?t|doesn'?t|never|not|aren'?t|isn'?t|rarely|barely)( really| fully| even| actually)? (check|checked|read|grade|graded|look at)\b|\bskip(ping)? (the )?(homework|reading|assignments?|work)\b|\bcheat|\bcopy (the |someone|answers|off)|\bget away with\b|\b(chatgpt|ai) (to )?(do|write)s?\b/i;
+const shortcutFlag = (p) => (SHORTCUT.test(Object.values(p || {}).filter((v) => typeof v === 'string').join(' '))
+  ? '<p class="upd-note shortcut-flag"><span class="tag st-changes">Check</span> This might be a way around the work (<a href="../rules/" target="_blank">rule 2</a>). Tips on doing the work well are fine; ways to skip it aren’t.</p>' : '');
 const courseName = (slug) => bySlug[slug]?.name || slug || 'School-wide';
 
 // Draw one desk section into `panel`. `again` redraws it (after an action).
@@ -59,7 +64,7 @@ const tabs = {
           : 'The live version it was meant to update has been unpublished, so approving publishes this on its own.'}</p>` : ''}
         ${x.review_note ? `<p class="upd-note meta">Resubmitted. Last time a reviewer asked: “${esc(x.review_note)}”</p>` : ''}
         ${payloadHtml(x.kind, x.payload, x.original?.status === 'approved' ? x.original.payload : null)}
-        <div class="checklist meta">Check: facts have a source · no real test questions or answer keys · nothing personal about a teacher · links work${x.payload?.pdf ? ' · the whole PDF, including any names or emails in it' : ''}</div>
+        ${shortcutFlag(x.payload)}<div class="checklist meta">Check: facts have a source · no real test questions or answer keys · no ways to skip the work · nothing personal about a teacher · links work${x.payload?.pdf ? ' · the whole PDF, including any names or emails in it' : ''}</div>
         <div class="r-actions">
           <button class="btn" data-act="approved">Approve</button>
           <button class="btn ghost" data-act="changes">Needs changes…</button>

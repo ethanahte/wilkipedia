@@ -734,6 +734,7 @@ def build_static():
 <p class="lede">These keep Wilkipedia useful, and keep it online.</p>
 <ol class="rules">
   <li><b>No real tests, quizzes or answer keys.</b> Describe the test style (“30 multiple choice + 2 free response, curved”). Never post the questions.</li>
+  <li><b>No shortcuts around the work.</b> No tips on getting credit without doing the work, like which assignments nobody checks or how to get around a teacher’s rules, even when they’re true. Tips on doing the work well are what we want: what to start early, what counts most, how to study.</li>
   <li><b>About the class, not the person.</b> Nothing insulting or personal about any teacher or student. Teacher sections are facts about how the class runs.</li>
   <li><b>Link, don’t upload, copyrighted material.</b> Say where to find textbooks and teacher packets. Study guides you made yourself are welcome.</li>
   <li><b>Facts need a source.</b> Grading weights and policies should come from the syllabus or the teacher. Opinions are fine, but they’re labelled as student experience.</li>
@@ -771,7 +772,7 @@ def build_static():
 <h2 id="posting">3. What you post</h2>
 <p>Everything you post follows the <a href="../rules/">Community rules</a>. In short:</p>
 <ul>
-  <li><b>No real tests, quizzes or answer keys</b>, and no helping anyone cheat. Describing the test style is fine.</li>
+  <li><b>No real tests, quizzes or answer keys</b>, and no helping anyone cheat or skip the work. Describing the test style is fine.</li>
   <li><b>About the class, not the person.</b> Nothing insulting, personal or private about any teacher or student. No teacher ratings.</li>
   <li><b>Only what's true.</b> Facts need a source, and opinions are labelled as student experience. If you don't know, leave it blank.</li>
   <li><b>Only what's yours to share.</b> Don't upload textbooks, teacher packets or anything else you didn't make. Link to it instead.</li>

@@ -29,6 +29,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   against the site being shut down. Don't add star ratings.
 - **No hosting of tests, quizzes, answer keys or copyrighted packets.** Resources
   are links.
+- **No shortcuts around the work** (Community rule 2, Ethan): no tips on getting credit
+  without doing it ("many assignments aren't fully checked, so…"), even when true. Tips on
+  doing the work well are the point. The review desk flags likely ones (`SHORTCUT` in
+  reviewdesk.js). The flag is a hint for the reviewer; it never blocks or rejects anything.
 - **Reading never requires an account.**
 - **Keep teacher data to names and courses.** No emails, phone numbers or photos.
 - **Display names default to first name only** (see `handle_new_user`).
