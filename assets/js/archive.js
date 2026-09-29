@@ -1,8 +1,9 @@
-// The study guides archive (Ethan): every class at Wilcox as a frosted block, one column per
-// subject, and the classes that have study guides glow gold. Arrow keys, a drag or the wheel move
-// through a column; left and right move between subjects, and the columns wrap round. Picking a
-// block lifts it out towards you, a ripple runs through its neighbours, and a normal page panel
-// beside it lists that class's guides (real text, so it can be read, zoomed and translated).
+// The study guides archive (Ethan): every class at Wilcox as a card, one shelf per subject, the
+// cards standing side by side like files in a drawer (Ethan: not towers), and the classes that
+// have study guides glow gold. Left and right, a drag or the wheel move along a shelf; up and down
+// move between subjects, and the shelves wrap round. Picking a card lifts it out towards you, a
+// ripple runs through its neighbours, and a normal page panel beside it lists that class's guides
+// (real text, so it can be read, zoomed and translated).
 //
 // The idea and the motion come from RhineLabUI, a fan recreation of an Arknights terminal. Only
 // the MIT-licensed motion maths is adapted here (the ripple below). None of its models, logo,
@@ -23,9 +24,9 @@
 
 import { $, esc, courseUrl, root, lessMotion } from './ui.js';
 
-const LANE = 5.3, ROW = 0.52, W = 4.4, H = 0.38, D = 2.6;   // column spacing, row spacing, block size
-const CW = 512, CH = 44, PER = 4;                           // label cells in the texture atlas
-const SHOW = 2.6;                                           // columns drawn either side of the focus
+const COL = 2.5, SHELF = 2.45, W = 2.2, H = 1.5, D = 0.16;  // card spacing, shelf spacing, card size
+const CW = 224, CH = 152, PER = 9;                          // label cells in the texture atlas
+const SHOW = 1.3, SIDE = 8.5;                               // shelves above/below, cards either side
 
 const smooth = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * t * (10 + t * (-15 + 6 * t)); };
 const bell = (x, w) => Math.exp(-0.5 * (x / w) ** 2);
@@ -57,12 +58,12 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   const at = (lane, row) => cells.findIndex((x) => x.lane === lane && x.row === row);
 
   el.innerHTML = `<div class="ar-stage" tabindex="0" role="application" aria-roledescription="archive"
-      aria-label="Study guide archive. Up and down move through a subject's classes, left and right between subjects, Enter opens a class.">
+      aria-label="Study guide archive. Left and right move along a subject's classes, up and down between subjects, Enter opens a class.">
       <div class="ar-hud" aria-hidden="true"><span class="ar-k" id="ar-sub"></span><span class="ar-pos" id="ar-pos"></span></div>
       <form class="ar-jump" id="ar-jump" role="search"><label class="sr" for="ar-q">Jump to a class</label>
         <input id="ar-q" list="ar-classes" placeholder="Jump to a class…" autocomplete="off"><datalist id="ar-classes">${
           data.courses.map((c) => `<option value="${esc(c.name)}">`).join('')}</datalist></form>
-      <p class="ar-hint" aria-hidden="true">↑ ↓ classes · ← → subjects · Enter opens · drag or scroll</p>
+      <p class="ar-hint" aria-hidden="true">← → classes · ↑ ↓ subjects · Enter opens · drag or scroll</p>
       <aside class="ar-panel" id="ar-panel" hidden></aside>
       <p class="sr" aria-live="polite" id="ar-live"></p>
     </div>`;
@@ -135,7 +136,7 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   $('#ar-q', el).addEventListener('change', () => $('#ar-jump', el).requestSubmit());
   stage.addEventListener('keydown', (e) => {
     if (e.target.closest('input, a, button')) return;
-    const k = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }[e.key];
+    const k = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
     if (k) { e.preventDefault(); move(...k); return; }
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCell === focusCell() ? close() : open(focusCell()); }
     if (e.key === 'Escape' && openCell >= 0) { e.preventDefault(); close(); }
@@ -154,8 +155,8 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
-  const sky = new THREE.HemisphereLight(0xffffff, 0xd9d4c7, 1.7); scene.add(sky);
-  const sun = new THREE.DirectionalLight(0xffffff, 1.05); sun.position.set(-3, 8, 10); scene.add(sun);
+  const sky = new THREE.HemisphereLight(0xffffff, 0xd9d4c7, 1.3); scene.add(sky);
+  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-2, 3, 12); scene.add(sun);   // mostly from the front: the card faces are the point
   scene.add(sun.target);
 
   // blocks: one instanced box; their front labels: one instanced plane reading a texture atlas
@@ -182,11 +183,11 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   const labels = new THREE.InstancedMesh(labelGeo, labelMat, cells.length);
   labels.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   scene.add(labels);
-  // a heading over each column
+  // a heading over each shelf
   const heads = lanes.map(() => {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 96;
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(W, W * 96 / 1024), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false }));
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6 * 96 / 1024), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false }));
     scene.add(m); return { c, t, m };
   });
 
@@ -201,8 +202,8 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
       ink: dark ? '#ecebe6' : '#171717', inkGold: '#171717', muted: dark ? '#9a9892' : '#6b6a66',
     };
     scene.background = palette.bg;
-    scene.fog = new THREE.Fog(palette.bg, 14, 30);
-    sky.groundColor.set(dark ? 0x202020 : 0xd9d4c7); sky.intensity = dark ? 1.1 : 1.7;
+    scene.fog = new THREE.Fog(palette.bg, 12, 26);
+    sky.groundColor.set(dark ? 0x202020 : 0xd9d4c7); sky.intensity = dark ? 0.9 : 1.3; sun.intensity = dark ? 1.1 : 1.5;
     const g = atlas.getContext('2d');
     g.clearRect(0, 0, atlas.width, atlas.height);
     cells.forEach(({ c, n }, i) => {
@@ -210,19 +211,20 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
       g.save(); g.beginPath(); g.rect(x, y, CW, CH); g.clip();
       g.strokeStyle = n ? 'rgba(0,0,0,.16)' : palette.edge; g.lineWidth = 2;   // a hairline round the face
       g.strokeRect(x + 1, y + 1, CW - 2, CH - 2);
-      g.textBaseline = 'middle';
       g.fillStyle = n ? palette.inkGold : palette.ink;
-      g.font = '500 22px Newsreader, Georgia, serif';
-      let name = c.name;
-      const room = CW - (n ? 130 : 40);
-      while (g.measureText(name).width > room && name.length > 4) name = name.slice(0, -2).trimEnd() + '…';
-      g.fillText(name, x + 20, y + CH / 2 + 1);
-      if (n) {
-        g.font = '600 12px ui-monospace, Menlo, monospace'; g.letterSpacing = '2px';
-        g.textAlign = 'right';
-        g.fillText(`${n} GUIDE${n === 1 ? '' : 'S'}`, x + CW - 20, y + CH / 2 + 1);
-        g.textAlign = 'left'; g.letterSpacing = '0px';
+      g.textBaseline = 'alphabetic';
+      g.font = '500 21px Newsreader, Georgia, serif';
+      const words = c.name.split(' '), lines = [];
+      for (const w of words) {
+        const tryLine = lines.length ? `${lines[lines.length - 1]} ${w}` : w;
+        if (lines.length && g.measureText(tryLine).width <= CW - 30) lines[lines.length - 1] = tryLine; else lines.push(w);
       }
+      if (lines.length > 3) { lines.length = 3; lines[2] = lines[2].replace(/\s*\S*$/, '') + '…'; }
+      lines.forEach((ln, k) => g.fillText(ln, x + 15, y + 34 + k * 24));
+      g.font = '600 10px ui-monospace, Menlo, monospace'; g.letterSpacing = '2px';
+      g.fillStyle = n ? 'rgba(0,0,0,.72)' : palette.muted;
+      g.fillText(n ? `${n} GUIDE${n === 1 ? '' : 'S'}` : (/^AP\b/.test(c.name) ? 'AP' : ''), x + 15, y + CH - 16);
+      g.letterSpacing = '0px';
       g.restore();
     });
     tex.needsUpdate = true;
@@ -267,10 +269,10 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     if (Math.hypot(dx, dy) > 6) drag.moved = true;
     if (!drag.moved) return;
     drag.x = e.clientX; drag.y = e.clientY; drag.ax += dx; drag.ay += dy;
-    while (drag.ay <= -34) { drag.ay += 34; move(0, 1); }
-    while (drag.ay >= 34) { drag.ay -= 34; move(0, -1); }
-    while (drag.ax <= -110) { drag.ax += 110; move(1, 0); }
-    while (drag.ax >= 110) { drag.ax -= 110; move(-1, 0); }
+    while (drag.ax <= -70) { drag.ax += 70; move(0, 1); }
+    while (drag.ax >= 70) { drag.ax -= 70; move(0, -1); }
+    while (drag.ay <= -90) { drag.ay += 90; move(1, 0); }
+    while (drag.ay >= 90) { drag.ay -= 90; move(-1, 0); }
   });
   renderer.domElement.addEventListener('pointerup', (e) => {
     const was = drag; drag = null;
@@ -283,7 +285,7 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
   renderer.domElement.addEventListener('pointerleave', () => { px = py = 0; dirty = true; wake(); });
   renderer.domElement.addEventListener('wheel', (e) => {
     e.preventDefault();
-    wheel += e.deltaY;
+    wheel += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     while (wheel >= 60) { wheel -= 60; move(0, 1); }
     while (wheel <= -60) { wheel += 60; move(0, -1); }
   }, { passive: false });
@@ -298,7 +300,7 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     const still = lessMotion(), k = still ? 1e3 : 1;
     camLane = damp(camLane, cur, 7 * k, dt);
     camOff.x = damp(camOff.x, px * 0.5, 3 * k, dt); camOff.y = damp(camOff.y, py * 0.3, 3 * k, dt);
-    camOff.pan = damp(camOff.pan, openCell >= 0 ? 2.1 : 0, 6 * k, dt);   // make room for the panel
+    camOff.pan = damp(camOff.pan, openCell >= 0 ? 2.6 : 0, 6 * k, dt);   // make room for the panel
     const t = now / 1000, age = (now - openAt) / 1000, fc = focusCell();
     let moving = Math.abs(camLane - cur) > 1e-3 || (!still && age < 3.2 && openCell >= 0);
     for (let l = 0; l < NL; l++) {
@@ -308,37 +310,40 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     }
     const open = openCell >= 0 ? cells[openCell] : null;
     cells.forEach((x, i) => {
-      const dl = nearest(x.lane, camLane, NL);
-      if (Math.abs(dl - camLane) > SHOW) { M.makeScale(0, 0, 0); blocks.setMatrixAt(i, M); labels.setMatrixAt(i, M); return; }
-      const target = i === openCell ? 2.4 : i === fc ? 0.55 : 0;
+      const dl = nearest(x.lane, camLane, NL), across = x.row - scroll[x.lane];
+      if (Math.abs(dl - camLane) > SHOW || Math.abs(across) > SIDE) { M.makeScale(0, 0, 0); blocks.setMatrixAt(i, M); labels.setMatrixAt(i, M); return; }
+      const target = i === openCell ? 1.9 : i === fc ? 0.45 : 0;
       lift[i] = damp(lift[i], target, 9 * k, dt);
       if (Math.abs(lift[i] - target) > 1e-3) moving = true;
-      let z = lift[i] - (1 - laneW[x.lane]) * 0.7;
-      if (!still) z += 0.05 * Math.sin(t * 0.9 + x.row * 0.5 + x.lane * 1.3);
+      let z = lift[i] - (1 - laneW[x.lane]) * 0.9;
+      if (!still) z += 0.04 * Math.sin(t * 0.9 + x.row * 0.55 + x.lane * 1.3);
+      let y = 0;
       if (open && i !== openCell && !still) {
         const od = nearest(open.lane, dl, NL);
-        z += 0.9 * ripple(Math.hypot(x.row - open.row, (dl - od) * 2.2), age);
+        z += 0.7 * ripple(Math.hypot(x.row - open.row, (dl - od) * 2), age);
       }
-      P.set(dl * LANE, -(x.row - scroll[x.lane]) * ROW, z);
-      E.set(i === openCell ? 0.12 * smooth(lift[i] / 2.4) : 0, i === openCell ? -0.22 * smooth(lift[i] / 2.4) : 0, 0);
+      if (i === fc && openCell !== i) y = 0.08 * smooth(lift[i] / 0.45);    // the focused card rises a touch
+      const up = smooth(lift[i] / 1.9);
+      P.set(across * COL, -dl * SHELF + y + (i === openCell ? 0.25 * up : 0), z);
+      E.set(i === openCell ? -0.06 * up : 0, i === openCell ? -0.2 * up : 0, 0);
       Q.setFromEuler(E);
-      S.setScalar(1 + (i === openCell ? 0.05 * smooth(lift[i] / 2.4) : 0));
+      S.setScalar(1 + (i === openCell ? 0.14 * up : 0));
       M.compose(P, Q, S);
       blocks.setMatrixAt(i, M);
       labels.setMatrixAt(i, M.multiply(LM));
     });
     blocks.instanceMatrix.needsUpdate = labels.instanceMatrix.needsUpdate = true;
+    // wide screens look along the shelves a little from the right and above; tall ones head-on
+    const tall = camera.aspect < 1;
     heads.forEach(({ m }, l) => {
       const dl = nearest(l, camLane, NL);
       m.visible = Math.abs(dl - camLane) <= SHOW;
-      m.position.set(dl * LANE, 0.95 + scroll[l] * ROW, -(1 - laneW[l]) * 0.5);
+      // the shelf names stay put on screen when the cards shift over for the panel
+      m.position.set((tall ? -0.4 : -1.35) * COL + 1.2 + (tall ? 0 : camOff.pan), -dl * SHELF + H / 2 + 0.32, -(1 - laneW[l]) * 0.9);
     });
-    // wide screens look at the columns a little from the right; tall ones more head-on and lower,
-    // so the column starts near the top instead of under an empty sky
-    const tall = camera.aspect < 1;
-    T.set(camLane * LANE + (tall ? 0 : camOff.pan), tall ? -2.4 : -1.1, 0);
-    camera.position.set(T.x + (tall ? 1.1 : 3.2) + camOff.x, T.y + (tall ? 1.6 : 2.2) - camOff.y, tall ? 16 : 14);
-    camera.lookAt(T.x + (tall ? 0.1 : 0.4), T.y - 0.1, 0);
+    T.set(tall ? 0 : camOff.pan, -camLane * SHELF, 0);
+    camera.position.set(T.x + (tall ? 0.5 : 2.2) + camOff.x, T.y + (tall ? 0.9 : 1.4) - camOff.y, tall ? 14.5 : 13.5);
+    camera.lookAt(T.x + (tall ? 0.1 : 0.5), T.y - 0.15, 0);
     renderer.render(scene, camera);
     dirty = false;
     if (visible && (moving || dirty || !still)) raf = requestAnimationFrame(frame);
@@ -348,7 +353,7 @@ export async function mountArchive(el, { data, guides, openUrl, classesOf }) {
     if (!r.width || !r.height) return;
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height;
-    camera.fov = r.width < 640 ? 42 : 31;
+    camera.fov = r.width < 640 ? 46 : 34;
     camera.updateProjectionMatrix();
     dirty = true; wake();
   };

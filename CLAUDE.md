@@ -862,8 +862,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Study guides: Graph · Archive** (Ethan). Tabs on guides/ (`showView` in guides.js, remembered in
   `wilkipedia-guides-view`, `#archive` opens it). The archive (`archive.js`, loaded on first use) is a
   three.js scene using campus/vendor's three (import by absolute URL: a relative `import()` resolves
-  against the module, not the page). Every class is a block, one column per subject, columns wrap
-  round; classes with guides are gold and sort first. Pick one and it lifts out, a ripple runs
+  against the module, not the page). Every class is a card, one horizontal shelf per subject, cards
+  standing side by side (Ethan: not vertical towers); shelves wrap round, ← → along a shelf, ↑ ↓
+  between subjects. Classes with guides are gold and sort first. Pick one and it lifts out, a ripple runs
   through its neighbours, and a real-text panel lists its guides with a "decryption" reveal (bars
   pulling back per line, CSS only). Keyboard (arrows, Enter, Esc, Home/End), drag, wheel, jump box.
   The loop pauses off screen and in hidden tabs, and idles under reduced motion.
