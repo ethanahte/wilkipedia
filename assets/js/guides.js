@@ -355,3 +355,29 @@ $('#gv-panel').addEventListener('input', (e) => {
 });
 $('#gv-panel').addEventListener('click', (e) => { if (e.target.id === 'gv-animate') draw(true); });
 $('#gv-info').addEventListener('click', (e) => { if (e.target.closest('.gv-x')) info(null); });
+
+// ── Graph · Archive (archive.js, loaded the first time it's picked; the choice is remembered) ──
+const VIEW_KEY = 'wilkipedia-guides-view';
+let archive = null;
+async function showView(v, focus) {
+  const isArc = v === 'archive';
+  document.querySelectorAll('.gv-views [data-view]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+  $('#gv-graph').hidden = isArc; $('#ar').hidden = !isArc;
+  try { localStorage.setItem(VIEW_KEY, v); } catch { /* storage blocked */ }
+  if (isArc) {
+    archive ??= import('./archive.js').then((m) => m.mountArchive($('#ar'), { data, guides, openUrl, classesOf }));
+    const a = await archive;
+    if (focus) a?.focus();
+  } else { size(); wake(); }
+}
+document.querySelector('.gv-views').addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) showView(b.dataset.view, true); });
+document.querySelector('.gv-views').addEventListener('keydown', (e) => {          // arrow keys between the tabs
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const tabs = [...document.querySelectorAll('.gv-views [data-view]')], i = tabs.indexOf(document.activeElement);
+  if (i < 0) return;
+  const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+  next.focus(); showView(next.dataset.view);
+});
+let startView = location.hash === '#archive' ? 'archive' : 'graph';
+try { if (location.hash !== '#graph' && localStorage.getItem(VIEW_KEY) === 'archive') startView = 'archive'; } catch { /* ignore */ }
+if (startView === 'archive') showView('archive');
