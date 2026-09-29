@@ -1158,6 +1158,8 @@ def build_campus():
       <div class="vrow"><span class="vk">Style <kbd>P</kbd></span><div class="seg" data-set="style"><button type="button" data-v="diorama">Diorama</button><button type="button" data-v="pixel">Pixel</button></div></div>
       <div class="vrow"><span class="vk">Time <kbd>N</kbd></span><div class="seg" data-set="time"><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button></div></div>
       <div class="vrow"><span class="vk">Weather <kbd>R</kbd></span><div class="seg" data-set="rain"><button type="button" data-v="clear">Clear</button><button type="button" data-v="rain">Rain</button></div></div>
+      <div class="vrow"><span class="vk">Sound</span><div class="seg" data-set="sfx"><button type="button" data-v="off">Off</button><button type="button" data-v="on" title="Rain and the sounds around you">On</button></div></div>
+      <div class="vrow"><span class="vk">Music</span><div class="seg" data-set="music"><button type="button" data-v="off">Off</button><button type="button" data-v="on" title="Soft piano, made in the browser">On</button></div></div>
       <div class="vrow"><span class="vk">Quality</span><div class="seg" data-set="q"><button type="button" data-q="high" title="Outlines, soft shadows, bloom">High</button><button type="button" data-q="medium" title="Outlines and shadows">Medium</button><button type="button" data-q="low" title="No outlines or shadows: for older phones">Low</button></div></div>
       <div class="vrow go"><span class="vk">Go to</span><div class="vgo" id="vgo"></div></div>
     </div>

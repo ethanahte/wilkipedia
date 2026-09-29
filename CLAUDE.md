@@ -277,6 +277,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   `campus/campus.css`, three.js r169 vendored at `campus/vendor/`. build.py only
   writes `campus/index.html` (import map with `?v=` hashes), so `campus/` is not
   in GENERATED_DIRS. No npm/Vite (no node here); plain ES modules.
+  - **Sound** (`campus/js/sound.js`): rain and music are synthesized with Web Audio, with NO
+    audio files, so there is nothing to license. Ethan asked about Minecraft's music: it's copyrighted
+    (C418 / Mojang / Microsoft), so never add it or any other commercial track. Rain = looping
+    filtered noise (hiss + rumble) and random droplet taps, following the Weather toggle, quieter
+    when flying high. Music = an original generative piano piece (random walk over D major
+    pentatonic by day, A minor pentatonic lower and slower at night, long rests between phrases).
+    View panel rows "Sound" and "Music" (the rows live in build.py's campus template, since
+    campus/index.html is generated). Both off by default; `wilcox-campus-sound` remembers them; the
+    AudioContext starts only inside a click or key press, and suspends when hidden or both are off.
   - **All geometry comes from `campus/js/layout.js`**: metres, origin at the
     cedar's trunk, +x east, +z south. Measured off the Apple Maps satellite
     view (0.4675 m/px) and matched to the official campus map. Fix a building by

@@ -20,6 +20,7 @@ import { buildPortables } from './portables.js';
 import { buildQuad } from './quad.js';
 import { buildProps } from './props.js';
 import { makeSky, makeClouds, makeBirds, makeFlags, makeLeaves, makeRain, makeRipples, makeLightPools, makeLightCones, SUN, HORIZON } from './life.js';
+import { makeSound } from './sound.js';
 import { LIGHTS } from './lights.js';
 import { Controls } from './controls.js';
 import { loadRooms, rooms, byId, makeHighlight, placeHighlight, standFor } from './rooms.js';
@@ -191,6 +192,9 @@ async function boot() {
   const saveEnv = () => { try { localStorage.setItem(TKEY, JSON.stringify(env)); } catch { /* ok */ } };
   const toggleNight = () => { env.night = !env.night; applyEnv(); saveEnv(); };
   const toggleRain = () => { env.rain = !env.rain; applyEnv(); saveEnv(); };
+  // rain sound and music (sound.js): made in code, off until the viewer turns them on
+  const sound = makeSound();
+  hud.setSound(sound.prefs);
   const toggleStyle = () => {
     style = style === 'pixel' ? 'diorama' : 'pixel';
     try { localStorage.setItem(SKEY, style); } catch { /* ok */ }
@@ -314,6 +318,7 @@ async function boot() {
   hud.bind({
     onFly: toggleFly, onMap: toggleMap, onQuality: (q) => applyQuality(q),
     onStyle: (s) => api.setStyle(s), onTime: (t) => api.setTime(t), onRain: (on) => api.setRain(on),
+    onSfx: (on) => { sound.setSfx(on); hud.setSound(sound.prefs); }, onMusic: (on) => { sound.setMusic(on); hud.setSound(sound.prefs); },
     spots: SPOTS.map((s) => s[0]), onGo: (i) => goToSpot(i),
     onHelp: () => { document.getElementById('help').hidden = false; document.exitPointerLock?.(); },
   });
@@ -355,6 +360,7 @@ async function boot() {
     } else lamps.forEach((l) => { l.intensity = 0; });
     leaves.userData.update(dt, t, camera.position, walking && !env.rain);
     rain.userData.update(dt, camera.position, env.rain, !walking);
+    sound.update(dt, { rain: env.rain, walking, height: camera.position.y, night: env.night });
     ripples.userData.update(dt, walking ? controls.pos : camera.position, env.rain && walking);
     const dens = (env.night ? NIGHT : DAY).density * (env.rain ? 1.3 : 1);
     // from the air the land stays clear however far you zoom out (Ethan): thinner fog the

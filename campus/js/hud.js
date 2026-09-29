@@ -177,8 +177,9 @@ export class Hud {
   setEnv(env) { this._seg('time', env.night ? 'night' : 'day'); this._seg('rain', env.rain ? 'rain' : 'clear'); }
 
   setStyle(style) { this._seg('style', style); }
+  setSound(p) { this._seg('sfx', p.sfx ? 'on' : 'off'); this._seg('music', p.music ? 'on' : 'off'); }
 
-  bind({ onFly, onMap, onQuality, onHelp, onStyle, onTime, onRain, spots = [], onGo }) {
+  bind({ onFly, onMap, onQuality, onHelp, onStyle, onTime, onRain, onSfx, onMusic, spots = [], onGo }) {
     $('#btn-fly').onclick = onFly;
     $('#btn-map').onclick = onMap;
     $('#minimap').onclick = onMap;
@@ -195,6 +196,8 @@ export class Hud {
         else if (set === 'style') onStyle(b.dataset.v);
         else if (set === 'time') onTime(b.dataset.v);
         else if (set === 'rain') onRain(b.dataset.v === 'rain');
+        else if (set === 'sfx') onSfx?.(b.dataset.v === 'on');
+        else if (set === 'music') onMusic?.(b.dataset.v === 'on');
       };
     }
     $('#vgo').innerHTML = spots.map((s, i) => `<button type="button" data-go="${i}"><kbd>${i + 1}</kbd>${s}</button>`).join('');
