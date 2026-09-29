@@ -159,7 +159,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only informs and is not a consent wall. The only third party is the Google
   Translate `googtrans` cookie, set only when someone picks a language.
 - **Interaction layer** (the "impressive but not AI" pass):
-  - Home **pathways map** (`pathways.js`, data from `tools/pathways.py` →
+  - **Home study guides** (Ethan: the guides are the main thing on the site): a section after the
+    tiles with a class finder (goes to that class's `#s-resources`) and the 6 newest approved
+    study guides (type GUIDE or a PDF), each opening the guide itself. It replaced the pathways
+    map, which Ethan found cool but not useful enough for the home page.
+  - **Pathways map**, now a closed fold on All classes (`#pw-fold`, drawn when first opened;
+    `#pw-fold` in the URL opens it). Clicking a class just goes there: the old zoom-into-the-map
+    redrew the whole SVG every frame and then the page transition ran on top, which felt rough.
+    (`pathways.js`, data from `tools/pathways.py` →
     `data/pathways.json`): every catalog class as a station on a transit map,
     with its subject as the row. Linked classes sit in columns by chain step.
     Every link comes from catalog wording via the ALIASES table, and the map

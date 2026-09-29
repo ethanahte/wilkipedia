@@ -1,11 +1,11 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
-import { KINDS, staleness } from './forms.js';
+import { KINDS, GUIDE, staleness } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES, canEditOwn } from './store.js';
 
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
@@ -277,6 +277,38 @@ async function heroExamples(input) {
   }, 3200);
 }
 
+// Home: the study guides, the main thing on the site (Ethan). A class finder (to that class's
+// guides), then the newest guides, each opening the guide itself.
+async function homeGuides(data, name) {
+  const box = $('#home-guides');
+  if (!box) return;
+  const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
+  $('#hg-classes').innerHTML = data.courses.map((c) => `<option value="${esc(c.name)}">`).join('');
+  $('#hg-find').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = $('#hg-class').value.trim().toLowerCase();
+    if (!v) return $('#hg-class').focus();
+    const c = data.courses.find((x) => x.name.toLowerCase() === v) || data.courses.find((x) => x.name.toLowerCase().includes(v));
+    if (c) location.href = `${courseUrl(c.slug)}#s-resources`;
+    else toast(`No class called “${$('#hg-class').value.trim()}”. Pick one from the list.`, 'warn');
+  });
+  const all = await s.approved({ kind: 'resource' }).catch(() => []);
+  const guides = all.filter((g) => g.payload?.type === GUIDE || g.payload?.pdf).slice(0, 6);
+  if (!guides.length) {
+    box.innerHTML = '<div class="empty">No study guides yet. <a href="submit/?kind=resource">Be the first to share one</a>.</div>';
+    return;
+  }
+  const links = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
+  box.innerHTML = guides.map((g) => {
+    const u = (g.payload.pdf?.path && links[g.payload.pdf.path]) || safeUrl(g.payload.url);
+    const classes = [g.course_slug, ...(g.payload.also || [])].filter((c) => bySlug[c]);
+    return `<article class="hg-card">
+      <div class="hg-k">${classes.map((c) => `<a href="${courseUrl(c)}#s-resources">${esc(name[c])}</a>`).join(' · ') || 'Study guide'}</div>
+      <h3>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(g.payload.title)}</a>` : esc(g.payload.title)}</h3>
+      <p class="meta">${g.payload.pdf ? 'PDF · ' : ''}by ${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p></article>`;
+  }).join('');
+}
+
 const pages = {
   async home() {
     heroExamples($('#home-q'));
@@ -284,11 +316,11 @@ const pages = {
     mountInbox($('#inbox'));
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
-    import('./pathways.js').then((m) => m.mount($('#pathways'), s));
     attach($('#home-q'), $('#home-results'));
     addLive(s);
     const [recent, data] = await Promise.all([s.recent(4), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
+    homeGuides(data, name);
     $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name); return `<a href="${href}">
       ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(where)}</b>
       <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`; }).join('')
@@ -297,6 +329,9 @@ const pages = {
 
   async subject() {
     if ($('#arcmatrix')) import('./charts.js').then((m) => m.mountArcMatrix());
+    // the class map is drawn only when its fold is first opened
+    $('#pw-fold')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.on) { e.target.dataset.on = '1'; import('./pathways.js').then((m) => m.mount($('#pathways'), s)); } });
+    if (location.hash === '#pw-fold' && $('#pw-fold')) $('#pw-fold').open = true;
     if (location.hash === '#ag' && $('#ag')) $('#ag').open = true;       // from the old By the numbers link
     await markContent();
     const state = { f: 'all', sort: 'subject' };

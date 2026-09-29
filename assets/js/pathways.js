@@ -1,11 +1,10 @@
-// The home page's pathways map: every class in the course catalog, laid out like
+// The pathways map (All classes page, folded): every class in the course catalog, laid out like
 // a transit map. Rows are subjects; a class the catalog links to another by a
 // prerequisite sits in a column for how far along its chain it is, and one it
 // links to nothing (all of English, for one) is a hollow station in a row below,
 // in grade order, with no line: nothing here is invented. Point at a class and its whole path lights
 // up (what leads to it, and what it leads to), a tip beside it quotes its
-// prerequisite, and the catalog's own wording sits underneath; click and the
-// map flies into the class page.
+// prerequisite, and the catalog's own wording sits underneath; click to open the class page.
 //
 // Data: data/pathways.json, built by tools/pathways.py from catalog.json.
 // Nothing here is inferred: the info bar always quotes the catalog.
@@ -191,23 +190,10 @@ export async function mount(el, s) {
       <a class="add-link" href="${courseUrl(slug)}">Open the class page →</a></div>`;
   }
 
-  // Fly into the class, then go there (the page transition takes it from here)
-  function fly(a) {
-    const href = a.getAttribute('href');
-    if (lessMotion()) { location.href = href; return; }
-    const p = pos[a.dataset.slug];
-    const from = root.viewBox.baseVal, to = { x: p.x - 60, y: p.y - 34, w: 120, h: 68 };
-    const start = { x: from.x, y: from.y, w: from.width, h: from.height };
-    root.classList.add('flying');
-    const t0 = performance.now(), D = 520;
-    setTimeout(() => { location.href = href; }, D + 250);   // go even if animation frames are held back
-    const ease = (t) => 1 - Math.pow(1 - t, 3);
-    (function step(now) {
-      const k = ease(Math.min(1, (now - t0) / D));
-      root.setAttribute('viewBox', ['x', 'y', 'w', 'h'].map((q) => start[q] + (to[q] - start[q]) * k).join(' '));
-      if (k < 1) requestAnimationFrame(step); else location.href = href;
-    })(t0);
-  }
+  // Go straight to the class. The old zoom into the map redrew the whole map every frame and then
+  // the page transition animated again on top (Ethan: "not smooth"); the page transition alone
+  // carries the class name up into the class page's title.
+  const go = (a) => { location.href = a.getAttribute('href'); };   // pageTransitions() in ui.js names the title
 
   const touch = matchMedia('(hover: none)').matches;
   root.addEventListener('pointerover', (e) => { const a = e.target.closest('.pw-node'); if (a && !touch) { focus(a.dataset.slug); showTip(a); } });
@@ -222,15 +208,13 @@ export async function mount(el, s) {
     e.preventDefault();
     if (touch && pinned !== a.dataset.slug) { pinned = a.dataset.slug; focus(pinned); showTip(a); return; }   // tap once to look, twice to go
     showTip(null);
-    fly(a);
+    go(a);
   });
 
   // Draw the lines in when the map first scrolls into view
   if (lessMotion() || !('IntersectionObserver' in window)) root.classList.add('in');
   else new IntersectionObserver((es, io) => { if (es.some((x) => x.isIntersecting)) { root.classList.add('in'); io.disconnect(); } }, { threshold: 0.25 }).observe(root);
 
-  // Coming back with the Back button: undo the zoom
-  addEventListener('pageshow', (e) => { if (e.persisted) { root.setAttribute('viewBox', `0 0 ${W} ${height}`); root.classList.remove('flying'); } });
 }
 
 function $(sel, el) { return el.querySelector(sel); }

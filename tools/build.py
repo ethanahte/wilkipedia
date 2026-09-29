@@ -445,10 +445,14 @@ def build_home(depts, courses, teachers):
 
 <nav class="tiles" aria-label="Explore Wilkipedia">{tiles}</nav>
 
-<section class="home-sec pw-sec" aria-labelledby="pw-h">
-  <h2 id="pw-h">How classes connect</h2>
-  <p class="sec-sub">Every class in the {e(CATALOG_SOURCE)}, joined by the prerequisites it lists. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span> <span class="pw-legend"><i class="seq"></i> next grade or level, not a prerequisite</span> <span class="pw-legend"><i class="solo"></i> linked to no other class</span></p>
-  <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div>
+<section class="home-sec guides-sec" aria-labelledby="hg-h">
+  <div class="hg-head"><h2 id="hg-h">Study guides</h2><a class="add-link" href="guides/">All study guides →</a></div>
+  <p class="sec-sub">Made by Wilcox students for their own classes, and checked by reviewers before they’re posted.</p>
+  <form class="hg-find" id="hg-find" role="search"><label class="sr" for="hg-class">Find study guides for a class</label>
+    <input id="hg-class" list="hg-classes" placeholder="Find guides for a class, e.g. AP Biology" autocomplete="off"><datalist id="hg-classes"></datalist>
+    <button class="btn">Find</button></form>
+  <div id="home-guides" class="hg-grid"><div class="meta">Loading…</div></div>
+  <p class="hg-share">Made one for a class you took? <a href="submit/?kind=resource">Share your study guide</a> and it helps everyone who takes it next.</p>
 </section>
 
 <section class="home-sec">
@@ -475,6 +479,9 @@ def build_subjects(depts):
   <span class="nb-sub">Bubble size = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g. Point at a bubble for the classes.</span></summary>
   <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
   <p class="nb-src">SCUSD COURSE CATALOG {e(CATALOG_SOURCE.split(' ')[-1])} · A FEW CLASSES LIST A–G LOOSELY (“D/G”); THEY COUNT UNDER EACH LETTER · CHECK WITH YOUR COUNSELOR</p></details>
+<details class="nb-card nb-fold pw-fold" id="pw-fold"><summary><h2 id="pw-h">How classes connect</h2>
+  <span class="nb-sub">Every class in the {e(CATALOG_SOURCE)}, joined by the prerequisites it lists. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span> <span class="pw-legend"><i class="seq"></i> next grade or level, not a prerequisite</span> <span class="pw-legend"><i class="solo"></i> linked to no other class</span></span></summary>
+  <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div></details>
 <div id="by-subject">{body}</div>
 <div id="flat" hidden></div>""", active="subjects/", data={"page": "subject"})
 
