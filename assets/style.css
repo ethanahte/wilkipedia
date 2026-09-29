@@ -2042,6 +2042,8 @@ ol.periods .pn { flex: none; width: 2em; font: 700 .8rem var(--sans); color: var
 .ib-msg.me .ib-bubble { background: var(--accent-soft); }
 .ib-compose { display: grid; gap: 8px; }
 .ib-compose textarea { width: 100%; }
+.ib-starters { display: flex; flex-wrap: wrap; gap: 6px; }
+.ib-starters .chip { cursor: pointer; }
 .ib-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 8px; }
 .ib-tiles.small { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
 .ib-tile { display: grid; gap: 2px; padding: 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); color: var(--ink); text-decoration: none; }

@@ -135,7 +135,10 @@ const tabs = {
           ${f.page ? `<code>${esc(f.page)}</code>` : ''}
           <span class="meta">${f.name ? `from ${esc(f.name)} · ` : ''}${ago(f.created_at)}</span></div>
         ${prose(f.message)}
-        <div class="r-actions">${['new', 'planned', 'done', 'closed'].filter((x) => x !== f.status)
+        <div class="r-actions">${f.user_id
+            ? `<a class="btn small" href="#thread/feedback:${f.id}">Reply…</a>`
+            : '<span class="meta">Sent without signing in, so there’s no one to reply to.</span>'}
+          ${['new', 'planned', 'done', 'closed'].filter((x) => x !== f.status)
           .map((x) => `<button class="btn ghost small" data-fstatus="${x}">Mark ${x}</button>`).join('')}
           <button class="btn ghost danger small" data-fdel>Delete</button></div>
       </article>`).join('') : '<div class="empty">No feedback yet.</div>';

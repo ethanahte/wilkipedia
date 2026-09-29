@@ -251,6 +251,14 @@ async function threads(panel) {
   $('#ib-tq', panel)?.addEventListener('input', (e) => { threadQ = e.target.value.trim().toLowerCase(); clearTimeout(threads.t); threads.t = setTimeout(() => threads(panel).then(() => { const q = $('#ib-tq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }), 250); });
 }
 
+// Ways to start a reply to someone's feedback (Ethan: ask what they meant, or say kindly why not)
+const STARTERS = [
+  ['clarify', 'Ask what they mean', 'Thanks for sending this! Could you tell us a bit more about what you mean? For example, which page it was on and what you expected to happen. …'],
+  ['cant', 'Explain why not', 'Thanks for the idea, we really appreciate it. We talked it over and can’t do this one for now, because … If you have another idea, please send it our way.'],
+  ['planned', 'Say it’s planned', 'Thanks, this is a great idea! We’ve added it to our list and will let you know here when it’s done. …'],
+  ['thanks', 'Just say thanks', 'Thank you for taking the time to send this. …'],
+];
+
 async function thread(panel, subject) {
   if (!/^(submission|feedback|report):\d+$/.test(subject)) { panel.innerHTML = '<div class="empty">That conversation doesn’t exist.</div>'; return; }
   const [x, ms] = await Promise.all([s.subjectInfo(subject), s.thread(subject)]);
@@ -286,9 +294,20 @@ async function thread(panel, subject) {
     <ol class="ib-timeline">${started}${ms.map(item).join('')}</ol>
     ${canWrite ? `<form class="ib-compose" id="ib-compose">
         <label for="ib-body" class="flabel">${mine ? 'Write to the review team' : `Write to ${esc(x.author || 'the author')}`}</label>
+        ${team && !mine && type === 'feedback' ? `<div class="chips ib-starters" role="group" aria-label="Start with">${STARTERS.map(([k, l]) =>
+          `<button type="button" class="chip" data-starter="${k}">${l}</button>`).join('')}</div>` : ''}
         <textarea id="ib-body" rows="3" maxlength="2000" required placeholder="${mine ? 'Ask what a note meant, explain a choice, or add something they should know.' : 'They’ll get a notification. Be kind and specific.'}"></textarea>
         <div class="r-actions"><button class="btn">Send</button><span class="meta">${mine ? 'Only you and the review team can read this.' : 'The author and the review team can read this.'}</span></div></form>` : ''}`;
   $('[data-fix]', panel)?.addEventListener('click', () => openEditor(s, x, () => thread(panel, subject), 'author'));
+  // a starter fills the box and selects the "…" to type over
+  $('.ib-starters', panel)?.addEventListener('click', (e) => {
+    const k = e.target.closest('[data-starter]')?.dataset.starter;
+    if (!k) return;
+    const box = $('#ib-body', panel), text = STARTERS.find(([key]) => key === k)[2];
+    box.value = text; box.focus();
+    const at = text.indexOf('…');
+    if (at >= 0) box.setSelectionRange(at, at + 1);
+  });
   $('#ib-compose', panel)?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const body = $('#ib-body', panel).value.trim();

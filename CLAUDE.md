@@ -1024,6 +1024,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     `on_status_notify` writes each reviewer decision into the thread (`kind='decision'`,
     `status`), and `edit_submission` writes its note (`kind='edit'`), so a post keeps its whole
     history. A resubmission is written too, and tells the reviewer who sent it back.
+  - Feedback cards on the desk have **Reply…** (opens `feedback:<id>`; anonymous feedback has no one
+    to reply to and says so). Replying to someone's feedback offers starters (`STARTERS` in
+    dashboard.js: ask what they mean, explain why not, say it's planned, thanks) that fill the box
+    and select the "…" to type over. They only fill text: status changes stay the Mark buttons.
   - No private messages between students, by design: they talk in public class-page
     comments. A reply to your comment notifies you. The Privacy page says the team reads
     conversations.
