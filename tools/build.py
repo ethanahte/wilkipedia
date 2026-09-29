@@ -424,7 +424,6 @@ def build_home(depts, courses, teachers):
     <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
   </aside>
 </section>
-<section id="inbox" class="inbox" aria-label="Your notifications" hidden></section>
 <section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
 
 <section class="home-sec guides-sec" aria-labelledby="hg-h">

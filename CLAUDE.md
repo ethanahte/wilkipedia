@@ -912,7 +912,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     from our data, never invented), quick links (`HERO_QUICK`), and counts from the data files.
   - Right: "Right now", the live bell strip shown as today's periods in a column. It goes back
     to one column below 900px, or when the home bell is turned off in Settings.
-  - "For you" and the cafeteria card follow under it.
+  - The cafeteria card follows under it. There is NO notifications card on the home page (Ethan,
+    2026-09-29: the header bell already shows them; the old "For you" card and `mountInbox` are gone).
 - **Breadcrumbs**: `crumbs(trail, here, path)` in build.py. Subject, class and teacher pages
   already had them; they gained `aria-label` and schema.org BreadcrumbList JSON-LD for search
   results. The current page isn't repeated, since its <h1> sits right under. Dashboard views
@@ -1032,10 +1033,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   edited_at, notifies the author). Status changes notify authors via the
   `on_status_notify` trigger. Users read their `notifications` on the account
   page (visiting it marks them read). The unread count is a red badge on the
-  header profile picture (`setNoteCount` in ui.js). The home page's "For you"
-  card (`mountInbox` in pages.js) lists work sent back to you (it stays until it
-  is resubmitted or withdrawn) and unread notifications. Its "Make changes"
-  button links to `account/#edit-<id>`, which opens that submission's editor.
+  header bell (`setNoteCount` in ui.js). Work sent back to you and unread notifications live in
+  the Dashboard; `dashboard/#edit-<id>` opens that submission's editor.
   No email notifications, by decision (2026-09-27): authors are told on-site only.
 - **The Dashboard** (`dashboard/`, `dashboard.js` + `reviewdesk.js`, migration 017,
   2026-09-28/29). This is the one place for everything around your work (Ethan: 集成化, like
@@ -1052,8 +1051,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - `reviewdesk.js` is the old review page as a module: `deskTab(panel, store, name,
       again)` draws one section and wires its buttons on that panel.
   - The header has a bell with the unread count; the count used to sit on the avatar. The
-    "Review" header link goes to `dashboard/#review`. The home "For you" card and Settings link
-    here. The account page keeps only a Dashboard card, and old
+    "Review" header link goes to `dashboard/#review`. Settings links here. The account page keeps only a Dashboard card, and old
     `account/#notifications|#my-subs|#edit-<id>` links redirect here.
   - You group (everyone):
     - Updates: notifications by day, with filters and per-item/all read.

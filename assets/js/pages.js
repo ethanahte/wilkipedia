@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, setNoteCount, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
@@ -218,51 +218,6 @@ async function activities(kind) {
 }
 const safeLink = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
 
-// "For you" on the home page, for signed-in people with something new: work a
-// reviewer sent back (it stays until it's resubmitted or withdrawn, with a button
-// straight into the editor) and unread notifications (published, edited, not
-// accepted). Reading them clears the red count on the profile picture.
-const SENT_BACK = /^A reviewer asked for changes/;
-function mountInbox(el) {
-  if (!el) return;
-  let run = 0;
-  const draw = async () => {
-    const me = s.user(), mine_ = ++run;
-    if (!me) { el.hidden = true; el.innerHTML = ''; return; }
-    let mine, notes, data;
-    try {
-      [mine, notes, data] = await Promise.all([s.mySubmissions(), s.notifications ? s.notifications() : [], courses()]);
-    } catch { el.hidden = true; return; }
-    if (mine_ !== run) return;                    // a newer draw started
-    const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
-    const back = mine.filter((x) => x.status === 'changes');
-    // A sent-back notice is already shown as its item below, while that item is open
-    const fresh = notes.filter((n) => !n.read && !(back.length && SENT_BACK.test(n.message)));
-    if (!back.length && !fresh.length) { el.hidden = true; el.innerHTML = ''; return; }
-    const icon = (m) => (/published|approved|live now/.test(m) ? ['good', '✓'] : SENT_BACK.test(m) ? ['back', '↩']
-      : /edited/.test(m) ? ['', '✎'] : ['bad', '✕']);
-    const what = (x) => `${KINDS[x.kind]?.label.toLowerCase() || 'submission'} for ${placeOf(x, name)[0]}`;
-    el.innerHTML = `<div class="inbox-head"><b>For you</b>
-        <a href="${root}dashboard/">Open your Dashboard <span aria-hidden="true">→</span></a></div>
-      <ul class="inbox-list">${back.map((x) => `<li class="inbox-item back"><span class="inbox-ic" aria-hidden="true">↩</span>
-        <div><b>A reviewer sent back your ${esc(what(x))}.</b>
-          ${x.review_note ? `<q class="inbox-note">${esc(x.review_note)}</q>` : ''}
-          <div class="inbox-act"><a class="btn small" href="${root}dashboard/#edit-${x.id}">Make changes</a>
-            <span class="meta">Stays here until you resubmit or withdraw it.</span></div></div></li>`).join('')}
-      ${fresh.slice(0, 3).map((n) => { const [cls, ic] = icon(n.message); return `<li class="inbox-item ${cls}">
-        <span class="inbox-ic" aria-hidden="true">${ic}</span><div>${n.link ? `<a href="${root}${esc(n.link)}">${esc(n.message)}</a>` : esc(n.message)}
-        <span class="meta"> · ${ago(n.created_at)}</span></div></li>`; }).join('')}</ul>
-      ${fresh.length ? `<div class="inbox-foot">${fresh.length > 3 ? `<a href="${root}dashboard/">+${fresh.length - 3} more</a>` : ''}
-        <button type="button" class="btn ghost small" data-read>Mark as read</button></div>` : ''}`;
-    el.hidden = false;
-    $('[data-read]', el)?.addEventListener('click', async () => {
-      if (await guard(() => s.markAllRead(), 'All caught up.')) { setNoteCount(0); draw(); }
-    });
-  };
-  s.onAuth(draw);
-  draw();
-}
-
 // The hero search suggests real things to look for (class and club names from our own data),
 // one after another, while the box is empty and not being typed in
 async function heroExamples(input) {
@@ -319,7 +274,6 @@ const pages = {
   async home() {
     heroExamples($('#home-q'));
     if (getPref('homebg') === 'pano') import('./pano.js').then((m) => m.mountPano(root));   // the turning quad behind the page
-    mountInbox($('#inbox'));
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
     attach($('#home-q'), $('#home-results'));
