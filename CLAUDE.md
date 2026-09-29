@@ -767,8 +767,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     one WebGL full-screen triangle (no three.js on the home page). It starts
     facing east and turns once every 150 s, stops turning with reduced
     motion, and follows day and night mode.
-  - 'paint': the painted courtyard (`body.home::before`). It also shows
-    under the quad until the quad loads, or if WebGL is missing.
+    Until it loads (and if WebGL is missing), `body.home::before` shows a still of its
+    first frame: `day-e-sm`/`night-e-sm` at `auto 200%`, 5vh down, dimmed like the shader.
+    It used to show the painting, so every load swapped pictures (Ethan). The turn starts
+    at the first drawn frame (`t0 ??= now`) so the fade-in lines up. Change the start yaw,
+    pitch or field of view in pano.js and that CSS has to follow.
+  - 'paint': the painted courtyard (`body.home::before`).
   - 'plain': no image and no frosted panels, the original white home page.
 
   The cube faces in `assets/img/pano/` (`day`/`night`, n e s w u d) come in

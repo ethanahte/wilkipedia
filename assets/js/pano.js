@@ -2,7 +2,8 @@
 // screen (Ethan). Six views (a cube) from just west of the cedar: by day Ethan's watercolour of the
 // quad, by night his anime-style one (assets/img/pano/, see CLAUDE.md); here one full-screen
 // triangle looks up each pixel's direction in them, so it is sharp at any size and costs almost nothing.
-// The painted courtyard (body.home::before) shows until it loads, and stays if WebGL can't run.
+// Until it loads, body.home::before shows a still of this same first frame (style.css), so it fades in
+// without the picture changing; the still stays if WebGL can't run.
 import { lessMotion } from './ui.js';
 
 const TURN = 150;                        // seconds for one full turn
@@ -91,10 +92,11 @@ export function mountPano(root) {
     canvas.width = Math.round(innerWidth * k); canvas.height = Math.round(innerHeight * k);
     gl.viewport(0, 0, canvas.width, canvas.height);
   };
-  const t0 = performance.now();
+  let t0 = null;                          // the turn starts at the first frame, so it matches the still
   function draw(now) {
     raf = 0;
     if (!ready) return;
+    t0 ??= now;
     const a = canvas.width / canvas.height;
     gl.uniform2f(uRes, canvas.width, canvas.height);
     gl.uniform1f(uTh, Math.max(0.5, 0.466 / a));             // ~78° across a wide screen, ~50° on a phone

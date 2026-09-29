@@ -1394,7 +1394,7 @@ a.chip { text-decoration: none; }
 .modal-card .field { max-width: none; }
 /* home: a background behind the whole page, the reader's choice (Settings → Pages; html[data-homebg]):
    'pano' (the default) the quad turning slowly, 'paint' a painted Wilcox courtyard, 'plain' none,
-   the original white page. The painting also shows under the quad until it loads. Over a background
+   the original white page. Under the quad, a still of its first frame shows until it loads (below). Over a background
    cards keep their solid backgrounds and bare text sits on frosted panels. */
 body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: url(img/home-scene.webp) center 60% / cover; }
@@ -1410,9 +1410,24 @@ body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer
   }
   :root[data-theme="dark"] body.home::before { background-image: url(img/home-scene-night-800.webp); }
 }
+/* With the turning quad chosen (the default: no data-homebg, or 'pano'), the placeholder is not the
+   painting but a still of the quad's first frame: the east cube face, cropped and dimmed the way
+   pano.js draws it. So the quad fades in over the same view instead of swapping pictures on every
+   load (Ethan). The face is a 90° view and the quad shows its middle half (th = 0.5), hence 200%;
+   the slight upward pitch moves it ~5vh down. Narrow screens: th = 0.466 / aspect across. */
+:root:not([data-homebg="paint"]):not([data-homebg="plain"]) body.home::before {
+  background: url(img/pano/day-e-sm.webp) center calc(50% + 5vh) / auto 200% no-repeat;
+  filter: brightness(.84) contrast(1.08); }
+@media (max-aspect-ratio: 932/1000) {
+  :root:not([data-homebg="paint"]):not([data-homebg="plain"]) body.home::before { background-size: 214.6% auto; } }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-homebg="paint"]):not([data-homebg="plain"]) body.home::before {
+    background-image: url(img/pano/night-e-sm.webp); filter: none; } }
+:root[data-theme="dark"]:not([data-homebg="paint"]):not([data-homebg="plain"]) body.home::before {
+  background-image: url(img/pano/night-e-sm.webp); filter: none; }
 /* ...and over it, once it loads, the quad turning slowly all the way round (assets/js/pano.js) */
 .pano-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
-  opacity: 0; transition: opacity 1.4s ease; }
+  opacity: 0; transition: opacity .8s ease; }
 .pano-bg.on { opacity: 1; }
 :root[data-homebg="plain"] body.home::before { display: none; }
 :root:not([data-homebg="plain"]) body.home .hero-main, :root:not([data-homebg="plain"]) body.home .home-sec, :root:not([data-homebg="plain"]) body.home footer.site,
