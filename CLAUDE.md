@@ -847,6 +847,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).
+- **No coloured side stripes on cards** (Ethan: "looks very AI"). No `border-left/top: Npx solid
+  <colour>` or `inset Npx 0 0` accent edges on cards, rows, modals or nav items. Show a category or
+  state with a soft all-round tint (`color-mix(... var(--cc) 7%, var(--card))`), a small dot, or a
+  tag instead. Neutral grey thread/quote lines, tab underlines and the header's gold rule are fine.
 - **More panel** (build.py `page()`, style.css "More: one calm panel"): centred under the whole bar
   (`.more` is `position: static`, so the sticky header places it). A featured page on the left over
   Ethan's courtyard painting (night painting at night), then the three `MORE_GROUPS` columns with
