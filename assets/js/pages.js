@@ -293,19 +293,25 @@ async function homeGuides(data, name) {
     else toast(`No class called “${$('#hg-class').value.trim()}”. Pick one from the list.`, 'warn');
   });
   const all = await s.approved({ kind: 'resource' }).catch(() => []);
-  const guides = all.filter((g) => g.payload?.type === GUIDE || g.payload?.pdf).slice(0, 6);
+  const every = all.filter((g) => g.payload?.type === GUIDE || g.payload?.pdf);
+  const classesOf = (g) => [g.course_slug, ...(g.payload.also || [])].filter((c) => bySlug[c]);
+  const nClasses = new Set(every.flatMap(classesOf)).size;
+  $('#hg-count').textContent = every.length
+    ? `${every.length} guide${every.length === 1 ? '' : 's'} for ${nClasses} class${nClasses === 1 ? '' : 'es'} so far` : '';
+  const guides = every.slice(0, 5);
   if (!guides.length) {
-    box.innerHTML = '<div class="empty">No study guides yet. <a href="submit/?kind=resource">Be the first to share one</a>.</div>';
+    box.innerHTML = '<li class="hg-empty">No study guides yet. <a href="submit/?kind=resource">Be the first to share one</a>.</li>';
     return;
   }
   const links = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
   box.innerHTML = guides.map((g) => {
     const u = (g.payload.pdf?.path && links[g.payload.pdf.path]) || safeUrl(g.payload.url);
-    const classes = [g.course_slug, ...(g.payload.also || [])].filter((c) => bySlug[c]);
-    return `<article class="hg-card">
-      <div class="hg-k">${classes.map((c) => `<a href="${courseUrl(c)}#s-resources">${esc(name[c])}</a>`).join(' · ') || 'Study guide'}</div>
-      <h3>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(g.payload.title)}</a>` : esc(g.payload.title)}</h3>
-      <p class="meta">${g.payload.pdf ? 'PDF · ' : ''}by ${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p></article>`;
+    const where = classesOf(g).map((c) => name[c]).join(' · ') || 'Study guide';
+    const inner = `<span class="hg-title">${esc(g.payload.title)}</span>
+        <span class="hg-meta"><span class="hg-class">${esc(where)}</span><span>${esc(g.payload.author || g.author)}${g.payload.pdf ? ' · PDF' : ''}</span></span>
+        <span class="hg-go" aria-hidden="true">↗</span>`;
+    return `<li>${u ? `<a class="hg-row" href="${esc(u)}" target="_blank" rel="noopener nofollow">${inner}</a>`
+      : `<a class="hg-row" href="${courseUrl(classesOf(g)[0] || '')}#s-resources">${inner}</a>`}</li>`;
   }).join('');
 }
 

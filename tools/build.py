@@ -189,9 +189,6 @@ MORE_GROUPS = [
                           ("settings/", "Settings", "settings", "Theme, text size, language")]),
 ]
 MORE = [(href, label, icon) for _, items in MORE_GROUPS for href, label, icon, _ in items]
-# The home page hero's shortcuts (paths relative to the home page)
-HERO_QUICK = [("bell/", "bell", "Bell schedule"), ("menu/", "food", "Today’s menu"), ("map/", "pin", "Campus map"),
-              ("guides/", "book", "Study guides"), ("clubs/", "clubs", "Clubs")]
 WILCOX_SITE = "https://wilcox.santaclarausd.org/"
 
 
@@ -407,38 +404,18 @@ def course_row(c, r):
 
 # ─────────────────────────── pages ───────────────────────────
 
-# The home page's grid of ways in: (href, icon, label, short line).
-HOME_TILES = [
-    ("subjects/", "book", "Classes", "What every class is really like"),
-    ("teachers/", "teachers", "Teachers", "Every teacher and their classes"),
-    ("guides/", "notes", "Study guides", "Notes and tips from students"),
-    ("map/", "pin", "Campus map", "Find any room"),
-    ("bell/", "bell", "Bell schedule", "Period times, block days, finals"),
-    ("clubs/", "clubs", "Clubs", "Every club and how to join"),
-    ("sports/", "sports", "Sports", "Chargers teams by season"),
-    ("campus/", "cube", "3D campus", "Walk the whole school"),
-]
-
-
 def build_home(depts, courses, teachers):
-    tiles = "".join(f'<a class="tile" href="{href}">{ICONS[icon]}<b>{e(label)}</b><span>{e(sub)}</span></a>'
-                    for href, icon, label, sub in HOME_TILES)
-    acts = json.loads((DATA / "activities.json").read_text())
-    n_clubs, n_sports = len(acts.get("clubs", [])), len(acts.get("sports", []))
     page("", "Wilkipedia", f"""
 <section class="hero hero-split" aria-labelledby="hero-h">
   <div class="hero-main">
     <p class="hero-kicker">Wilcox High School · Santa Clara</p>
     <h1 id="hero-h">Everything Wilcox, in one place.</h1>
-    <p class="lede">Classes, teachers, rooms, the bell schedule, clubs and sports, written by Wilcox students for Wilcox students.</p>
     <form class="big-search" action="search/" role="search">
       <div class="big-search-field">{ICONS["search"]}<input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
       <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
       <button class="btn">Search</button>
     </form>
-    <nav class="hero-quick" aria-label="Jump to">{"".join(f'<a href="{href}">{ICONS[icon]}<span>{label}</span></a>' for href, icon, label in HERO_QUICK)}</nav>
-    <p class="hero-stats"><span><b>{len(courses)}</b> classes</span><span><b>{len(teachers)}</b> teachers</span><span><b>{n_clubs}</b> clubs</span><span><b>{n_sports}</b> teams</span></p>
-    <p class="hero-trust">Checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
+    <p class="hero-trust">Written by Wilcox students and checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
   </div>
   <aside class="hero-side" aria-label="Right now at Wilcox">
     <p class="hero-side-h">Right now</p>
@@ -448,16 +425,17 @@ def build_home(depts, courses, teachers):
 <section id="inbox" class="inbox" aria-label="Your notifications" hidden></section>
 <section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
 
-<nav class="tiles" aria-label="Explore Wilkipedia">{tiles}</nav>
-
 <section class="home-sec guides-sec" aria-labelledby="hg-h">
-  <div class="hg-head"><h2 id="hg-h">Study guides</h2><a class="add-link" href="guides/">All study guides →</a></div>
-  <p class="sec-sub">Made by Wilcox students for their own classes, and checked by reviewers before they’re posted.</p>
-  <form class="hg-find" id="hg-find" role="search"><label class="sr" for="hg-class">Find study guides for a class</label>
-    <input id="hg-class" list="hg-classes" placeholder="Find guides for a class, e.g. AP Biology" autocomplete="off"><datalist id="hg-classes"></datalist>
-    <button class="btn">Find</button></form>
-  <div id="home-guides" class="hg-grid"><div class="meta">Loading…</div></div>
-  <p class="hg-share">Made one for a class you took? <a href="submit/?kind=resource">Share your study guide</a> and it helps everyone who takes it next.</p>
+  <div class="hg-intro">
+    <h2 id="hg-h">Study guides</h2>
+    <p class="hg-sub">Made by Wilcox students for classes they took, and checked by reviewers before they go up.</p>
+    <p class="hg-count" id="hg-count"></p>
+    <form class="hg-find" id="hg-find" role="search"><label class="sr" for="hg-class">Find study guides for a class</label>
+      <input id="hg-class" list="hg-classes" placeholder="Your class, e.g. AP Biology" autocomplete="off"><datalist id="hg-classes"></datalist>
+      <button class="btn">Find</button></form>
+    <p class="hg-links"><a href="guides/">All study guides</a><a href="submit/?kind=resource">Share one you made</a></p>
+  </div>
+  <ol class="hg-list" id="home-guides" aria-label="Newest study guides"><li class="meta">Loading…</li></ol>
 </section>
 
 <section class="home-sec">

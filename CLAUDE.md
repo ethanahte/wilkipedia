@@ -159,10 +159,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only informs and is not a consent wall. The only third party is the Google
   Translate `googtrans` cookie, set only when someone picks a language.
 - **Interaction layer** (the "impressive but not AI" pass):
-  - **Home study guides** (Ethan: the guides are the main thing on the site): a section after the
-    tiles with a class finder (goes to that class's `#s-resources`) and the 6 newest approved
-    study guides (type GUIDE or a PDF), each opening the guide itself. It replaced the pathways
+  - **Home study guides** (Ethan: the guides are the main thing on the site): laid out like a
+    contents page, not a card grid. Left: heading, a real count ("N guides for M classes"), a class
+    finder (goes to that class's `#s-resources`), links. Right: the 5 newest approved study guides
+    (type GUIDE or a PDF) as hairline rows, each opening the guide itself. It replaced the pathways
     map, which Ethan found cool but not useful enough for the home page.
+  - **Home hero is kept short** so the cafeteria menu shows above the fold: kicker, headline,
+    search, one trust line. The lede, the shortcut buttons, the stats row and the 8 tiles under it
+    were removed because each repeated the nav or the More panel (Ethan). Don't add them back.
   - **Pathways map**, now a closed fold on All classes (`#pw-fold`, drawn when first opened;
     `#pw-fold` in the URL opens it). Clicking a class just goes there: the old zoom-into-the-map
     redrew the whole SVG every frame and then the page transition ran on top, which felt rough.
