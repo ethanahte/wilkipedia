@@ -1063,6 +1063,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       first, plus your comments, feedback and reports with their state.
     - Conversations.
   - People (admins): every member, their whole history, and their role via `set_role()`.
+    Filter tabs (All · SCUSD ✓ · Not verified · Review team, with counts) and a Sort menu (Newest,
+    Name, Class year, SCUSD first, Role, Most published). Class year, SCUSD and Role group the list
+    under headings. "Published" counts approved posts per member (`s.approved()`).
     Admins can never change their own role.
   - Conversations: table `messages`, one thread per subject (`submission:<id>`,
     `feedback:<id>`, `report:<id>`). Only the sender and the review team can read it (the

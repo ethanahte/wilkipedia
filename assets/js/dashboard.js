@@ -343,18 +343,54 @@ async function review(panel) {
 
 // ── People (admins) ──
 let peopleQ = '';
+// Sort and filter the members (Ethan): tabs to narrow the list, a menu to order it; ordering by
+// class year, SCUSD or role groups the list under headings. Remembered for the visit.
+let peopleFilter = 'all', peopleSort = 'new';
+const PEOPLE_FILTERS = [['all', 'All'], ['scusd', 'SCUSD ✓'], ['unverified', 'Not verified'], ['team', 'Review team']];
+const PEOPLE_SORTS = [['new', 'Newest first'], ['name', 'Name A–Z'], ['class', 'Class year'], ['scusd', 'SCUSD ✓ first'], ['role', 'Role'], ['posts', 'Most published']];
 async function people(panel) {
-  const list = await s.people();
-  const shown = list.filter((p) => !peopleQ || p.display_name.toLowerCase().includes(peopleQ));
+  const [list, pub] = await Promise.all([s.people(), s.approved().catch(() => [])]);
+  const posts = {};
+  for (const x of pub) if (x.user_id) posts[x.user_id] = (posts[x.user_id] || 0) + 1;
   const roles = ['contributor', 'trusted', 'reviewer', 'admin'];
-  panel.innerHTML = `<div class="ib-bar"><input type="search" id="ib-pq" placeholder="Find a member" value="${esc(peopleQ)}" aria-label="Find a member">
-      <span class="meta">${plural(list.length, 'member')} · ${list.filter((p) => REVIEWER_ROLES.includes(p.role)).length} on the review team</span></div>
-    <ul class="ib-people">${shown.map((p) => `<li data-uid="${p.id}">${avatarHtml(p, 'md')}
+  const inFilter = (p, f) => (f === 'scusd' ? p.school_verified : f === 'unverified' ? !p.school_verified : f === 'team' ? REVIEWER_ROLES.includes(p.role) : true);
+  const byName = (a, b) => a.display_name.localeCompare(b.display_name);
+  const ORDER = {
+    new: (a, b) => String(b.created_at).localeCompare(String(a.created_at)),
+    name: byName,
+    class: (a, b) => (a.grad_year || 9999) - (b.grad_year || 9999) || byName(a, b),
+    scusd: (a, b) => (b.school_verified ? 1 : 0) - (a.school_verified ? 1 : 0) || byName(a, b),
+    role: (a, b) => roles.indexOf(b.role) - roles.indexOf(a.role) || byName(a, b),
+    posts: (a, b) => (posts[b.id] || 0) - (posts[a.id] || 0) || byName(a, b),
+  };
+  const GROUP_BY = {
+    class: (p) => (p.grad_year ? `Class of ${p.grad_year}` : 'No class year'),
+    scusd: (p) => (p.school_verified ? 'SCUSD ✓ (verified school account)' : 'Not verified'),
+    role: (p) => `${roleLabel(p.role)}s`,
+  };
+  const shown = list.filter((p) => inFilter(p, peopleFilter) && (!peopleQ || p.display_name.toLowerCase().includes(peopleQ))).sort(ORDER[peopleSort]);
+  const row = (p) => `<li data-uid="${p.id}">${avatarHtml(p, 'md')}
         <a href="#person/${p.id}" class="ib-p-name"><b>${esc(p.display_name)}</b>${p.school_verified ? ' <span class="tag">SCUSD ✓</span>' : ''}</a>
-        <span class="meta">${p.grad_year ? `Class of ${p.grad_year} · ` : ''}joined ${fmtDate(p.created_at)}</span>
+        <span class="meta">${p.grad_year ? `Class of ${p.grad_year} · ` : ''}${posts[p.id] ? `${plural(posts[p.id], 'post')} published · ` : ''}joined ${fmtDate(p.created_at)}</span>
         ${p.id === s.user().id ? `<span class="tag">${esc(roleLabel(p.role))} (you)</span>`
-          : `<select data-role aria-label="Role for ${esc(p.display_name)}">${roles.map((r) => `<option value="${r}" ${p.role === r ? 'selected' : ''}>${esc(roleLabel(r))}</option>`).join('')}</select>`}</li>`).join('')}</ul>`;
+          : `<select data-role aria-label="Role for ${esc(p.display_name)}">${roles.map((r) => `<option value="${r}" ${p.role === r ? 'selected' : ''}>${esc(roleLabel(r))}</option>`).join('')}</select>`}</li>`;
+  let body = '';
+  if (!shown.length) body = '<div class="empty">No one matches.</div>';
+  else if (GROUP_BY[peopleSort]) {
+    const groups = [];
+    for (const p of shown) { const g = GROUP_BY[peopleSort](p); if (!groups.length || groups.at(-1)[0] !== g) groups.push([g, []]); groups.at(-1)[1].push(p); }
+    body = groups.map(([g, ps]) => `<h3 class="ib-day ib-pgroup">${esc(g)}<span class="c">${ps.length}</span></h3><ul class="ib-people">${ps.map(row).join('')}</ul>`).join('');
+  } else body = `<ul class="ib-people">${shown.map(row).join('')}</ul>`;
+  panel.innerHTML = `<div class="ib-bar"><div class="vtabs" role="group" aria-label="Show">${PEOPLE_FILTERS.map(([k, l]) => {
+        const c = list.filter((p) => inFilter(p, k)).length;
+        return `<button type="button" class="vtab" data-pf="${k}" aria-pressed="${peopleFilter === k}">${l}<span class="c">${c}</span></button>`; }).join('')}</div></div>
+    <div class="ib-ptools"><input type="search" id="ib-pq" placeholder="Find a member" value="${esc(peopleQ)}" aria-label="Find a member">
+      <label class="ib-psort">Sort by <select id="ib-psort">${PEOPLE_SORTS.map(([k, l]) => `<option value="${k}" ${peopleSort === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <span class="meta">${plural(shown.length, 'member')}${shown.length !== list.length ? ` of ${list.length}` : ''}</span></div>
+    ${body}`;
   $('#ib-pq', panel).addEventListener('input', (e) => { peopleQ = e.target.value.trim().toLowerCase(); clearTimeout(people.t); people.t = setTimeout(() => people(panel).then(() => { const q = $('#ib-pq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }), 200); });
+  $('#ib-psort', panel).addEventListener('change', (e) => { peopleSort = e.target.value; people(panel); });
+  panel.onclick = (e) => { const f = e.target.closest('[data-pf]'); if (f) { peopleFilter = f.dataset.pf; people(panel); } };
   panel.onchange = async (e) => {
     const sel = e.target.closest('[data-role]'); if (!sel) return;
     const p = list.find((y) => y.id === sel.closest('[data-uid]').dataset.uid);

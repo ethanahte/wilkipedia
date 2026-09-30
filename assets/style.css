@@ -2167,6 +2167,12 @@ a.ib-tile:hover { border-color: var(--gold); }
   .ib-card-h .meta { margin-left: 0; width: 100%; }
 }
 .ib-people select { width: auto; min-width: 150px; margin-left: auto; }
+.ib-ptools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 16px; }
+.ib-ptools input[type="search"] { max-width: 260px; }
+.ib-psort { display: inline-flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); white-space: nowrap; }
+.ib-psort .combo, .ib-psort select { width: 170px; }
+.ib-pgroup { display: flex; align-items: baseline; gap: 8px; }
+.ib-pgroup .c { font: 600 .68rem var(--mono); color: var(--muted); }
 /* Dashboard: a grouped side menu (You / Review / Site) beside the panel; a scrolling strip on phones */
 .db-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; }
 .db-side { position: sticky; top: 84px; display: grid; gap: 14px; }
