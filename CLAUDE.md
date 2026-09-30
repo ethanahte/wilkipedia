@@ -1067,7 +1067,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     `status`), and `edit_submission` writes its note (`kind='edit'`), so a post keeps its whole
     history. A resubmission is written too, and tells the reviewer who sent it back.
   - Feedback has three views (Ethan): **New** `#feedback`, **Planned** `#feedback-planned`, and
-    **Finished** `#feedback-done` (done + closed), chips with counts at the top; the sidebar badge
+    **Finished** `#feedback-done` (done + closed), shown as one pipeline across the top (`.fb-steps`:
+    big serif count, small-caps name, a line on what it means, arrows between; the current step is
+    gold-tinted with an ink underline. Ethan didn't want pill buttons); the sidebar badge
     counts New only. "Close (won't do)" = status `closed`: not doing it; the sender is notified
     ("Your feedback was closed"), so reply first to say why. Nothing is deleted by closing.
   - Feedback cards on the desk have **Reply…** (opens `feedback:<id>`; anonymous feedback has no one

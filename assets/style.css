@@ -1422,6 +1422,26 @@ html.translated-ltr font, html.translated-rtl font { display: contents; }
 .draft-note { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; font-size: .9rem; max-width: 640px; }
 .danger-link { color: var(--bad) !important; }
 .pub-sum { margin: 4px 0; font-size: .92rem; }
+/* Feedback: New → Planned → Finished as one pipeline across the top of the desk */
+.fb-steps { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); margin: 0 0 20px;
+  border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--card); }
+.fb-step { position: relative; display: grid; gap: 3px; padding: 16px 20px 18px; color: var(--muted); text-decoration: none; transition: background .2s, color .2s; }
+.fb-step:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.fb-step .n { display: inline-flex; align-items: flex-start; gap: 6px; font: 500 2rem/1 var(--serif); letter-spacing: -.02em;
+  color: color-mix(in srgb, var(--ink) 42%, var(--card)); font-variant-numeric: tabular-nums; transition: color .2s; }
+.fb-step .l { font: 600 .66rem/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); margin-top: 6px; }
+.fb-step .d { font-size: .8rem; line-height: 1.35; }
+.fb-step[aria-current] { color: var(--ink); background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.fb-step[aria-current] .n { color: var(--ink); }
+.fb-step[aria-current]::after { content: ""; position: absolute; left: 20px; right: 20px; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--ink); }
+.fb-step:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.fb-live { width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: var(--bad); }
+.fb-arrow { display: grid; place-items: center; padding: 0 4px; color: color-mix(in srgb, var(--ink) 30%, var(--card)); }
+@media (max-width: 640px) {
+  .fb-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fb-arrow { display: none; }
+  .fb-step { padding: 12px 12px 14px; } .fb-step .n { font-size: 1.5rem; } .fb-step .d { display: none; }
+}
 a.chip { text-decoration: none; }
 
 /* ── edit dialog & notifications ── */

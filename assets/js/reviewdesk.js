@@ -140,10 +140,15 @@ const tabs = {
       new: ['Back to New', 'Put it back in New'], planned: ['Mark planned', 'We’re going to do this'], done: ['Mark done', 'It’s done (the sender is told)'],
       closed: ['Close (won’t do)', 'Not doing this one. The sender gets a notice that it was closed, so reply first to say why.'],
     };
-    const chips = `<div class="list-tools"><div class="chips" role="group" aria-label="Show">
-        <a class="chip" href="#feedback" aria-pressed="${view === 'new'}">New (${n('new')})</a>
-        <a class="chip" href="#feedback-planned" aria-pressed="${view === 'planned'}">Planned (${n('planned')})</a>
-        <a class="chip" href="#feedback-done" aria-pressed="${view === 'done'}">Finished (${n('done')})</a></div></div>`;
+    // a pipeline across the top: where feedback is, and how it moves (Ethan: not pill buttons)
+    const step = (v, href, name, desc) => `<a class="fb-step" href="${href}"${view === v ? ' aria-current="page"' : ''}>
+        <span class="n">${n(v)}${v === 'new' && n('new') ? '<i class="fb-live" aria-hidden="true"></i>' : ''}</span>
+        <span class="l">${name}</span><span class="d">${desc}</span></a>`;
+    const chips = `<nav class="fb-steps" aria-label="Feedback">${step('new', '#feedback', 'New', 'Just sent in, to look at')}
+        <span class="fb-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        ${step('planned', '#feedback-planned', 'Planned', 'We’re going to do it')}
+        <span class="fb-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        ${step('done', '#feedback-done', 'Finished', 'Done, or closed as won’t do')}</nav>`;
     const EMPTY = { new: 'No new feedback. Nice.', planned: 'Nothing planned yet. Mark feedback planned when you decide to do it.', done: 'Nothing finished yet.' };
     return chips + (list.length ? list.map((f) => `
       <article class="card review fb-${f.status}" data-fid="${f.id}">
