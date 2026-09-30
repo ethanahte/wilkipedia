@@ -125,23 +125,39 @@ const tabs = {
         </div>
       </article>`).join('') : '<div class="empty">No open reports.</div>';
   },
+  // Three views (Ethan): New (just posted), Planned, and Finished (done, or closed as won't-do)
   async feedback() {
-    const list = await s.feedbackList();
+    const all = await s.feedbackList();
+    const view = location.hash === '#feedback-planned' ? 'planned' : location.hash === '#feedback-done' ? 'done' : 'new';
+    const inView = (f) => (view === 'done' ? f.status === 'done' || f.status === 'closed' : f.status === view);
+    const n = (v) => all.filter((f) => (v === 'done' ? f.status === 'done' || f.status === 'closed' : f.status === v)).length;
+    const list = all.filter(inView);
     const label = { idea: '💡 Idea', bug: '🐞 Bug', feature: '✨ Feature', other: '💬 Other' };
-    return list.length ? list.map((f) => `
+    const STATUS = { new: 'New', planned: 'Planned', done: 'Done', closed: 'Closed · won’t do' };
+    // what each item can move to, from where it is
+    const moves = { new: ['planned', 'done', 'closed'], planned: ['new', 'done', 'closed'], done: ['new', 'closed'], closed: ['new', 'done'] };
+    const BTN = {
+      new: ['Back to New', 'Put it back in New'], planned: ['Mark planned', 'We’re going to do this'], done: ['Mark done', 'It’s done (the sender is told)'],
+      closed: ['Close (won’t do)', 'Not doing this one. The sender gets a notice that it was closed, so reply first to say why.'],
+    };
+    const chips = `<div class="list-tools"><div class="chips" role="group" aria-label="Show">
+        <a class="chip" href="#feedback" aria-pressed="${view === 'new'}">New (${n('new')})</a>
+        <a class="chip" href="#feedback-planned" aria-pressed="${view === 'planned'}">Planned (${n('planned')})</a>
+        <a class="chip" href="#feedback-done" aria-pressed="${view === 'done'}">Finished (${n('done')})</a></div></div>`;
+    const EMPTY = { new: 'No new feedback. Nice.', planned: 'Nothing planned yet. Mark feedback planned when you decide to do it.', done: 'Nothing finished yet.' };
+    return chips + (list.length ? list.map((f) => `
       <article class="card review fb-${f.status}" data-fid="${f.id}">
         <div class="r-head"><span class="tag">${label[f.kind] || esc(f.kind)}</span>
-          <span class="tag ${f.status === 'new' ? 'warn' : ''}">${esc(f.status)}</span>
+          <span class="tag ${f.status === 'new' ? 'warn' : ''}">${STATUS[f.status] || esc(f.status)}</span>
           ${f.page ? `<code>${esc(f.page)}</code>` : ''}
           <span class="meta">${f.name ? `from ${esc(f.name)} · ` : ''}${ago(f.created_at)}</span></div>
         ${prose(f.message)}
         <div class="r-actions">${f.user_id
             ? `<a class="btn small" href="#thread/feedback:${f.id}">Reply…</a>`
             : '<span class="meta">Sent without signing in, so there’s no one to reply to.</span>'}
-          ${['new', 'planned', 'done', 'closed'].filter((x) => x !== f.status)
-          .map((x) => `<button class="btn ghost small" data-fstatus="${x}">Mark ${x}</button>`).join('')}
+          ${(moves[f.status] || moves.new).map((x) => `<button class="btn ghost small" data-fstatus="${x}" title="${BTN[x][1]}">${BTN[x][0]}</button>`).join('')}
           <button class="btn ghost danger small" data-fdel>Delete</button></div>
-      </article>`).join('') : '<div class="empty">No feedback yet.</div>';
+      </article>`).join('') : `<div class="empty">${EMPTY[view]}</div>`);
   },
   async announcements() {
     const isAdmin = s.user()?.role === 'admin';
@@ -247,7 +263,8 @@ async function onClick(e) {
     return redraw();
   }
   const fc = t.closest('[data-fid]');
-  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus), `Marked ${t.dataset.fstatus}.`); return redraw(); }
+  if (fc && t.dataset.fstatus) { await guard(() => s.setFeedbackStatus(Number(fc.dataset.fid), t.dataset.fstatus),
+    { new: 'Back in New.', planned: 'Moved to Planned.', done: 'Done. It’s in Finished, and the sender is told.', closed: 'Closed. It’s in Finished, and the sender is told.' }[t.dataset.fstatus]); return redraw(); }
   if (fc && 'fdel' in t.dataset) { if (!(await popconfirm(t, { title: 'Delete this feedback?', text: 'Marking it closed keeps it instead.', key: 'feedback-delete' }))) return; await guard(() => s.deleteFeedback(Number(fc.dataset.fid)), 'Deleted.'); return redraw(); }
   if (t.dataset.resolve) { await guard(() => s.resolveReport(Number(t.dataset.resolve)), 'Resolved.'); return redraw(); }
   if (t.dataset.tobounty) {

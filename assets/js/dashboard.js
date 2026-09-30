@@ -9,7 +9,7 @@
 //   Site     Announcements, Bounties (admins edit, reviewers see), People (admins only)
 //
 // Routes live in the hash: #updates #work #threads #thread/<subject> #review #comments #reports
-// #feedback #published(-off) #announcements #bounties #people #person/<id> #edit-<submission id>.
+// #feedback(-planned|-done) #published(-off) #announcements #bounties #people #person/<id> #edit-<submission id>.
 // Old /inbox/ and /review/ addresses forward here.
 
 import { popconfirm, initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
@@ -400,7 +400,7 @@ async function route() {
   const edit = /^edit-(\d+)$/.exec(h);
   if (edit) { history.replaceState(null, '', '#work'); h = 'work'; }
   const [tab, arg] = h.startsWith('thread/') ? ['threads', h.slice(7)] : h.startsWith('person/') ? ['people', h.slice(7)]
-    : h === 'published-off' ? ['published', 'off'] : [h, null];
+    : h === 'published-off' ? ['published', 'off'] : /^feedback-(planned|done)$/.test(h) ? ['feedback', h.slice(9)] : [h, null];
   const allowed = SECTIONS().flatMap(([, items]) => items.map(([k]) => k));
   const active = allowed.includes(tab) ? tab : 'updates';
   if (!$('.db-nav', app) || app.dataset.role !== me.role) { app.innerHTML = frame(); app.dataset.role = me.role; refreshTeamCounts(); }

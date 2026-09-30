@@ -1066,6 +1066,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     `on_status_notify` writes each reviewer decision into the thread (`kind='decision'`,
     `status`), and `edit_submission` writes its note (`kind='edit'`), so a post keeps its whole
     history. A resubmission is written too, and tells the reviewer who sent it back.
+  - Feedback has three views (Ethan): **New** `#feedback`, **Planned** `#feedback-planned`, and
+    **Finished** `#feedback-done` (done + closed), chips with counts at the top; the sidebar badge
+    counts New only. "Close (won't do)" = status `closed`: not doing it; the sender is notified
+    ("Your feedback was closed"), so reply first to say why. Nothing is deleted by closing.
   - Feedback cards on the desk have **Reply…** (opens `feedback:<id>`; anonymous feedback has no one
     to reply to and says so). Replying to someone's feedback offers starters (`STARTERS` in
     dashboard.js: ask what they mean, explain why not, say it's planned, thanks) that fill the box
