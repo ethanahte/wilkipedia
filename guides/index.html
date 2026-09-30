@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://wilcoxwiki.org/guides/">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
 <link rel="preload" href="../assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/style.css?v=cde72cb632">
+<link rel="stylesheet" href="../assets/style.css?v=a236502e0f">
 <meta name="data-version" content="28c811696c">
 <script>try{(function(){var L=localStorage,S=Storage.prototype,set=S.setItem,get=S.getItem,cat=function(k){k=String(k);if(/^(sb-|wilkipedia-(cookies|demo-))/.test(k))return'need';if(/^wilkipedia-(recent-|draft:)/.test(k))return'history';return/^(wilkipedia|wilcox)-/.test(k)?'prefs':'need'};window.wkStoreCat=cat;S.setItem=function(k,v){if(this===L&&cat(k)!=='need'){var c;try{c=JSON.parse(get.call(L,'wilkipedia-cookies'))||{}}catch(e){c={}}if(c[cat(k)]===false)return}return set.call(this,k,v)}})()}catch(e){}</script>
 <script>try{var d=document.documentElement,t=localStorage.getItem('wilkipedia-theme'),c=localStorage.getItem('wilkipedia-class-applied');if(t)d.dataset.theme=t;if(c)d.dataset.class=c;['text','motion','bell','fab','avatars','homebg'].forEach(function(k){var v=localStorage.getItem('wilkipedia-'+k);if(v)d.dataset[k]=v})}catch(e){}</script>
@@ -62,8 +62,10 @@
   <div id="gv-chart" class="gv-chart" role="img" aria-label="Graph of subjects, classes and study guides. The list below has every guide."></div>
   <div class="gv-panel" id="gv-panel" hidden></div>
   <aside class="gv-info" id="gv-info" hidden></aside>
-  <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
-  <div class="gv-legend" id="gv-legend" role="group" aria-label="What the dots are. Click a kind of resource to hide or show it."></div>
+  <div class="gv-foot">
+    <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
+    <div class="gv-legend" id="gv-legend" role="group" aria-label="What the dots are. Click a kind of resource to hide or show it."></div>
+  </div>
 </div>
 <section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
   <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>

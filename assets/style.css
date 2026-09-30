@@ -1787,14 +1787,19 @@ html.pal-open { overflow: hidden; }
 .gv-m { color: #9a9a9a; font-size: .8rem; }
 .gv-open { display: inline-block; margin-top: 4px; font-weight: 600; }
 .gv-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; background: none; color: #8a8a8a; cursor: pointer; }
-.gv-hint { position: absolute; left: 14px; bottom: 10px; margin: 0; z-index: 2; font-size: .72rem; color: #6f6f6f; pointer-events: none; }
+/* the hint and the legend share one strip along the bottom, so they can't run into each other:
+   the hint takes what room is left and moves up a line when there's none */
+.gv-foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap-reverse; align-items: flex-end;
+  justify-content: space-between; gap: 6px 18px; padding: 22px 14px 10px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(30, 30, 30, 0), rgba(30, 30, 30, .9) 55%); }
+.gv-hint { flex: 1 1 320px; min-width: 0; margin: 0; font-size: .72rem; line-height: 1.4; color: #6f6f6f; }
 .gv-fail { padding: 80px 24px; text-align: center; color: #b3b3b3; }
-.gv-legend { position: absolute; right: 14px; bottom: 10px; margin: 0; z-index: 2; display: flex; gap: 12px; font-size: .72rem; color: #8a8a8a; pointer-events: none; }
+.gv-legend { flex: 0 1 auto; margin: 0 0 0 auto; display: flex; gap: 12px; font-size: .72rem; color: #8a8a8a; pointer-events: none; }
 .gv-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .gv-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .gv-legend .s { background: #c9a227; width: 12px; height: 12px; } .gv-legend .a { background: #7aa7ff; } .gv-legend .c { background: #a8a8a8; } .gv-legend .g { background: #dcddde; width: 7px; height: 7px; }
 .gv-legend.no-ap .ap { display: none; }
-.gv-legend { flex-wrap: wrap; justify-content: flex-end; max-width: calc(100% - 28px); row-gap: 6px; }
+.gv-legend { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; align-items: center; }
 .gv-type { pointer-events: auto; display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px 2px 6px; border-radius: 999px;
   border: 1px solid #3a3a3a; background: rgba(30, 30, 30, .85); color: #c8c8c8; font: inherit; cursor: pointer; transition: opacity .15s, border-color .15s; }
 .gv-type:hover { border-color: #6a6a6a; }
@@ -1806,7 +1811,7 @@ html.pal-open { overflow: hidden; }
 .rtype::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(0, 0, 0, .12); }
 .gv-class h3 { margin: 18px 0 4px; font-size: 1.2rem; }
 .gv-class h3 a { color: var(--ink); text-decoration: none; }
-@media (max-width: 640px) { .gv-chart { height: 64vh; } .gv-hint, .gv-count { display: none; } .gv-legend { left: 14px; right: auto; flex-wrap: wrap; } .gv-bar { justify-content: space-between; } .gv-panel { left: 12px; width: auto; } }
+@media (max-width: 640px) { .gv-chart { height: 64vh; } .gv-hint, .gv-count { display: none; } .gv-legend { margin-left: 0; justify-content: flex-start; } .gv-bar { justify-content: space-between; } .gv-panel { left: 12px; width: auto; } }
 
 /* ── By the numbers (numbers.js): lieflat-charts cards ──
    Card = conclusion title + legend line + chart + source line (all caps).
