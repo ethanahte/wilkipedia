@@ -2074,6 +2074,21 @@ ol.periods .pn { flex: none; width: 2em; font: 700 .8rem var(--sans); color: var
 .ib-panel { padding-top: 16px; }
 .ib-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .ib-bar input[type="search"] { min-width: 220px; }
+/* Filter tabs in the Dashboard: plain words on one hairline, the chosen one underlined in ink.
+   (Ethan: pill "chips" looked like tags.) */
+.ib-bar:has(> .vtabs), .list-tools:has(> .vtabs) { align-items: flex-end; border-bottom: 1px solid var(--rule); padding-bottom: 0; margin-bottom: 18px; }
+.vtabs { display: flex; gap: 26px; min-width: 0; overflow-x: auto; scrollbar-width: none; margin-bottom: -1px; }
+.vtabs::-webkit-scrollbar { display: none; }
+.vtab { position: relative; display: inline-flex; align-items: baseline; gap: 7px; padding: 10px 0 12px; border: 0; background: none;
+  color: var(--muted); font: 500 .94rem var(--sans); white-space: nowrap; text-decoration: none; cursor: pointer; transition: color .15s; }
+.vtab:hover { color: var(--ink); }
+.vtab[aria-pressed="true"] { color: var(--ink); }
+.vtab[aria-pressed="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--ink); }
+.vtab .c { font: 600 .68rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.vtab.hot .c { color: var(--bad); }
+.vtab:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 3px; }
+.ib-bar:has(> .vtabs) > :not(.vtabs) { margin-bottom: 8px; }
+.list-tools:has(> .vtabs) input { margin-bottom: 8px; order: 2; margin-left: auto; }
 .ib-day { margin: 18px 0 6px; font: 600 .78rem/1 var(--sans, inherit); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .ib-feed, .ib-work, .ib-list, .ib-threads, .ib-timeline, .ib-people { list-style: none; margin: 0; padding: 0; }
 .ib-note { display: flex; gap: 12px; align-items: flex-start; padding: 11px 12px; border-radius: 10px; }

@@ -80,8 +80,8 @@ const tabs = {
     const names = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     const summary = (x) => { const p = x.payload || {}; return p.title || p.summary || p.text || p.test_style || p.what || p.name || ''; };
     return `<div class="list-tools"><input id="pub-q" type="search" placeholder="Filter by class, teacher, author or text" aria-label="Filter">
-        <div class="chips"><a class="chip" href="#published" aria-pressed="${!showOff}">Live on the site (${showOff ? '…' : list.length})</a>
-        <a class="chip" href="#published-off" aria-pressed="${showOff}">Unpublished / rejected</a></div></div>
+        <div class="vtabs" role="group" aria-label="Show"><a class="vtab" href="#published" aria-pressed="${!showOff}">Live on the site${showOff ? '' : `<span class="c">${list.length}</span>`}</a>
+        <a class="vtab" href="#published-off" aria-pressed="${showOff}">Unpublished / rejected${showOff ? `<span class="c">${list.length}</span>` : ''}</a></div></div>
       ${list.length ? list.map((x) => `
       <article class="card review pub-row" data-id="${x.id}" data-hay="${esc(`${placeOf(x, names)[0]} ${x.teacher || ''} ${x.author} ${JSON.stringify(x.payload)}`.toLowerCase())}">
         <div class="r-head"><span class="tag">${esc(KINDS[x.kind]?.label || x.kind)}</span>

@@ -873,6 +873,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   <colour>` or `inset Npx 0 0` accent edges on cards, rows, modals or nav items. Show a category or
   state with a soft all-round tint (`color-mix(... var(--cc) 7%, var(--card))`), a small dot, or a
   tag instead. Neutral grey thread/quote lines, tab underlines and the header's gold rule are fine.
+- **Dashboard filter tabs** (`.vtabs` / `.vtab`, Ethan: pill chips looked like tags): Updates,
+  Conversations and Published filter with plain words on one hairline, the chosen one underlined in
+  ink, with a small mono count where there's something (Unread's count in red). Use `.vtabs` for any
+  new view switch in the Dashboard; `.chip` stays for real tags and quick-fill starters.
 - **More panel** (build.py `page()`, style.css "More: one calm panel"): centred under the whole bar
   (`.more` is `position: static`, so the sticky header places it). A featured page on the left over
   Ethan's courtyard painting (night painting at night), then the three `MORE_GROUPS` columns with

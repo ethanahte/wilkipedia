@@ -104,8 +104,10 @@ async function updates(panel) {
   const show = notes.filter((n) => filter === 'all' || (filter === 'unread' ? !n.read : GROUP[kindOf(n)] === filter));
   const groups = [];
   for (const n of show) { const d = dayLabel(n.created_at); if (!groups.length || groups.at(-1)[0] !== d) groups.push([d, []]); groups.at(-1)[1].push(n); }
-  panel.innerHTML = `<div class="ib-bar"><div class="chips" role="group" aria-label="Show">${FILTERS.map(([k, l]) =>
-      `<button type="button" class="chip" data-filter="${k}" aria-pressed="${filter === k}">${l}</button>`).join('')}</div>
+  // tabs, not pills (Ethan: the pills looked like tags); a count where there's something in it
+  const count = (k) => notes.filter((n) => k === 'all' || (k === 'unread' ? !n.read : GROUP[kindOf(n)] === k)).length;
+  panel.innerHTML = `<div class="ib-bar"><div class="vtabs" role="group" aria-label="Show">${FILTERS.map(([k, l]) => { const c = k === 'all' ? 0 : count(k);
+      return `<button type="button" class="vtab${k === 'unread' && c ? ' hot' : ''}" data-filter="${k}" aria-pressed="${filter === k}">${l}${c ? `<span class="c">${c}</span>` : ''}</button>`; }).join('')}</div>
       ${notes.some((n) => !n.read) ? '<button type="button" class="btn ghost small" data-allread>Mark all as read</button>' : ''}</div>
     ${groups.length ? groups.map(([d, list]) => `<h3 class="ib-day">${esc(d)}</h3><ul class="ib-feed">${list.map((n) => {
       const k = kindOf(n), [cls, ic] = ICON[k] || ICON.other, href = noteHref(n);
@@ -235,8 +237,9 @@ async function threads(panel) {
   const list = rows.map(([subj, ms], i) => ({ subj, ms, x: infos[i], last: ms[0] }))
     .filter((r) => !threadQ || `${subjectTitle(r.subj, r.x)} ${r.x?.author || ''} ${r.ms.map((m) => m.body).join(' ')}`.toLowerCase().includes(threadQ));
   panel.innerHTML = `<div class="ib-bar">
-      <div class="chips" role="group" aria-label="Show">${[['all', 'All'], ['submission', 'Posts'], ['feedback', 'Feedback'], ['report', 'Reports']].map(([k, l]) =>
-        `<button type="button" class="chip" data-tf="${k}" aria-pressed="${threadFilter === k}">${l}</button>`).join('')}</div>
+      <div class="vtabs" role="group" aria-label="Show">${[['all', 'All'], ['submission', 'Posts'], ['feedback', 'Feedback'], ['report', 'Reports']].map(([k, l]) => {
+        const c = k === 'all' ? 0 : [...by.keys()].filter((subj) => subj.startsWith(k + ':')).length;
+        return `<button type="button" class="vtab" data-tf="${k}" aria-pressed="${threadFilter === k}">${l}${c ? `<span class="c">${c}</span>` : ''}</button>`; }).join('')}</div>
       ${team ? `<input type="search" id="ib-tq" placeholder="Search by person or words" value="${esc(threadQ)}" aria-label="Search conversations">` : ''}</div>
     ${team ? '<p class="meta">You see every conversation on the site: reviewers and admins answer them together.</p>' : ''}
     ${list.length ? `<ul class="ib-threads">${list.map(({ subj, ms, x, last }) => {
