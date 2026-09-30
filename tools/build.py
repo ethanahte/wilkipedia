@@ -969,10 +969,15 @@ def build_static():
          desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
 
     page("settings/", "Settings", """
-<h1>Settings</h1>
-<p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
-<nav class="set-toc" aria-label="Settings sections" id="set-toc"></nav>
-<div id="settings" class="settings"><div class="meta">Loading…</div></div>""", data={"page": "settings"},
+<header class="set-head">
+  <p class="set-kicker">Preferences</p>
+  <h1>Settings</h1>
+  <p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
+</header>
+<div class="set-layout">
+  <nav class="set-toc" aria-label="Settings sections" id="set-toc"></nav>
+  <div id="settings" class="settings"><div class="meta">Loading…</div></div>
+</div>""", data={"page": "settings"},
          desc="Theme, text size, motion, language and other Wilkipedia settings.")
 
     page("credits/", "Credits", """

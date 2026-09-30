@@ -91,6 +91,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   THEME_BOOT. Use `lessMotion()` for anything animated. Adding a pref: default
   in PREF_DEFAULTS, the name in THEME_BOOT's list, CSS, a row on the page, and
   its key in the page's reset list.
+  Design: editorial, not boxed. A numbered index on the left (sticky; a
+  scrolling strip under the header below 900px) marks the section you're in
+  from the scroll position, and the last section at the very bottom. Each
+  section has a number, a serif title, a one-line `SEC_SUB` and hairline rows.
+  Choices that can be pictured use `tiles()` (a preview above the label): the
+  theme as a tiny drawn page in day or night (`.pv-page`, fixed colours on
+  purpose), "Aa" at each text size, the real home backgrounds, sample avatars.
+  Class colour is `.set-swatches`. Everything else is a toggle or the quiet
+  segmented track (`.settings .seg`). Tiles keep the ids and data attributes
+  the wiring reads (`#theme-seg [data-theme-pref]`, `#class-seg
+  [data-class-pref]`, `[data-v]`). The Account page still uses the plain
+  `themeSeg()` / `classSeg()`.
 - **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
   with the Community rules and the Privacy page. A signed-in member whose
   `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen

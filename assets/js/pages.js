@@ -565,7 +565,31 @@ const pages = {
       `<button type="button" role="radio" aria-checked="${cur === v}" data-v="${v}">${l}</button>`).join('')}</div>`;
     const tgl = (id, label, on) => `<span class="tgl"><input type="checkbox" id="${id}" aria-label="${esc(label)}" ${on ? 'checked' : ''}><span aria-hidden="true"></span></span>`;
     const row = (title, hint, control, wide = false) => `<div class="set-row${wide ? ' wide' : ''}"><div class="set-l"><b>${title}</b>${hint ? `<small>${hint}</small>` : ''}</div><div class="set-c">${control}</div></div>`;
-    const sec = (id, title, rows, note = '') => `<section class="set-sec" id="${id}"><h2>${title}</h2><div class="set-card">${rows}</div>${note ? `<p class="meta">${note}</p>` : ''}</section>`;
+    const sec = (id, title, rows, note = '', n = 1) => `<section class="set-sec" id="${id}"><header class="set-sh"><span class="set-no" aria-hidden="true">${String(n).padStart(2, '0')}</span>
+      <h2>${title}</h2>${SEC_SUB[id] ? `<p>${SEC_SUB[id]}</p>` : ''}</header><div class="set-list">${rows}</div>${note ? `<p class="set-note">${note}</p>` : ''}</section>`;
+    const SEC_SUB = {
+      appearance: 'How Wilkipedia looks on this device.', language: 'The language for menus, buttons and pages.',
+      pages: 'What shows up around the site.', account: 'Saved to your account, so it follows you to every device.',
+      bounties: 'For the review team: how the bounty board opens.', cookies: 'What this site keeps in your browser. No ads, no analytics, no tracking.',
+      device: 'Drafts in progress, and a fresh start.',
+    };
+    // Picture choices: a small preview above each label. attr is the data attribute the wiring reads.
+    const tiles = (id, label, cur, opts, attr = 'data-v', cls = '') => `<div class="set-tiles ${cls}" id="${id}" role="radiogroup" aria-label="${label}">${opts.map(([v, l, pv]) =>
+      `<button type="button" role="radio" aria-checked="${cur === v}" ${attr}="${v}"><span class="pv" aria-hidden="true">${pv}</span><span class="pv-l">${l}</span></button>`).join('')}</div>`;
+    const page_ = (m) => `<span class="pv-page pv-${m}"><i class="pv-bar"></i><i class="pv-h"></i><i class="pv-t"></i><i class="pv-t s"></i><i class="pv-c"></i><i class="pv-c"></i></span>`;
+    const themeTiles = () => tiles('theme-seg', 'Theme', themePref(), [
+      ['system', 'Match my device', `${page_('day')}${page_('night pv-half')}`], ['light', 'Day', page_('day')], ['dark', 'Night', page_('night')]], 'data-theme-pref');
+    const sizeTiles = () => tiles('set-text', 'Text size', getPref('text'), [['normal', 'Default', '<b class="pv-aa">Aa</b>'], ['large', 'Large', '<b class="pv-aa l">Aa</b>'], ['larger', 'Larger', '<b class="pv-aa xl">Aa</b>']], 'data-v', 'small');
+    const bgTiles = () => tiles('set-homebg', 'Home page background', getPref('homebg'), [
+      ['pano', 'The quad, turning', '<span class="pv-img pv-pano"></span>'], ['paint', 'Painting', '<span class="pv-img pv-paint"></span>'], ['plain', 'Plain', page_('plain')]]);
+    const avTiles = (me) => {
+      const who = me?.avatar && AVATARS[me.avatar] ? [{ name: me.name, avatar: me.avatar, color: me.avatar_color }] : [];
+      const trio = [...who, { name: 'a', avatar: 'owl', color: 'blue' }, { name: 'b', avatar: 'fox', color: 'orange' }, { name: 'c', avatar: 'panda', color: 'green' }].slice(0, 3);
+      const row_ = trio.map((p) => avatarHtml(p, 'md')).join('');
+      return tiles('set-avatars', 'Profile pictures', getPref('avatars'), [['lines', 'Line drawings', `<span class="pv-av pv-lines">${row_}</span>`], ['emoji', 'Emoji', `<span class="pv-av pv-emoji">${row_}</span>`]], 'data-v', 'small');
+    };
+    const classSwatches = (me) => `<div class="set-swatches" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class · ${CLASS_COLORS[classColorOf(me.grad_year)]}` : 'My class'], ['gold', 'Wilcox gold'],
+      ...Object.entries(CLASS_COLORS)].map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>`;
 
     const draw = () => {
       const me = s.user();
@@ -576,17 +600,17 @@ const pages = {
       const o = orrOpts();
       const sections = [
         ['appearance', 'Appearance', [
-          row('Theme', 'Day, night, or follow your device. The moon button in the header does the same.', themeSeg()),
-          row('Class colour', classNote(me), classSeg(me), true),
-          row('Text size', 'Makes all text on the site bigger.', seg('set-text', 'Text size', getPref('text'), [['normal', 'Default'], ['large', 'Large'], ['larger', 'Larger']])),
+          row('Theme', 'Day, night, or follow your device. The moon button in the header does the same.', themeTiles(), true),
+          row('Class colour', classNote(me), classSwatches(me), true),
+          row('Text size', 'Makes all text on the site bigger.', sizeTiles(), true),
+          row('Profile pictures', 'How everyone’s profile icons look to you: one-line drawings, or the original emoji.', avTiles(me), true),
           row('Motion', 'Turn off animations like the night-mode circle and the moving planets.', seg('set-motion', 'Motion', getPref('motion'), [['system', 'Match my device'], ['reduce', 'Reduce'], ['full', 'Full']])),
-          row('Profile pictures', 'How everyone’s profile icons look to you: one-line drawings, or the original emoji.', seg('set-avatars', 'Profile pictures', getPref('avatars'), [['lines', 'Line drawings'], ['emoji', 'Emoji']])),
         ].join('')],
         ['language', 'Language', row('Language', 'Menus and buttons use our own translations. Everything else is translated by Google.',
           `<select id="set-lang" class="set-select">${LANGS.map(([code, native, english]) => `<option value="${code}" ${code === currentLang() ? 'selected' : ''}>${esc(native)}${native !== english ? ` · ${esc(english)}` : ''}</option>`).join('')}</select>`)],
         ['pages', 'Pages', [
           row('Home page background', 'What’s behind the home page: the quad turning slowly all the way round, the painting of the courtyard, or nothing (plain).',
-            seg('set-homebg', 'Home page background', getPref('homebg'), [['pano', 'The quad, turning'], ['paint', 'Painting'], ['plain', 'Plain']])),
+            bgTiles(), true),
           row('Bell schedule on the home page', 'Today’s periods at the top of the home page. The full schedule is always under More.', tgl('set-bell', 'Bell schedule on the home page', getPref('bell') === 'on')),
           row('Contribute button', 'The round + button in the corner of every page. You can still contribute from the More menu or your account.', tgl('set-fab', 'Contribute button', getPref('fab') === 'on')),
           row('Tour of the site', 'The speech bubbles from your first sign-in that show where everything is.',
@@ -602,7 +626,7 @@ const pages = {
         row('Show me on the leaderboard', 'Your name and points on the Leaderboard. Your work keeps your name either way.', tgl('set-lb', 'Show me on the leaderboard', me.show_on_leaderboard)),
         row('Name, picture and class year', 'Edited on your account page.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
         row('Dashboard', 'Notifications, everything you’ve sent in, and your conversations with the review team.', `<a class="btn ghost small" href="${root}dashboard/">Open the Dashboard</a>`),
-      ].join(''), 'Saved to your account, so it follows you to every device.']);
+      ].join('')]);
       if (team) sections.push(['bounties', 'Bounty board', [
         row('Open the board on', 'The view the bounty page starts with.', seg('set-bview', 'Bounty board view', ls.get('wilkipedia-bounty-view', 'board'), [['board', 'Board'], ['agenda', 'Agenda'], ['ledger', 'Ledger'], ['orrery', 'Orrery']])),
         row('Orrery: motion', 'Planets orbit the sun.', tgl('set-o-motion', 'Orrery motion', o.motion)),
@@ -615,7 +639,7 @@ const pages = {
       const saved = [...storedKeys().filter((k) => /^(sb-|wilkipedia|wilcox)/.test(k)).map((k) => [keyLabel(k), storeGroup(k), k]),
         ...(gt ? [['Google Translate language', 'google', 'googtrans (cookie)']] : [])];
       sections.push(['cookies', 'Cookies & storage', [
-        row('Needed to work', 'Keeps you signed in and remembers the choices on this card. Wilkipedia has no ads, analytics or tracking cookies.',
+        row('Needed to work', 'Keeps you signed in and remembers your choices below. Wilkipedia has no ads, analytics or tracking cookies.',
           '<span class="set-pill">Always on</span>'),
         row('Remember my settings', 'Night mode, text size, class colour, closed announcements, the 3D campus view and the rest of this page. Off: changes last until you leave the page.',
           tgl('set-c-prefs', 'Remember my settings', cp.prefs)),
@@ -637,8 +661,9 @@ const pages = {
           '<button type="button" class="btn ghost danger small" id="set-reset">Reset</button>'),
       ].join('')]);
 
-      $('#set-toc').innerHTML = sections.map(([id, title]) => `<a href="#${id}">${title}</a>`).join('');
-      $('#settings').innerHTML = sections.map(([id, title, rows, note]) => sec(id, title, rows, note)).join('');
+      $('#set-toc').innerHTML = `<ol>${sections.map(([id, title], i) => `<li><a href="#${id}" data-sec="${id}"><span class="set-no" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>${title}</a></li>`).join('')}</ol>`;
+      $('#settings').innerHTML = sections.map(([id, title, rows, note], i) => sec(id, title, rows, note, i + 1)).join('');
+      spy();
       if (!cp.prefs) $('#settings').insertAdjacentHTML('afterbegin', '<p class="set-warn"><b>Remember my settings is off</b>, so changes here last only until you leave this page. <a href="#cookies">Change</a></p>');
       wireAppearance(s);
 
@@ -698,6 +723,28 @@ const pages = {
     const keyLabel = (k) => (k.startsWith('sb-') ? 'Sign-in token' : k.startsWith(DRAFT) ? 'Unsent draft'
       : k.startsWith('wilkipedia-demo') ? 'Demo-mode data' : NAMES[k] || k);
     const PREF_KEYS = { 'wilkipedia-text': 1, 'wilkipedia-motion': 1, 'wilkipedia-bell': 1, 'wilkipedia-fab': 1, 'wilkipedia-homebg': 1 };
+    // The index on the left marks the section you're reading: the last one whose heading has
+    // passed the top, or the last section once you reach the bottom (a short one never gets there).
+    let lock = 0;
+    let shown = '';
+    const mark = (id) => {
+      $$('#set-toc [data-sec]').forEach((a) => (a.dataset.sec === id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      const toc = $('#set-toc'), a = $(`#set-toc [data-sec="${id}"]`);
+      if (a && id !== shown && toc.scrollWidth > toc.clientWidth) toc.scrollTo({ left: a.offsetLeft - 16, behavior: lessMotion() ? 'auto' : 'smooth' });   // phones: the strip follows
+      shown = id;
+    };
+    const current = () => {
+      if (Date.now() < lock) return;
+      const secs = $$('.set-sec');
+      if (!secs.length) return;
+      const bottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+      mark((bottom ? secs.at(-1) : secs.filter((x) => x.getBoundingClientRect().top < 140).at(-1) || secs[0]).id);
+    };
+    const spy = () => {
+      $('#set-toc').onclick = (e) => { const a = e.target.closest('[data-sec]'); if (a) { lock = Date.now() + 900; mark(a.dataset.sec); } };
+      location.hash ? mark(location.hash.slice(1)) : current();
+    };
+    addEventListener('scroll', current, { passive: true });
     s.onAuth(draw);
     draw();
     if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
