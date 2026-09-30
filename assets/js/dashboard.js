@@ -66,7 +66,7 @@ function dayLabel(iso) {
 const SECTIONS = () => [
   ['You', [['updates', 'Updates'], ['work', 'My work'], ['threads', 'Conversations']]],
   ...(isTeam() ? [['Review', [['review', 'To review'], ['comments', 'Comments'], ['reports', 'Reports'], ['feedback', 'Feedback'], ['published', 'Published']]]] : []),
-  ...(isTeam() ? [['Site', [['announcements', 'Announcements'], ['bounties', 'Bounties'], ...(isAdmin() ? [['people', 'People']] : [])]]] : []),
+  ...(isTeam() ? [['Site', [['announcements', 'Announcements'], ['bounties', 'Bounties'], ...(isAdmin() ? [['people', 'People'], ['tests', 'Feature tests']] : [])]]] : []),
 ];
 const DESK = { review: 'submissions', comments: 'comments', reports: 'reports', feedback: 'feedback', published: 'published', announcements: 'announcements', bounties: 'bounties' };
 
@@ -450,7 +450,8 @@ async function route() {
   refreshCount();
   const redraw = () => { refreshTeamCounts(); return route(); };
   const run = { updates: () => updates(panel), work: () => work(panel), review: () => review(panel),
-    threads: () => (arg ? thread(panel, arg) : threads(panel)), people: () => (arg ? person(panel, arg) : people(panel)) }[active]
+    threads: () => (arg ? thread(panel, arg) : threads(panel)), people: () => (arg ? person(panel, arg) : people(panel)),
+    tests: () => import('./selftest.js').then((m) => m.testsTab(panel, s)) }[active]   // admins: Jonathan's feature test page
     || (() => deskTab(panel, s, DESK[active], redraw));
   await guard(run);
   if (edit) {                                                         // "Make changes" from the home page

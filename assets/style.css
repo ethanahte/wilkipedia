@@ -2181,6 +2181,39 @@ a.ib-tile:hover { border-color: var(--gold); }
 .ib-psort .combo, .ib-psort select { width: 170px; }
 .ib-pgroup { display: flex; align-items: baseline; gap: 8px; }
 .ib-pgroup .c { font: 600 .68rem var(--mono); color: var(--muted); }
+/* Feature tests (selftest.js, admins): a checklist that fills in as it runs */
+.st-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.st-h { margin: 0 0 4px; font: 600 1.5rem var(--serif); }
+.st-actions { display: flex; gap: 8px; }
+.st-sum { margin: 14px 0 6px; font: 600 .7rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.st-sec { margin: 22px 0 0; }
+.st-gh { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font: 600 .66rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.st-gh::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+.st-list, .st-manual { list-style: none; margin: 0; padding: 0; }
+.st-row { display: grid; grid-template-columns: 22px minmax(0, 14em) minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 8px 4px; border-bottom: 1px solid var(--rule); font-size: .92rem; }
+.st-ic { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 700; color: #fff; background: transparent; box-shadow: inset 0 0 0 1px var(--rule); }
+.st-row.pass .st-ic { background: #2e8448; box-shadow: none; }
+.st-row.fail .st-ic { background: var(--bad); box-shadow: none; }
+.st-row.warn .st-ic { background: var(--gold); color: #111; box-shadow: none; }
+.st-row.run .st-ic { color: var(--muted); animation: st-spin 1s linear infinite; }
+@keyframes st-spin { to { transform: rotate(360deg); } }
+.st-name { font-weight: 600; }
+.st-detail { color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-row.fail .st-detail { color: var(--bad); white-space: normal; }
+.st-ms { font: 500 .72rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.st-btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.st-btn { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); }
+.st-btn.pass { border-color: color-mix(in srgb, #2e8448 45%, var(--rule)); }
+.st-btn.fail { border-color: color-mix(in srgb, var(--bad) 55%, var(--rule)); }
+.st-btn p { margin: 2px 0 0; }
+.st-btn > .btn { flex: none; white-space: nowrap; }
+.st-err { color: var(--bad); font-size: .85rem; }
+.st-demo:not(:empty) { margin-top: 8px; max-width: 240px; }
+.st-manual li { padding: 9px 4px; border-bottom: 1px solid var(--rule); }
+.st-manual label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.st-manual label > span { display: grid; gap: 2px; }
+.st-manual input { width: auto; margin-top: 3px; }
+@media (max-width: 640px) { .st-row { grid-template-columns: 22px minmax(0, 1fr) auto; } .st-detail { grid-column: 2 / -1; } .st-ms { display: none; } }
 /* Dashboard: a grouped side menu (You / Review / Site) beside the panel; a scrolling strip on phones */
 .db-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; }
 .db-side { position: sticky; top: 84px; display: grid; gap: 14px; }

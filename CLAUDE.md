@@ -1064,6 +1064,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - My work: posts with a Sent in → In review → Published track, sorted so "Needs you" comes
       first, plus your comments, feedback and reports with their state.
     - Conversations.
+  - **Feature tests** (admins; Jonathan's idea: "features can be bugtested efficiently"),
+    `selftest.js`, Dashboard → Site → Feature tests (`#tests`). Automatic checks (every page with a
+    marker it must contain, data files, database reads, a PDF link, search, the bell, browser
+    support) are READ-ONLY by rule: never add a check that posts, notifies or edits anything.
+    Button tests fire the real components (toasts, progress toast, confirm, result page, loading
+    ring, top bar, night-mode ripple, dropdown). The site shows at most 3 toasts at once, so the
+    toast test checks each kind appeared, not a count. Flows that write data are a by-hand
+    checklist (ticks + dates in localStorage). "Copy report" puts it all on the clipboard. When a
+    page gains a new must-have element or a feature is added, add a check here.
   - People (admins): every member, their whole history, and their role via `set_role()`.
     Filter tabs (All · SCUSD ✓ · Not verified · Review team, with counts) and a Sort menu (Newest,
     Name, Class year, SCUSD first, Role, Most published). Class year, SCUSD and Role group the list
