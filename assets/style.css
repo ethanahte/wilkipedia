@@ -2324,6 +2324,13 @@ a.ib-tile:hover { border-color: var(--gold); }
 .db-nav a:hover { background: var(--card); }
 .db-nav a[aria-current="page"] { background: var(--accent-soft); font-weight: 650; }
 .db-nav .ib-n { margin-left: auto; }
+.db-nav a.db-out { color: var(--muted); font-weight: 500; }
+.db-nav a.db-out span { font-size: .8rem; }
+.db-nav a.db-out:hover { color: var(--ink); }
+.db-main { min-width: 0; }
+.db-ph { padding: 2px 0 16px; margin-bottom: 18px; border-bottom: 1px solid var(--rule); }
+.db-ph h2 { margin: 0; font-size: 1.6rem; letter-spacing: -.01em; }
+.db-ph p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
 .db-layout .ib-panel { padding-top: 0; }
 .db-h { margin: 26px 0 10px; }
 .r-talk { margin-left: 8px; font-size: .85rem; }

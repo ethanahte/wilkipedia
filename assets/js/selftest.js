@@ -1,5 +1,5 @@
 // Feature tests (Jonathan's idea: "features can be bugtested efficiently to ensure the website runs
-// as intended"). Dashboard → Site → Feature tests, admins only.
+// as intended"). Dashboard → Manage → Feature tests, admins only.
 //
 //   Automatic checks   every page and data file loads, the database answers, PDFs open, search and
 //                      the bell schedule work, the browser can run the 3D campus. All READ-ONLY:
@@ -162,8 +162,8 @@ const BUTTONS = [
 
 const MANUAL = [
   ['signin', 'Sign in and out', 'Sign out from the account menu, sign back in with Google.'],
-  ['post', 'Post something, then remove it', 'Post a tip on a class, approve it in To review, check the class page, then unpublish it.'],
-  ['pdf', 'Upload a PDF study guide', 'Share a small test PDF, open it from To review, then reject it.'],
+  ['post', 'Post something, then remove it', 'Post a tip on a class, approve it in Review → Posts, check the class page, then unpublish it.'],
+  ['pdf', 'Upload a PDF study guide', 'Share a small test PDF, open it from Review → Posts, then reject it.'],
   ['sendback', 'Send back and resubmit', 'Send a post back with a note; as the author, “Make changes” and resubmit.'],
   ['reply', 'Reply to feedback', 'Open Feedback → Reply…, send a message, check the sender sees it.'],
   ['bell', 'Bell and calendar on a school day', 'The home “Right now” card shows the current period.'],

@@ -711,7 +711,7 @@ def build_static():
 
     page("dashboard/", "Dashboard", """
 <h1>Dashboard</h1>
-<p class="lede">Everything about your work on Wilkipedia in one place: what’s published, what a reviewer said, your conversations with the review team, and what happened to your comments, feedback and reports.</p>
+<p class="lede">Your updates, your work and your conversations with the review team, in one place.</p>
 <div id="dash-app" class="inbox-app"><div class="meta">Loading…</div></div>""", script="dashboard.js")
 
     # The Inbox and the review desk became the Dashboard. Old addresses (including links
@@ -724,8 +724,8 @@ def build_static():
             '<noscript><meta http-equiv="refresh" content="0; url=../dashboard/"></noscript>'
             '<p>This page moved to your <a href="../dashboard/">Dashboard</a>.</p>\n')
 
-    page("account/", "Your account", """
-<h1>Your account</h1>
+    page("account/", "Your profile", """
+<h1>Your profile</h1>
 <div id="account"><div class="meta">Loading…</div></div>""", data={"page": "account"})
 
     page("search/", "Search", """
@@ -1042,7 +1042,7 @@ SEARCH_PAGES = [
     ("Contribute", "submit/", "Add info, a tip or a study guide", "submit add write contribute study guide tip"),
     ("Leaderboard", "leaderboard/", "Top contributors", "leaderboard points top"),
     ("Teachers", "teachers/", "Every teacher", "teachers staff"),
-    ("Your account", "account/", "Profile, picture, settings", "account profile settings avatar picture sign out night mode"),
+    ("Your profile", "account/", "Name, picture, class year, sign out", "account profile avatar picture name class year leaderboard sign out"),
     ("Dashboard", "dashboard/", "Notifications, your work, conversations, reviewing", "dashboard inbox notifications messages my work posts submissions status review reviewer reply conversation"),
     ("Community rules", "rules/", "What you can post", "rules guidelines"),
     ("Privacy", "privacy/", "What we store", "privacy data delete account cookies tracking"),

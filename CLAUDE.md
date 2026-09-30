@@ -917,9 +917,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Language is not in the bar: `[data-act="lang"]` buttons in the More footer, the account menu
     and the drawer footer, served by one handler in `wireHeader()` that clicks the hidden
     `#lang-btn` translate.js owns (`#lang-menu` sits at body level).
-  - Your picture opens the account menu: Dashboard with its count, My work, To review with a
-    count plus a gold dot on the picture, Bounty board, Language, Account, Settings,
-    Sign out.
+  - Your picture opens the account menu, kept short on purpose (Ethan, 2026-09-30: it
+    repeated pages and functions): Dashboard with its count, Review queue with a count plus a
+    gold dot on the picture (team only), Profile, Settings, Sign out. Don't add back My work
+    (it's in the Dashboard), Bounty board (its own floating button), Language (More panel,
+    drawer, Settings) or theme (the bar's moon button).
   - Narrower screens: at ≤1120px the search pill shrinks to a round button (`.search-btn` is
     never shown in the bar, so there's only ever one). At ≤760px the page links move into the
     ☰ drawer (`#drawer`: every page grouped like More, footer: Language, Settings).
@@ -1063,23 +1065,37 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   - Old addresses: `/inbox/` and `/review/` are tiny redirect pages (build.py) that keep the
     `#…` part. Notification links stored in the database still say `inbox/…` and `review/`,
     so keep those redirects.
-  - Layout: a side menu grouped You / Review / Site, with counts. On phones it becomes a
-    scrolling strip.
-    - Review group (reviewers and admins): To review (overview tiles, "waiting for a reply",
-      then the queue), Comments, Reports, Feedback, Published.
-    - Site group: Announcements and Bounties (admins edit, reviewers see), People (admins).
+  - Layout: a side menu grouped You / Review / Manage, with counts. On phones it becomes a
+    scrolling strip that keeps the current section in view (`showTab`). Every section opens
+    with a title and a one-line "what this is" (`HEADS`); a thread or a person has its own.
+  - **One place for each thing** (Ethan, 2026-09-30: for admins and reviewers the same
+    functions kept turning up on different pages):
+    - Review group (reviewers and admins), the things waiting on the team, each with a count:
+      Posts (`#review`, just the queue), Comments, Reports, Feedback, Replies (`#replies`).
+    - Replies is every member's conversation with the team, "Waiting for a reply" first. You →
+      Conversations is only YOUR threads, for the team too. A thread opened from either marks
+      the right one in the menu and its breadcrumb.
+    - Manage group: Published, Announcements, People and Feature tests (admins), and a link
+      out to the Bounty board (`'@bounties/'` in SECTIONS = a link, not a section). Bounties
+      are posted and edited on the board, which already did everything the old Dashboard
+      Bounties table did; `#bounties` now forwards there.
     - `reviewdesk.js` is the old review page as a module: `deskTab(panel, store, name,
       again)` draws one section and wires its buttons on that panel.
   - The header has a bell with the unread count; the count used to sit on the avatar. The
-    "Review" header link goes to `dashboard/#review`. Settings links here. The account page keeps only a Dashboard card, and old
-    `account/#notifications|#my-subs|#edit-<id>` links redirect here.
+    "Review" header link goes to `dashboard/#review`. Old `account/#notifications|#my-subs|#edit-<id>`
+    links redirect here.
+  - The account page is "Your profile" (menu: Profile): the profile card, the profile form
+    (name, picture, class year, leaderboard), sign out, demo tools. Its old Dashboard card and
+    Appearance card were repeats and are gone; a line points to Settings and the Dashboard.
+    Settings → Your profile is one row linking there (the leaderboard switch lives only on
+    the profile).
   - You group (everyone):
     - Updates: notifications by day, with filters and per-item/all read.
     - My work: posts with a Sent in → In review → Published track, sorted so "Needs you" comes
       first, plus your comments, feedback and reports with their state.
     - Conversations.
   - **Feature tests** (admins; Jonathan's idea: "features can be bugtested efficiently"),
-    `selftest.js`, Dashboard → Site → Feature tests (`#tests`). Automatic checks (every page with a
+    `selftest.js`, Dashboard → Manage → Feature tests (`#tests`). Automatic checks (every page with a
     marker it must contain, data files, database reads, a PDF link, search, the bell, browser
     support) are READ-ONLY by rule: never add a check that posts, notifies or edits anything.
     Button tests fire the real components (toasts, progress toast, confirm, result page, loading
@@ -1158,7 +1174,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     "live version" for guides). `form.files()` + `withUploads()` upload on submit
     (submit page and `openEditor`). `linkPdfs(el)` turns `<a data-pdf>` into
     six-hour signed links. It's used on class pages (the card opens the PDF, with
-    "Live version ↗"), Dashboard → To review and the editor.
+    "Live version ↗"), Dashboard → Review → Posts and the editor.
   - Guides shared as links before this keep their link and need no PDF, even when
     edited (`legacyLink`). Supabase's free plan has about 1 GB of storage and a
     monthly download limit. Watch Usage, and move files to Cloudflare R2 if it

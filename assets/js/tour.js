@@ -23,7 +23,7 @@ const STEPS = (name) => [
       : 'Classes, teachers, rooms, clubs and more. Press Ctrl K from any page.' },
   { sel: ['#theme-toggle'], title: 'Night mode', text: 'The moon switches Wilkipedia to night mode, and the sun switches it back.' },
   { sel: ['.main-nav .more summary', '.menu-btn'], title: 'Language', text: 'Read Wilkipedia in 15 other languages: it’s at the bottom of More.' },
-  { sel: ['.acct .who', '.menu-btn'], title: 'Your menu', text: 'Your Dashboard, account and Settings (text size, motion, class colour, cookies and the rest) are all in here.' },
+  { sel: ['.acct .who', '.menu-btn'], title: 'Your menu', text: 'Your Dashboard, your profile and Settings (language, text size, motion, class colour, cookies and the rest) are all in here.' },
   { sel: ['#contribute-fab'], title: 'Contribute',
     text: 'Know something about a class? Add info, a tip or a study guide. Reviewers check it, and you earn points on the Leaderboard.' },
   { sel: ['#bounty-tab'], title: 'Bounties', text: 'Pages that still need writing. Claim one and write it up.' },

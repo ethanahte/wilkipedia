@@ -10,12 +10,7 @@ import { MODE, SIZE_POINTS, REVIEWER_ROLES, canEditOwn } from './store.js';
 
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
 
-// Theme and class-colour pickers, shared by the Account and Settings pages
-const themeSeg = () => `<div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">${[['system', 'Match my device'], ['light', 'Day'], ['dark', 'Night']]
-  .map(([v, l]) => `<button type="button" role="radio" aria-checked="${themePref() === v}" data-theme-pref="${v}">${l}</button>`).join('')}</div>`;
-const classSeg = (me) => `<div class="seg swatch-seg" id="class-seg" role="radiogroup" aria-label="Colour theme">${[['auto', me?.grad_year ? `My class (${CLASS_COLORS[classColorOf(me.grad_year)]})` : 'My class'], ['gold', 'Wilcox gold'],
-  ...Object.entries(CLASS_COLORS).map(([k, v]) => [k, v])]
-  .map(([v, l]) => `<button type="button" role="radio" aria-checked="${classPref() === v}" data-class-pref="${v}"><span class="sw sw-${v === 'auto' ? classColorOf(me?.grad_year) || 'gold' : v}"></span>${esc(l)}</button>`).join('')}</div>`;
+// The Settings page's theme and class-colour pickers
 const classNote = (me) => `${me?.grad_year ? `Class of ${me.grad_year}’s colour is ${CLASS_COLORS[classColorOf(me.grad_year)]}.` : 'Set your class year in your profile and “My class” uses your class colour.'}
   It shows as a small accent (your picture’s ring and class chip). The site itself stays Wilcox gold.`;
 function wireAppearance(s) {
@@ -445,27 +440,13 @@ const pages = {
           `<option value="${r}" ${me.role === r ? 'selected' : ''}>${roleLabel(r)}</option>`).join('')}</select></label>
           <label class="check"><input type="checkbox" id="demo-school" ${me.school ? 'checked' : ''}> Pretend this is a school account</label></p>` : ''}
         <p><button class="btn ghost danger" id="demo-reset">Erase demo data</button></p></section>` : '';
-      const themeCard = `<section class="card"><h2>Appearance</h2>
-        ${themeSeg()}
-        <h3>Class colour</h3>
-        ${classSeg(me)}
-        <p class="meta">${classNote(me)} Class colours: 2027 Blue · 2028 Green · 2029 Yellow · 2030 Purple.</p>
-        <p class="meta">Saved in this browser. <a href="${root}settings/">All settings →</a></p></section>`;
-
+      // Appearance and the Dashboard used to be repeated here: they live in Settings and the menu
+      const elsewhere = `<p class="meta acct-else">Night mode, text size, language and the rest are in <a href="${root}settings/">Settings</a>.${me ? ` Your notifications and posts are in your <a href="${root}dashboard/">Dashboard</a>.` : ''}</p>`;
       if (!me) {
         $('#account').innerHTML = `<p>Sign in to claim bounties, submit work and comment. Reading never needs an account.</p>
-          <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${themeCard}${demoTools}`;
+          <p><button class="btn js-signin">Sign in${MODE === 'live' ? ' with Google' : ''}</button></p>${elsewhere}${demoTools}`;
       } else {
-        // Notifications, your work and the review desk live in the Dashboard; this is just the way in
-        const [mine, unread] = await Promise.all([s.mySubmissions().catch(() => []), s.unreadCount ? s.unreadCount().catch(() => 0) : 0]);
-        const todo = mine.filter((x) => x.status === 'changes').length, review = mine.filter((x) => x.status === 'pending').length;
-        const inboxCard = `<a class="card inbox-card" href="${root}dashboard/"><div><h2>Dashboard</h2>
-            <p class="meta">${[unread ? `<b>${unread} new</b>` : 'No new notifications', todo ? `<b>${todo} sent back to you</b>` : '', review ? `${review} in review` : '',
-              `${mine.length} post${mine.length === 1 ? '' : 's'} in all`].filter(Boolean).join(' · ')}</p>
-            <p class="meta">Notifications, everything you’ve sent in, and your conversations with the review team.</p></div>
-          <span class="btn small">Open the Dashboard →</span></a>`;
         $('#account').innerHTML = `
-          ${inboxCard}
           <section class="card profile">
             <div class="profile-head">${avatarHtml(me, 'lg')}
               <div><b class="profile-name">${esc(me.name)}</b>${badge(me.school)}
@@ -498,12 +479,11 @@ const pages = {
             <button class="btn">Save profile</button>
           </form>
 
-          ${themeCard}
-
           <section class="card"><h2>Account</h2>
             <p><button type="button" class="btn ghost" id="signout">Sign out</button></p>
             <p class="meta">To delete your account, ask a Wilkipedia admin. See <a href="${root}privacy/">Privacy</a> for what that removes.</p>
           </section>
+          ${elsewhere}
           ${demoTools}`;
 
         // live preview while picking
@@ -534,7 +514,6 @@ const pages = {
         $('#demo-role')?.addEventListener('change', (e) => guard(() => s.setDemoRole(e.target.value), 'Role switched.'));
         $('#demo-school')?.addEventListener('change', (e) => guard(() => s.setDemoSchool(e.target.checked)));
       }
-      wireAppearance(s);
       $('#demo-reset')?.addEventListener('click', async () => {
         if (!(await popconfirm($('#demo-reset'), { title: 'Erase all demo data?', text: 'Claims, submissions and comments in this browser.', ok: 'Erase' }))) return;
         await s.resetDemo(); location.reload();
@@ -569,7 +548,7 @@ const pages = {
       <h2>${title}</h2>${SEC_SUB[id] ? `<p>${SEC_SUB[id]}</p>` : ''}</header><div class="set-list">${rows}</div>${note ? `<p class="set-note">${note}</p>` : ''}</section>`;
     const SEC_SUB = {
       appearance: 'How Wilkipedia looks on this device.', language: 'The language for menus, buttons and pages.',
-      pages: 'What shows up around the site.', account: 'Saved to your account, so it follows you to every device.',
+      pages: 'What shows up around the site.', account: 'How you appear to everyone else.',
       bounties: 'For the review team: how the bounty board opens.', cookies: 'What this site keeps in your browser. No ads, no analytics, no tracking.',
       device: 'Drafts in progress, and a fresh start.',
     };
@@ -622,10 +601,8 @@ const pages = {
             `<button type="button" class="btn ghost small" id="set-ann" ${closed ? '' : 'disabled'}>Show them again</button>`),
         ].join('')],
       ];
-      if (me) sections.push(['account', 'Your account', [
-        row('Show me on the leaderboard', 'Your name and points on the Leaderboard. Your work keeps your name either way.', tgl('set-lb', 'Show me on the leaderboard', me.show_on_leaderboard)),
-        row('Name, picture and class year', 'Edited on your account page.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
-        row('Dashboard', 'Notifications, everything you’ve sent in, and your conversations with the review team.', `<a class="btn ghost small" href="${root}dashboard/">Open the Dashboard</a>`),
+      if (me) sections.push(['account', 'Your profile', [
+        row('Name, picture, class year and leaderboard', 'Saved to your account, so they follow you to every device.', `<a class="btn ghost small" href="${root}account/">Edit profile</a>`),
       ].join('')]);
       if (team) sections.push(['bounties', 'Bounty board', [
         row('Open the board on', 'The view the bounty page starts with.', seg('set-bview', 'Bounty board view', ls.get('wilkipedia-bounty-view', 'board'), [['board', 'Board'], ['agenda', 'Agenda'], ['ledger', 'Ledger'], ['orrery', 'Orrery']])),
@@ -684,8 +661,6 @@ const pages = {
       $('#set-tour').onclick = () => { scrollTo(0, 0); import('./tour.js').then((m) => m.startTour(s.user()?.name)); };
       $('#set-ann').onclick = () => { ls.del('wilkipedia-dismissed-announcements'); paintAnnouncements(s); toast('Closed announcements will show again.', 'good'); draw(); };
       $('#set-ask').onclick = () => { resetConfirms(); toast('You’ll be asked before deleting again.', 'good'); draw(); };
-      $('#set-lb')?.addEventListener('change', (e) => guard(() => s.updateProfile({ show_on_leaderboard: e.target.checked }),
-        e.target.checked ? 'You’re on the leaderboard.' : 'You’re hidden from the leaderboard.'));
       for (const k of ['motion', 'labels', 'belt', 'photo']) {
         $(`#set-o-${k}`)?.addEventListener('change', (e) => { ls.set(ORR, JSON.stringify({ ...orrOpts(), [k]: e.target.checked })); savedToast(); });
       }

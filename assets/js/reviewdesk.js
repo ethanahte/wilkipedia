@@ -1,5 +1,6 @@
 // The review desk, as sections of the Dashboard (dashboard.js calls deskTab): posts waiting
-// for review, published work, held comments, reports, feedback, announcements and bounties.
+// for review, published work, held comments, reports, feedback and announcements. (Bounties
+// are posted and edited on the Bounty board itself.)
 // The database only answers these queries for reviewers (see is_reviewer() in schema.sql).
 
 import { popconfirm, courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
@@ -195,16 +196,7 @@ const tabs = {
             <button class="btn ghost small" data-atoggle>${a.active ? 'Hide' : 'Show'}</button>
             <button class="btn ghost danger small" data-adel>Delete</button></div>
         </article>`).join('') || '<div class="empty">No announcements yet.</div>'}</div>`;
-  },
-  async bounties() {
-    const list = await s.bounties();
-    const isAdmin = s.user()?.role === 'admin';
-    return `${isAdmin ? '<p><button class="btn" data-newbounty>+ Post a bounty</button></p>' : '<p class="meta">Only admins can post or edit bounties.</p>'}
-      <table class="plain"><tbody>${list.map((b) => `<tr><td><code>${esc(b.id)}</code></td><td>${esc(b.title)}
-          ${b.status === 'closed' ? ' <span class="tag">withdrawn</span>' : b.status === 'done' ? ' <span class="tag">completed</span>' : ''}</td>
-        <td>${b.claims.map((c) => esc(c.name)).join(', ') || '<span class="meta">unclaimed</span>'}</td>
-        <td>${isAdmin ? `<button class="linkish" data-editb="${esc(b.id)}">Edit</button> · <button class="linkish" data-bstatus="${esc(b.id)}" data-to="${b.status === 'open' ? 'closed' : 'open'}">${b.status === 'open' ? 'Close' : 'Repost'}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
-  },
+  }
 };
 
 let annList = [];
@@ -282,7 +274,4 @@ async function onClick(e) {
     if (r?.note) f.done_means.value = `Check and update: ${r.note}`;
     return;
   }
-  if ('newbounty' in t.dataset) { openBountyEditor(s, null, data.courses, redraw); return; }
-  if (t.dataset.editb) { const b = (await s.bounties()).find((x) => x.id === t.dataset.editb); openBountyEditor(s, b, data.courses, redraw); return; }
-  if (t.dataset.bstatus) { await guard(() => s.setBountyStatus(t.dataset.bstatus, t.dataset.to), t.dataset.to === 'open' ? `${t.dataset.bstatus} is back on the board.` : `${t.dataset.bstatus} closed.`); return redraw(); }
 }

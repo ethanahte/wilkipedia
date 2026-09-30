@@ -2,15 +2,20 @@
 // as the Inbox and took in the review desk, so it's more than notifications.
 //
 //   You      Updates (every notification, by day), My work (everything you sent in, with its
-//            state and next step), Conversations (one thread per post / feedback / report,
-//            between whoever sent it in and the review team; not a chat between students)
-//   Review   reviewers and admins: To review (overview + the queue), Comments, Reports,
-//            Feedback, Published (reviewdesk.js draws these)
-//   Site     Announcements, Bounties (admins edit, reviewers see), People (admins only)
+//            state and next step), Conversations (one thread per post / feedback / report of
+//            YOURS, between you and the review team; not a chat between students)
+//   Review   reviewers and admins, the things waiting on the team, each with its count: Posts
+//            (the queue), Comments, Reports, Feedback, and Replies (every member's conversation
+//            with the team, the ones waiting for an answer first). reviewdesk.js draws most.
+//   Manage   Published, Announcements, People and Feature tests (admins), and a link to the
+//            Bounty board, which is where bounties are posted and edited.
 //
-// Routes live in the hash: #updates #work #threads #thread/<subject> #review #comments #reports
-// #feedback(-planned|-done) #published(-off) #announcements #bounties #people #person/<id> #edit-<submission id>.
-// Old /inbox/ and /review/ addresses forward here.
+// Each thing lives in one place (Ethan, 2026-09-30: the same functions kept turning up on
+// different pages). Your own threads are under You; everyone else's are Review → Replies.
+//
+// Routes live in the hash: #updates #work #threads #replies #thread/<subject> #review #comments #reports
+// #feedback(-planned|-done) #published(-off) #announcements #people #person/<id> #edit-<submission id>.
+// Old /inbox/ and /review/ addresses forward here, and so does #bounties (to the board).
 
 import { popconfirm, initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
          guard, courseUrl, roleLabel, avatarHtml, root } from './ui.js';
@@ -65,10 +70,11 @@ function dayLabel(iso) {
 // ── the menu ──
 const SECTIONS = () => [
   ['You', [['updates', 'Updates'], ['work', 'My work'], ['threads', 'Conversations']]],
-  ...(isTeam() ? [['Review', [['review', 'To review'], ['comments', 'Comments'], ['reports', 'Reports'], ['feedback', 'Feedback'], ['published', 'Published']]]] : []),
-  ...(isTeam() ? [['Site', [['announcements', 'Announcements'], ['bounties', 'Bounties'], ...(isAdmin() ? [['people', 'People'], ['tests', 'Feature tests']] : [])]]] : []),
+  ...(isTeam() ? [['Review', [['review', 'Posts'], ['comments', 'Comments'], ['reports', 'Reports'], ['feedback', 'Feedback'], ['replies', 'Replies']]]] : []),
+  ...(isTeam() ? [['Manage', [['published', 'Published'], ['announcements', 'Announcements'], ...(isAdmin() ? [['people', 'People'], ['tests', 'Feature tests']] : []),
+    ['@bounties/', 'Bounty board']]]] : []),                       // '@' = a link to another page, not a section here
 ];
-const DESK = { review: 'submissions', comments: 'comments', reports: 'reports', feedback: 'feedback', published: 'published', announcements: 'announcements', bounties: 'bounties' };
+const DESK = { review: 'submissions', comments: 'comments', reports: 'reports', feedback: 'feedback', published: 'published', announcements: 'announcements' };
 
 let unread = 0;
 const badge = (k, n) => { const b = $(`[data-tab="${k}"] .ib-n`, app); if (b) { b.textContent = n > 99 ? '99+' : n || ''; b.hidden = !n; } };
@@ -81,9 +87,10 @@ async function refreshCount() {
 async function refreshTeamCounts() {
   if (!isTeam()) return;
   const n = (p) => p.then((l) => l.length).catch(() => 0);
-  const [rev, com, rep, fb] = await Promise.all([n(s.pending()), n(s.heldComments()), n(s.reports()),
-    s.feedbackList().then((l) => l.filter((f) => f.status === 'new').length).catch(() => 0)]);
-  badge('review', rev); badge('comments', com); badge('reports', rep); badge('feedback', fb);
+  const [rev, com, rep, fb, wait] = await Promise.all([n(s.pending()), n(s.heldComments()), n(s.reports()),
+    s.feedbackList().then((l) => l.filter((f) => f.status === 'new').length).catch(() => 0),
+    s.recentMessages().then((ms) => waitingSubjects(ms).length).catch(() => 0)]);
+  badge('review', rev); badge('comments', com); badge('reports', rep); badge('feedback', fb); badge('replies', wait);
 }
 
 function frame() {
@@ -92,10 +99,26 @@ function frame() {
     <aside class="db-side">
       <div class="ib-me">${avatarHtml(me, 'md')}<div><b>${esc(me.name)}</b><div class="meta">${esc(roleLabel(me.role))}</div></div></div>
       <nav class="db-nav" aria-label="Dashboard">${SECTIONS().map(([group, items]) => `<div class="db-group"><div class="db-gh">${group}</div>
-        ${items.map(([k, l]) => `<a data-tab="${k}" href="#${k}">${l}<span class="ib-n" hidden></span></a>`).join('')}</div>`).join('')}</nav>
+        ${items.map(([k, l]) => (k.startsWith('@') ? `<a class="db-out" href="${root}${k.slice(1)}">${l}<span aria-hidden="true">↗</span></a>`
+          : `<a data-tab="${k}" href="#${k}">${l}<span class="ib-n" hidden></span></a>`)).join('')}</div>`).join('')}</nav>
     </aside>
-    <div class="ib-panel" id="ib-panel"><div class="meta">Loading…</div></div></div>`;
+    <div class="db-main"><header class="db-ph" id="db-ph"></header><div class="ib-panel" id="ib-panel"><div class="meta">Loading…</div></div></div></div>`;
 }
+// Each section says what it is and what it's for, so you always know where you are
+const HEADS = {
+  updates: ['Updates', 'What happened to your work, newest first.'],
+  work: ['My work', 'Everything you’ve sent in, and what happens next.'],
+  threads: ['Conversations', 'Your messages with the review team about your posts, feedback and reports.'],
+  review: ['Posts to review', 'New posts and changes to live ones, waiting for a reviewer.'],
+  comments: ['Comments to approve', 'Comments from members who need a reviewer first.'],
+  reports: ['Reports', 'Pages someone said are wrong, out of date or inappropriate.'],
+  feedback: ['Feedback', 'Ideas and bug reports from members, from new to finished.'],
+  replies: ['Replies', 'Members’ conversations with the team. Anyone waiting for an answer comes first.'],
+  published: ['Published', 'Everything live on the site. Unpublish or bring back from here.'],
+  announcements: ['Announcements', 'The notices across the top of every page.'],
+  people: ['People', 'Everyone who has signed in, and what they can do.'],
+  tests: ['Feature tests', 'Check that the site works as it should after a change.'],
+};
 
 // ── Updates ──
 let filter = 'all';
@@ -217,7 +240,14 @@ async function work(panel) {
 }
 
 // ── Conversations ──
-let threadFilter = 'all', threadQ = '';
+let threadFilter = 'all', threadQ = '', replyFilter = 'waiting';
+// Threads where someone other than the team spoke last and it isn't you: the team owes them an answer
+function waitingSubjects(msgs) {
+  const last = new Map();
+  for (const m of msgs) if (!last.has(m.subject)) last.set(m.subject, m);          // newest first
+  const me = s.user()?.id;
+  return [...last.entries()].filter(([, m]) => !m.team && m.kind === 'note' && m.user_id !== me).map(([subj]) => subj);
+}
 const infoCache = new Map();
 const info = (subject) => { if (!infoCache.has(subject)) infoCache.set(subject, s.subjectInfo(subject).catch(() => null)); return infoCache.get(subject); };
 function subjectTitle(subject, x) {
@@ -227,31 +257,41 @@ function subjectTitle(subject, x) {
   if (type === 'feedback') return `${FB_KIND[x.kind] || 'Feedback'}: ${x.message.slice(0, 80)}`;
   return `Report · ${x.course_slug ? cname[x.course_slug] || x.course_slug : 'School info'}${x.note ? `: ${x.note.slice(0, 60)}` : ''}`;
 }
-async function threads(panel) {
+// scope 'mine': your own posts, feedback and reports (You → Conversations).
+// scope 'team': everyone's, for reviewers and admins (Review → Replies), the ones waiting first.
+async function threads(panel, scope = 'mine') {
   const msgs = await s.recentMessages();
   const by = new Map();
   for (const m of msgs) { if (!by.has(m.subject)) by.set(m.subject, []); by.get(m.subject).push(m); }   // newest first
-  const rows = [...by.entries()].filter(([subj]) => threadFilter === 'all' || subj.startsWith(threadFilter + ':')).slice(0, 80);
-  const infos = await Promise.all(rows.map(([subj]) => info(subj)));
-  const me = s.user().id, team = isTeam();
-  const list = rows.map(([subj, ms], i) => ({ subj, ms, x: infos[i], last: ms[0] }))
-    .filter((r) => !threadQ || `${subjectTitle(r.subj, r.x)} ${r.x?.author || ''} ${r.ms.map((m) => m.body).join(' ')}`.toLowerCase().includes(threadQ));
+  const me = s.user().id, team = scope === 'team';
+  const all = [...by.entries()].slice(0, 120);
+  const infos = await Promise.all(all.map(([subj]) => info(subj)));
+  const rows = all.map(([subj, ms], i) => ({ subj, ms, x: infos[i], last: ms[0] }))
+    .filter((r) => (team ? r.x?.user_id !== me : r.x ? r.x.user_id === me : !isTeam()));   // the team sees everyone's: yours stay under You
+  const waitingSet = new Set(waitingSubjects(msgs));
+  const flt = team ? replyFilter : threadFilter;
+  const TABS = team ? [['waiting', 'Waiting for a reply'], ['all', 'All'], ['submission', 'Posts'], ['feedback', 'Feedback'], ['report', 'Reports']]
+    : [['all', 'All'], ['submission', 'Posts'], ['feedback', 'Feedback'], ['report', 'Reports']];
+  const inTab = (r, k) => (k === 'all' ? true : k === 'waiting' ? waitingSet.has(r.subj) : r.subj.startsWith(k + ':'));
+  const list = rows.filter((r) => inTab(r, flt))
+    .filter((r) => !team || !threadQ || `${subjectTitle(r.subj, r.x)} ${r.x?.author || ''} ${r.ms.map((m) => m.body).join(' ')}`.toLowerCase().includes(threadQ));
   panel.innerHTML = `<div class="ib-bar">
-      <div class="vtabs" role="group" aria-label="Show">${[['all', 'All'], ['submission', 'Posts'], ['feedback', 'Feedback'], ['report', 'Reports']].map(([k, l]) => {
-        const c = k === 'all' ? 0 : [...by.keys()].filter((subj) => subj.startsWith(k + ':')).length;
-        return `<button type="button" class="vtab" data-tf="${k}" aria-pressed="${threadFilter === k}">${l}${c ? `<span class="c">${c}</span>` : ''}</button>`; }).join('')}</div>
+      <div class="vtabs" role="group" aria-label="Show">${TABS.map(([k, l]) => {
+        const c = k === 'all' ? 0 : rows.filter((r) => inTab(r, k)).length;
+        return `<button type="button" class="vtab${k === 'waiting' && c ? ' hot' : ''}" data-tf="${k}" aria-pressed="${flt === k}">${l}${c ? `<span class="c">${c}</span>` : ''}</button>`; }).join('')}</div>
       ${team ? `<input type="search" id="ib-tq" placeholder="Search by person or words" value="${esc(threadQ)}" aria-label="Search conversations">` : ''}</div>
-    ${team ? '<p class="meta">You see every conversation on the site: reviewers and admins answer them together.</p>' : ''}
+    ${team ? '<p class="meta">Reviewers and admins answer these together. Your own are under <a href="#threads">Conversations</a>.</p>' : ''}
     ${list.length ? `<ul class="ib-threads">${list.map(({ subj, ms, x, last }) => {
-      const waiting = !last.team && last.kind === 'note' && last.user_id !== me;   // the other side spoke last
-      return `<li><a class="ib-thread ${waiting && team ? 'waiting' : ''}" href="${threadHref(subj)}">
+      const waiting = team && waitingSet.has(subj);
+      return `<li><a class="ib-thread ${waiting ? 'waiting' : ''}" href="${threadHref(subj)}">
         <span class="ib-t-title">${esc(subjectTitle(subj, x))}</span>
         <span class="ib-t-last">${esc(last.author)}${last.team ? ' <span class="tag team">Review team</span>' : ''}: ${esc(last.body.slice(0, 120))}</span>
-        <span class="meta">${plural(ms.length, 'message')} · ${ago(last.created_at)}${team && x?.author ? ` · from ${esc(x.author)}` : ''}${waiting && team ? ' · <b>waiting for a reply</b>' : ''}</span></a></li>`;
+        <span class="meta">${plural(ms.length, 'message')} · ${ago(last.created_at)}${team && x?.author ? ` · from ${esc(x.author)}` : ''}${waiting ? ' · <b>waiting for a reply</b>' : ''}</span></a></li>`;
     }).join('')}</ul>`
-    : `<div class="empty">No conversations yet. ${team ? '' : 'Open one from any of your posts, feedback or reports in <a href="#work">My work</a>, to ask the review team something.'}</div>`}`;
-  panel.onclick = (e) => { const f = e.target.closest('[data-tf]'); if (f) { threadFilter = f.dataset.tf; threads(panel); } };
-  $('#ib-tq', panel)?.addEventListener('input', (e) => { threadQ = e.target.value.trim().toLowerCase(); clearTimeout(threads.t); threads.t = setTimeout(() => threads(panel).then(() => { const q = $('#ib-tq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }), 250); });
+    : `<div class="empty">${team ? (flt === 'waiting' ? 'Nobody is waiting for an answer. 🎉' : 'No conversations here.')
+      : 'No conversations yet. Open one from any of your posts, feedback or reports in <a href="#work">My work</a>, to ask the review team something.'}</div>`}`;
+  panel.onclick = (e) => { const f = e.target.closest('[data-tf]'); if (f) { if (team) replyFilter = f.dataset.tf; else threadFilter = f.dataset.tf; threads(panel, scope); } };
+  $('#ib-tq', panel)?.addEventListener('input', (e) => { threadQ = e.target.value.trim().toLowerCase(); clearTimeout(threads.t); threads.t = setTimeout(() => threads(panel, scope).then(() => { const q = $('#ib-tq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }), 250); });
 }
 
 // Ways to start a reply to someone's feedback (Ethan: ask what they meant, or say kindly why not)
@@ -289,10 +329,13 @@ async function thread(panel, subject) {
       <div><b>${name}</b>${m.team ? ' <span class="tag team">Review team</span>' : ''} <span class="meta">· ${ago(m.created_at)}</span></div>${prose(m.body)}</div></li>`;
   };
   const canWrite = mine || team;
-  panel.innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><a href="#updates">Dashboard</a> / <a href="#threads">Conversations</a></nav>
+  const home = team && !mine ? ['replies', 'Replies'] : ['threads', 'Conversations'];              // where this thread is listed
+  $$('[data-tab]', app).forEach((a) => (a.dataset.tab === home[0] ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+  showTab();
+  panel.innerHTML = `<nav class="crumbs" aria-label="Breadcrumb"><a href="#updates">Dashboard</a> / <a href="#${home[0]}">${home[1]}</a></nav>
     <article class="ib-card ib-subject">${head}
       <div class="r-actions">${type === 'submission' && mine && canEditOwn(x) && x.status === 'changes' ? '<button type="button" class="btn small" data-fix>Make changes and resubmit</button>' : ''}
-        ${team && type === 'submission' && x.status === 'pending' ? '<a class="btn ghost small" href="#review">Review it in To review</a>' : ''}
+        ${team && type === 'submission' && x.status === 'pending' ? '<a class="btn ghost small" href="#review">Review it in Posts</a>' : ''}
         ${team && !mine && x.user_id && isAdmin() ? `<a class="btn ghost small" href="#person/${x.user_id}">All of ${esc(x.author)}’s activity</a>` : ''}</div></article>
     <ol class="ib-timeline">${started}${ms.map(item).join('')}</ol>
     ${canWrite ? `<form class="ib-compose" id="ib-compose">
@@ -322,23 +365,10 @@ async function thread(panel, subject) {
 }
 
 // ── To review: an overview, then the queue itself (reviewdesk.js) ──
+// (It used to open with count tiles and a "waiting for a reply" list: the menu's counts and
+// Review → Replies say the same, so it's just the queue now.)
 async function review(panel) {
-  const [held, reports, feedback, msgs] = await Promise.all([s.heldComments().catch(() => []), s.reports().catch(() => []),
-    s.feedbackList().catch(() => []), s.recentMessages()]);
-  const fresh = feedback.filter((f) => f.status === 'new');
-  const last = new Map();
-  for (const m of msgs) if (!last.has(m.subject)) last.set(m.subject, m);
-  const waiting = [...last.values()].filter((m) => !m.team && m.kind === 'note');   // the author spoke last
-  const tile = (n, label, href) => `<a class="ib-tile ${n ? 'hot' : ''}" href="${href}"><b>${n}</b><span>${label}</span></a>`;
-  panel.innerHTML = `<div class="ib-tiles">
-      ${tile(waiting.length, 'waiting for a reply', '#threads')}
-      ${tile(held.length, `comment${held.length === 1 ? '' : 's'} to approve`, '#comments')}
-      ${tile(reports.length, `open report${reports.length === 1 ? '' : 's'}`, '#reports')}
-      ${tile(fresh.length, 'new feedback', '#feedback')}</div>
-    ${waiting.length ? `<section class="ib-sec"><h2>Waiting for a reply</h2><ul class="ib-threads">${waiting.map((m) => `<li><a class="ib-thread waiting" href="${threadHref(m.subject)}">
-        <span class="ib-t-last"><b>${esc(m.author)}</b>: ${esc(m.body.slice(0, 140))}</span><span class="meta">${ago(m.created_at)}</span></a></li>`).join('')}</ul></section>` : ''}
-    <h2 class="db-h">Posts waiting for review</h2><div id="db-desk"><div class="meta">Loading…</div></div>`;
-  await deskTab($('#db-desk', panel), s, 'submissions', () => { refreshTeamCounts(); return route(); });
+  await deskTab(panel, s, 'submissions', () => { refreshTeamCounts(); return route(); });
 }
 
 // ── People (admins) ──
@@ -426,6 +456,14 @@ async function person(panel, uid) {
         <a href="${threadHref('feedback:' + f.id)}">Conversation</a><span class="meta">${ago(f.created_at)}</span></li>`).join('')}</ul>` : '<p class="meta">None.</p>'}</section>`;
 }
 
+// On phones the menu is a sideways strip: keep the current section in view
+function showTab() {
+  const nav = $('.db-nav', app), a = $('[data-tab][aria-current]', app);
+  if (!nav || !a || nav.scrollWidth <= nav.clientWidth) return;
+  const n = nav.getBoundingClientRect(), r = a.getBoundingClientRect();
+  if (r.left < n.left || r.right > n.right) nav.scrollLeft += r.left - n.left - 16;
+}
+
 // ── routing ──
 async function route() {
   const me = s.user();
@@ -436,6 +474,7 @@ async function route() {
   }
   let h = decodeURIComponent(location.hash.slice(1)) || 'updates';
   h = { queue: 'review', submissions: 'review', notifications: 'updates' }[h] || h;          // older addresses
+  if (h === 'bounties') { location.replace(`${root}bounties/`); return; }                     // bounties are run on the board itself
   const edit = /^edit-(\d+)$/.exec(h);
   if (edit) { history.replaceState(null, '', '#work'); h = 'work'; }
   const [tab, arg] = h.startsWith('thread/') ? ['threads', h.slice(7)] : h.startsWith('person/') ? ['people', h.slice(7)]
@@ -444,13 +483,17 @@ async function route() {
   const active = allowed.includes(tab) ? tab : 'updates';
   if (!$('.db-nav', app) || app.dataset.role !== me.role) { app.innerHTML = frame(); app.dataset.role = me.role; refreshTeamCounts(); }
   $$('[data-tab]', app).forEach((a) => (a.dataset.tab === active ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+  showTab();
   const panel = $('#ib-panel', app);
+  const head = !arg && HEADS[active];                                  // a thread or a person has its own heading
+  $('#db-ph', app).hidden = !head;
+  if (head) $('#db-ph', app).innerHTML = `<h2>${head[0]}</h2><p>${head[1]}</p>`;
   panel.onclick = panel.onchange = null;
   panel.innerHTML = '<div class="meta">Loading…</div>';
   refreshCount();
   const redraw = () => { refreshTeamCounts(); return route(); };
   const run = { updates: () => updates(panel), work: () => work(panel), review: () => review(panel),
-    threads: () => (arg ? thread(panel, arg) : threads(panel)), people: () => (arg ? person(panel, arg) : people(panel)),
+    threads: () => (arg ? thread(panel, arg) : threads(panel)), replies: () => threads(panel, 'team'), people: () => (arg ? person(panel, arg) : people(panel)),
     tests: () => import('./selftest.js').then((m) => m.testsTab(panel, s)) }[active]   // admins: Jonathan's feature test page
     || (() => deskTab(panel, s, DESK[active], redraw));
   await guard(run);

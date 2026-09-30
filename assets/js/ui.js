@@ -681,11 +681,9 @@ export async function initHeader() {
              <div class="acct-menu" role="menu" hidden>
                <div class="acct-head">${avatarHtml(u, 'md')}<div><b>${esc(u.name)}</b><span class="meta">${esc(roleLabel(u.role))}</span></div></div>
                <a role="menuitem" href="${root}dashboard/">Dashboard<span class="acct-n" data-n="notes" hidden></span></a>
-               <a role="menuitem" href="${root}dashboard/#work">My work</a>
-               ${isTeam ? `<a role="menuitem" href="${root}dashboard/#review">To review<span class="acct-n gold" data-n="review" hidden></span></a>
-               <a role="menuitem" href="${root}bounties/">Bounty board</a>` : ''}
-               <hr><button type="button" role="menuitem" data-act="lang">Language</button>
-               <hr><a role="menuitem" href="${root}account/">Account</a><a role="menuitem" href="${root}settings/">Settings</a>
+               ${isTeam ? `<a role="menuitem" href="${root}dashboard/#review">Review queue<span class="acct-n gold" data-n="review" hidden></span></a>` : ''}
+               <hr><a role="menuitem" href="${root}account/">Profile</a><a role="menuitem" href="${root}settings/">Settings</a>
+               <hr>
                <button type="button" role="menuitem" data-signout>Sign out</button></div></div>`
         : `<button class="btn small" id="signin">Sign in</button>`;
       // a welcome once you're back from signing in (Google's page comes in between, so remember it for this tab)
