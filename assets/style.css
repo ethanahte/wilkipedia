@@ -391,6 +391,9 @@ html[data-bell="off"] .hero-side { display: none; }
   border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.2); padding: 6px; max-height: 70vh; overflow-y: auto; }
 .results-pop .empty { padding: 12px; }
 .big-search-field { position: relative; flex: 1; }
+/* The hero sits above the sections under it, so its search suggestions (in the frosted panel's own
+   layer) open over the cafeteria card instead of behind it. */
+.hero-split { position: relative; z-index: 5; }
 /* The home page has its own big search box, so the header one steps aside there. */
 body.home .hsearch, body.home .search-btn { display: none !important; }
 .results.page .result { border-bottom: 1px solid var(--rule); border-radius: 0; padding: 10px 4px; }
@@ -2236,23 +2239,23 @@ a.ib-tile:hover { border-color: var(--gold); }
 .toast-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .12); }
 .toast-bar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .2s ease; }
 /* result pages (ui.js showResult): one clear answer, what happens next, where to go */
-.result { display: grid; place-items: center; padding: 28px 0; }
+.result-page { display: grid; place-items: center; padding: 28px 0; }
 .result-card { width: min(560px, 100%); text-align: center; display: grid; justify-items: center; gap: 6px; }
 .result-ic { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; font-size: 2rem; font-weight: 800; margin-bottom: 8px;
   background: #2e8448; color: #fff; box-shadow: 0 0 0 10px rgba(46, 132, 72, .12); }
-.result.bad .result-ic { background: var(--bad); box-shadow: 0 0 0 10px rgba(179, 38, 30, .12); }
-.result.warn .result-ic { background: var(--gold); color: #111; box-shadow: 0 0 0 10px rgba(245, 196, 0, .18); }
-.result.info .result-ic { background: var(--ink); color: var(--paper); font-family: Georgia, serif; font-style: italic; }
-.result h2 { margin: 6px 0 2px; font-size: 1.6rem; }
+.result-page.bad .result-ic { background: var(--bad); box-shadow: 0 0 0 10px rgba(179, 38, 30, .12); }
+.result-page.warn .result-ic { background: var(--gold); color: #111; box-shadow: 0 0 0 10px rgba(245, 196, 0, .18); }
+.result-page.info .result-ic { background: var(--ink); color: var(--paper); font-family: Georgia, serif; font-style: italic; }
+.result-page h2 { margin: 6px 0 2px; font-size: 1.6rem; }
 .result-text { margin: 4px 0 0; color: var(--muted); max-width: 46ch; }
 .result-note { margin: 2px 0 0; }
 .result-act { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
-.result .result-ic { animation: result-pop .42s cubic-bezier(.2, .9, .3, 1.4) both; }
+.result-page .result-ic { animation: result-pop .42s cubic-bezier(.2, .9, .3, 1.4) both; }
 @keyframes result-pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
 .result-sheet { position: fixed; inset: 0; z-index: 75; padding: 24px 16px; background: color-mix(in srgb, var(--paper) 94%, transparent);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity .2s ease; }
 .result-sheet.in { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .result .result-ic { animation: none; } .result-sheet { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .result-page .result-ic { animation: none; } .result-sheet { transition: none; } }
 /* the hero search: an icon inside the box */
 .big-search-field > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
 .big-search-field > input { padding-left: 42px; border-radius: 10px; }

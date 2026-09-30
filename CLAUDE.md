@@ -866,6 +866,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     REST endpoint (supabase-js can't report upload progress), and the loading toast gets a bar
     with a percentage (`toast.loading(…).progress(0..1)`).
   - `showResult(container | null, {status, title, text, actions})` is a clear result page
+    Its wrapper class is `result-page`, NOT `result`: `.result` is a search suggestion row, and
+    sharing the name once turned every home-page suggestion into a centred card.
     (明确的结果页): a big ✓/✕, what happens next, and buttons. It's used after sending a post
     (the submit page's #done), sending feedback (#fb-done), and resubmitting or suggesting a
     change (a full-screen sheet; "Back to the page" closes it).

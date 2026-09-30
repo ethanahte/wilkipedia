@@ -1196,7 +1196,7 @@ const RESULT_ICON = { good: '✓', bad: '✕', warn: '!', info: 'i' };
 export function showResult(container, { status = 'good', title, text = '', note = '', actions = [] } = {}) {
   const sheet = !container;
   const wrap = document.createElement('div');
-  wrap.className = `result ${status}${sheet ? ' result-sheet' : ''}`;
+  wrap.className = `result-page ${status}${sheet ? ' result-sheet' : ''}`;   // not `result`: that's a search suggestion
   if (sheet) { wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); }
   wrap.setAttribute('aria-labelledby', 'result-t');
   wrap.innerHTML = `<div class="result-card"><div class="result-ic" aria-hidden="true">${RESULT_ICON[status] || '✓'}</div>
