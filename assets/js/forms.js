@@ -91,7 +91,7 @@ export const KINDS = {
       { key: 'room', label: 'Room', type: 'text', required: true, max: 12,
         hint: 'As it appears on the campus map, e.g. B106 or S112.' },
       { key: 'periods', label: 'Class each period', type: 'periods', required: true,
-        hint: 'Use each class’s full name, picked from the list (e.g. “AP Macroeconomics”, not “AP Macro”), or type “Prep” for a free period. Leave a period blank if you don’t know it.' },
+        hint: 'Use each class’s full name, picked from the list (e.g. “AP Macroeconomics”, not “AP Macro”), type “Prep” for a planning period, or press No class if there’s no class that period. Leave a period blank only if you don’t know it.' },
       { key: 'source', label: 'How do you know?', type: 'text', max: 120,
         hint: 'e.g. "I’m in their 3rd period" or "Posted on the classroom door".' },
     ],

@@ -475,11 +475,15 @@ export function classLinker(list) {
     return c ? `<a href="${courseUrl(c.slug)}"${c.call ? ` title="${esc(c.name)}"` : ''}>${esc(c.call || c.name)}</a>` : esc(name);
   };
 }
+// A period with no class: "No class" is saved; these words typed in a Period box mean the same
+const NO_CLASS_WORDS = ['no class', 'none', 'free', 'off', 'empty', 'n/a', 'na', '-', '—', 'nothing'];
+const NO_CLASS = new RegExp(`^(${NO_CLASS_WORDS.map((w) => w.replace(/[/\\-]/g, '\\$&')).join('|')})$`, 'i');
+
 // The Period boxes' suggestions: suggestions.periods (catalog names, the
 // teacher's first) shown by everyday name where there is one
 function periodOptions() {
   const m = courseNames(suggestions.courses || []);
-  return ['<option value="Prep">', ...(suggestions.periods || []).map((n) => {
+  return ['<option value="Prep">', '<option value="No class">', ...(suggestions.periods || []).map((n) => {
     const c = m.get(normName(n));
     if (c?.sections?.some((x) => normName(x) === normName(n))) return `<option value="${esc(n)}">Listed as ${esc(c.name)}</option>`;
     return c?.call && !c.shared ? `<option value="${esc(c.call)}">${esc(c.name)}</option>` : `<option value="${esc(n)}">`;
@@ -495,7 +499,7 @@ export function scheduleBlock(list, { add = '', link = (x) => esc(x), rooms = fa
   const now = schoolYear(0);
   const table = (x) => (x.periods
     ? `<ol class="periods">${PERIODS.map((n) => `<li><span class="pn">P${n}</span>${x.periods[n]
-      ? (/^(prep|free|none|no class|—|-)$/i.test(x.periods[n]) ? `<span class="meta">${esc(x.periods[n])}</span>` : link(x.periods[n]))
+      ? (/^prep$/i.test(x.periods[n]) || NO_CLASS.test(x.periods[n]) ? `<span class="meta">${esc(x.periods[n])}</span>` : link(x.periods[n]))
       : '<span class="meta">—</span>'}</li>`).join('')}</ol>`
     : `<p>${esc(x.text)}</p>`);
   const [first, ...past] = list;
@@ -1018,7 +1022,8 @@ export function renderFields(el, kind, preset = {}, files = {}) {
     } else if (f.type === 'periods') {
       const cur = val && typeof val === 'object' ? val : {};
       input = `<div class="periods-in" id="${id}" role="group" aria-label="${esc(f.label)}">${PERIODS.map((n) =>
-        `<label><span>Period ${n}</span><input name="${f.key}.${n}" value="${esc(cur[n] || '')}" list="dl-periods" maxlength="60" autocomplete="off" placeholder="—"></label>`).join('')}</div>
+        `<label${NO_CLASS.test(cur[n] || '') ? ' class="is-none"' : ''}><span>Period ${n}</span><input name="${f.key}.${n}" value="${esc(cur[n] || '')}" list="dl-periods" maxlength="60" autocomplete="off" placeholder="—">`
+        + `<button type="button" class="pi-none" data-none="${f.key}.${n}" aria-pressed="${NO_CLASS.test(cur[n] || '')}" title="No class this period">No class</button></label>`).join('')}</div>
         <datalist id="dl-periods">${periodOptions()}</datalist>`;
     } else if (f.type === 'textarea') {
       input = `<textarea id="${id}" name="${f.key}" rows="4" ${f.max ? `maxlength="${f.max}"` : ''} ${f.required ? 'required' : ''}>${esc(val)}</textarea>`;
@@ -1101,13 +1106,29 @@ export function renderFields(el, kind, preset = {}, files = {}) {
     if (input && file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; }
   }
   el.addEventListener('change', (e) => { if (fields.some((f) => (f.when || f.whenAlt)?.[0] === e.target.name)) apply(); });
+  // Period boxes: "No class" fills in (or clears) that period, so an empty period can be said out loud
+  const paintNone = (input) => {
+    const on = NO_CLASS.test(input.value.trim());
+    input.closest('label').classList.toggle('is-none', on);
+    input.nextElementSibling?.setAttribute('aria-pressed', on);
+  };
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-none]'); if (!b) return;
+    e.preventDefault();
+    const input = $(`[name="${b.dataset.none}"]`, el);
+    input.value = NO_CLASS.test(input.value.trim()) ? '' : 'No class';
+    input.classList.remove('invalid');
+    paintNone(input);
+    input.dispatchEvent(new Event('input', { bubbles: true }));   // so drafts notice
+  });
+  el.addEventListener('input', (e) => { if (e.target.matches?.('.periods-in input')) paintNone(e.target); });
   apply();
   linkPdfs(el);
   // Period boxes take a class's catalog name or an approved everyday name, or
   // "Prep", and save the catalog name. A section (Chamber Orchestra) is its own
   // class, so it keeps its own name.
   const canon = () => {
-    const m = new Map([['prep', 'Prep'], ...(suggestions.periods || []).map((n) => [n.toLowerCase(), n])]);
+    const m = new Map([['prep', 'Prep'], ...NO_CLASS_WORDS.map((w) => [w, 'No class']), ...(suggestions.periods || []).map((n) => [n.toLowerCase(), n])]);
     for (const [k, c] of courseNames(suggestions.courses || [])) m.set(k, c.sections?.find((x) => normName(x) === k) || c.name);
     return m;
   };
@@ -1169,7 +1190,7 @@ export function renderFields(el, kind, preset = {}, files = {}) {
             const words = v.toLowerCase().split(/\s+/);
             const near = (suggestions.courses || []).filter((x) => words.every((w) => `${x.name} ${x.call || ''}`.toLowerCase().includes(w)))
               .slice(0, 3).map((x) => x.call || x.name);
-            return `Period ${n}: “${v}” isn’t a full class name. Pick it from the list${near.length ? ` (maybe ${near.join(' or ')}?)` : ''}, or type Prep.`;
+            return `Period ${n}: “${v}” isn’t a full class name. Pick it from the list${near.length ? ` (maybe ${near.join(' or ')}?)` : ''}, type Prep, or press No class.`;
           }
           continue;
         }

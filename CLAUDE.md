@@ -127,7 +127,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   renders the current school year's schedule with a "Not this year's" tag when
   it's older, and puts the rest under "Past years". It's used on the map's room
   panel (only that room's years) and on teacher pages (`#t-sched`, every room).
-  Period boxes accept a catalog class name, an approved everyday name, or "Prep".
+  Period boxes accept a catalog class name, an approved everyday name, "Prep", or
+  "No class" (each box has a No class button; typed "none", "free", "off", "-" and the
+  like in `NO_CLASS_WORDS` in ui.js save as "No class", shown greyed like Prep).
   They're checked in `renderFields` and saved as the catalog name. Schedules link
   only those names (`courseMatcher` / `classLinker`), so nothing is guessed.
 - **Everyday class names** live in `data/course-nicknames.json`, keyed by slug.

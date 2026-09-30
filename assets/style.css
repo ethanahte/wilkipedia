@@ -2138,6 +2138,11 @@ html.gated { overflow: hidden; }
 .periods-in label { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 400; }
 .periods-in label span { flex: none; width: 5.2em; font: 600 .85rem var(--sans); color: var(--muted); }
 .periods-in input { flex: 1; min-width: 0; }
+.periods-in .pi-none { flex: none; padding: 5px 9px; border: 1px solid var(--rule); border-radius: 6px; background: none; color: var(--muted);
+  font: 500 .76rem var(--sans); white-space: nowrap; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+.periods-in .pi-none:hover { border-color: var(--ink); color: var(--ink); }
+.periods-in .pi-none[aria-pressed="true"] { background: var(--on-bg); border-color: var(--on-bg); color: var(--on-fg); }
+.periods-in .is-none input { color: var(--muted); font-style: italic; }
 .periods-in.invalid { outline: 2px solid var(--bad); outline-offset: 4px; border-radius: 6px; }
 .sched { margin: 10px 0 4px; }
 .sched-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; font-size: .92rem; }
