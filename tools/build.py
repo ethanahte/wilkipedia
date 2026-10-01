@@ -500,41 +500,88 @@ def sec_head(key, title, sub=""):
 
 
 def build_courses(depts, courses):
+    # The class page (Ethan, 2026-10-01: "more 高级, more efficient, more fascinating"). The official
+    # facts lead: the catalog's own description is the opening text, the numbers sit in a small grid,
+    # and "Where it fits" draws the catalog's prerequisite links in and out of this class (the same
+    # links as the pathways map, so nothing is invented). Student-written sections fill in below;
+    # the empty ones fold into one "Help finish this page" block (course.js), and a side index shows
+    # what's written so far.
     dept_name = {d["slug"]: short_dept(d["name"]) for d in depts}
+    pw = pathways.build(list(courses.values()))
+    pw_name = {n["slug"]: n["name"] for n in pw["nodes"]}
+    before_of, after_of = {}, {}
+    for ed in pw["edges"]:
+        before_of.setdefault(ed["to"], []).append(ed["from"])
+        after_of.setdefault(ed["from"], []).append(ed["to"])
     for c in courses.values():
-        stats = [(k, c.get(f)) for k, f in [("Grades", "grades"), ("UC/CSU a–g", "ucCsu"), ("Credits", "credits"),
+        stats = [(k, c.get(f)) for k, f in [("Grades", "grades"), ("Credits", "credits"), ("UC/CSU a–g", "ucCsu"),
                                              ("Course #", "courseNumber")]]
         stats_html = "".join(f'<div><dt>{k}</dt><dd>{e(v)}</dd></div>' for k, v in stats if v)
         prereq = c.get("prerequisite")
-        desc_html = "".join(f"<p>{e(p)}</p>" for p in (c.get("description") or "").split("\n\n") if p.strip())
+        paras = [p for p in (c.get("description") or "").split("\n\n") if p.strip()]
         is_ap = c["name"].startswith("AP ")
         where = "" if c.get("offeredAtListed", True) else '<p class="note">This program is taught off campus at SVCTE, not at Wilcox.</p>'
+        page_no = c.get("page") - 1 if isinstance(c.get("page"), int) else "?"
+        src = f'<p class="c-src">From the {e(CATALOG_SOURCE)}, page {e(page_no)}.</p>'
+        lead = (f'<p class="c-lead">{e(paras[0])}</p>' + (f'<details class="c-more"><summary>Read the rest of the catalog description</summary>'
+                + "".join(f"<p>{e(p)}</p>" for p in paras[1:]) + '</details>' if len(paras) > 1 else '') + src
+                if paras else '<p class="c-lead quiet">The course catalog has no description for this class.</p>')
+        kicker = " · ".join([e(dept_name[c["department"]])] + (["AP"] if is_ap else []) + (["Honors"] if "Honors" in c["name"] else []))
+        link = lambda s_: f'<a href="../{e(s_)}/">{e(pw_name.get(s_) or courses.get(s_, {}).get("name", s_))}</a>'
+        bef, aft = sorted(set(before_of.get(c["slug"], []))), sorted(set(after_of.get(c["slug"], [])))
+        path = (f'''<div class="c-path" aria-label="Where it fits">
+    <p class="c-path-h">Where it fits</p>
+    <ol class="c-path-row">
+      <li class="cp-side">{"".join(f"<span>{link(x)}</span>" for x in bef) or '<span class="cp-none">Nothing required first</span>'}<small>Comes before</small></li>
+      <li class="cp-now"><b>{e(c["name"])}</b></li>
+      <li class="cp-side">{"".join(f"<span>{link(x)}</span>" for x in aft) or '<span class="cp-none">Not a prerequisite for another class</span>'}<small>Leads to</small></li>
+    </ol>
+    <p class="c-src">From the catalog’s prerequisites. <a href="../../subjects/#pw-fold">See every class’s path</a></p>
+  </div>''' if bef or aft else "")
         page(f"courses/{c['slug']}/", c["name"], f"""
 {crumbs([("All classes", "../../subjects/"), (dept_name[c['department']], f"../../subjects/{c['department']}/")], c["name"], f"courses/{c['slug']}/")}
-<header class="entry-head">
-  <div class="entry-title"><h1>{e(c['name'])}</h1><div class="c-badges">{course_badges(c)}</div></div>
+<header class="c-hero">
+  <p class="c-kicker">{kicker}</p>
+  <h1>{e(c['name'])}</h1>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}
   {f'<p class="aka">Wilcox also runs {" and ".join(f"<b>{e(n)}</b>" for n in c["sections"])} as a separate class under this course</p>' if c.get("sections") else ''}
-  <dl class="facts">{stats_html}</dl>
-  {f'<p class="prereq"><b>Prerequisite.</b> {e(prereq)}</p>' if prereq else ''}
-  {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
+  <div class="c-hero-grid">
+    <div class="c-about" id="s-catalog">
+      {lead}
+      {f'<p class="c-prereq"><span>Prerequisite</span>{e(prereq)}</p>' if prereq else ''}
+      {f'<p class="meta">{e(c["note"])}</p>' if c.get("note") else ''}
+    </div>
+    <dl class="c-facts">{stats_html}</dl>
+  </div>
+  {path}
 </header>
 {where}
 
-<nav class="entry-toc" aria-label="On this page"><a href="#s-overview">Overview</a><a href="#s-teachers">Teachers</a><a href="#s-resources">Resources</a><a href="#s-tips">Tips</a><a href="#s-summer">Summer HW</a><a href="#comments">Comments</a><a href="#s-catalog">Catalog</a></nav>
+<div class="c-layout">
+<aside class="c-rail" aria-label="On this page">
+  <nav class="c-toc" id="c-toc">
+    <a href="#s-overview" data-sec="overview">What students say<span class="n"></span></a>
+    <a href="#s-teachers" data-sec="teachers">Teachers<span class="n"></span></a>
+    <a href="#s-resources" data-sec="resources">Study guides<span class="n"></span></a>
+    <a href="#s-tips" data-sec="tips">Tips<span class="n"></span></a>
+    <a href="#s-summer" data-sec="summer">Summer homework<span class="n"></span></a>
+    <a href="#comments" data-sec="comments">Comments<span class="n"></span></a>
+  </nav>
+  <div class="c-progress" id="c-progress" hidden></div>
+</aside>
+<div class="c-main">
+<section id="s-overview" class="c-sec">{sec_head("overview", "What students say")}<div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
 
-<section id="s-overview" class="entry-sec">{sec_head("overview", "What students say")}<div id="overview" class="dyn"><div class="meta">Loading…</div></div></section>
-
-<section id="s-teachers" class="entry-sec">{sec_head("teachers", "Teachers", "Each teacher’s section is written by their students.")}
+<section id="s-teachers" class="c-sec">{sec_head("teachers", "Teachers", "Each teacher’s version of the class, written by their students.")}
   <div id="teachers" class="teachers dyn"></div>
-  <div id="compare" hidden><h3>Side by side</h3><div class="scroll-x"><table id="compare-table" class="compare"></table></div></div>
 </section>
 
-<section id="s-resources" class="entry-sec">{sec_head("resources", "Resources &amp; study guides")}<div id="resources" class="dyn"></div></section>
-<section id="s-tips" class="entry-sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
-<section id="s-summer" class="entry-sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
+<section id="s-resources" class="c-sec">{sec_head("resources", "Study guides &amp; resources")}<div id="resources" class="dyn"></div></section>
+<section id="s-tips" class="c-sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
+<section id="s-summer" class="c-sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
+<section id="s-todo" class="c-sec c-todo" hidden><h2>Help finish this page</h2><p class="sec-sub">Took this class? These parts aren’t written yet. Each one takes a few minutes, and a reviewer checks it before it goes up.</p><div id="todo" class="c-todo-grid"></div></section>
 
-<section id="comments" class="entry-sec">{sec_head("comments", "Comments", 'About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a>')}
+<section id="comments" class="c-sec">{sec_head("comments", "Comments", 'About the class, not the teacher as a person. New members’ comments appear after a reviewer approves them. <a href="../../rules/">Rules</a>')}
   <form id="comment-form" class="comment-form">
     <div id="replying" class="meta" hidden>Replying to a comment · <button type="button" class="linkish" id="cancel-reply">cancel</button></div>
     <label class="sr" for="comment-prompt">Topic</label><select id="comment-prompt"></select>
@@ -544,9 +591,8 @@ def build_courses(depts, courses):
   </form>
   <div id="comment-list"></div>
 </section>
-
-<section id="s-catalog" class="entry-sec quiet">{sec_head("catalog", "Catalog description", f"From the {e(CATALOG_SOURCE)}, page {e(c.get('page') - 1 if isinstance(c.get('page'), int) else '?')}.")}
-  <div class="catalog-desc">{desc_html or '<p class="meta">The catalog has no description for this class.</p>'}</div></section>
+</div>
+</div>
 """, desc=f"{c['name']} at Wilcox High School: what students say about tests, grading and homework, plus study guides and tips."
           + (" Includes AP exam info." if is_ap else ""),
              active="subjects/", script="course.js",

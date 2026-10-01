@@ -83,6 +83,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Class page** (`courses/<slug>/`: `build_courses` in build.py + `course.js`; redesigned
+  2026-10-01, Ethan: "more 高级, more efficient, more fascinating"). Styles are the `.c-*` block at
+  the end of style.css; teacher pages still use the older `.entry-*` styles, so leave those.
+  - Top (static, official only): mono kicker (department · AP · Honors), big title, the catalog's
+    first paragraph as the opening text (the rest folds into "Read the rest"), the source and
+    page, the prerequisite, and a 2×2 grid of grades / credits / a–g / course #. "Where it fits"
+    draws what comes before and what it leads to from `pathways.build()` (the catalog's
+    prerequisite links, same as the pathways map), and is left out when a class has no links.
+  - Below: a sticky side index (a strip under the header below 1000px) with a count per section
+    and "N% written" (overview, the share of teachers written, guides, tips). Empty overview /
+    guides / tips / summer sections are hidden and become one "Help finish this page" block
+    (`TODO` in course.js) instead of a stack of "No … yet" lines; their index links go there.
+  - Teachers: two or more written → tabs (`teacherTab`) plus a Compare tab (a table of the
+    fields any of them filled in); unwritten teachers are listed underneath. Switching tabs
+    redraws from the loaded posts (`draw(true)`), no new fetch.
+  - Time outside class and difficulty are drawn as small scales from the form's own option lists.
 - **Settings page** (`settings/`, `pages.settings` in pages.js) gathers every
   setting; the originals stay where they are (header toggles, Account, the
   Orrery's Display menu) and read/write the same stored values. Reader prefs
