@@ -800,8 +800,7 @@ const pages = {
   },
 
   async bell() {
-    mountBellStrip($('#bell'), { expandable: false });
-    $('#bell-full').innerHTML = fullHtml(await loadBell());
+    (await import('./bell.js')).mountBellPage();
   },
 
   // The teachers list: by subject, with a find box

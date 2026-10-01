@@ -83,6 +83,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Bell schedule page** (`bell/`: `mountBellPage` in bell.js, styles `.bp-*`/`.bw-*`/`.bs-*`;
+  redesigned 2026-10-01, Ethan: "even better"). All from data/bell.json.
+  - Now (a dark panel): the current period big, a countdown that ticks every second (to the
+    end of the period, the next bell, or the first bell), the period's progress, the whole day
+    as a bar with a needle, and facts (today ends, next day off "in N days", skipping the rest
+    of a break you're already on). Off and adjusted days say so and show the next school day.
+  - This week: Mon–Fri columns (next week from Saturday), each period a block at its real time
+    over 8:30–4:00 (420px: 56px an hour), today tinted with a red now-line, days off hatched.
+    On phones it scrolls sideways and starts at today; redraws keep the scroll.
+  - Every schedule (finals in a fold), and special days by month, upcoming first (the next one
+    flagged), past ones folded.
+  - The home page strip (`mountBellStrip`) is unchanged.
 - **Teacher pages** (`teachers/<slug>/`: `build_teachers` + `pages.teacher`; the list is
   `pages.teachers`; redesigned 2026-10-01, Ethan: "impressive"). Official facts only, plus what
   students wrote: a nameplate (initials monogram, kicker with subjects, room from their schedule),

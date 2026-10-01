@@ -1055,10 +1055,12 @@ def build_static():
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
 
     page("bell/", "Bell schedule", """
-<h1>Bell schedule</h1>
-<p class="lede">When every period starts and ends at Wilcox, 2026–27.</p>
-<section id="bell" class="bell bell-page" aria-label="Today"><div class="meta">Loading today…</div></section>
-<div id="bell-full" class="bell-full-page"><div class="meta">Loading…</div></div>""", active="bell/", data={"page": "bell"},
+<header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1></header>
+<section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
+<section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
+<section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
+<section class="bp-sec"><h2>Special days</h2><p class="sec-sub">Days off, finals and changed schedules this school year.</p><div id="bp-special"></div></section>
+<p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
     # "By the numbers" was retired (its a–g chart moved to All classes, its coverage
