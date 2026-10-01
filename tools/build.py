@@ -398,7 +398,8 @@ def course_row(c, r):
     t = c["teachers"]
     who = ", ".join(t[:3]) + (f" +{len(t) - 3}" if len(t) > 3 else "") if t else ""
     m = re.search(r"\d+", c.get("grades") or "")
-    return f"""<li class="course-row is-empty" data-slug="{e(c['slug'])}" data-name="{e(c['name'])}" data-grade="{m.group() if m else ''}" data-kind="{'ap' if c['name'].startswith('AP ') else ''}{' honors' if 'Honors' in c['name'] else ''}">
+    hay = " ".join([c["name"], c.get("call") or "", *t]).lower()
+    return f"""<li class="course-row is-empty" data-slug="{e(c['slug'])}" data-name="{e(c['name'])}" data-hay="{e(hay)}" data-grade="{m.group() if m else ''}" data-kind="{'ap' if c['name'].startswith('AP ') else ''}{' honors' if 'Honors' in c['name'] else ''}">
   <a href="{r}courses/{e(c['slug'])}/"><span class="c-name">{e(c['name'])}</span>
   <span class="c-meta">{e(grades(c))}{' · ' + e(who) if who else ''}</span></a>
   <span class="c-badges">{course_badges(c)}<span class="status"></span></span></li>"""
@@ -452,32 +453,62 @@ def short_dept(name):
 
 
 def build_subjects(depts):
-    body = "".join(f"""<section class="dept-block"><h2><a href="{e(d['slug'])}/">{e(short_dept(d['name']))}</a> <span class="meta">{len(d['courses'])} classes</span></h2>
+    # The class lists (Ethan, 2026-10-01: like the class page, "more 高级, efficient, fascinating").
+    # A short head with the live numbers, a find box that filters as you type, an index of the
+    # subjects (each with how much is written, filled in by pages.js), then each subject's classes
+    # in two dense columns, where a dot says what has student info instead of "Not written yet"
+    # on every row. The a–g chart and the pathways map sit in an "Explore" pair of folds.
+    year = e(CATALOG_SOURCE.split(' ')[-1])
+    total = sum(len(d["courses"]) for d in depts)
+    SORT_HTML = '<label class="cl-sort">Sort <select id="sort" data-native><option value="subject">By subject</option><option value="az">A–Z</option><option value="grade">By grade</option></select></label>'
+    tools = lambda sort: f'''<div class="cl-tools">
+  <label class="cl-find">{ICONS["search"]}<span class="sr">Find a class</span><input id="cl-q" type="search" placeholder="Find a class or a teacher" autocomplete="off"></label>
+  <div class="vtabs" id="filter" role="group" aria-label="Show"><button type="button" class="vtab" data-f="all" aria-pressed="true">All</button><button type="button" class="vtab" data-f="has">Has student info</button><button type="button" class="vtab" data-f="ap">AP</button><button type="button" class="vtab" data-f="honors">Honors</button></div>
+  {SORT_HTML if sort else ''}
+</div>
+<p class="cl-none" id="cl-none" hidden>No classes match. <button type="button" class="linkish" id="cl-clear">Clear the search</button></p>'''
+    index = "".join(f'''<a class="cl-subj" href="#d-{e(d['slug'])}" data-dept="{e(d['slug'])}"><b>{e(short_dept(d['name']))}</b>
+      <span class="cl-subj-n">{len(d['courses'])} classes<span class="w"></span></span><span class="c-bar"><i></i></span></a>''' for d in depts)
+    body = "".join(f"""<section class="dept-block" id="d-{e(d['slug'])}"><header class="cl-dh"><h2><a href="{e(d['slug'])}/">{e(short_dept(d['name']))}</a></h2><span class="cl-dn">{len(d['courses'])}</span><a class="cl-dlink" href="{e(d['slug'])}/">Subject page →</a></header>
       <ul class="course-list">{''.join(course_row(c, '../') for c in d['courses'])}</ul></section>""" for d in depts)
     page("subjects/", "All classes", f"""
-<h1>All classes</h1>
-<p class="lede">Every class offered at Wilcox in the {e(CATALOG_SOURCE.split(' ')[-1])} catalog. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> nobody has written it yet</span></p>
-<div class="sortbar"><span class="label">Sort</span><div class="chips" id="sort"><button class="chip" data-sort="subject" aria-pressed="true">By subject</button><button class="chip" data-sort="az">A–Z</button><button class="chip" data-sort="grade">By grade</button></div>
-<span class="label">Show</span><div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div></div>
+<div class="classes-page">
+<header class="cl-head">
+  <p class="c-kicker">Course catalog {year}</p>
+  <h1>All classes</h1>
+  <p class="cl-lede"><b>{total}</b> classes in <b>{len(depts)}</b> subjects, from the SCUSD catalog. <span id="cl-written"></span></p>
+</header>
+<nav class="cl-index" aria-label="Subjects">{index}</nav>
+<div class="cl-explore">
 <details class="nb-card nb-fold" id="ag"><summary><h2>Where each UC/CSU a–g requirement can be met</h2>
   <span class="nb-sub">Bubble size = number of classes · rows = subjects · columns = a–g letters, plus classes that don’t count toward a–g. Point at a bubble for the classes.</span></summary>
   <svg id="arcmatrix" viewBox="0 0 430 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Number of classes in each subject that meet each a–g requirement"></svg>
-  <p class="nb-src">SCUSD COURSE CATALOG {e(CATALOG_SOURCE.split(' ')[-1])} · A FEW CLASSES LIST A–G LOOSELY (“D/G”); THEY COUNT UNDER EACH LETTER · CHECK WITH YOUR COUNSELOR</p></details>
+  <p class="nb-src">SCUSD COURSE CATALOG {year} · A FEW CLASSES LIST A–G LOOSELY (“D/G”); THEY COUNT UNDER EACH LETTER · CHECK WITH YOUR COUNSELOR</p></details>
 <details class="nb-card nb-fold pw-fold" id="pw-fold"><summary><h2 id="pw-h">How classes connect</h2>
   <span class="nb-sub">Every class in the {e(CATALOG_SOURCE)}, joined by the prerequisites it lists. Point at a class to see what it needs. <span class="pw-legend"><i class="has"></i> students have written about it</span> <span class="pw-legend"><i class="seq"></i> next grade or level, not a prerequisite</span> <span class="pw-legend"><i class="solo"></i> linked to no other class</span></span></summary>
   <div id="pathways" class="pathways"><div class="meta">Loading the map…</div></div></details>
+</div>
+{tools(True)}
 <div id="by-subject">{body}</div>
-<div id="flat" hidden></div>""", active="subjects/", data={"page": "subject"})
+<div id="flat" hidden></div>
+</div>""", active="subjects/", data={"page": "subject"})
 
     for d in depts:
         svcte = d["slug"] == "svcte"
+        others = "".join(f'<a href="../{e(o["slug"])}/">{e(short_dept(o["name"]))}</a>' for o in depts if o is not d)
         page(f"subjects/{d['slug']}/", short_dept(d["name"]), f"""
+<div class="classes-page">
 {crumbs([("All classes", "../")], short_dept(d["name"]), f"subjects/{d['slug']}/")}
-<h1>{e(short_dept(d['name']))}</h1>
+<header class="cl-head">
+  <p class="c-kicker">Subject · course catalog {year}</p>
+  <h1>{e(short_dept(d['name']))}</h1>
+  <p class="cl-lede"><b>{len(d['courses'])}</b> classes. <span id="cl-written"></span></p>
+</header>
 {'<p class="note">SVCTE programs are taught at the Silicon Valley Career Technical Education campus, not at Wilcox. Ask your counselor about signing up.</p>' if svcte else ''}
-<p class="lede">{len(d['courses'])} classes. <span class="legend"><span class="dot on"></span> has student info <span class="dot"></span> not written yet</span></p>
-<div class="chips" id="filter"><button class="chip" data-f="all" aria-pressed="true">All</button><button class="chip" data-f="has">Has info</button><button class="chip" data-f="ap">AP</button><button class="chip" data-f="honors">Honors</button></div>
+{tools(False)}
 <ul class="course-list">{''.join(course_row(c, '../../') for c in d['courses'])}</ul>
+<nav class="cl-others" aria-label="Other subjects"><span>Other subjects</span>{others}</nav>
+</div>
 """, desc=f"All {short_dept(d['name'])} classes at Wilcox High School, with student-written guides.",
              active="subjects/", data={"page": "subject"})
 

@@ -33,12 +33,24 @@ import { search, attach, addLive, groupedHtml } from './search.js';
 import { mountBellStrip, loadBell, fullHtml } from './bell.js';
 
 // ── subject lists: light up classes that have content ──
+// A dot on the row says it (no "Not written yet" on every row). The subject index and the head
+// count how many classes in each subject have student info.
 async function markContent() {
   const has = await s.contentIndex();
   $$('.course-row').forEach((li) => {
     const on = has.has(li.dataset.slug);
     li.classList.toggle('is-empty', !on);
-    $('.status', li).textContent = on ? '' : 'Not written yet';
+    $('.status', li).textContent = '';
+    $('a', li).title = on ? 'Students have written about this class' : 'Nobody has written about this class yet';
+  });
+  const rows = $$('.course-row');
+  const n = rows.filter((li) => !li.classList.contains('is-empty')).length;
+  if ($('#cl-written')) $('#cl-written').textContent = n ? `${n} ${n === 1 ? 'has' : 'have'} student info so far.` : 'Nobody has written about any of them yet.';
+  $$('.cl-subj').forEach((a) => {
+    const list = $$('.course-row', $(`#d-${a.dataset.dept}`));
+    const w = list.filter((li) => !li.classList.contains('is-empty')).length;
+    $('.w', a).textContent = w ? ` · ${w} written` : '';
+    $('.c-bar i', a).style.width = `${list.length ? Math.round((w / list.length) * 100) : 0}%`;
   });
 }
 
@@ -290,16 +302,19 @@ const pages = {
     if (location.hash === '#pw-fold' && $('#pw-fold')) $('#pw-fold').open = true;
     if (location.hash === '#ag' && $('#ag')) $('#ag').open = true;       // from the old By the numbers link
     await markContent();
-    const state = { f: 'all', sort: 'subject' };
+    const state = { f: 'all', sort: 'subject', q: '' };
     const rows = $$('.course-row');
     const flat = $('#flat');
     const shown = (li) => (state.f === 'has' ? !li.classList.contains('is-empty')
       : state.f === 'ap' ? li.dataset.kind.includes('ap')
-      : state.f === 'honors' ? li.dataset.kind.includes('honors') : true);
+      : state.f === 'honors' ? li.dataset.kind.includes('honors') : true)
+      && (!state.q || state.q.split(/\s+/).every((w) => li.dataset.hay.includes(w)));
     const GRADE = { 9: 'Open to 9th graders', 10: 'From 10th grade', 11: 'From 11th grade', 12: '12th grade', '': 'Grade not listed' };
 
     function apply() {
       rows.forEach((li) => (li.hidden = !shown(li)));
+      const any = rows.some((li) => !li.hidden);
+      $('#cl-none').hidden = any;
       // Subject view: the rows stay where the page put them
       if (!flat || state.sort === 'subject') {
         if (flat) { flat.hidden = true; $('#by-subject').hidden = false; }
@@ -307,32 +322,38 @@ const pages = {
         return;
       }
       // A–Z and by-grade views: copies of the visible rows, regrouped
-      const vis = rows.filter((li) => !li.hidden)
-        .sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+      const vis = rows.filter((li) => !li.hidden).sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
       const groups = {};
       for (const li of vis) {
-        const key = state.sort === 'az' ? (/[a-z]/i.test(li.dataset.name[0]) ? li.dataset.name[0].toUpperCase() : '#')
-                                        : li.dataset.grade;
+        const key = state.sort === 'az' ? (/[a-z]/i.test(li.dataset.name[0]) ? li.dataset.name[0].toUpperCase() : '#') : li.dataset.grade;
         (groups[key] ??= []).push(li);
       }
-      const keys = Object.keys(groups).sort((a, b) =>
-        state.sort === 'grade' ? (Number(a) || 99) - (Number(b) || 99) : a.localeCompare(b));
-      flat.innerHTML = keys.map((k) => `<section class="dept-block"><h2>${esc(state.sort === 'grade' ? GRADE[k] ?? `Grade ${k}` : k)}
-          <span class="meta">${groups[k].length}</span></h2><ul class="course-list"></ul></section>`).join('')
-        || '<div class="empty">No classes match.</div>';
+      const keys = Object.keys(groups).sort((a, b) => (state.sort === 'grade' ? (Number(a) || 99) - (Number(b) || 99) : a.localeCompare(b)));
+      flat.innerHTML = keys.map((k) => `<section class="dept-block"><header class="cl-dh"><h2>${esc(state.sort === 'grade' ? GRADE[k] ?? `Grade ${k}` : k)}</h2>
+          <span class="cl-dn">${groups[k].length}</span></header><ul class="course-list"></ul></section>`).join('');
       $$('.course-list', flat).forEach((ul, i) => groups[keys[i]].forEach((li) => ul.append(li.cloneNode(true))));
       $('#by-subject').hidden = true;
       flat.hidden = false;
     }
-    const chips = (id, key) => $(id)?.addEventListener('click', (e) => {
-      const b = e.target.closest('.chip');
+    $('#filter')?.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-f]');
       if (!b) return;
-      $$(`${id} .chip`).forEach((c) => c.setAttribute('aria-pressed', c === b));
-      state[key] = b.dataset[key === 'f' ? 'f' : 'sort'];
+      $$('#filter [data-f]').forEach((c) => c.setAttribute('aria-pressed', c === b));
+      state.f = b.dataset.f;
       apply();
     });
-    chips('#filter', 'f');
-    chips('#sort', 'sort');
+    $('#sort')?.addEventListener('change', (e) => { state.sort = e.target.value; apply(); });
+    $('#cl-q')?.addEventListener('input', (e) => { state.q = e.target.value.trim().toLowerCase(); apply(); });
+    $('#cl-clear')?.addEventListener('click', () => { $('#cl-q').value = ''; state.q = ''; apply(); $('#cl-q').focus(); });
+    // the subject index jumps to its section, even when a search had hidden it
+    $('.cl-index')?.addEventListener('click', (e) => {
+      const a = e.target.closest('.cl-subj'); if (!a) return;
+      if (state.sort !== 'subject' || state.q || state.f !== 'all') {
+        $('#cl-q').value = ''; Object.assign(state, { f: 'all', sort: 'subject', q: '' });
+        $('#sort').value = 'subject'; $$('#filter [data-f]').forEach((c) => c.setAttribute('aria-pressed', c.dataset.f === 'all'));
+        apply();
+      }
+    });
   },
 
   async search() {

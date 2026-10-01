@@ -83,6 +83,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Class lists** (`subjects/` and `subjects/<dept>/`: `build_subjects` + `pages.subject`/`markContent`;
+  redesigned 2026-10-01 with the class page). Styles: the `.cl-*` block and `.classes-page`
+  scope at the end of style.css (`.course-row` is shared with other pages, so the new look is
+  scoped). A head with live numbers, an index of the subjects (each with a written bar), the
+  a–g chart and pathways map as an "Explore" pair of folds, then a sticky tool bar: a find box
+  (filters as you type on `data-hay` = name, nickname, teachers), Show tabs, and Sort. Each
+  subject's classes sit in two columns; a dot shows which have student info (no more "Not
+  written yet" on every row). Subject pages get the same find box and tabs, plus links to
+  the other subjects.
 - **Class page** (`courses/<slug>/`: `build_courses` in build.py + `course.js`; redesigned
   2026-10-01, Ethan: "more 高级, more efficient, more fascinating"). Styles are the `.c-*` block at
   the end of style.css; teacher pages still use the older `.entry-*` styles, so leave those.
