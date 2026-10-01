@@ -4,7 +4,8 @@
 //            cards slide out to the sides, one after another, until only the background is left
 //            (the turning quad or the painting) with a way back to the top. Not with the plain
 //            background: there'd be nothing to show.
-//   Bounce   pulling past the top or the bottom stretches like a rubber band and springs back.
+//   Bounce   pulling past the top or the bottom stretches like a rubber band and springs back,
+//            and a fling that runs into either edge bounces off it.
 //            At the top the cards come down off the header; at the bottom the end caption lifts.
 //            The background swells a little either way. The header never moves: that's why the
 //            browser's own bounce is off site-wide (it dragged the header and looked like a refresh).
@@ -12,8 +13,6 @@
 // Reduce motion: the cards fade instead of sliding, and nothing bounces.
 import { $, $$, lessMotion, getPref } from './ui.js';
 
-const MAX = 140;                                      // the furthest a pull can stretch, in px
-const rubber = (d) => MAX * (1 - 1 / ((d / MAX) * 0.55 + 1));
 const clamp = (x) => Math.max(0, Math.min(1, x));
 
 export function mountHomeMotion() {
@@ -87,74 +86,110 @@ export function mountHomeMotion() {
   fit();
 
   // ── bounce ──
-  let y = 0, v = 0, raw = 0, edge = null, raf = 0, idle = 0, last = 0;
+  // Like iOS and macOS (Ethan: "like the popular websites"). Two cases:
+  //   a fling that runs into the edge bounces at once, further the faster it was going;
+  //   a pull that starts AT the edge stretches with resistance, and snaps back on letting go.
+  // The return is a near-critically damped spring: quick (about 0.3 s), no wobble.
+  let y = 0, v = 0, edge = null, raf = 0, last = 0;
   const target = () => (edge === 'bottom' && end ? $('.hr-cap', end) : layer);
+  const clear = () => { layer.style.transform = ''; if (end) $('.hr-cap', end).style.transform = ''; };
   const apply = () => {
-    const t = target();
-    t.style.transform = Math.abs(y) < 0.05 ? '' : `translateY(${y}px)`;
-    document.body.style.setProperty('--ob', (Math.min(1, Math.abs(y) / MAX)).toFixed(3));
-    if (!y) { layer.style.transform = ''; if (end) $('.hr-cap', end).style.transform = ''; }
+    if (Math.abs(y) < 0.05) clear(); else target().style.transform = `translateY(${y}px)`;
+    document.body.style.setProperty('--ob', Math.min(1, Math.abs(y) / 120).toFixed(3));
   };
-  const pull = (d) => {                                // d: how far past the edge, before resistance
-    cancelAnimationFrame(raf); raf = 0; v = 0;
-    y = (edge === 'top' ? 1 : -1) * rubber(Math.max(0, d));
-    apply();
-  };
-  // let go: a spring that overshoots a little before it settles (that's the bounce)
-  const release = () => {
-    raw = 0;
-    if (!edge || raf) return;
+  const sign = () => (edge === 'top' ? 1 : -1);
+  // iOS's rubber band: the further you pull, the less it follows
+  const rubber = (d) => { const h = innerHeight; return (1 - 1 / ((d * 0.55) / h + 1)) * h; };
+  const spring = () => {
+    if (raf) return;
     last = performance.now();
     const step = (now) => {
       const dt = Math.min(0.032, (now - last) / 1000); last = now;
-      v += (-260 * y - 20 * v) * dt;
-      y += v * dt;
-      if (Math.abs(y) < 0.3 && Math.abs(v) < 6) { y = 0; v = 0; raf = 0; apply(); edge = null; return; }
+      for (let i = 0; i < 4; i++) { v += (-640 * y - 48 * v) * (dt / 4); y += v * (dt / 4); }   // small steps: stiff springs need them
+      if (Math.abs(y) < 0.3 && Math.abs(v) < 8) { y = v = 0; raf = 0; apply(); edge = null; return; }
       apply();
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
   };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+  const pullTo = (d) => { stop(); v = 0; y = sign() * rubber(Math.max(0, d)); apply(); };
+  // hit the edge moving at `speed` px/s: start the spring with that speed outward
+  const impact = (which, speed) => {
+    if (lessMotion()) return;
+    stop(); edge = which; y = 0;
+    v = sign() * Math.max(500, Math.min(3200, Math.abs(speed) * 0.7));
+    spring();
+  };
+  const maxY = () => document.documentElement.scrollHeight - innerHeight;
   const atTop = () => scrollY <= 0;
-  const atBottom = () => scrollY + innerHeight >= document.documentElement.scrollHeight - 1;
+  const atBottom = () => scrollY >= maxY() - 1;
 
-  // trackpads and mouse wheels: at an edge, keep counting the scroll the page can't do
+  // Flings, from any input (trackpad coasting, a flicked phone, the mouse wheel): watch the scroll
+  // speed, and when it arrives at an edge still moving, bounce.
+  let py = scrollY, pt = performance.now(), speed = 0, quietUntil = 0, programmatic = false;
+  addEventListener('scroll', () => {
+    const now = performance.now(), dt = Math.max(1, now - pt);
+    const sp = ((scrollY - py) / dt) * 1000;
+    speed = speed * 0.4 + sp * 0.6;
+    const arrivedTop = scrollY <= 0 && py > 0, arrivedBottom = scrollY >= maxY() - 1 && py < maxY() - 1;
+    if (!programmatic && touching === null && (arrivedTop || arrivedBottom)) {
+      impact(arrivedTop ? 'top' : 'bottom', speed);       // even a slow arrival gets a small bounce
+      quietUntil = now + 160;                             // the coasting that follows is the same fling
+    }
+    if (arrivedTop || arrivedBottom) programmatic = false;
+    py = scrollY; pt = now;
+  }, { passive: true });
+  if (end) $('.hr-top', end).addEventListener('click', () => { programmatic = true; }, true);   // "Back to the top" just arrives
+
+  // Trackpad and wheel at an edge. Coasting after a fling keeps sending wheel events: those are
+  // swallowed (quietUntil, kept alive while they keep coming), so it doesn't hang stretched.
+  let pulled = 0, peak = 0, weak = 0, idle = 0;
+  const letGo = () => { clearTimeout(idle); pulled = peak = weak = 0; if (edge && !raf) spring(); };
   addEventListener('wheel', (e) => {
     if (lessMotion() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || document.documentElement.classList.contains('drawer-open')) return;
     if (e.target.closest?.('.results-pop, .menu, .acct-menu, dialog, [role="dialog"], .lang-menu')) return;
+    const now = performance.now();
     const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1);
+    if (now < quietUntil) { quietUntil = now + 160; return; }
     const want = dy < 0 && atTop() ? 'top' : dy > 0 && atBottom() ? 'bottom' : null;
-    if (!edge || raf) {
+    if (!pulled) {
       if (!want) return;
-      if (raf) { cancelAnimationFrame(raf); raf = 0; raw = MAX * 0.4 * Math.min(1, Math.abs(y) / MAX); }
+      if (raf && edge !== want) return;
       edge = want;
+      pulled = raf ? Math.abs(y) * 2 : 0;                  // catch it mid-spring and keep pulling
     }
-    raw += edge === 'top' ? -dy : dy;                   // scrolling back the other way undoes the pull
-    if (raw <= 0) { raw = 0; y = 0; apply(); edge = null; return; }
-    pull(raw);
+    const d = edge === 'top' ? -dy : dy;
+    // once the pull is over its peak and the deltas fade, the fingers have lifted: let go now
+    peak = Math.max(peak, Math.abs(d));
+    weak = d > 0 && peak > 6 && d < peak * 0.5 ? weak + 1 : 0;
+    if (weak >= 2) { letGo(); quietUntil = now + 160; return; }
+    pulled = Math.max(0, pulled + d);
+    if (!pulled) { stop(); y = 0; apply(); edge = null; return; }
+    pullTo(pulled);
     clearTimeout(idle);
-    idle = setTimeout(release, 140);
+    idle = setTimeout(letGo, 70);
   }, { passive: true });
 
-  // touch: pulling down at the top or up at the bottom
-  let from = null, anchor = null;
-  addEventListener('touchstart', (e) => { if (e.touches.length === 1) { from = e.touches[0].clientY; anchor = null; } }, { passive: true });
+  // Touch: a pull that starts at an edge (flicks into an edge are caught by the scroll watcher)
+  let touching = null, anchor = null;
+  addEventListener('touchstart', (e) => { if (e.touches.length === 1) { touching = e.touches[0].clientY; anchor = null; } }, { passive: true });
   addEventListener('touchmove', (e) => {
-    if (from === null || lessMotion() || e.touches.length !== 1) return;
-    const ty = e.touches[0].clientY, down = ty > from;
+    if (touching === null || lessMotion() || e.touches.length !== 1) return;
+    const ty = e.touches[0].clientY, down = ty > touching;
     if (anchor === null) {
       const want = down && atTop() ? 'top' : !down && atBottom() ? 'bottom' : null;
-      from = ty;
+      touching = ty;
       if (!want) return;
-      cancelAnimationFrame(raf); raf = 0;
-      edge = want; anchor = ty;
+      edge = want; anchor = ty - (raf ? sign() * Math.abs(y) * 2 : 0);
+      stop();
       return;
     }
     const d = edge === 'top' ? ty - anchor : anchor - ty;
-    if (d <= 0) { anchor = null; y = 0; apply(); edge = null; from = ty; return; }
-    pull(d * 1.4);
+    if (d <= 0) { anchor = null; y = 0; apply(); edge = null; touching = ty; return; }
+    pullTo(d);
   }, { passive: true });
-  const up = () => { if (anchor !== null) release(); from = anchor = null; };
+  const up = () => { if (anchor !== null) spring(); touching = anchor = null; };
   addEventListener('touchend', up, { passive: true });
   addEventListener('touchcancel', up, { passive: true });
 }

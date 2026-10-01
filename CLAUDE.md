@@ -820,10 +820,19 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       page holds still while the cards slide out left or right in turn (`--reveal` 0→1 on body)
       until only the background is left, with a "Back to the top" pill. Measure progress from
       `.home-reveal`'s offsetTop: a stuck element's own offsetTop moves with the scroll.
-    - Bounce: the browser's own overscroll stays OFF site-wide (it dragged the header). On the
-      home page, wheel or touch past the top pulls the cards down off the header, and past the
-      bottom lifts the end pill; a spring with a little overshoot brings them back, and the
-      background swells up to 6% (`--ob`). Rubber band caps at 140 px.
+    - Bounce, made to feel like iOS/macOS (Ethan: the first version was "too slow on the top"):
+      the browser's own overscroll stays OFF site-wide (it dragged the header). On the home page
+      the cards (top) or the end pill (bottom) move; the header never does, and the background
+      swells up to 6% (`--ob`).
+      - Any scroll that ARRIVES at an edge (trackpad coasting, a flicked phone, the wheel)
+        bounces at once, harder the faster it came (the scroll watcher), and the coasting wheel
+        events that follow are swallowed (`quietUntil`), so it never hangs stretched.
+      - A pull that STARTS at an edge stretches with iOS's rubber band (0.55, screen height).
+        Trackpad: once the deltas fade below half their peak twice, the fingers have lifted
+        and it lets go. Wheel: 70 ms without events. Touch: on touchend.
+      - The return is a near-critically damped spring (k 640, c 48): ~0.3 s, no wobble.
+      Measured in headless Chrome: fast fling 25 px, rest in 0.28 s; wheel notch 0.39 s; touch
+      0.34 s. Re-measure if you touch the constants.
     - Reduce motion: the cards fade instead of sliding, and nothing bounces.
     - Testing: the in-app browser pane often runs hidden, which pauses animation frames and
       scroll events and reports two different screen heights, so it can't judge this. A
