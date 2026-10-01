@@ -2662,3 +2662,86 @@ a.ib-tile:hover { border-color: var(--gold); }
   .classes-page .course-list { grid-template-columns: minmax(0, 1fr); }
   .cl-index { grid-template-columns: 1fr 1fr; gap: 0 18px; }
 }
+
+/* ── Teacher pages (Ethan 2026-10-01: "impressive"): a nameplate, the numbers, Today, class cards ── */
+.t-hero { display: flex; align-items: flex-end; gap: 26px; padding: 14px 0 26px; }
+.t-mono { flex: none; display: grid; place-items: center; width: 112px; height: 112px; border-radius: 50%;
+  background: var(--ink); color: var(--paper); font: 500 2.6rem/1 var(--serif); letter-spacing: -.02em;
+  box-shadow: 0 0 0 6px var(--paper), 0 0 0 7px var(--rule); }
+.t-id { min-width: 0; }
+.t-id .c-kicker { margin: 0 0 10px; }
+.t-id h1 { margin: 0; font-size: clamp(2.4rem, 6.4vw, 4rem); line-height: 1.02; letter-spacing: -.025em; text-wrap: balance; }
+.t-where { margin: 12px 0 0; color: var(--muted); }
+.t-where b { color: var(--ink); font-weight: 600; }
+.t-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--rule); }
+.t-stats > div { padding: 14px 18px 16px 0; }
+.t-stats > div + div { padding-left: 18px; border-left: 1px solid var(--rule); }
+.t-stats dt { font: 600 .66rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.t-stats dd { margin: 6px 0 0; font: 500 2rem/1 var(--serif); font-variant-numeric: tabular-nums; }
+#t-app { max-width: 900px; }
+.t-sec { padding: 36px 0 6px; }
+.t-sec + .t-sec { border-top: 1px solid var(--rule); }
+.t-sec > h2, .tt-h h2 { margin: 0 0 6px; font-size: 1.7rem; letter-spacing: -.01em; }
+/* Today: their periods over today's bell schedule */
+.t-today { border: 0; }
+.tt-list { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+.tt-list li { display: grid; grid-template-columns: 64px 44px minmax(0, 1fr) auto; align-items: baseline; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+.tt-time { font: 500 .82rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tt-p { font: 600 .7rem var(--mono); letter-spacing: .1em; color: var(--muted); }
+.tt-what { font: 500 1.08rem/1.3 var(--serif); min-width: 0; }
+.tt-what a { color: var(--ink); text-decoration: none; }
+.tt-what a:hover { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+.tt-list li.quiet .tt-what { color: var(--muted); font-style: italic; font-size: .98rem; }
+.tt-list li.past { opacity: .5; }
+.tt-list li.now { position: relative; margin: 0 -14px; padding-left: 14px; padding-right: 14px; border-radius: 8px; border-bottom-color: transparent;
+  background: color-mix(in srgb, var(--gold) 20%, transparent); }
+.tt-now { font: 700 .62rem var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: var(--ink); color: var(--paper); }
+/* class cards */
+.tc-grid { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.tc-card a { display: grid; gap: 6px; height: 100%; padding: 16px 18px 18px; border: 1px solid var(--rule); border-radius: 12px; color: var(--ink); text-decoration: none; background: var(--paper);
+  transition: border-color .2s, transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s; }
+.tc-card a:hover { border-color: var(--ink); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0, 0, 0, .08); }
+.tc-card b { font: 500 1.28rem/1.2 var(--serif); letter-spacing: -.005em; }
+.tc-badges { display: flex; gap: 4px; min-height: 18px; }
+.tc-meta { font-size: .82rem; color: var(--muted); }
+.tc-state { margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--rule); font-size: .84rem; display: grid; gap: 4px; }
+.tc-state em { font: 600 .62rem var(--mono); letter-spacing: .12em; text-transform: uppercase; font-style: normal; color: var(--ink); }
+.tc-state em::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 1px var(--ink); vertical-align: 1px; }
+.tc-state em.no { color: var(--muted); }
+.tc-state em.no::before { background: none; box-shadow: inset 0 0 0 1px var(--empty); }
+.tc-quote { color: var(--muted); font: italic .95rem/1.45 var(--serif); }
+/* clubs and teams, student posts */
+.t-acts, .t-posts { list-style: none; margin: 12px 0 0; padding: 0; border-top: 1px solid var(--rule); display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); column-gap: 28px; }
+.t-acts a, .t-posts a { display: grid; gap: 3px; padding: 12px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+.t-acts b { font: 500 1.05rem var(--serif); }
+.t-acts span { font-size: .82rem; color: var(--muted); }
+.t-acts a:hover b, .t-posts a:hover .tp-text { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+.t-posts .c-kicker { margin: 0; }
+.tp-text { font: 1rem/1.45 var(--serif); }
+.t-foot { margin-top: 34px; max-width: 46em; }
+/* the teachers list */
+.tl-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0 36px; margin-top: 8px; }
+.tl-group .c-kicker { margin: 26px 0 8px; }
+.tl-group ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.tl-group a { display: grid; gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+.tl-group a b { font: 500 1.05rem var(--serif); }
+.tl-group a span { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-group a:hover b { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+@media (max-width: 640px) {
+  .t-hero { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .t-mono { width: 84px; height: 84px; font-size: 2rem; }
+  .t-stats { grid-template-columns: 1fr 1fr; }
+  .t-stats > div:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .t-stats > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .tt-list li { grid-template-columns: 56px 36px minmax(0, 1fr) auto; gap: 8px; }
+}
+.tc-grid > li { display: flex; }
+.tc-card a { flex: 1; align-content: start; }
+.tc-badges { align-items: flex-start; flex-wrap: wrap; }
+.tc-badges .tag { line-height: 1.4; }
+/* the full schedule, in the same hairline style as Today */
+#t-sched .periods { border: 0; border-top: 1px solid var(--ink); border-radius: 0; background: none; }
+#t-sched .periods li { padding: 10px 0; border-bottom: 1px solid var(--rule); border-top: 0; }
+#t-sched .periods li a { font: 500 1.02rem var(--serif); color: var(--ink); text-decoration: none; }
+#t-sched .periods li a:hover { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+#t-sched .sched-head { margin-bottom: 10px; }

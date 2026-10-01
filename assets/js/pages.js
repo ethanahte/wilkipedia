@@ -5,7 +5,7 @@ import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, le
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
-import { KINDS, GUIDE, staleness } from './forms.js';
+import { KINDS, GUIDE, staleness, schoolYear } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES, canEditOwn } from './store.js';
 
 const which = JSON.parse($('#page-data')?.textContent || '{}').page;
@@ -30,7 +30,7 @@ function wireAppearance(s) {
 const s = await initHeader();
 
 import { search, attach, addLive, groupedHtml } from './search.js';
-import { mountBellStrip, loadBell, fullHtml } from './bell.js';
+import { mountBellStrip, loadBell, fullHtml, dayPlan, nextSchoolDay, clock } from './bell.js';
 
 // ── subject lists: light up classes that have content ──
 // A dot on the row says it (no "Not written yet" on every row). The subject index and the head
@@ -802,6 +802,82 @@ const pages = {
   async bell() {
     mountBellStrip($('#bell'), { expandable: false });
     $('#bell-full').innerHTML = fullHtml(await loadBell());
+  },
+
+  // The teachers list: by subject, with a find box
+  teachers() {
+    const items = $$('#tl-groups li');
+    $('#tl-q').addEventListener('input', (e) => {
+      const words = e.target.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      items.forEach((li) => (li.hidden = !words.every((w) => li.dataset.hay.includes(w))));
+      $$('.tl-group').forEach((g) => (g.hidden = !$$('li', g).some((li) => !li.hidden)));
+      $('#cl-none').hidden = items.some((li) => !li.hidden);
+    });
+  },
+
+  // A teacher's page (redesigned 2026-10-01): what students wrote about each of their classes,
+  // their room and schedule, "Today" (the schedule over today's bell schedule) and student posts
+  async teacher() {
+    const app = $('#t-app');
+    const name = app.dataset.teacher, slugs = app.dataset.courses.split(',').filter(Boolean);
+    const [subs, scheds, data, bell] = await Promise.all([s.approved(), s.approved({ kind: 'room_schedule' }), courses(), loadBell().catch(() => null)]);
+    const cname = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
+    const mine = subs.filter((x) => x.teacher === name);
+    const secs = mine.filter((x) => x.kind === 'teacher_section');
+
+    // each class card says whether students wrote about this teacher's version
+    let written = 0;
+    $$('.tc-card').forEach((li) => {
+      const sec = secs.find((x) => x.course_slug === li.dataset.slug);
+      if (sec) written++;
+      li.classList.toggle('tc-written', !!sec);           // (not .done: that's a site-wide padding class)
+      const line = sec && (sec.payload.test_style || sec.payload.homework || sec.payload.grading || '');
+      $('[data-state]', li).innerHTML = sec ? `<em>Students wrote about it</em>${line ? `<span class="tc-quote">“${esc(line.length > 110 ? line.slice(0, 108).trimEnd() + '…' : line)}”</span>` : ''}`
+        : '<em class="no">Not written yet</em>';
+    });
+    $('#t-written').textContent = slugs.length ? `${written} of ${slugs.length}` : '—';
+
+    // room and schedule
+    const list = collectSchedules(scheds.filter((x) => x.teacher === name), secs)[name]?.list || [];
+    const add = `${root}submit/?kind=room_schedule&teacher=${encodeURIComponent(name)}`;
+    const room = list[0]?.room || secs.find((x) => x.payload.room)?.payload.room;
+    const link = classLinker(data.courses);
+    $('#t-where').innerHTML = room ? `Room <b>${esc(room)}</b> · <a href="${root}map/#${encodeURIComponent(room)}">on the map →</a>` : `Room not added yet · <a href="${add}">add it</a>`;
+    $('#t-sched').innerHTML = scheduleBlock(list, { add, link, rooms: true })
+      + (list.length ? `<p class="meta">${room ? `<a href="${root}map/#${encodeURIComponent(room)}">See room ${esc(room)} on the map</a> · ` : ''}<a href="${add}">Add or update a schedule</a></p>` : '');
+
+    // Today: this year's schedule laid over today's bell schedule, with the current period marked
+    const sched = list[0]?.periods && list[0].year === schoolYear(0) ? list[0].periods : null;
+    if (sched && bell) {
+      const now = new Date(), m = now.getHours() * 60 + now.getMinutes();
+      const mins = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+      let plan = dayPlan(bell, now), when = 'Today', day = now;
+      if (!plan.periods) { [day, plan] = nextSchoolDay(bell, now); when = day ? day.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) : null; }
+      if (plan?.periods && when) {
+        const isToday = when === 'Today';
+        const rows = plan.periods.map(([label, a, b]) => {
+          const n = /\b([1-7])(?:st|nd|rd|th)?\b/.exec(label)?.[1];          // "1st Period" or "Period 1"
+          const what = n ? sched[n] : null;
+          const quiet = !n || !what || /^(prep|no class|free|none|-|—)$/i.test(what);
+          const state = isToday && m >= mins(a) && m < mins(b) ? 'now' : isToday && m >= mins(b) ? 'past' : '';
+          return `<li class="${quiet ? 'quiet' : ''} ${state}"><span class="tt-time">${clock(a)}</span><span class="tt-p">${n ? `P${n}` : esc(label)}</span>
+            <span class="tt-what">${n ? (what ? (quiet ? esc(what) : link(what)) : '<span class="meta">—</span>') : ''}</span>${state === 'now' ? '<span class="tt-now">Now</span>' : ''}</li>`;
+        }).join('');
+        $('#t-today').innerHTML = `<header class="tt-h"><h2>${esc(when)}</h2><p class="sec-sub">${esc(plan.label)}${room ? ` · Room ${esc(room)}` : ''}. From the ${esc(list[0].year)} room schedule and the school’s bell schedule.</p></header><ol class="tt-list">${rows}</ol>`;
+        $('#t-today').hidden = false;
+      }
+    }
+
+    // from students: tips, study guides and summer homework tied to this teacher
+    const KIND_L = { tip: 'Tip', resource: 'Study guide', summer_hw: 'Summer homework' };
+    const posts = mine.filter((x) => KIND_L[x.kind]);
+    $('#t-students').hidden = !posts.length;
+    $('#t-students-list').innerHTML = `<ul class="t-posts">${posts.map((x) => {
+      const p = x.payload, sec = { tip: 's-tips', resource: 's-resources', summer_hw: 's-summer' }[x.kind];
+      const text = x.kind === 'tip' ? p.text : x.kind === 'resource' ? p.title : p.assignment || p.what || p.details || 'Summer homework';
+      return `<li><a href="${courseUrl(x.course_slug)}#${sec}"><span class="c-kicker">${KIND_L[x.kind]} · ${esc(cname[x.course_slug] || '')}</span>
+        <span class="tp-text">${esc(String(text || '').slice(0, 180))}</span><span class="meta">${byline(x.author, x.verified)}</span></a></li>`;
+    }).join('')}</ul>`;
   },
 
   // Teacher pages: their room and period schedule, this year's first

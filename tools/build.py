@@ -632,23 +632,58 @@ def build_courses(depts, courses):
 
 
 def build_teachers(teachers, courses):
-    rows = "".join(f"""<li><a href="{e(t['slug'])}/"><b>{e(t['name'])}</b></a> <span class="meta">{e(', '.join(t['departments']))}</span></li>"""
-                   for t in teachers)
-    page("teachers/", "Teachers", f"""<h1>Teachers</h1>
-<p class="meta">From the {e(DIRECTORY_SOURCE)}.</p><ul class="plain-list">{rows}</ul>""", active="subjects/", data={"page": "static"})
+    # Teacher pages (redesigned 2026-10-01, Ethan: "impressive"). Everything on them is official
+    # or student-written: the staff directory gives the subjects and classes, the school's club and
+    # sports list gives what they advise or coach, and pages.js adds what students wrote, their
+    # room schedule, and "Today" (the schedule laid over today's bell schedule).
+    acts = json.loads((DATA / "activities.json").read_text()) if (DATA / "activities.json").exists() else {"clubs": [], "sports": []}
+    split = lambda v: [x.strip().lower() for x in re.split(r",|&|/|\band\b", v or "") if x.strip()]
+    by_dept = {}
     for t in teachers:
-        cs = "".join(f'<li><a href="../../courses/{e(s)}/">{e(courses[s]["name"])}</a></li>' for s in t["courses"])
-        others = [r for r in t["raw"] if r not in [None]]
+        for d in t["departments"] or ["Other"]:
+            by_dept.setdefault(d, []).append(t)
+    groups = "".join(f"""<section class="tl-group"><p class="c-kicker">{e(d)}</p><ul>{''.join(f'<li data-hay="{e((x["name"] + " " + " ".join(courses[s_]["name"] for s_ in x["courses"])).lower())}"><a href="{e(x["slug"])}/"><b>{e(x["name"])}</b><span>{e(", ".join(courses[s_]["name"] for s_ in x["courses"][:3]))}{" +" + str(len(x["courses"]) - 3) if len(x["courses"]) > 3 else ""}</span></a></li>' for x in sorted(ts, key=lambda x: surname(x["name"])))}</ul></section>"""
+                     for d, ts in sorted(by_dept.items()))
+    page("teachers/", "Teachers", f"""
+<div class="classes-page">
+<header class="cl-head"><p class="c-kicker">Staff directory · {e(DIRECTORY_SOURCE.split(", ")[-1])}</p><h1>Teachers</h1>
+  <p class="cl-lede"><b>{len(teachers)}</b> teachers, by subject. From the {e(DIRECTORY_SOURCE)}.</p></header>
+<div class="cl-tools"><label class="cl-find">{ICONS["search"]}<span class="sr">Find a teacher</span><input id="tl-q" type="search" placeholder="Find a teacher or a class" autocomplete="off"></label></div>
+<div class="tl-groups" id="tl-groups">{groups}</div>
+<p class="cl-none" id="cl-none" hidden>No teacher matches.</p>
+</div>""", active="subjects/", data={"page": "teachers"})
+    for t in teachers:
+        me = t["name"].lower()
+        clubs = [c for c in acts.get("clubs", []) if me in split(c.get("advisor"))]
+        teams = [x for x in acts.get("sports", []) if me in [c.lower() for c in x.get("coaches", [])]]
+        parts = t["name"].replace(" Iii", "").split()
+        mono = (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
+        cards = "".join(f'''<li class="tc-card" data-slug="{e(s_)}"><a href="../../courses/{e(s_)}/#s-teachers">
+          <span class="tc-badges">{course_badges(courses[s_])}</span><b>{e(courses[s_]["name"])}</b>
+          <span class="tc-meta">{e(grades(courses[s_]))}</span>
+          <span class="tc-state" data-state>…</span></a></li>''' for s_ in t["courses"])
+        stat = lambda n, l: f'<div><dt>{l}</dt><dd>{n}</dd></div>'
+        act_html = "".join(f'<li><a href="../../clubs/#{e(slugify(c["name"]))}"><b>{e(c["name"])}</b><span>Club advisor{(" · meets " + e(c["meets"])) if c.get("meets") else ""}</span></a></li>' for c in clubs) + \
+                   "".join(f'<li><a href="../../sports/#{e(slugify(x["name"]))}"><b>{e(x["name"])}</b><span>Coach{(" · " + e(x["season"])) if x.get("season") else ""}</span></a></li>' for x in teams)
+        others = [r for r in t["raw"] if r]
         page(f"teachers/{t['slug']}/", t["name"], f"""
 {crumbs([("Teachers", "../")], t["name"], f"teachers/{t['slug']}/")}
-<h1>{e(t['name'])}</h1>
-<p class="meta">{e(', '.join(t['departments']))}</p>
-<h2>Classes</h2>
-{f'<ul class="plain-list">{cs}</ul>' if cs else '<p class="meta">No classes matched in the catalog.</p>'}
-<p class="meta">Listed in the staff directory as: {e(', '.join(others)) or '—'}. Each class page has a section on how this teacher runs it.</p>
-<h2>Room and schedule</h2>
-<div id="t-sched" data-teacher="{e(t['name'])}"><p class="meta">Loading…</p></div>
-""", desc=f"Classes taught by {t['name']} at Wilcox High School.", data={"page": "static"})
+<header class="t-hero">
+  <span class="t-mono" aria-hidden="true">{e(mono)}</span>
+  <div class="t-id"><p class="c-kicker">Teacher · {e(" · ".join(t["departments"]))}</p><h1>{e(t['name'])}</h1>
+    <p class="t-where" id="t-where"></p></div>
+</header>
+<dl class="t-stats">{stat(len(t["courses"]), "Classes" if len(t["courses"]) != 1 else "Class")}{stat(len(t["departments"]), "Subjects" if len(t["departments"]) != 1 else "Subject")}{stat(len(clubs) + len(teams), "Clubs &amp; teams") if clubs or teams else ""}<div><dt>Written by students</dt><dd id="t-written">…</dd></div></dl>
+<div id="t-app" data-teacher="{e(t['name'])}" data-courses="{e(",".join(t["courses"]))}">
+<section class="t-sec t-today" id="t-today" hidden></section>
+<section class="t-sec"><h2>Classes</h2><p class="sec-sub">From the staff directory. Each one opens on this teacher’s version of the class.</p>
+  {f'<ul class="tc-grid">{cards}</ul>' if cards else '<p class="empty-line">No classes matched in the catalog.</p>'}</section>
+<section class="t-sec" id="t-sched-sec"><h2>Room and schedule</h2><div id="t-sched"><p class="meta">Loading…</p></div></section>
+{f'<section class="t-sec"><h2>Clubs &amp; teams</h2><p class="sec-sub">From the Wilcox club and athletics lists.</p><ul class="t-acts">{act_html}</ul></section>' if act_html else ''}
+<section class="t-sec" id="t-students" hidden><h2>From students</h2><div id="t-students-list"></div></section>
+</div>
+<p class="c-src t-foot">Listed in the {e(DIRECTORY_SOURCE)} as teaching {e(", ".join(others)) or "—"}.</p>
+""", desc=f"{t['name']} at Wilcox High School: classes, room and schedule, and what students say about each class.", data={"page": "teacher"})
 
 
 def build_static():

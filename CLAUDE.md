@@ -83,6 +83,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Teacher pages** (`teachers/<slug>/`: `build_teachers` + `pages.teacher`; the list is
+  `pages.teachers`; redesigned 2026-10-01, Ethan: "impressive"). Official facts only, plus what
+  students wrote: a nameplate (initials monogram, kicker with subjects, room from their schedule),
+  a row of numbers (classes, subjects, clubs & teams, "written by students" = how many of their
+  classes have a teacher section by them), then:
+  - **Today**: this school year's room schedule laid over today's bell schedule (`dayPlan`), with
+    the current period marked; on a day off, the next school day. Hidden without a schedule for
+    the current year. Period labels are "1st Period" or "Period 1": match the digit anywhere.
+  - Class cards (from the directory) saying whether students wrote about this teacher's version,
+    with a line from it; each opens the class page at Teachers.
+  - Room and schedule (`scheduleBlock`, restyled under `#t-sched`).
+  - Clubs & teams they advise or coach, matched by exact name in `data/activities.json`
+    (the school's club and athletics lists; advisors can be "A, B" or "A and B").
+  - From students: tips, study guides and summer homework with `teacher` = them.
+  - Pitfall: `.done` is a site-wide padding class; the written cards use `.tc-written`.
+  The Teachers list is grouped by subject with a find box (name or class).
 - **Campus map page** (`map/`, map.js; redesigned 2026-10-01). The map is the page: a slim head,
   then the stage (about the screen's height) with floating glass controls: the dock (top left:
   find + "Go to" building jumps), zoom (bottom left), a key (bottom right, hidden on phones and
