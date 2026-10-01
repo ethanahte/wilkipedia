@@ -813,6 +813,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     lookup and day dimming), looped as two copies so it never runs out (it once slid a single
     90° face and showed white after a quarter turn). If the faces, the start yaw, the pitch or
     the dimming change, re-run strip.html and replace both strips.
+  - **Home motion** (`assets/js/homemotion.js`, Ethan 2026-09-30), on every choice but where noted:
+    - Reveal (not with 'plain'): `#main` and the footer are moved into `.home-layer`, which is
+      sticky with `top: --stick` (screen height − its height, rechecked on every scroll for phone
+      address bars). After it comes `.home-reveal`, 92vh of empty space: scrolling into it, the
+      page holds still while the cards slide out left or right in turn (`--reveal` 0→1 on body)
+      until only the background is left, with a "Back to the top" pill. Measure progress from
+      `.home-reveal`'s offsetTop: a stuck element's own offsetTop moves with the scroll.
+    - Bounce: the browser's own overscroll stays OFF site-wide (it dragged the header). On the
+      home page, wheel or touch past the top pulls the cards down off the header, and past the
+      bottom lifts the end pill; a spring with a little overshoot brings them back, and the
+      background swells up to 6% (`--ob`). Rubber band caps at 140 px.
+    - Reduce motion: the cards fade instead of sliding, and nothing bounces.
+    - Testing: the in-app browser pane often runs hidden, which pauses animation frames and
+      scroll events and reports two different screen heights, so it can't judge this. A
+      headless Chrome over CDP (`--remote-debugging-port`, Input.dispatchMouseEvent /
+      dispatchTouchEvent) gave reliable frames.
   - 'paint': the painted courtyard (`body.home::before`).
   - 'plain': no image and no frosted panels, the original white home page.
 

@@ -269,6 +269,7 @@ const pages = {
   async home() {
     heroExamples($('#home-q'));
     if (getPref('homebg') === 'pano') import('./pano.js').then((m) => m.mountPano(root));   // the turning quad behind the page
+    import('./homemotion.js').then((m) => m.mountHomeMotion());           // scroll on to see only the background; edges bounce
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
     attach($('#home-q'), $('#home-results'));
