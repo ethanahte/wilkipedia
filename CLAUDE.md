@@ -808,6 +808,11 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     It used to show the painting, so every load swapped pictures (Ethan). The turn starts
     at the first drawn frame (`t0 ??= now`) so the fade-in lines up. Change the start yaw,
     pitch or field of view in pano.js and that CSS has to follow.
+    The Settings tile previews it with a real 360° strip, `day-strip.webp` / `night-strip.webp`
+    (2048×320, made by `tools/pano-stitch/strip.html` from the `-lg` faces with pano.js's own
+    lookup and day dimming), looped as two copies so it never runs out (it once slid a single
+    90° face and showed white after a quarter turn). If the faces, the start yaw, the pitch or
+    the dimming change, re-run strip.html and replace both strips.
   - 'paint': the painted courtyard (`body.home::before`).
   - 'plain': no image and no frosted panels, the original white home page.
 

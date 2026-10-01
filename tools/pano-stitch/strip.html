@@ -1,0 +1,77 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Panorama strip</title>
+<!--
+  Makes the small 360° strips the Settings page shows as the preview for "Home page background: the quad,
+  turning" (assets/img/pano/day-strip.webp and night-strip.webp). Local tool: nothing here is linked from the site.
+
+  The strip is a cylinder unrolled: every column looks straight out at its own heading, so the two ends meet
+  and it can loop without a seam. It uses the same cube faces, the same lookup and the same day dimming as
+  assets/js/pano.js, so the preview is the home page's own view. Column 1/8 of the way along faces east (where
+  the home page starts), and going right turns right, the way the home page turns.
+
+  From the repo root: python3 -m http.server 8801, and python3 tools/pano-stitch/recv.py.
+  Open http://127.0.0.1:8801/tools/pano-stitch/strip.html and in the console:
+    await strip('day'); await strip('night')     // writes tools/pano-stitch/out/<set>-strip.webp
+  then copy both to assets/img/pano/.
+-->
+<canvas id="c" width="2048" height="320"></canvas>
+<script>
+// The size fits the Settings tile: 16:10, showing a quarter of the turn (90°), so the strip is 4 × 1.6 = 6.4 : 1.
+// Its height spans tan ±0.49, what the home page shows top to bottom on a wide screen.
+const W = 2048, H = 320, T = 0.4909, PITCH = 0.05;
+const FACES = [['w', 0], ['e', 0], ['u', 1], ['d', 1], ['s', 0], ['n', 0]];        // as in pano.js
+const FS = `precision highp float;
+uniform samplerCube cube; uniform vec2 res; uniform float pitch, tn, dim;
+void main(){
+  vec2 f = gl_FragCoord.xy / res;
+  vec3 d = normalize(vec3(0.0, (f.y * 2.0 - 1.0) * tn, -1.0));
+  float yaw = -1.5707963 - (f.x - 0.125) * 6.2831853;       // east at 1/8, turning right as it goes
+  float cp = cos(pitch), sp = sin(pitch), cy = cos(yaw), sy = sin(yaw);
+  d = vec3(d.x, d.y * cp - d.z * sp, d.y * sp + d.z * cp);
+  d = vec3(d.x * cy + d.z * sy, d.y, -d.x * sy + d.z * cy);
+  vec3 c = textureCube(cube, vec3(-d.x, d.y, d.z)).rgb;
+  c = mix(c, pow(c, vec3(1.15)) * 0.86 * (1.0 - 0.12 * smoothstep(0.0, 0.5, d.y)), dim);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+const canvas = document.getElementById('c');
+const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }'));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'p');
+gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_CUBE_MAP, p, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+const img = (src) => new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = src; });
+
+async function strip(set) {
+  const list = await Promise.all(FACES.map(([f]) => img(`../../assets/img/pano/${set}-${f}-lg.webp`)));
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+  list.forEach((im, k) => {
+    let src = im;
+    if (FACES[k][1]) {                                                  // up and down: turned half round
+      const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+      const g = c.getContext('2d'); g.translate(c.width, c.height); g.rotate(Math.PI); g.drawImage(im, 0, 0);
+      src = c;
+    }
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + k, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, src);
+  });
+  gl.viewport(0, 0, W, H);
+  gl.uniform2f(gl.getUniformLocation(prog, 'res'), W, H);
+  gl.uniform1f(gl.getUniformLocation(prog, 'pitch'), PITCH);
+  gl.uniform1f(gl.getUniformLocation(prog, 'tn'), T);
+  gl.uniform1f(gl.getUniformLocation(prog, 'dim'), set === 'day' ? 1 : 0);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  const blob = await new Promise((ok) => canvas.toBlob(ok, 'image/webp', 0.82));
+  await fetch(`http://127.0.0.1:8799/${set}-strip.webp`, { method: 'POST', body: blob });
+  return `${set}-strip.webp: ${Math.round(blob.size / 1024)} KB`;
+}
+</script>
