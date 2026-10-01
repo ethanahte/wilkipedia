@@ -813,12 +813,32 @@ def build_static():
 <div class="note">Summer work is usually posted in <b>May and June</b>. That’s when we run the summer homework bounty drive. Know of one now? <a href="../submit/?kind=summer_hw">Report it</a>.</div>""",
          active="summer/", data={"page": "summer"})
 
-    page("school/", "School info", """
-<h1>School info</h1>
-<p class="lede">Things every Wilcox student should know, written by students.</p>
-<a class="panel bell-link" href="../bell/"><span class="label"><span class="topic-ico small" aria-hidden="true">""" + ICONS["bell"] + """</span>Bell schedule</span><b>Period times, block days, finals and special days →</b></a>
-<div id="school-list"><div class="meta">Loading…</div></div>
-<p><a class="btn ghost" href="../submit/?kind=school_info">Add school info</a></p>""",
+    # School info (redesigned 2026-10-01): a way into the parts of the site that answer everyday school
+    # questions, each with a live detail (pages.school), then the students' "how things work" articles
+    # by topic. Topics nobody has written fold into one "Not written yet" block.
+    mp = json.loads((DATA / "map.json").read_text())
+    acts = json.loads((DATA / "activities.json").read_text())
+    n_rooms = sum(1 for r in mp["rooms"] if r["kind"] == "classroom")
+    cj = json.loads((DATA / "courses.json").read_text())["courses"]
+    n_cls = len(cj)
+    n_teach = sum(1 for x in json.loads((DATA / "search.json").read_text()) if x.get("t") == "t")   # every teacher page (build_data runs first)
+    glance = [("bell/", "Bell schedule", "si-bell", "Period times and block days"),
+              ("calendar/", "Calendar", "si-cal", "Days off, breaks and finals"),
+              ("menu/", "Cafeteria menu", "si-menu", "Breakfast and lunch"),
+              ("map/", "Campus map", "si-map", f"{n_rooms} classrooms"),
+              ("clubs/", "Clubs", "si-clubs", f"{len(acts.get('clubs', []))} clubs"),
+              ("sports/", "Sports", "si-sports", f"{len(acts.get('sports', []))} teams"),
+              ("teachers/", "Teachers", "si-teach", f"{n_teach} teachers by subject"),
+              ("subjects/", "Classes", "si-classes", f"{n_cls} classes in the catalog")]
+    tiles = "".join(f'<a class="si-tile" href="../{h}"><b>{e(t)}</b><span id="{i}">{e(sub)}</span><i aria-hidden="true">→</i></a>' for h, t, i, sub in glance)
+    page("school/", "School info", f"""
+<header class="cl-head"><p class="c-kicker">Wilcox High School · Santa Clara</p><h1>School info</h1>
+  <p class="cl-lede">What every Wilcox student should know: when things happen, where they are, and how things work. Written by students.</p></header>
+<section class="si-sec"><h2>At a glance</h2><nav class="si-grid" aria-label="School at a glance">{tiles}</nav></section>
+<section class="si-sec"><div class="si-h"><h2>How things work</h2><a class="cl-dlink" href="../submit/?kind=school_info">Write one →</a></div>
+  <p class="sec-sub">Guides from students who’ve been through it, checked by reviewers before they go up.</p>
+  <div id="school-list"><div class="meta">Loading…</div></div></section>
+<p class="c-src">Official news and forms are on the <a href="{WILCOX_SITE}" target="_blank" rel="noopener">Wilcox High School website ↗</a>. When a guide here disagrees with the school, trust the school.</p>""",
          active="school/", data={"page": "school"})
 
     page("dashboard/", "Dashboard", """

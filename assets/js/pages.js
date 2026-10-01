@@ -412,30 +412,50 @@ const pages = {
       : '<div class="empty">No summer homework has been reported yet.</div>';
   },
 
+  // School info (redesigned 2026-10-01): live details on the "At a glance" tiles, then the
+  // students' guides by topic, with the topics nobody has written folded into one block
   async school() {
-    const I = (d) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-    const TOPIC_ICONS = {
-      'Bell schedule': I('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
-      'Counselor appointments': I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 15l2 2 4-4"/>'),
-      'Passes & attendance': I('<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M13 6v12" stroke-dasharray="2 2"/>'),
-      'Tech & accounts': I('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20M9 16v4M15 16v4"/>'),
-      'Clubs & activities': I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
-      'Getting around': I('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
-      Other: I('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'),
+    // live details: what's on now, the next day off, today's lunch
+    loadBell().then((bell) => {
+      const now = new Date(), plan = dayPlan(bell, now), m = now.getHours() * 60 + now.getMinutes();
+      const mm = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+      if (plan.periods) {
+        const cur = plan.periods.find(([, a, b]) => m >= mm(a) && m < mm(b));
+        $('#si-bell').textContent = cur ? `Now: ${cur[0].replace(/ \+ announcements/, '')}, until ${clock(cur[2])}`
+          : m < mm(plan.periods[0][1]) ? `First bell at ${clock(plan.periods[0][1])}` : m >= mm(plan.periods.at(-1)[2]) ? 'School’s out for today' : 'Passing period';
+      } else $('#si-bell').textContent = plan.adjusted ? 'Adjusted schedule today' : 'No school today';
+      const t = new Date(now); t.setHours(12, 0, 0, 0);
+      for (let i = 1; i < 120; i++) { t.setDate(t.getDate() + 1); const p = dayPlan(bell, t);
+        if (p.off && p.off !== 'Weekend') { $('#si-cal').textContent = `Next day off: ${t.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · in ${i} day${i === 1 ? '' : 's'}`; break; } }
+    }).catch(() => {});
+    import('./menu.js').then((m) => m.todaysLunch()).then((day) => {
+      const first = day && (day.Entrees || day[Object.keys(day)[0]])?.[0];
+      if (first) $('#si-menu').textContent = `Today: ${first.name.replace(/\s*\((VG|V|GF)\)/g, '')}`;
+    }).catch(() => {});
+
+    // the guides, by topic
+    const PROMPT = {
+      'Counselor appointments': 'How to book one, and how counselors are assigned.',
+      'Passes & attendance': 'Hall and bathroom passes, being late, and reporting an absence.',
+      'Tech & accounts': 'Your school account and the apps classes use.',
+      'Clubs & activities': 'How to join or start a club, and where to find what’s on.',
+      'Getting around': 'Buildings, room numbers and getting between classes.',
+      Other: 'Anything else a new student should know.',
     };
-    const icon = (t) => `<span class="topic-ico" aria-hidden="true">${TOPIC_ICONS[t] || TOPIC_ICONS.Other}</span>`;
     const list = await s.approved({ kind: 'school_info' });
     const by = {};
     for (const x of list) (by[x.payload.topic] ??= []).push(x);
-    const order = KINDS.school_info.fields[0].options.filter((t) => t !== 'Bell schedule' || by[t]);
-    $('#school-list').innerHTML = order.map((topic) => `<section class="card topic"><h2>${icon(topic)}${esc(topic)}</h2>
-      ${(by[topic] || []).map((x) => {
-        const stale = staleness(x);
-        return `<article><h3>${icon(topic)}${esc(x.payload.title)}</h3>${prose(x.payload.text)}
-          ${stale ? `<div class="stale">${esc(stale)}</div>` : ''}
-          <div class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${REVIEWER_ROLES.includes(s.user()?.role) ? ` · <button class="linkish" data-edit="${x.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : suggestLink(s, x)}</div></article>`;
-      }).join('') || `<div class="empty">Nothing here yet. <a href="${root}bounties/">Check the bounties</a> or <a href="${root}submit/?kind=school_info">add it</a>.</div>`}
-    </section>`).join('');
+    const topics = KINDS.school_info.fields[0].options;
+    const written = topics.filter((t) => by[t]), empty = topics.filter((t) => !by[t]);
+    const mod = REVIEWER_ROLES.includes(s.user()?.role);
+    const article = (x) => { const stale = staleness(x);
+      return `<article class="si-art" id="a-${x.id}"><h4>${esc(x.payload.title)}</h4><div class="si-text">${prose(x.payload.text)}</div>
+        ${stale ? `<p class="stale">${esc(stale)}</p>` : ''}
+        <p class="meta">By ${byline(x.author, x.verified)} · checked ${fmtDate(x.reviewed_at)}${x.payload.source ? ` · Source: ${esc(x.payload.source)}` : ''}${mod ? ` · <button class="linkish" data-edit="${x.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${x.id}">Unpublish</button>` : suggestLink(s, x)}</p></article>`; };
+    $('#school-list').innerHTML = `${written.length ? `<nav class="si-index" aria-label="Topics">${written.map((t) => `<a href="#t-${slugify(t)}">${esc(t)}<span>${by[t].length}</span></a>`).join('')}</nav>
+      ${written.map((t) => `<section class="si-topic" id="t-${slugify(t)}"><h3>${esc(t)}</h3>${by[t].map(article).join('')}</section>`).join('')}` : ''}
+      ${empty.length ? `<section class="si-todo">${written.length ? '<p class="si-todo-h">Not written yet</p>' : '<p class="empty-line">Nothing is written yet. Know how something works at Wilcox? Each topic below takes a few minutes.</p>'}
+        <div class="c-todo-grid">${empty.map((t) => `<a class="c-todo-item" href="${root}submit/?kind=school_info&topic=${encodeURIComponent(t)}"><b>${esc(t)}</b><span>${esc(PROMPT[t] || '')}</span><i aria-hidden="true">→</i></a>`).join('')}</div></section>` : ''}`;
     $('#school-list').addEventListener('click', async (e) => {
       const ed = e.target.closest('[data-edit]');
       if (ed) { openEditor(s, list.find((x) => String(x.id) === ed.dataset.edit), () => location.reload()); return; }

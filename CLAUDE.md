@@ -83,6 +83,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **School info** (`school/`: template in `build_static`, script `pages.school`; redesigned
+  2026-10-01). "At a glance": tiles into the pages that answer everyday questions, with counts
+  from the data files at build time (classrooms from map.json, clubs and teams from
+  activities.json, teachers from search.json, classes from courses.json) and live lines filled
+  in by the script (the current period, the next day off, today's first lunch entrée). Then
+  "How things work": the students' school_info guides by topic with a topic index; topics
+  nobody has written fold into one "Not written yet" block whose links pre-pick the topic
+  (`?topic=` on the submit form).
 - **Bell schedule vs Calendar** (2026-10-01, Ethan: date features "fit better under calendar";
   keep it simple and effective). The Bell schedule answers "what time is it", the Calendar
   "what day is it". Don't put countdowns to dates, the school-year bar or the special-days list

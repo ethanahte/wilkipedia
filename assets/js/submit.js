@@ -86,6 +86,7 @@ function paint() {
   const preset = {};
   if (q.get('room')) preset.room = q.get('room').toUpperCase();
   if (q.get('name')) preset.name = q.get('name');
+  if (q.get('topic')) preset.topic = q.get('topic');                  // from School info's "Not written yet"
   if (state.kind === 'room_schedule') preset.school_year = schoolYear(0);   // this year's, unless they change it
   const draft = drafts.get(draftKey());
   if (draft?.teacher && !state.teacher) state.teacher = draft.teacher;

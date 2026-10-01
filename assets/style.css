@@ -2897,3 +2897,28 @@ a.ib-tile:hover { border-color: var(--gold); }
 .cy-counts { margin-top: 10px; }
 .cy-counts .bc { background: var(--paper); }
 @media (max-width: 760px) { .cy { padding: 18px 14px 14px; margin: 4px -6px 24px; } .cy-day b { font-size: 2.1rem; } .cy-qs span.on::after { content: ""; } }
+
+/* ── School info (2026-10-01): at a glance, then the students' guides ── */
+.si-sec { padding-top: 30px; }
+.si-sec > h2, .si-h h2 { margin: 0 0 6px; font-size: 1.7rem; letter-spacing: -.01em; }
+.si-h { display: flex; align-items: baseline; gap: 16px; }
+.si-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 28px; margin-top: 10px; border-top: 1px solid var(--ink); }
+.si-tile { position: relative; display: grid; gap: 4px; padding: 16px 28px 15px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+.si-tile b { font: 500 1.15rem/1.2 var(--serif); }
+.si-tile span { color: var(--muted); font-size: .84rem; line-height: 1.4; }
+.si-tile i { position: absolute; right: 2px; top: 18px; font-style: normal; color: var(--muted); transition: transform .2s, color .2s; }
+.si-tile:hover b { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+.si-tile:hover i { color: var(--ink); transform: translateX(3px); }
+#si-bell, #si-cal, #si-menu { color: var(--ink); }
+.si-index { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 14px 0 0; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.si-index a { color: var(--ink); text-decoration: none; font-size: .92rem; }
+.si-index a span { margin-left: 6px; font: 600 .68rem var(--mono); color: var(--muted); }
+.si-index a:hover { text-decoration: underline 1px var(--gold); text-underline-offset: 4px; }
+.si-topic { padding-top: 22px; scroll-margin-top: 80px; }
+.si-topic > h3 { margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--ink); font: 600 .7rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.si-art { max-width: 44em; padding: 16px 0 14px; border-bottom: 1px solid var(--rule); }
+.si-art h4 { margin: 0 0 6px; font: 500 1.35rem/1.25 var(--serif); }
+.si-text { line-height: 1.6; }
+.si-text p:last-child { margin-bottom: .4em; }
+.si-todo { margin-top: 22px; }
+.si-todo-h { margin: 0 0 8px; max-width: 40em; font: 600 .66rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
