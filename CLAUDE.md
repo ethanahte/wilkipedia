@@ -821,20 +821,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       they flew out to the sides at first, Ethan preferred a fade)
       until only the background is left, with a "Back to the top" pill. Measure progress from
       `.home-reveal`'s offsetTop: a stuck element's own offsetTop moves with the scroll.
-    - Bounce, made to feel like iOS/macOS (Ethan: the first version was "too slow on the top"):
-      the browser's own overscroll stays OFF site-wide (it dragged the header). On the home page
-      the cards (top) or the end pill (bottom) move; the header never does, and the background
-      swells up to 6% (`--ob`).
-      - Any scroll that ARRIVES at an edge (trackpad coasting, a flicked phone, the wheel)
-        bounces at once, harder the faster it came (the scroll watcher), and the coasting wheel
-        events that follow are swallowed (`quietUntil`), so it never hangs stretched.
-      - A pull that STARTS at an edge stretches with iOS's rubber band (0.55, screen height).
-        Trackpad: once the deltas fade below half their peak twice, the fingers have lifted
-        and it lets go. Wheel: 70 ms without events. Touch: on touchend.
-      - The return is a near-critically damped spring (k 640, c 48): ~0.3 s, no wobble.
-      Measured in headless Chrome: fast fling 25 px, rest in 0.28 s; wheel notch 0.39 s; touch
-      0.34 s. Re-measure if you touch the constants.
-    - Reduce motion: nothing bounces (the fade stays: it only follows your scrolling).
+    - Pull (下拉), not bounce (Ethan 2026-09-30: first "too slow", then "not bouncy, just
+      下拉"). The browser's own overscroll stays OFF site-wide (it dragged the header). On the
+      home page, a pull that STARTS at an edge stretches with iOS's rubber band (0.55, screen
+      height): the cards (top) or the end pill (bottom) move, the header never does, and the
+      background swells up to 6% (`--ob`). Letting go glides it back on a critically damped
+      spring (k 500, c 2√k), so it never overshoots.
+      - Nothing bounces on its own: a scroll that runs into an edge just stops, and the
+        trackpad's coasting wheel events after it are swallowed (`quietUntil`, 300 ms).
+      - Wheel: nothing moves until the 3rd event in a stream, so a mouse-wheel click does
+        nothing (one stretch-and-back looks like a bounce). Fingers lifted = the deltas fade
+        below half their peak twice, or 70 ms without events. Touch: on touchend.
+    - Reduce motion: no pull (the fade stays: it only follows your scrolling).
     - Testing: the in-app browser pane often runs hidden, which pauses animation frames and
       scroll events and reports two different screen heights, so it can't judge this. A
       headless Chrome over CDP (`--remote-debugging-port`, Input.dispatchMouseEvent /

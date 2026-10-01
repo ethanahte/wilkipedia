@@ -4,13 +4,14 @@
 //            cards fade away, one after another from the top, until only the background is left
 //            (the turning quad or the painting) with a way back to the top. Not with the plain
 //            background: there'd be nothing to show.
-//   Bounce   pulling past the top or the bottom stretches like a rubber band and springs back,
-//            and a fling that runs into either edge bounces off it.
+//   Pull     pulling past the top (下拉) or the bottom stretches like a rubber band and glides
+//            back when you let go. Nothing bounces on its own (Ethan: "not bouncy, just 下拉"):
+//            a scroll that runs into an edge simply stops there.
 //            At the top the cards come down off the header; at the bottom the end caption lifts.
 //            The background swells a little either way. The header never moves: that's why the
 //            browser's own bounce is off site-wide (it dragged the header and looked like a refresh).
 //
-// (They used to fly out to the sides; Ethan preferred a fade.) Reduce motion: nothing bounces.
+// (They used to fly out to the sides; Ethan preferred a fade.) Reduce motion: no pull.
 import { $, $$, lessMotion, getPref } from './ui.js';
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
@@ -75,11 +76,9 @@ export function mountHomeMotion() {
   new ResizeObserver(fit).observe(layer);
   fit();
 
-  // ── bounce ──
-  // Like iOS and macOS (Ethan: "like the popular websites"). Two cases:
-  //   a fling that runs into the edge bounces at once, further the faster it was going;
-  //   a pull that starts AT the edge stretches with resistance, and snaps back on letting go.
-  // The return is a near-critically damped spring: quick (about 0.3 s), no wobble.
+  // ── pull (下拉) ──
+  // A pull that starts AT an edge stretches with resistance and glides back when you let go.
+  // Nothing bounces by itself: the first version bounced off the edges, and Ethan wanted just the pull.
   let y = 0, v = 0, edge = null, raf = 0, last = 0;
   const target = () => (edge === 'bottom' && end ? $('.hr-cap', end) : layer);
   const clear = () => { layer.style.transform = ''; if (end) $('.hr-cap', end).style.transform = ''; };
@@ -95,7 +94,8 @@ export function mountHomeMotion() {
     last = performance.now();
     const step = (now) => {
       const dt = Math.min(0.032, (now - last) / 1000); last = now;
-      for (let i = 0; i < 4; i++) { v += (-640 * y - 48 * v) * (dt / 4); y += v * (dt / 4); }   // small steps: stiff springs need them
+      // critically damped (c = 2√k): it glides straight back and never overshoots
+      for (let i = 0; i < 4; i++) { v += (-500 * y - 44.7 * v) * (dt / 4); y += v * (dt / 4); }
       if (Math.abs(y) < 0.3 && Math.abs(v) < 8) { y = v = 0; raf = 0; apply(); edge = null; return; }
       apply();
       raf = requestAnimationFrame(step);
@@ -104,44 +104,29 @@ export function mountHomeMotion() {
   };
   const stop = () => { cancelAnimationFrame(raf); raf = 0; };
   const pullTo = (d) => { stop(); v = 0; y = sign() * rubber(Math.max(0, d)); apply(); };
-  // hit the edge moving at `speed` px/s: start the spring with that speed outward
-  const impact = (which, speed) => {
-    if (lessMotion()) return;
-    stop(); edge = which; y = 0;
-    v = sign() * Math.max(500, Math.min(3200, Math.abs(speed) * 0.7));
-    spring();
-  };
   const maxY = () => document.documentElement.scrollHeight - innerHeight;
   const atTop = () => scrollY <= 0;
   const atBottom = () => scrollY >= maxY() - 1;
 
-  // Flings, from any input (trackpad coasting, a flicked phone, the mouse wheel): watch the scroll
-  // speed, and when it arrives at an edge still moving, bounce.
-  let py = scrollY, pt = performance.now(), speed = 0, quietUntil = 0, programmatic = false;
+  // A scroll that runs into an edge just stops. The trackpad's coasting that follows keeps sending
+  // wheel events: they're swallowed (quietUntil, kept alive while they keep coming), so they
+  // don't turn into a pull.
+  let py = scrollY, quietUntil = 0;
   addEventListener('scroll', () => {
-    const now = performance.now(), dt = Math.max(1, now - pt);
-    const sp = ((scrollY - py) / dt) * 1000;
-    speed = speed * 0.4 + sp * 0.6;
-    const arrivedTop = scrollY <= 0 && py > 0, arrivedBottom = scrollY >= maxY() - 1 && py < maxY() - 1;
-    if (!programmatic && touching === null && (arrivedTop || arrivedBottom)) {
-      impact(arrivedTop ? 'top' : 'bottom', speed);       // even a slow arrival gets a small bounce
-      quietUntil = now + 160;                             // the coasting that follows is the same fling
-    }
-    if (arrivedTop || arrivedBottom) programmatic = false;
-    py = scrollY; pt = now;
+    if ((scrollY <= 0 && py > 0) || (scrollY >= maxY() - 1 && py < maxY() - 1)) quietUntil = performance.now() + 300;
+    py = scrollY;
   }, { passive: true });
-  if (end) $('.hr-top', end).addEventListener('click', () => { programmatic = true; }, true);   // "Back to the top" just arrives
 
-  // Trackpad and wheel at an edge. Coasting after a fling keeps sending wheel events: those are
-  // swallowed (quietUntil, kept alive while they keep coming), so it doesn't hang stretched.
-  let pulled = 0, peak = 0, weak = 0, idle = 0;
-  const letGo = () => { clearTimeout(idle); pulled = peak = weak = 0; if (edge && !raf) spring(); };
+  // Trackpad at an edge: a pull is a stream of small events. A mouse wheel's single click is one
+  // big event, so nothing moves until the third event in a row (a click would only look like a bounce).
+  let pulled = 0, peak = 0, weak = 0, count = 0, idle = 0;
+  const letGo = () => { clearTimeout(idle); pulled = peak = weak = count = 0; if (edge && !raf) spring(); else if (!y) edge = null; };
   addEventListener('wheel', (e) => {
     if (lessMotion() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || document.documentElement.classList.contains('drawer-open')) return;
     if (e.target.closest?.('.results-pop, .menu, .acct-menu, dialog, [role="dialog"], .lang-menu')) return;
     const now = performance.now();
     const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1);
-    if (now < quietUntil) { quietUntil = now + 160; return; }
+    if (now < quietUntil) { quietUntil = now + 300; return; }
     const want = dy < 0 && atTop() ? 'top' : dy > 0 && atBottom() ? 'bottom' : null;
     if (!pulled) {
       if (!want) return;
@@ -153,15 +138,15 @@ export function mountHomeMotion() {
     // once the pull is over its peak and the deltas fade, the fingers have lifted: let go now
     peak = Math.max(peak, Math.abs(d));
     weak = d > 0 && peak > 6 && d < peak * 0.5 ? weak + 1 : 0;
-    if (weak >= 2) { letGo(); quietUntil = now + 160; return; }
+    if (weak >= 2) { letGo(); quietUntil = now + 300; return; }
     pulled = Math.max(0, pulled + d);
-    if (!pulled) { stop(); y = 0; apply(); edge = null; return; }
-    pullTo(pulled);
+    if (!pulled) { stop(); y = 0; apply(); edge = null; count = 0; return; }
+    if (++count >= 3) pullTo(pulled);
     clearTimeout(idle);
     idle = setTimeout(letGo, 70);
   }, { passive: true });
 
-  // Touch: a pull that starts at an edge (flicks into an edge are caught by the scroll watcher)
+  // Touch: a pull that starts at an edge
   let touching = null, anchor = null;
   addEventListener('touchstart', (e) => { if (e.touches.length === 1) { touching = e.touches[0].clientY; anchor = null; } }, { passive: true });
   addEventListener('touchmove', (e) => {
