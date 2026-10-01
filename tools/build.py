@@ -919,23 +919,32 @@ def build_static():
 <p>Wilkipedia is an independent project run by Wilcox High School students. It is not operated by Wilcox High School or Santa Clara Unified School District.</p>
 <p class="meta">Last updated September 2026.</p>""", data={"page": "static"})
 
-    page("map/", "Campus map", """
-<h1>Campus map</h1>
-<p class="lede">Tap a room to zoom in and see who teaches there, what they teach and when. Or <a href="../campus/">walk the campus in 3D →</a></p>
+    # The campus map (redesigned 2026-10-01 with the class pages): the map is the page. A slim head,
+    # then the map with a floating dock (find a room, a teacher or a class; jump to a building),
+    # floating zoom and a small key; the room panel slides in on the right. map.js draws it all.
+    page("map/", "Campus map", f"""
+<header class="mp-top">
+  <div><p class="c-kicker">Wilcox High School · campus</p><h1>Campus map</h1></div>
+  <p class="mp-top-r">Tap a room to see who teaches there, what and when. <a href="../campus/">Walk it in 3D →</a></p>
+</header>
 <div class="map-app" id="map-app">
-  <div class="map-toolbar">
-    <form id="room-find" class="room-find" role="search"><input id="room-q" list="room-ids" placeholder="Find a room, e.g. B204" aria-label="Find a room" autocomplete="off"><datalist id="room-ids"></datalist></form>
-    <div class="zoom"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button><button type="button" id="z-reset">Whole campus</button></div>
-  </div>
   <div class="map-stage" id="map-stage">
     <svg id="map-svg" role="group" aria-label="Wilcox High School campus map"><g id="plan" aria-hidden="true"></g><g id="hotspots"></g><g id="map-labels" aria-hidden="true"></g></svg>
+    <div class="map-dock">
+      <form id="room-find" class="mp-find" role="search" autocomplete="off">{ICONS["search"]}<label class="sr" for="room-q">Find a room, a teacher or a class</label>
+        <input id="room-q" type="search" placeholder="Find a room, teacher or class" role="combobox" aria-expanded="false" aria-controls="map-results" aria-autocomplete="list" autocomplete="off"></form>
+      <ul class="mp-results" id="map-results" role="listbox" hidden></ul>
+      <div class="mp-bldgs" id="map-bldgs" role="group" aria-label="Jump to a building"></div>
+    </div>
+    <div class="map-zoom" role="group" aria-label="Zoom"><button type="button" id="z-in" aria-label="Zoom in">+</button><button type="button" id="z-out" aria-label="Zoom out">−</button><button type="button" id="z-reset" class="wide">Whole campus</button></div>
+    <p class="map-key" aria-hidden="true"><i class="k-has"></i>Has info<i class="k-room"></i>Tap any room</p>
     <aside class="map-panel" id="map-panel" aria-live="polite" hidden></aside>
-    <div class="map-hint" id="map-hint">Drag to move · scroll or pinch to zoom · tap a room</div>
+    <div class="map-hint" id="map-hint">Drag to move · scroll or pinch to zoom</div>
   </div>
   <p class="meta credit" id="map-credit"></p>
 </div>
-<section><h2>Rooms with info</h2>
-  <p class="meta">Built from the room schedules and teacher sections students add. Each school year gets its own schedule, and past years stay viewable. <a href="../submit/?kind=room_schedule">Add a room schedule</a></p>
+<section class="mp-index"><header class="cl-dh"><h2>Rooms with info</h2><span class="cl-dn" id="room-n"></span><a class="cl-dlink" href="../submit/?kind=room_schedule">Add a room schedule →</a></header>
+  <p class="sec-sub">From the room schedules and teacher sections students add. Each school year gets its own schedule, and past years stay viewable.</p>
   <div id="room-list"><div class="meta">Loading…</div></div>
 </section>""", active="map/", script="map.js", data={"page": "map"},
          desc="Interactive map of Wilcox High School: tap a classroom to see who teaches there, what they teach and when.")

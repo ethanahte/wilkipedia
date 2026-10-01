@@ -83,6 +83,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Campus map page** (`map/`, map.js; redesigned 2026-10-01). The map is the page: a slim head,
+  then the stage (about the screen's height) with floating glass controls: the dock (top left:
+  find + "Go to" building jumps), zoom (bottom left), a key (bottom right, hidden on phones and
+  while a room is open), and the room panel (right; a bottom sheet on phones).
+  - Find searches `searchIndex()`: every room on the map, plus the teachers, classes and clubs
+    students have tied to a room, so "Hedlund" or "Algebra 2" finds the room. A directory
+    teacher with no room yet shows "Room not added yet" and links to the room schedule form.
+    Arrow keys move, Enter picks, Esc closes. Rebuilt whenever rooms reload.
+  - Building jumps frame the bounding box of every room with that `buildingName`.
+  - `#<room>` in the address opens it, on load and on hashchange.
 - **Class lists** (`subjects/` and `subjects/<dept>/`: `build_subjects` + `pages.subject`/`markContent`;
   redesigned 2026-10-01 with the class page). Styles: the `.cl-*` block and `.classes-page`
   scope at the end of style.css (`.course-row` is shared with other pages, so the new look is

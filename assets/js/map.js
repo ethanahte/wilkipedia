@@ -207,7 +207,7 @@ const badges = (c) => `${c.name.startsWith('AP ') ? '<span class="tag ap">AP</sp
 function panelHtml(r) {
   const multiFloor = map.rooms.some((x) => x.building === r.building && x.floor && x.floor !== r.floor);
   const where = [r.buildingName, multiFloor && r.floor ? `Floor ${r.floor}` : null].filter(Boolean).join(' · ');
-  const head = `<div class="mp-head"><div><div class="label">${esc(where)}</div><h2>${esc(r.label)}</h2></div>
+  const head = `<div class="mp-head"><div><p class="c-kicker">${esc(where)}</p><h2>${esc(r.label)}</h2>${r.label !== r.id && r.kind === 'classroom' ? `<p class="meta">Room ${esc(r.id)}</p>` : ''}</div>
     <button type="button" class="icon-btn mp-close" aria-label="Close">✕</button></div>`;
   if (r.kind === 'building') {
     return `${head}<p>${esc(map.insets[r.target]?.label || '')}</p>
@@ -364,26 +364,95 @@ const centre = () => { const r = size(); return [r.left + r.width / 2, r.top + r
 $('#z-in').onclick = () => { const [x, y] = centre(); const t = { ...cam }; zoomAt(x, y, 1 / 1.5); const to = { ...cam }; cam = t; flyTo(to, 250); };
 $('#z-out').onclick = () => { const [x, y] = centre(); const t = { ...cam }; zoomAt(x, y, 1.5); const to = { ...cam }; cam = t; flyTo(to, 250); };
 $('#z-reset').onclick = () => { closePanel(false); flyTo(fitCam()); };
-$('#room-ids').innerHTML = map.rooms.filter((r) => r.kind !== 'building')
-  .map((r) => `<option value="${esc(r.id === r.label ? r.id : `${r.id} · ${r.label}`)}">`).join('');
-$('#room-find').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const q = normRoom($('#room-q').value.split('·')[0]);
-  const hit = roomById[q] || map.rooms.find((r) => normRoom(r.label).includes(q));
-  if (hit) { select(hit.id); $('#room-q').blur(); } else $('#room-q').classList.add('invalid');
+// ── find: a room, a teacher or a class, with a live list ──
+// Rooms come from the map; teachers, classes and clubs from what students have added, so
+// "Hedlund" or "AP Bio" finds the room. A teacher with no room yet offers to add one.
+let found = [], active = 0;
+function searchIndex() {
+  const out = map.rooms.filter((r) => r.kind !== 'building').map((r) => ({ room: r.id, kind: 'Room',
+    title: r.label, sub: [r.label !== r.id ? r.id : null, r.buildingName].filter(Boolean).join(' · '), hay: `${r.id} ${r.label} ${r.buildingName}`.toLowerCase() }));
+  const placed = new Set();
+  for (const [id, list] of Object.entries(byRoom)) for (const t of list) {
+    placed.add(t.teacher);
+    out.push({ room: id, kind: 'Teacher', title: t.teacher, sub: `Room ${id}`, hay: t.teacher.toLowerCase() });
+    for (const slug of t.courses) if (course[slug]) out.push({ room: id, kind: 'Class', title: course[slug].name, sub: `${t.teacher} · Room ${id}`,
+      hay: `${course[slug].name} ${course[slug].call || ''}`.toLowerCase() });
+  }
+  for (const [id, list] of Object.entries(clubsByRoom)) for (const c of list) out.push({ room: id, kind: 'Club', title: c.name, sub: `Room ${id}`, hay: c.name.toLowerCase() });
+  for (const name of Object.keys(teacherSlug)) if (!placed.has(name)) out.push({ room: null, kind: 'Teacher', title: name, sub: 'Room not added yet', hay: name.toLowerCase(),
+    href: `${root}submit/?kind=room_schedule&teacher=${encodeURIComponent(name)}` });
+  return out;
+}
+let INDEX = [];
+function find(q) {
+  const words = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  const id = normRoom(q);
+  const score = (x) => (x.room && x.room === id ? 0 : x.room && x.kind === 'Room' && x.room.startsWith(id) ? 1 : x.title.toLowerCase().startsWith(words[0]) ? 2 : 3) + (x.room ? 0 : 4);
+  return INDEX.filter((x) => words.every((w) => x.hay.includes(w)) || (x.kind === 'Room' && x.room.startsWith(id) && id.length >= 2))
+    .sort((a, b) => score(a) - score(b) || a.title.localeCompare(b.title, undefined, { numeric: true })).slice(0, 8);
+}
+function showResults() {
+  const box = $('#map-results'), q = $('#room-q').value;
+  found = find(q); active = 0;
+  box.hidden = !q.trim();
+  $('#room-q').setAttribute('aria-expanded', String(!box.hidden));
+  box.innerHTML = found.length ? found.map((x, i) => `<li role="option" id="mr-${i}" aria-selected="${i === active}" data-i="${i}">
+      <span class="mr-kind">${x.kind}</span><b>${esc(x.title)}</b><span class="mr-sub">${esc(x.sub)}</span></li>`).join('')
+    : `<li class="mr-none">Nothing called “${esc(q.trim())}” on the map.</li>`;
+}
+function pick(i) {
+  const x = found[i];
+  if (!x) return;
+  if (x.href) { location.href = x.href; return; }
+  $('#map-results').hidden = true; $('#room-q').setAttribute('aria-expanded', 'false');
+  $('#room-q').value = x.kind === 'Room' ? x.title : `${x.title} · ${x.room}`;
+  $('#room-q').blur();
+  select(x.room);
+}
+$('#room-q').addEventListener('input', showResults);
+$('#room-q').addEventListener('focus', () => { if ($('#room-q').value.trim()) showResults(); });
+$('#room-q').addEventListener('keydown', (e) => {
+  if ($('#map-results').hidden || !found.length) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    active = (active + (e.key === 'ArrowDown' ? 1 : found.length - 1)) % found.length;
+    $$('#map-results [data-i]').forEach((li) => li.setAttribute('aria-selected', String(Number(li.dataset.i) === active)));
+    $('#room-q').setAttribute('aria-activedescendant', `mr-${active}`);
+  } else if (e.key === 'Escape') { $('#map-results').hidden = true; e.stopPropagation(); }
 });
-$('#room-q').addEventListener('input', () => $('#room-q').classList.remove('invalid'));
+$('#room-find').addEventListener('submit', (e) => { e.preventDefault(); pick(active); });
+$('#map-results').addEventListener('pointerdown', (e) => { const li = e.target.closest('[data-i]'); if (li) { e.preventDefault(); pick(Number(li.dataset.i)); } });
+document.addEventListener('pointerdown', (e) => { if (!e.target.closest('.map-dock')) $('#map-results').hidden = true; });
+
+// ── jump to a building: frame all its rooms ──
+const BLDGS = [];
+for (const r of map.rooms) {
+  if (!r.buildingName || r.kind === 'building') continue;
+  let b = BLDGS.find((x) => x.name === r.buildingName);
+  if (!b) BLDGS.push(b = { name: r.buildingName, x0: r.x, y0: r.y, x1: r.x + r.w, y1: r.y + r.h });
+  b.x0 = Math.min(b.x0, r.x); b.y0 = Math.min(b.y0, r.y); b.x1 = Math.max(b.x1, r.x + r.w); b.y1 = Math.max(b.y1, r.y + r.h);
+}
+const shortB = (n) => n.replace(/^Building /, '').replace(/^Portables \((\w+)\)$/, (_, w) => `Portables ${w}`).replace(' & athletics', 's');
+$('#map-bldgs').innerHTML = BLDGS.map((b, i) => `<button type="button" data-b="${i}" title="${esc(b.name)}">${esc(shortB(b.name))}</button>`).join('');
+$('#map-bldgs').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-b]'); if (!btn) return;
+  const b = BLDGS[btn.dataset.b];
+  closePanel(false);
+  frame({ x: b.x0, y: b.y0, w: b.x1 - b.x0, h: b.y1 - b.y0 }, 1.25);
+});
 new ResizeObserver(() => { if (!selected) { cam = fitCam(); apply(); } else apply(); }).observe(stage);
 
-// ── room list under the map ──
+// ── rooms with info, under the map ──
 function drawList() {
   const ids = [...new Set([...Object.keys(byRoom), ...Object.keys(clubsByRoom)])].filter((id) => roomById[id]);
   const groups = {};
   for (const id of ids) (groups[roomById[id].buildingName] ??= []).push(id);
-  $('#room-list').innerHTML = ids.length ? Object.entries(groups).sort().map(([b, list]) => `<div class="room-group">
-      <h3>${esc(b)}</h3><div class="chips">${list.sort((a, c) => a.localeCompare(c, undefined, { numeric: true }))
-        .map((id) => `<button type="button" class="chip" data-goto="${esc(id)}">${esc(id)} · ${esc([...(byRoom[id] || []).map((t) => t.teacher), ...(clubsByRoom[id] || []).map((c) => c.name)].join(', '))}</button>`).join('')}</div></div>`).join('')
-    : '<div class="empty">No rooms have info yet. When students add a room number to a teacher section, it shows up on the map.</div>';
+  $('#room-n').textContent = ids.length || '';
+  $('#room-list').innerHTML = ids.length ? `<div class="mp-groups">${Object.entries(groups).sort().map(([b, list]) => `<div class="mp-group">
+      <p class="c-kicker">${esc(b)}</p><ul>${list.sort((a, c) => a.localeCompare(c, undefined, { numeric: true }))
+        .map((id) => `<li><button type="button" data-goto="${esc(id)}"><b>${esc(roomById[id].label)}</b><span>${esc([...(byRoom[id] || []).map((t) => t.teacher), ...(clubsByRoom[id] || []).map((c) => c.name)].join(', '))}</span></button></li>`).join('')}</ul></div>`).join('')}</div>`
+    : '<p class="empty-line">No rooms have info yet. When students add a room schedule, or a room number to a teacher section, the room lights up on the map.</p>';
 }
 $('#room-list').addEventListener('click', (e) => {
   const b = e.target.closest('[data-goto]');
@@ -395,8 +464,10 @@ $('#room-list').addEventListener('click', (e) => {
 // ── start ──
 setMode('plan');
 await loadRooms();
+INDEX = searchIndex();
 drawSpots();
 drawList();
+addEventListener('hashchange', () => { const id = decodeURIComponent(location.hash.slice(1)); if (id && id !== selected) select(normRoom(id)) || select(id); });
 const start = decodeURIComponent(location.hash.slice(1));
 if (start) select(normRoom(start)) || select(start);
-s.onAuth(async () => { await loadRooms(); drawSpots(); drawList(); if (selected) panel.innerHTML = panelHtml(roomById[selected]); });
+s.onAuth(async () => { await loadRooms(); INDEX = searchIndex(); drawSpots(); drawList(); if (selected) panel.innerHTML = panelHtml(roomById[selected]); });
