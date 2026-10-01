@@ -4,4 +4,6 @@ Disallow: /account/
 Disallow: /inbox/
 Disallow: /dashboard/
 Disallow: /submit/
+Disallow: /leaderboard/
+Disallow: /credits/
 Sitemap: https://wilcoxwiki.org/sitemap.xml

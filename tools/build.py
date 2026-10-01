@@ -274,14 +274,16 @@ def trail_paths(trail, here_path):
     return out
 
 
-def page(path, title, body, *, desc="", script=None, active=None, data=None):
+def page(path, title, body, *, desc="", script=None, active=None, data=None, private=False):
     """Writes ROOT/path/index.html (or ROOT/path if it ends in .html)."""
     out = ROOT / path if path.endswith(".html") else ROOT / path / "index.html"
     depth = len(out.relative_to(ROOT).parts) - 1
     r = "../" * depth or "./"
     full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: everything about Wilcox High School"
     canon = ""
-    if SITE_URL:
+    if private:                    # members-only pages (Ethan 2026-10-01): kept out of search engines too
+        canon = '<meta name="robots" content="noindex">'
+    elif SITE_URL:
         rel = "" if path in ("", "index.html") else path.rstrip("/") + ("/" if not path.endswith(".html") else "")
         canon = f'<link rel="canonical" href="{e(SITE_URL.rstrip("/") + "/" + rel)}">'
     cur = lambda href: " aria-current=page" if active == href else ""
@@ -798,13 +800,15 @@ def build_static():
   <svg id="cascade" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Classes per subject, with the ones students have written about highlighted"></svg>
 </article>""", script="submit.js")
 
+    # The leaderboard is for members (Ethan 2026-10-01: "so random people that find this web will not
+    # have easy access"): signed out, the page explains and offers sign-in, and fetches nothing. The
+    # database agrees: migration 018 stops signed-out visitors reading the leaderboard view at all.
     page("leaderboard/", "Leaderboard", """
-<h1>Leaderboard</h1>
-<p class="lede">The people building Wilkipedia. Points come from approved work.</p>
-<div class="chips"><button class="chip" data-lb="points" aria-pressed="true">All time</button><button class="chip" data-lb="semester_points">This semester</button></div>
-<ol id="board" class="leaders"></ol>
-<p class="meta">S bounty 10 · M 30 · L 60 · anything outside a bounty 5. Everyone who contributes in the first year is a <b>Founding Contributor</b>.</p>""",
-         active="leaderboard/", data={"page": "leaderboard"})
+<header class="cl-head"><p class="c-kicker">Members only</p><h1>Leaderboard</h1>
+  <p class="cl-lede">The people building Wilkipedia. Points come from approved work.</p></header>
+<div id="lb-app"><div class="meta">Loading…</div></div>
+<p class="c-src lb-rules">Points: a small bounty 10, medium 30, large 60, anything outside a bounty 5. Everyone who contributes in the first year is a <b>Founding Contributor</b>. Don’t want to be listed? Turn it off on <a href="../account/">your profile</a>.</p>""",
+         active="leaderboard/", data={"page": "leaderboard"}, private=True)
 
     page("summer/", "Summer homework", """
 <h1>Summer homework</h1>
@@ -957,7 +961,8 @@ def build_static():
 <h2>Signing in</h2>
 <p>Signing in means agreeing to the <a href="../terms/">Terms of Service</a>. Sign-in uses Google. When you sign in, Google tells us your name and email address. We store them in our database (hosted by Supabase) so that your claims, submissions and comments belong to you.</p>
 <ul>
-  <li><b>Public:</b> your display name, which is your first name unless you change it on your account page. It appears next to your approved work, your comments and your leaderboard points.</li>
+  <li><b>Public:</b> your display name (your first name unless you change it on your profile) and profile picture, next to your approved work and your comments.</li>
+  <li><b>Only signed-in members:</b> the Leaderboard and the Credits lists, where your name appears with your points and class year. You can leave the leaderboard on your profile.</li>
   <li><b>Never public:</b> your email address. Only the site's admins can see it, and only to run the site.</li>
 </ul>
 <p>If you sign in with a Santa Clara Unified school account (@scusd.net), your contributions show an <b>SCUSD ✓</b> badge. We work that out from your email's domain; the email itself stays private.</p>
@@ -972,7 +977,7 @@ def build_static():
 <p>School accounts are usually closed after graduation. Your work stays on Wilkipedia afterwards.</p>
 <h2>Who runs this</h2>
 <p>Wilkipedia is an independent project run by Wilcox High School students. It is not operated by Wilcox High School or Santa Clara Unified School District.</p>
-<p class="meta">Last updated September 2026.</p>""", data={"page": "static"})
+<p class="meta">Last updated October 2026.</p>""", data={"page": "static"})
 
     # The campus map (redesigned 2026-10-01 with the class pages): the map is the page. A slim head,
     # then the map with a floating dock (find a room, a teacher or a class; jump to a building),
@@ -1051,98 +1056,58 @@ def build_static():
          desc="Wilcox High School sports teams by season: tryouts, practices and what it's like to play.")
 
     page("feedback/", "Feedback", """
-<h1>Feedback</h1>
-<p class="lede">Found a bug? Want a feature? Have an idea? Tell the Wilkipedia team. Every message is read.</p>
-<form id="fb-form" class="card fb-form">
-  <div class="field"><span class="flabel">What kind?</span>
-    <div class="seg" id="fb-kind" role="radiogroup" aria-label="Kind of feedback">
-      <button type="button" role="radio" aria-checked="true" data-kind="idea">💡 Idea</button>
-      <button type="button" role="radio" aria-checked="false" data-kind="bug">🐞 Bug</button>
-      <button type="button" role="radio" aria-checked="false" data-kind="feature">✨ Feature request</button>
-      <button type="button" role="radio" aria-checked="false" data-kind="other">💬 Other</button>
-    </div></div>
+<div class="fb-wrap">
+<header class="cl-head"><p class="c-kicker">Tell the team</p><h1>Feedback</h1>
+  <p class="cl-lede">Found a bug, want a feature, or have an idea? Every message is read by the people who build Wilkipedia.</p></header>
+<form id="fb-form" class="fb-form2">
+  <fieldset class="fb-kinds" id="fb-kind" role="radiogroup" aria-label="Kind of feedback"><legend class="flabel">What kind?</legend>
+    <button type="button" role="radio" aria-checked="true" data-kind="idea"><b>Idea</b><span>Something that would make it better</span></button>
+    <button type="button" role="radio" aria-checked="false" data-kind="bug"><b>Bug</b><span>Something broken or wrong</span></button>
+    <button type="button" role="radio" aria-checked="false" data-kind="feature"><b>Feature</b><span>Something new it should do</span></button>
+    <button type="button" role="radio" aria-checked="false" data-kind="other"><b>Other</b><span>Anything else</span></button>
+  </fieldset>
   <div class="field"><label for="fb-msg">Your message <span class="req">*</span></label>
     <div class="hint" id="fb-hint">What would make Wilkipedia better?</div>
     <textarea id="fb-msg" rows="6" maxlength="2000" required></textarea></div>
-  <div class="field"><label for="fb-page">Which page? <span class="hint-inline">(optional)</span></label>
-    <input id="fb-page" maxlength="300" placeholder="e.g. the campus map, or paste the link"></div>
-  <div class="field"><label for="fb-name">Your name <span class="hint-inline">(optional, so we can thank you)</span></label>
-    <input id="fb-name" maxlength="60"></div>
+  <div class="fb-two">
+    <div class="field"><label for="fb-page">Which page? <span class="hint-inline">(optional)</span></label>
+      <input id="fb-page" maxlength="300" placeholder="e.g. the campus map, or paste the link"></div>
+    <div class="field"><label for="fb-name">Your name <span class="hint-inline">(optional, so we can thank you)</span></label>
+      <input id="fb-name" maxlength="60"></div>
+  </div>
   <p id="fb-error" class="error" hidden></p>
-  <button class="btn big">Send feedback</button>
+  <div class="fb-send"><button class="btn big">Send feedback</button><span class="meta" id="fb-who"></span></div>
 </form>
-<div id="fb-done" class="done" hidden aria-live="polite"></div>""", data={"page": "feedback"},
+<div id="fb-done" class="done" hidden aria-live="polite"></div>
+<ol class="fb-after" aria-label="What happens next">
+  <li><b>We read it</b><span>The review team sees every message.</span></li>
+  <li><b>We plan it or explain</b><span>Signed in, you get a notification, and you can reply in your Dashboard.</span></li>
+  <li><b>It ships</b><span>When it’s done, you hear about it, and with your name left, you’re thanked on Credits.</span></li>
+</ol>
+</div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
-
-    page("bell/", "Bell schedule", """
-<header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1></header>
-<section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
-<section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
-<section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
-<a class="bp-cal" href="../calendar/"><b>Days off, breaks and finals</b><span>The whole school year, with countdowns, is on the Calendar</span><i aria-hidden="true">→</i></a>
-<p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},
-         desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
-
-    # "By the numbers" was retired (its a–g chart moved to All classes, its coverage
-    # chart to Contribute); the old address forwards to the a–g chart.
-    (ROOT / "numbers").mkdir(exist_ok=True)
-    (ROOT / "numbers" / "index.html").write_text('<!doctype html><meta charset="utf-8"><title>Moved</title>'
-        '<meta http-equiv="refresh" content="0; url=../subjects/#ag"><link rel="canonical" href="../subjects/">'
-        '<p>This page moved to <a href="../subjects/#ag">All classes</a>.</p>\n')
-
-    page("guides/", "Study guides", f"""
-<h1>Study guides</h1>
-<p class="lede">Every study guide and resource students have shared, as a graph. The big dots are subjects, each class hangs off its subject, and each guide hangs off every class it’s for.</p>
-<div class="gv" id="gv-graph" translate="no">
-  <div class="gv-bar">
-    <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>
-    <span class="gv-count" id="gv-count"></span>
-    <button type="button" class="gv-gear" id="gv-gear" aria-expanded="false" aria-label="Graph settings" title="Graph settings">{ICONS["settings"]}</button>
-  </div>
-  <div id="gv-chart" class="gv-chart" role="img" aria-label="Graph of subjects, classes and study guides. The list below has every guide."></div>
-  <div class="gv-panel" id="gv-panel" hidden></div>
-  <aside class="gv-info" id="gv-info" hidden></aside>
-  <div class="gv-foot">
-    <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
-    <div class="gv-legend" id="gv-legend" role="group" aria-label="What the dots are. Click a kind of resource to hide or show it."></div>
-  </div>
-</div>
-<section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
-  <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",
-         desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
-
-    page("settings/", "Settings", """
-<header class="set-head">
-  <p class="set-kicker">Preferences</p>
-  <h1>Settings</h1>
-  <p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
-</header>
-<div class="set-layout">
-  <nav class="set-toc" aria-label="Settings sections" id="set-toc"></nav>
-  <div id="settings" class="settings"><div class="meta">Loading…</div></div>
-</div>""", data={"page": "settings"},
-         desc="Theme, text size, motion, language and other Wilkipedia settings.")
-
+    # Credits: the thank-you and the sources are public; the lists of students (reviewers,
+    # contributors, people whose ideas shipped) are for signed-in members (pages.credits).
     page("credits/", "Credits", """
-<h1>Credits &amp; thanks</h1>
-<p class="lede">Wilkipedia exists because students gave their time. Thank you to everyone below.</p>
-<section class="sec credits-sec"><h2>Founders</h2>
+<header class="cl-head"><p class="c-kicker">Credits &amp; thanks</p><h1>Made by Wilcox students</h1>
+  <p class="cl-lede">Wilkipedia exists because students gave their time: writing, checking, and telling us what to fix. Thank you.</p></header>
+<dl class="t-stats cr-stats" id="cr-stats" hidden></dl>
+<section class="cr-sec"><h2>Founders</h2>
   <div class="people">
     <div class="person"><span class="avatar av-md" style="--av:#111">E</span><div><b>Ethan Liu</b><span class="meta">Founder · builds the site, final approver</span></div></div>
     <div class="person"><span class="avatar av-md" style="--av:#111">J</span><div><b>Jonathan Lee</b><span class="meta">Co-founder · reviewer</span></div></div>
   </div></section>
-<section class="sec credits-sec"><h2>Review team</h2><p class="meta">They check every submission before it goes live.</p><div class="people" id="cr-team"><div class="meta">Loading…</div></div></section>
-<section class="sec credits-sec"><h2>Contributors</h2><p class="meta">Everyone whose writing is on the site: overviews, teacher sections, tips, study guides, club and team info.</p><div class="people" id="cr-contrib"><div class="meta">Loading…</div></div></section>
-<section class="sec credits-sec"><h2>Ideas &amp; bug reports</h2><p class="meta">People whose feedback made it into the site. <a href="../feedback/">Send yours</a> and leave your name to be listed.</p><div class="people" id="cr-feedback"><div class="meta">Loading…</div></div></section>
-<section class="sec credits-sec sec-quiet"><h2>Sources</h2><ul class="sources">
-  <li>Courses: SCUSD High School Course Catalog 2025–2026</li>
-  <li>Teachers, clubs, sports and bell schedule: <a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">Wilcox High School website ↗</a></li>
-  <li>Campus map: Wilcox High School campus map</li>
-  <li>Cafeteria menu: Santa Clara Unified Nutrition Services (live)</li>
-  <li>Class colours: Wikipedia, “Adrian C. Wilcox High School”</li>
-  <li>Typeface: Newsreader (SIL Open Font License)</li>
-  <li>Orrery sky: Milky Way panorama, <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier ↗</a></li>
-</ul></section>""", data={"page": "credits"}, desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
+<div id="cr-members"><div class="meta">Loading…</div></div>
+<section class="cr-sec"><h2>Sources</h2><p class="sec-sub">Where the facts on the site come from.</p><ul class="cr-sources">
+  <li><b>Courses</b><span>SCUSD High School Course Catalog 2025–2026</span></li>
+  <li><b>Teachers, clubs, sports, bell schedule</b><span><a href="https://wilcox.santaclarausd.org/" target="_blank" rel="noopener">Wilcox High School website ↗</a></span></li>
+  <li><b>Campus map</b><span>Redrawn from the Wilcox High School campus map</span></li>
+  <li><b>Cafeteria menu</b><span>Santa Clara Unified Nutrition Services (live)</span></li>
+  <li><b>Class colours</b><span>Wikipedia, “Adrian C. Wilcox High School”</span></li>
+  <li><b>Typeface</b><span>Newsreader (SIL Open Font License)</span></li>
+  <li><b>Orrery sky</b><span>Milky Way panorama, <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier ↗</a></span></li>
+</ul></section>""", data={"page": "credits"}, private=True,
+         desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
 
     page("404.html", "Page not found", """
 <h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})
@@ -1243,7 +1208,7 @@ def build_seo(courses, teachers, depts):
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")
-    (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /review/\nDisallow: /account/\nDisallow: /inbox/\nDisallow: /dashboard/\nDisallow: /submit/\nSitemap: {base}/sitemap.xml\n")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nDisallow: /review/\nDisallow: /account/\nDisallow: /inbox/\nDisallow: /dashboard/\nDisallow: /submit/\nDisallow: /leaderboard/\nDisallow: /credits/\nSitemap: {base}/sitemap.xml\n")
 
 
 CAMPUS = ROOT / "campus"

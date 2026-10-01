@@ -63,6 +63,9 @@ $$;
 
 alter table public.profiles enable row level security;
 create policy "profiles are public" on public.profiles for select using (true);
+-- Signed out, only what a byline shows (migration 018); signed-in members read the rest.
+revoke select on public.profiles from anon;
+grant select (id, display_name, school_verified, avatar, avatar_color) on public.profiles to anon;
 create policy "edit own profile" on public.profiles for update using (id = auth.uid());
 -- Users may change their own profile settings and nothing else. Roles and the
 -- school badge are changed only by an admin in the Supabase table editor.
@@ -379,7 +382,7 @@ select name, count(*)::int as helped
  where status = 'done' and name is not null and btrim(name) <> ''
  group by name;
 
-grant select on public.feedback_credits to anon, authenticated;
+grant select on public.feedback_credits to authenticated;               -- members only (migration 018)
 
 -- ───────────────────────── leaderboard ─────────────────────────
 -- Points: a bounty pays once per person when their first submission for it is
@@ -414,7 +417,7 @@ select p.id, p.display_name, p.role,
  where p.show_on_leaderboard
  group by p.id;
 
-grant select on public.leaderboard to anon, authenticated;
+grant select on public.leaderboard to authenticated;                   -- members only (migration 018)
 
 -- ───────────────────────── edits & notifications ─────────────────────────
 alter table public.submissions

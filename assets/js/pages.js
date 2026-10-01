@@ -378,23 +378,40 @@ const pages = {
   },
 
 
+  // Members only: signed out, nothing is fetched (and the database refuses anyway, migration 018)
   async leaderboard() {
-    const rows = await s.leaderboard();
+    const app = $('#lb-app');
     let key = 'points';
-    const draw = () => {
-      const sorted = [...rows].sort((a, b) => b[key] - a[key]).filter((r) => r[key] > 0);
-      $('#board').innerHTML = sorted.map((r) => `<li><span class="who">${avatarHtml(r)} ${byline(r.display_name, r.school_verified)}
-        ${r.role !== 'contributor' ? `<span class="tag">${esc(roleLabel(r.role))}</span>` : ''}
-        ${classChip(r.grad_year)}</span>
-        <span class="meta">${r.approved} approved</span><b>${r[key]}</b></li>`).join('')
-        || '<li class="empty">No points yet. <a href="../bounties/">Claim the first bounty</a>.</li>';
+    const gate = () => { app.innerHTML = `<div class="members-gate"><p class="c-kicker">Members only</p><h2>Sign in to see the leaderboard</h2>
+      <p>It lists students by name, so only Wilkipedia members can see it. Reading the rest of the site never needs an account.</p>
+      <p><button class="btn js-signin">Sign in</button></p></div>`; };
+    const draw = async () => {
+      const me = s.user();
+      if (!me) return gate();
+      const rows = await s.leaderboard().catch(() => []);
+      const paint = () => {
+        const sorted = [...rows].sort((a, b) => b[key] - a[key]).filter((r) => r[key] > 0);
+        const mine = sorted.findIndex((r) => r.id === me.id);
+        const top = sorted.slice(0, 3), rest = sorted.slice(3);
+        const most = sorted[0]?.[key] || 1;
+        // the top three as a podium (second, first, third), the rest as a ranked list with bars
+        const order = [top[1], top[0], top[2]].map((r, i) => r && { r, place: [2, 1, 3][i] }).filter(Boolean);
+        app.innerHTML = `<div class="vtabs lb-tabs" role="group" aria-label="Show"><button type="button" class="vtab" data-lb="points" aria-pressed="${key === 'points'}">All time</button>
+            <button type="button" class="vtab" data-lb="semester_points" aria-pressed="${key === 'semester_points'}">This semester</button></div>
+          ${sorted.length ? `<ol class="lb-podium">${order.map(({ r, place }) => `<li class="p${place}${r.id === me.id ? ' me' : ''}">${avatarHtml(r, 'lg')}
+              <b>${esc(r.display_name)}</b>${badge(r.school_verified)}<span class="lb-pts">${r[key]}<small>pts</small></span><span class="lb-step"><i>${place}</i></span></li>`).join('')}</ol>
+            ${rest.length ? `<ol class="lb-list" start="4">${rest.map((r, i) => `<li class="${r.id === me.id ? 'me' : ''}"><span class="lb-n">${i + 4}</span>
+              <span class="lb-who">${avatarHtml(r)}<b>${esc(r.display_name)}</b>${badge(r.school_verified)}${r.role !== 'contributor' ? `<span class="tag">${esc(roleLabel(r.role))}</span>` : ''}${classChip(r.grad_year)}</span>
+              <span class="lb-bar"><i style="width:${((r[key] / most) * 100).toFixed(1)}%"></i></span><span class="lb-meta">${r.approved} approved</span><b class="lb-p">${r[key]}</b></li>`).join('')}</ol>` : ''}
+            <p class="lb-you">${mine >= 0 ? `You’re <b>#${mine + 1}</b> with ${sorted[mine][key]} points.` : me.show_on_leaderboard === false ? 'You’ve hidden yourself from the leaderboard.' : 'You’re not on the board yet: your first approved post puts you here.'}
+              <a href="${root}bounties/">Find a bounty →</a></p>`
+            : '<p class="empty-line">No points yet. <a href="../bounties/">Claim the first bounty</a>.</p>'}`;
+      };
+      paint();
+      app.onclick = (e) => { const b = e.target.closest('[data-lb]'); if (b) { key = b.dataset.lb; paint(); } };
     };
-    $$('[data-lb]').forEach((b) => b.addEventListener('click', () => {
-      key = b.dataset.lb;
-      $$('[data-lb]').forEach((x) => x.setAttribute('aria-pressed', x === b));
-      draw();
-    }));
-    draw();
+    s.onAuth(draw);
+    await draw();
   },
 
   async summer() {
@@ -782,6 +799,8 @@ const pages = {
       $('#fb-hint').textContent = hints[kind];
     });
     drafts.bind($('#fb-msg'), 'feedback');
+    const who = () => { const u = s.user(); $('#fb-who').textContent = u ? `Sending as ${u.name}. You’ll hear back in your Dashboard.` : 'Not signed in: we can’t reply to you, but we’ll still read it.'; };
+    who(); s.onAuth(who);
     const ref = document.referrer && new URL(document.referrer).origin === location.origin ? new URL(document.referrer).pathname : '';
     if (ref && !ref.includes('/feedback')) $('#fb-page').value = ref;
     $('#fb-form').addEventListener('submit', async (e) => {
@@ -804,19 +823,36 @@ const pages = {
     });
   },
 
+  // Credits: the founders and sources are on the page for everyone; the students below need sign-in
   async credits() {
-    const person = (p, sub) => `<div class="person">${avatarHtml(p, 'md')}<div><b>${esc(p.display_name ?? p.name)}</b>${badge(p.school_verified)}${classChip(p.grad_year)}
-      <span class="meta">${sub}</span></div></div>`;
-    const [team, lb, fb] = await Promise.all([s.team().catch(() => []), s.leaderboard().catch(() => []), s.feedbackCredits().catch(() => [])]);
-    const founders = ['Ethan', 'Ethan Liu', 'Jonathan', 'Jonathan Lee'];
-    const others = team.filter((p) => p.role === 'reviewer' || !founders.includes(p.display_name));
-    $('#cr-team').innerHTML = others.map((p) => person(p, esc(roleLabel(p.role)))).join('')
-      || '<p class="meta">Just the founders so far. Want to help review? Ask Ethan.</p>';
-    $('#cr-contrib').innerHTML = lb.map((p) => person(p, `${p.approved} contribution${p.approved === 1 ? '' : 's'} · ${p.points} pts`)).join('')
-      || '<p class="meta">Be the first: <a href="../bounties/">claim a bounty</a> or <a href="../submit/">add something</a>.</p>';
-    $('#cr-feedback').innerHTML = fb.map((f) => `<div class="person"><span class="avatar av-md" style="--av:#6f746c">${esc(f.name.trim().charAt(0).toUpperCase())}</span>
-      <div><b>${esc(f.name)}</b><span class="meta">${f.helped} idea${f.helped === 1 ? '' : 's'} or fix${f.helped === 1 ? '' : 'es'} used</span></div></div>`).join('')
-      || '<p class="meta">No one yet. Your idea could be first.</p>';
+    const box = $('#cr-members');
+    const draw = async () => {
+      if (!s.user()) {
+        $('#cr-stats').hidden = true;
+        box.innerHTML = `<section class="cr-sec"><div class="members-gate small"><p class="c-kicker">Members only</p><h2>Everyone else who helped</h2>
+          <p>The review team, every contributor, and the people whose ideas made it in. They’re all students, so their names are only shown to signed-in members.</p>
+          <p><button class="btn js-signin">Sign in to see them</button></p></div></section>`;
+        return;
+      }
+      const person = (p, sub) => `<div class="person">${avatarHtml(p, 'md')}<div><b>${esc(p.display_name ?? p.name)}</b>${badge(p.school_verified)}${classChip(p.grad_year)}
+        <span class="meta">${sub}</span></div></div>`;
+      const [team, lb, fb] = await Promise.all([s.team().catch(() => []), s.leaderboard().catch(() => []), s.feedbackCredits().catch(() => [])]);
+      const founders = ['Ethan', 'Ethan Liu', 'Jonathan', 'Jonathan Lee'];
+      const others = team.filter((p) => p.role === 'reviewer' || !founders.includes(p.display_name));
+      const sum = (xs, k) => xs.reduce((t, x) => t + (x[k] || 0), 0);
+      $('#cr-stats').hidden = false;
+      $('#cr-stats').innerHTML = [[lb.length, 'Contributors'], [sum(lb, 'approved'), 'Posts published'], [team.length, 'Reviewers'], [sum(fb, 'helped'), 'Ideas & fixes used']]
+        .map(([n, l]) => `<div><dt>${l}</dt><dd>${n}</dd></div>`).join('');
+      box.innerHTML = `<section class="cr-sec"><h2>Review team</h2><p class="sec-sub">They check every submission before it goes live.</p><div class="people">${others.map((p) => person(p, esc(roleLabel(p.role)))).join('')
+          || '<p class="meta">Just the founders so far. Want to help review? Ask Ethan.</p>'}</div></section>
+        <section class="cr-sec"><h2>Contributors</h2><p class="sec-sub">Everyone whose writing is on the site: overviews, teacher sections, tips, study guides, club and team info.</p><div class="people">${lb.map((p) => person(p, `${p.approved} contribution${p.approved === 1 ? '' : 's'} · ${p.points} pts`)).join('')
+          || '<p class="meta">Be the first: <a href="../bounties/">claim a bounty</a> or <a href="../submit/">add something</a>.</p>'}</div></section>
+        <section class="cr-sec"><h2>Ideas &amp; bug reports</h2><p class="sec-sub">People whose feedback made it into the site. <a href="../feedback/">Send yours</a> and leave your name to be listed.</p><div class="people">${fb.map((f) => `<div class="person"><span class="avatar av-md" style="--av:#6f746c">${esc(f.name.trim().charAt(0).toUpperCase())}</span>
+          <div><b>${esc(f.name)}</b><span class="meta">${f.helped} idea${f.helped === 1 ? '' : 's'} or fix${f.helped === 1 ? '' : 'es'} used</span></div></div>`).join('')
+          || '<p class="meta">No one yet. Your idea could be first.</p>'}</div></section>`;
+    };
+    s.onAuth(draw);
+    await draw();
   },
 
   async bell() {
