@@ -1,7 +1,7 @@
 // The home page's motion (Ethan, 2026-09-30).
 //
 //   Reveal   past the last card there is room to keep scrolling. The page stops moving and the
-//            cards slide out to the sides, one after another, until only the background is left
+//            cards fade away, one after another from the top, until only the background is left
 //            (the turning quad or the painting) with a way back to the top. Not with the plain
 //            background: there'd be nothing to show.
 //   Bounce   pulling past the top or the bottom stretches like a rubber band and springs back,
@@ -10,7 +10,7 @@
 //            The background swells a little either way. The header never moves: that's why the
 //            browser's own bounce is off site-wide (it dragged the header and looked like a refresh).
 //
-// Reduce motion: the cards fade instead of sliding, and nothing bounces.
+// (They used to fly out to the sides; Ethan preferred a fade.) Reduce motion: nothing bounces.
 import { $, $$, lessMotion, getPref } from './ui.js';
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
@@ -25,7 +25,7 @@ export function mountHomeMotion() {
   layer.append(main, foot);
 
   const reveal = getPref('homebg') !== 'plain';
-  let end = null, cards = [], dirs = [];
+  let end = null, cards = [];
   if (reveal) {
     end = document.createElement('div');
     end.className = 'home-reveal';
@@ -45,16 +45,7 @@ export function mountHomeMotion() {
   const fit = () => {
     stick();
     if (!reveal) return;
-    cards.forEach((c) => { c.style.transform = ''; });                    // measure where they really sit
     cards = [...$$('.hero-main, .hero-side, #next-meal, .home-sec', layer), foot].filter((c) => c.offsetParent);
-    // a card on the left half leaves to the left, on the right half to the right; full-width ones take turns
-    const mid = innerWidth / 2;
-    let turn = 1;
-    dirs = cards.map((c) => {
-      const r = c.getBoundingClientRect();
-      if (r.width > innerWidth * 0.7) return (turn = -turn);
-      return r.left + r.width / 2 < mid ? -1 : 1;
-    });
     shown = -1;
     paint();
   };
@@ -69,14 +60,13 @@ export function mountHomeMotion() {
     shown = p;
     document.body.style.setProperty('--reveal', p.toFixed(3));
     document.body.classList.toggle('revealed', p > 0.98);
-    const still = lessMotion(), n = cards.length;
+    const n = cards.length;
     cards.forEach((c, i) => {
-      // each card starts a little after the one above it
+      // each card starts fading a little after the one above it
       const k = clamp((p - (i / n) * 0.45) / 0.55);
-      if (!k) { c.style.transform = c.style.opacity = ''; return; }
       const e = k * k * (3 - 2 * k);                                       // ease in and out
-      c.style.transform = still ? '' : `translateX(${dirs[i] * e * (innerWidth * 0.55 + 160)}px) rotate(${dirs[i] * e * 2}deg)`;
-      c.style.opacity = String(1 - e);
+      c.style.opacity = k ? String(1 - e) : '';
+      c.style.visibility = k >= 1 ? 'hidden' : '';                         // gone: not clickable, not read out
     });
   };
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(paint); } };

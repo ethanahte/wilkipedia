@@ -817,7 +817,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - Reveal (not with 'plain'): `#main` and the footer are moved into `.home-layer`, which is
       sticky with `top: --stick` (screen height − its height, rechecked on every scroll for phone
       address bars). After it comes `.home-reveal`, 92vh of empty space: scrolling into it, the
-      page holds still while the cards slide out left or right in turn (`--reveal` 0→1 on body)
+      page holds still while the cards fade away one after another (`--reveal` 0→1 on body;
+      they flew out to the sides at first, Ethan preferred a fade)
       until only the background is left, with a "Back to the top" pill. Measure progress from
       `.home-reveal`'s offsetTop: a stuck element's own offsetTop moves with the scroll.
     - Bounce, made to feel like iOS/macOS (Ethan: the first version was "too slow on the top"):
@@ -833,7 +834,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
       - The return is a near-critically damped spring (k 640, c 48): ~0.3 s, no wobble.
       Measured in headless Chrome: fast fling 25 px, rest in 0.28 s; wheel notch 0.39 s; touch
       0.34 s. Re-measure if you touch the constants.
-    - Reduce motion: the cards fade instead of sliding, and nothing bounces.
+    - Reduce motion: nothing bounces (the fade stays: it only follows your scrolling).
     - Testing: the in-app browser pane often runs hidden, which pauses animation frames and
       scroll events and reports two different screen heights, so it can't judge this. A
       headless Chrome over CDP (`--remote-debugging-port`, Input.dispatchMouseEvent /

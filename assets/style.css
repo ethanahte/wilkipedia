@@ -1505,8 +1505,8 @@ body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer
 :root:not([data-homebg="plain"]) body.home footer.site { border-top: 0; }
 :root:not([data-homebg="plain"]) body.home .bell { box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
 /* Home motion (homemotion.js). The page and footer sit in one layer that stops once its bottom reaches
-   the bottom of the screen (--stick), while the reveal space scrolls on underneath and the cards slide
-   out to the sides (--reveal, 0 to 1). Pulling past either edge sets --ob (0 to 1): the background
+   the bottom of the screen (--stick), while the reveal space scrolls on underneath and the cards fade
+   away (--reveal, 0 to 1). Pulling past either edge sets --ob (0 to 1): the background
    swells a little while the cards or the end caption spring back. */
 body.home .home-layer { position: sticky; top: var(--stick, 0px); overflow-x: clip; }
 body.home::before, body.home .pano-bg { transform: scale(calc(1 + var(--ob, 0) * .06)); transform-origin: 50% 40%; }
