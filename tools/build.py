@@ -1057,12 +1057,9 @@ def build_static():
     page("bell/", "Bell schedule", """
 <header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1></header>
 <section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
-<section class="bp-sec"><h2>Countdowns</h2><div id="bp-counts" class="bp-counts"></div></section>
 <section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
-<section class="bp-sec"><h2>The school year</h2><div id="bp-year" class="bp-year"></div></section>
-<section class="bp-sec"><h2>Where the week goes</h2><p class="sec-sub">Minutes each period meets in a regular week (Monday all seven, then the block days).</p><div id="bp-minutes"></div></section>
 <section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
-<section class="bp-sec"><h2>Special days</h2><p class="sec-sub">Days off, finals and changed schedules this school year.</p><div id="bp-special"></div></section>
+<a class="bp-cal" href="../calendar/"><b>Days off, breaks and finals</b><span>The whole school year, with countdowns, is on the Calendar</span><i aria-hidden="true">→</i></a>
 <p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
 
@@ -1373,8 +1370,8 @@ def build_calendar():
                       for m, rows in months)
     ics_name = "wilcox-" + cal["year"].replace("–", "-") + ".ics"
     page("calendar/", "Calendar", f"""
-<h1>Calendar</h1>
-<p class="lede">Important dates for the {e(cal["year"])} school year: breaks and no-school days, finals and testing, rallies, dances, shows and family nights.</p>
+<header class="cl-head cal-head"><p class="c-kicker">Wilcox High School · {e(cal["year"])}</p><h1>Calendar</h1>
+  <p class="cl-lede">Breaks and days off, finals and testing, rallies, dances, shows and family nights. Bell times are on the <a href="../bell/">Bell schedule</a>.</p></header>
 <p class="cal-src meta">From Wilcox’s <a href="{e(cal["source"])}" target="_blank" rel="noopener">official activities calendar</a>, linked from the <a href="{e(cal["sourcePage"])}" target="_blank" rel="noopener">bell schedule page</a>. Events tagged with a group (like “Class of 2027”) are from that group’s own posts. Dates can change: the school’s calendar is the final word.
   <a class="btn ghost small cal-ics" href="{ics_name}" download="{ics_name}">Add to my calendar (.ics)</a></p>
 <div id="cal-app" class="cal-app"></div>

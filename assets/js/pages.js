@@ -30,7 +30,7 @@ function wireAppearance(s) {
 const s = await initHeader();
 
 import { search, attach, addLive, groupedHtml } from './search.js';
-import { mountBellStrip, loadBell, fullHtml, dayPlan, nextSchoolDay, clock } from './bell.js';
+import { mountBellStrip, loadBell, dayPlan, nextSchoolDay, clock } from './bell.js';
 
 // ── subject lists: light up classes that have content ──
 // A dot on the row says it (no "Not written yet" on every row). The subject index and the head

@@ -83,26 +83,27 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
-- **Bell schedule page** (`bell/`: `mountBellPage` in bell.js, styles `.bp-*`/`.bw-*`/`.bs-*`;
-  redesigned 2026-10-01, Ethan: "even better"). All from data/bell.json.
-  - Now (a dark panel): the current period big, a countdown that ticks every second (to the
-    end of the period, the next bell, or the first bell), the period's progress, the whole day
-    as a bar with a needle, and facts (today ends, next day off "in N days", skipping the rest
-    of a break you're already on). Off and adjusted days say so and show the next school day.
-  - This week: Mon–Fri columns (next week from Saturday), each period a block at its real time
-    over 8:30–4:00 (420px: 56px an hour), today tinted with a red now-line, days off hatched.
-    On phones it scrolls sideways and starts at today; redraws keep the scroll.
-  - Every schedule (finals in a fold), and special days by month, upcoming first (the next one
-    flagged), past ones folded.
-  - Visuals (Ethan: "a visual representation… cool countdowns"): the Now countdown sits in a
-    clock-face ring (60 ticks, a gold arc for how far through, a dot at now) and changed digits
-    roll in (not with reduced motion). Countdown cards: the weekend (to Friday's last bell),
-    the next day off, the next break (an off day named "break" or 3+ days), finals and the last
-    day of school (the special day saying "last day of school"), each with a ring for how far
-    from the previous one. The school year: one bar from the first date in bell.json to the
-    last day, breaks hatched, days off, finals and changed days marked, today's line, and
-    "Day N of M school days". Where the week goes: minutes each period meets in a regular week.
-  - The home page strip (`mountBellStrip`) is unchanged.
+- **Bell schedule vs Calendar** (2026-10-01, Ethan: date features "fit better under calendar";
+  keep it simple and effective). The Bell schedule answers "what time is it", the Calendar
+  "what day is it". Don't put countdowns to dates, the school-year bar or the special-days list
+  back on the bell page.
+  - **Bell schedule page** (`bell/`: `mountBellPage` in bell.js, styles `.bp-*`/`.bw-*`). From
+    data/bell.json. Now: a dark panel with the current period big, a countdown in a clock-face
+    ring (60 ticks, a gold arc for how far through, a dot at now; changed digits roll in, not
+    with reduced motion), the day as a bar with a needle, and facts: today ends, the weekend
+    (to Friday's last bell) and the next day off (links to the Calendar). This week: Mon–Fri,
+    each period a block at its real time over 8:30–4:00 (420px: 56px an hour), today tinted
+    with a now-line; on phones it scrolls and starts at today. Every schedule, with one line
+    on minutes a week, finals in a fold, then a link to the Calendar.
+  - **Home page bell strip** (`mountBellStrip`): "Full schedule →" is a link to the bell page;
+    it no longer expands in place.
+  - **Calendar's school year panel** (`yearPanel` in calendar.js, above Coming up): "Day N of
+    M" (school days from the calendar's First Day of School to its last End of Semester,
+    counted with the bell schedule's `dayPlan`), the year as one bar split into quarters by
+    the End of Quarter / Semester milestones, breaks and days off from bell.json (it has full
+    ranges; the calendar only marks the first day of winter break), today's line, and four
+    countdown cards with rings: next day off, end of the quarter, next break, last day. The
+    bar and cards reuse `.by-*` and `.bc` styles.
 - **Teacher pages** (`teachers/<slug>/`: `build_teachers` + `pages.teacher`; the list is
   `pages.teachers`; redesigned 2026-10-01, Ethan: "impressive"). Official facts only, plus what
   students wrote: a nameplate (initials monogram, kicker with subjects, room from their schedule),

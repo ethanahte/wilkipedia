@@ -14,12 +14,14 @@
 // The full file list is also in the page's HTML (#cal-list) for anyone without JS.
 
 import { popconfirm, initHeader, dataUrl, esc, $, toast } from './ui.js';
+import { loadBell, dayPlan } from './bell.js';
 
 const s = await initHeader();
 $('.cal-ics')?.addEventListener('click', () => toast('Downloading the calendar. Open the file to add every date to your phone or Google Calendar.', 'good'));
-const [cal, extra] = await Promise.all([
+const [cal, extra, bell] = await Promise.all([
   fetch(dataUrl('data/calendar.json')).then((r) => r.json()),
   fetch(dataUrl('data/calendar-extra.json')).then((r) => r.json()).catch(() => ({ sources: {}, events: [] })),
+  loadBell().catch(() => null),
 ]);
 const app = $('#cal-app');
 
@@ -85,6 +87,60 @@ const tag = (ev) => {
   const src = SOURCES[ev.src] || {};
   return `<span class="cal-src-tag" title="${esc(src.from || '')}">${esc(src.label || ev.src)}</span>`;
 };
+
+// ── the school year at a glance (Ethan 2026-10-01: dates belong here, times on the Bell schedule) ──
+// "Day N of M", the year as one bar split into its quarters (from the calendar's First Day of School
+// and End of Quarter / Semester milestones) with breaks and days off from the bell schedule, and
+// four countdowns: the next day off, the end of the quarter, the next break, the last day.
+function yearPanel() {
+  if (!bell) return '';
+  const first = events.find((ev) => /^first day of school/i.test(ev.title));
+  const ends = events.filter((ev) => ev.cat === 'milestone' && /^end of (quarter|semester) [1-4]\b/i.test(ev.title)).sort((a, b) => a.start.localeCompare(b.start));
+  if (!first || ends.length < 2) return '';
+  const last = ends.at(-1), A = parse(first.start), B = parse(last.start); B.setHours(23, 59);
+  const now = new Date(), x = (d) => Math.max(0, Math.min(100, ((d - A) / (B - A)) * 100));
+  let total = 0, done = 0, isSchool = false;
+  for (const d = new Date(A); d <= B; d.setDate(d.getDate() + 1)) {
+    const p = dayPlan(bell, d);
+    if (!p.periods && !p.adjusted) continue;
+    total++;
+    if (iso(d) < today) done++; else if (iso(d) === today) isSchool = true;
+  }
+  const quarters = ends.map((ev, i) => ({ n: i + 1, a: i ? ends[i - 1].start : first.start, b: ev.start, title: ev.title }));
+  const q = quarters.find((x2) => x2.b >= today);
+  // countdowns
+  const sps = bell.special.map((sp) => ({ ...sp, a: parse(sp.dates[0]), b: parse(sp.dates.at(-1)), first: sp.dates[0] }));
+  const isBreak = (sp) => sp.off && (/break/i.test(sp.off) || sp.dates.length >= 3);
+  const nextOf = (pred) => sps.find((sp) => pred(sp) && sp.first > today);
+  const prevOf = (pred, d) => { const p = sps.filter((sp) => pred(sp) && sp.first < (d || today)).at(-1); return p ? p.b : A; };
+  const days = (d) => Math.round((d - parse(today)) / 864e5);
+  const card = (label, d, from, what) => {
+    const n = days(d), p = Math.max(0, Math.min(1, (parse(today) - from) / Math.max(1, d - from))), C = 2 * Math.PI * 26;
+    return `<div class="bc"><svg class="bc-ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - p)).toFixed(1)}"/></svg>
+      <p class="bc-l">${label}</p><p class="bc-n">${n <= 0 ? '<b>Today</b>' : `<b>${n}</b><span>day${n === 1 ? '' : 's'}</span>`}</p><p class="bc-w">${esc(d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))}${what ? ` · ${esc(what)}` : ''}</p></div>`;
+  };
+  const off = nextOf((sp) => sp.off), brk = nextOf(isBreak);
+  const cards = [off && card('Next day off', off.a, prevOf((sp) => sp.off), off.off),
+    q && card(q.title.replace(/^End of /, 'End of '), parse(q.b), parse(q.a)),
+    brk && brk !== off && card('Next break', brk.a, prevOf(isBreak), brk.off),
+    card('Last day of school', parse(last.start), A, null)].filter(Boolean).join('');
+  // the bar
+  const marks = sps.filter((sp) => sp.off).map((sp) => { const b = new Date(sp.b); b.setDate(b.getDate() + 1);
+    return `<i class="${isBreak(sp) ? 'by-brk' : 'by-off'}" style="left:${x(sp.a)}%;width:${Math.max(0.35, x(b) - x(sp.a))}%" title="${esc(sp.off)}"></i>`; }).join('');
+  const qLines = quarters.slice(0, -1).map((qq) => `<i class="cy-qline" style="left:${x(parse(qq.b))}%"></i>`).join('');
+  const qLabels = quarters.map((qq) => `<span class="${q === qq ? 'on' : ''}" style="left:${x(parse(qq.a))}%;width:${x(parse(qq.b)) - x(parse(qq.a))}%">Q${qq.n}</span>`).join('');
+  const months = [];
+  for (let d = new Date(A.getFullYear(), A.getMonth() + 1, 1); d < B && x(d) < 95; d.setMonth(d.getMonth() + 1)) months.push(`<span style="left:${x(d)}%">${d.toLocaleDateString('en-US', { month: 'short' })}</span>`);
+  const before = today < first.start, after = today > last.start;
+  const head = before ? `<p class="cy-day"><b>${days(A)}</b> days until school starts</p>` : after ? '<p class="cy-day"><b>Summer.</b> The school year is over.</p>'
+    : `<p class="cy-day"><b>Day ${Math.min(total, done + (isSchool ? 1 : 0)) || 1}</b> of ${total}</p><p class="cy-sub">${q ? `Quarter ${q.n} · ` : ''}${Math.round((done / total) * 100)}% of the school year done · ${total - done - (isSchool ? 1 : 0)} school days after today</p>`;
+  return `<section class="cy" aria-label="The school year">
+    <div class="cy-top"><div><p class="c-kicker">${esc(cal.year)} school year</p>${head}</div></div>
+    <div class="by-bar cy-bar"><span class="by-fill" style="width:${x(now)}%"></span>${marks}${qLines}${before || after ? '' : `<i class="by-now" style="left:${x(now)}%"></i>`}</div>
+    <div class="cy-qs" aria-hidden="true">${qLabels}</div><div class="by-months" aria-hidden="true">${months.join('')}</div>
+    <div class="bp-counts cy-counts">${cards}</div>
+  </section>`;
+}
 
 function comingUp() {
   // the next few things that matter most: breaks, milestones, tests, big official events
@@ -220,7 +276,7 @@ function listView() {
 }
 
 function draw() {
-  app.innerHTML = comingUp() + `<div class="cal-main">${toolbar()}${filters()}${view === 'list' ? listView() : month() + dayPanel()}</div>`;
+  app.innerHTML = yearPanel() + comingUp() + `<div class="cal-main">${toolbar()}${filters()}${view === 'list' ? listView() : month() + dayPanel()}</div>`;
   refreshIcs();
 }
 
