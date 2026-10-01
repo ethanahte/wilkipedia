@@ -2838,3 +2838,79 @@ a.ib-tile:hover { border-color: var(--gold); }
   .bs-what { grid-column: 1 / -1; }
   .bs-next { grid-column: 2; grid-row: 1; }
 }
+/* bell page visuals: the countdown ring, countdown cards, the school year, the week's minutes */
+.bp-ring { position: relative; width: 220px; height: 220px; justify-self: end; align-self: center; }
+.bp-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(0deg); }
+.bp-ticks line { stroke: color-mix(in srgb, var(--paper) 30%, transparent); stroke-width: 1.2; stroke-linecap: round; }
+.bp-ring-bg { fill: none; stroke: color-mix(in srgb, var(--paper) 12%, transparent); stroke-width: 10; }
+.bp-ring-fg { fill: none; stroke: var(--gold); stroke-width: 10; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 110px 110px; transition: stroke-dashoffset 1s linear; }
+.bp-ring-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 3; transition: cx 1s linear, cy 1s linear; }
+.bp-ring .bp-count { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; font-size: 2.4rem; }
+.bp-ring .bp-count small { margin-top: 6px; }
+.bp-digits { display: block; white-space: nowrap; }
+.bp-digits span { display: inline-block; }
+.bp-count span.roll { animation: bp-roll .45s cubic-bezier(.2, .8, .2, 1); }
+@keyframes bp-roll { from { transform: translateY(-55%); opacity: 0; } to { transform: none; opacity: 1; } }
+/* countdown cards */
+.bp-counts { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-top: 14px; }
+.bc { position: relative; padding: 18px 18px 16px; border: 1px solid var(--rule); border-radius: 14px; background: var(--paper); overflow: hidden; }
+.bc-ring { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; transform: rotate(-90deg); }
+.bc-ring circle { fill: none; stroke: var(--rule); stroke-width: 6; }
+.bc-ring .fg { stroke: var(--gold); stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.2, .7, .2, 1); }
+.bc-l { margin: 0 56px 10px 0; font: 600 .64rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.bc-n { display: flex; align-items: baseline; gap: 6px; margin: 0; }
+.bc-n b { font: 500 3rem/1 var(--serif); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.bc-n span { font: 500 1rem var(--serif); }
+.bc-n em { margin-left: 4px; font: .82rem var(--mono); font-style: normal; color: var(--muted); }
+.bc-w { margin: 10px 0 0; font-size: .82rem; color: var(--muted); }
+/* the school year */
+.bp-year { margin-top: 12px; }
+.by-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 20px; }
+.by-head p { margin: 0; }
+.by-head b { font: 500 2rem var(--serif); margin-right: 4px; }
+.by-bar { position: relative; height: 34px; margin-top: 14px; border-radius: 8px; background: var(--card); box-shadow: inset 0 0 0 1px var(--rule); overflow: hidden; }
+.by-fill { position: absolute; top: 0; bottom: 0; left: 0; background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.by-bar i { position: absolute; top: 0; bottom: 0; }
+.by-brk, .by-key .by-brk { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--bad) 55%, transparent) 0 3px, transparent 3px 6px); }
+.by-off, .by-key .by-off { background: color-mix(in srgb, var(--bad) 60%, transparent); }
+.by-fin, .by-key .by-fin { background: var(--gold); }
+.by-adj, .by-key .by-adj { background: color-mix(in srgb, var(--ink) 30%, transparent); }
+.by-bar .by-off, .by-bar .by-adj { top: 22%; bottom: 22%; }
+.by-now { width: 3px; margin-left: -1.5px; background: var(--ink) !important; top: -2px !important; bottom: -2px !important; z-index: 1; }
+.by-breaks, .by-months { position: relative; height: 20px; overflow: hidden; }   /* the last month label sits at the very end */
+.by-breaks span { position: absolute; transform: translateX(-50%); top: 4px; font: 600 .6rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--bad); white-space: nowrap; }
+.by-months span { position: absolute; top: 2px; font: .7rem var(--mono); color: var(--muted); padding-left: 4px; border-left: 1px solid var(--rule); }
+.by-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 10px 0 0; font-size: .78rem; color: var(--muted); }
+.by-key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-left: 8px; }
+.by-key i:first-child { margin-left: 0; }
+/* where the week goes */
+.bm-head { margin-top: 10px; }
+.bm-head p { margin: 0; }
+.bm-head b { font: 500 1.5rem var(--serif); }
+.bm-head .meta { margin-top: 4px; }
+.bm-bars { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; max-width: 720px; }
+.bm-bars li { display: grid; grid-template-columns: 82px minmax(0, 1fr) 64px; align-items: center; gap: 12px; }
+.bm-k { font-size: .86rem; font-weight: 600; }
+.bm-bar { height: 14px; border-radius: 4px; background: var(--card); box-shadow: inset 0 0 0 1px var(--rule); overflow: hidden; }
+.bm-bar i { display: block; height: 100%; border-radius: 4px; background: var(--ink); transform-origin: left; animation: bm-grow .9s cubic-bezier(.2, .7, .2, 1) both; }
+.bm-bars li:nth-child(2) i { animation-delay: .05s; } .bm-bars li:nth-child(3) i { animation-delay: .1s; } .bm-bars li:nth-child(4) i { animation-delay: .15s; }
+.bm-bars li:nth-child(5) i { animation-delay: .2s; } .bm-bars li:nth-child(6) i { animation-delay: .25s; } .bm-bars li:nth-child(7) i { animation-delay: .3s; }
+.bm-bars li.other i { background: var(--dot-off); }
+.bm-bars li.other .bm-k { color: var(--muted); font-weight: 500; }
+.bm-v { font: .8rem var(--mono); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+@keyframes bm-grow { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { html:not([data-motion="full"]) .bm-bar i, html:not([data-motion="full"]) .bp-count span.roll { animation: none; } }
+html[data-motion="reduce"] .bm-bar i { animation: none; }
+@media (max-width: 760px) {
+  .bp-ring { justify-self: center; width: 200px; height: 200px; }
+  .bp-ring .bp-count { text-align: center; }
+  .by-breaks span { font-size: .5rem; }
+  .bm-bars li { grid-template-columns: 70px minmax(0, 1fr) 56px; gap: 8px; }
+  .bp-counts { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .bc { padding: 14px 12px 12px; }
+  .bc-ring { width: 30px; height: 30px; top: 10px; right: 10px; }
+  .bc-l { margin-right: 34px; font-size: .58rem; }
+  .bc-n b { font-size: 2.2rem; }
+  .bc-n em { display: none; }
+  .bc-w { font-size: .76rem; }
+}

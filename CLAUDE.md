@@ -94,6 +94,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     On phones it scrolls sideways and starts at today; redraws keep the scroll.
   - Every schedule (finals in a fold), and special days by month, upcoming first (the next one
     flagged), past ones folded.
+  - Visuals (Ethan: "a visual representation… cool countdowns"): the Now countdown sits in a
+    clock-face ring (60 ticks, a gold arc for how far through, a dot at now) and changed digits
+    roll in (not with reduced motion). Countdown cards: the weekend (to Friday's last bell),
+    the next day off, the next break (an off day named "break" or 3+ days), finals and the last
+    day of school (the special day saying "last day of school"), each with a ring for how far
+    from the previous one. The school year: one bar from the first date in bell.json to the
+    last day, breaks hatched, days off, finals and changed days marked, today's line, and
+    "Day N of M school days". Where the week goes: minutes each period meets in a regular week.
   - The home page strip (`mountBellStrip`) is unchanged.
 - **Teacher pages** (`teachers/<slug>/`: `build_teachers` + `pages.teacher`; the list is
   `pages.teachers`; redesigned 2026-10-01, Ethan: "impressive"). Official facts only, plus what
