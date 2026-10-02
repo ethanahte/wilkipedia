@@ -109,6 +109,35 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   "How things work": the students' school_info guides by topic with a topic index; topics
   nobody has written fold into one "Not written yet" block whose links pre-pick the topic
   (`?topic=` on the submit form).
+- **SAT page** (`sat/`: `build_sat` in build.py, `sat.js`, styles `.sat-*`/`.sn-*`/`.sd`/`.ss-*`/`.st-*`/`.sx-*`;
+  Ethan 2026-10-02: "people can also use it to post, and study SAT"). Official facts only:
+  - `data/sat.json` is hand-kept from College Board's pages (each one in `sources`, with the
+    `checked` date shown on the page): the 2026–27 SAT Weekend dates with registration, change and
+    score-release dates, the test's parts (two 32-min Reading and Writing modules of 27 questions,
+    a 10-min break, two 35-min Math modules of 22), the content domains with College Board's
+    approximate shares, and the free official practice links. **Update it each summer** when
+    College Board posts the next year's dates; after the last date the panel says so and links
+    College Board. Never fill it from memory or prep-company sites.
+  - The PSAT/SAT days at Wilcox are read at build time from the school calendar (events titled
+    PSAT or SAT in `data/calendar.json`).
+  - Page: a dark "Next SAT" panel (date, a ring counting the days since the last test, the year's
+    dates on a line with today's needle, then the next date still open for registration, scores on
+    the way, and the next school test day). It stays dark in night mode (`--sn-bg`). Then date
+    cards, the test drawn to scale, four facts, the domains as bars, a practice timer, the official
+    practice links, students' posts and Ask & answer.
+  - Practice timer: Reading and Writing module, Math module, or the whole test (auto-advances
+    through the modules and the break, like Bluebook). Pace = module time ÷ its questions (College
+    Board quotes 1 min 11 s for Reading and Writing). Gold cells = questions marked done, the needle
+    = where the clock says you should be. Keys: Space, →, ← while it's on screen.
+  - Posts are kind `sat` (forms.js; `SAT_TYPES` / `SAT_SECTIONS`, which the page filters by):
+    Tip, How I studied (optional score), Study notes (a PDF, in the same `guides` bucket and rules
+    as study guides) or Resource (link). They link to College Board material and never copy it:
+    no real test questions or answers. Migration 019 adds the kind.
+  - Ask & answer is an ordinary comment thread with `course_slug = 'sat'`. The comment code is
+    shared with class pages (`comments.js`, `mountComments`). A page with its own thread goes in
+    `THREADS` (ui.js: name and path, used by `courseUrl`, the dashboard and the review desk) and in
+    `comment_link()` in SQL (notification links). Comments are still never about teachers.
+  - The submit form takes `?kind=sat&type=…&section=…` (any select field's valid option).
 - **Bell schedule vs Calendar** (2026-10-01, Ethan: date features "fit better under calendar";
   keep it simple and effective). The Bell schedule answers "what time is it", the Calendar
   "what day is it". Don't put countdowns to dates, the school-year bar or the special-days list

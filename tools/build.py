@@ -39,7 +39,7 @@ DIRECTORY_SOURCE = "Wilcox High School staff directory, September 2026"
 
 GENERATED_DIRS = ["subjects", "courses", "teachers", "bounties", "submit", "review", "guides", "numbers",
                   "leaderboard", "summer", "school", "account", "rules", "about", "search", "privacy", "terms", "map",
-                  "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar", "inbox", "dashboard"]
+                  "menu", "clubs", "sports", "feedback", "credits", "bell", "calendar", "inbox", "dashboard", "sat"]
 
 e = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
@@ -160,6 +160,7 @@ ICONS = {
     "heart": _I('<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>'),
     "plus": '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     "settings": _I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
+    "target": _I('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>'),
     "chart": _I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
     "cube": _I('<path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/>'),
     "search": _I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
@@ -177,7 +178,8 @@ MORE_GROUPS = [
                     ("bell/", "Bell schedule", "bell", "Period times, block days, finals"),
                     ("menu/", "Cafeteria menu", "food", "Breakfast and lunch this week"),
                     ("school/", "School info", "school", "Counselors, passes, tech"),
-                    ("summer/", "Summer homework", "summer", "What’s due before school starts")]),
+                    ("summer/", "Summer homework", "summer", "What’s due before school starts"),
+                    ("sat/", "SAT", "target", "Test dates, a practice timer, students’ tips")]),
     ("Get involved", [("clubs/", "Clubs", "clubs", "85 clubs and how to join"),
                       ("sports/", "Sports", "sports", "Chargers teams by season"),
                       ("leaderboard/", "Leaderboard", "leaderboard", "Top contributors"),
@@ -1219,8 +1221,106 @@ SEARCH_PAGES = [
     ("About Wilkipedia", "about/", "Who runs this", "about contact founders ethan liu jonathan lee"),
     ("Credits", "credits/", "Everyone who helped build Wilkipedia", "credits thanks thank you contributors helpers founders team"),
     ("Send feedback", "feedback/", "Ideas, bug reports, feature requests", "feedback bug report feature request idea suggestion contact problem broken"),
+    ("SAT", "sat/", "Test dates, what’s on it, practice timer, students’ tips", "sat psat college board test prep study bluebook khan academy desmos score scores register registration test date practice test timer reading writing math"),
     ("Bell schedule", "bell/", "Period times, block days, finals", "bell schedule period times block day finals minimum day when does school start end"),
 ]
+
+
+# The SAT page (Ethan, 2026-10-02). Official facts only, from data/sat.json (College Board's pages,
+# with the date they were checked) and the school calendar; everything else is students' posts
+# (kind 'sat') and a comment thread (course_slug 'sat'). The facts are written into the page so it
+# reads without JavaScript; sat.js adds the countdown, the practice timer, the posts and the thread.
+def build_sat():
+    import datetime as dt
+    sat = json.loads((DATA / "sat.json").read_text())
+    cal = json.loads((DATA / "calendar.json").read_text())
+    events = cal["events"] if isinstance(cal, dict) else cal
+    school = [{"date": x["start"], "title": x["title"], "time": x.get("time") or "", "where": x.get("where") or ""}
+              for x in events if re.search(r"\bP?SAT\b", x.get("title", ""))]
+    day = lambda d: dt.date.fromisoformat(d)
+    short = lambda d: f"{day(d):%a}, {day(d):%b} {day(d).day}"
+    src = sat["sources"]
+    checked = day(sat["checked"])
+
+    dates = "".join(f"""<li class="sd" data-test="{x['test']}"><span class="sd-mo">{day(x['test']):%b}</span><b class="sd-day">{day(x['test']).day}</b>
+      <span class="sd-dl"><span>Register by <b>{short(x['register'])}</b></span><span>Changes by {short(x['changes'])}</span><span>Scores {short(x['scores'])}</span></span></li>"""
+                    for x in sat["dates"])
+    at_school = "".join(f"""<li data-date="{x['date']}"><b>{e(x['title'])}</b> <span>{short(x['date'])}{f" · {e(x['time'])}" if x['time'] else ""}{f" · {e(x['where'])}" if x['where'] else ""}</span></li>"""
+                        for x in school)
+
+    parts = sat["parts"]
+    total = sum(x["minutes"] for x in parts)
+    strip = "".join(f"""<div class="ss-p ss-{x['section']}" style="flex:{x['minutes']}"><b>{e(x['label'] if x['section'] == 'break' else f"Module {x['module']}")}</b>
+      <span>{x['minutes']} min{f" · {x['questions']} q" if x.get('questions') else ""}</span></div>""" for x in parts)
+    def doms(key, label, minutes, n):
+        rows = "".join(f"""<li><div class="dm-h"><b>{e(d['name'])}</b><span>≈{d['share']}%</span></div><i class="dm-bar"><i style="width:{d['share'] * 2.5:.1f}%"></i></i>{f"<p>{e(d['about'])}</p>" if d.get('about') else ""}</li>"""
+                       for d in sat["domains"][key])
+        return f"""<div class="dm dm-{key}"><p class="c-kicker">{label}</p><p class="dm-n"><b>{n}</b> questions · <b>{minutes}</b> minutes</p><ul>{rows}</ul></div>"""
+    rw_q = sum(x.get("questions", 0) for x in parts if x["section"] == "rw")
+    m_q = sum(x.get("questions", 0) for x in parts if x["section"] == "math")
+    rw_min = sum(x["minutes"] for x in parts if x["section"] == "rw")
+    m_min = sum(x["minutes"] for x in parts if x["section"] == "math")
+    host = lambda u: re.sub(r"^https?://(www\.)?", "", u).split("/")[0]
+    res = "".join(f"""<li><a class="sr-row" href="{e(x['url'])}" target="_blank" rel="noopener"><b>{e(x['name'])}</b><span>{e(x['what'])}</span><em>{e(host(x['url']))} ↗</em></a></li>"""
+                  for x in sat["resources"])
+
+    page("sat/", "SAT", f"""
+<header class="cl-head sat-head"><p class="c-kicker">College Board · The digital SAT</p><h1>The SAT</h1>
+  <p class="cl-lede">When you can take it, what’s on it, and how Wilcox students studied for it. The facts come from College Board; the tips come from students who took it.</p>
+  <nav class="sat-toc" aria-label="On this page"><a href="#dates">Dates</a><a href="#test">The test</a><a href="#timer">Practice timer</a><a href="#practice">Free practice</a><a href="#posts">From students</a><a href="#comments">Ask &amp; answer</a></nav></header>
+
+<section id="sat-next" class="sat-next" aria-label="The next SAT" hidden></section>
+
+<section class="sat-sec" id="dates"><div class="si-h"><h2>Test dates, 2026–27</h2><a class="cl-dlink" href="{e(src['dates'])}" target="_blank" rel="noopener">Register on College Board ↗</a></div>
+  <p class="sec-sub">{e(sat['datesNote'])} Every one is a Saturday.</p>
+  <ol class="sat-dates">{dates}</ol>
+  {f'<div class="sat-school"><p class="c-kicker">At Wilcox, from the school calendar</p><ul id="sat-school">{at_school}</ul><a class="cl-dlink" href="../calendar/">Calendar →</a></div>' if school else ''}
+</section>
+
+<section class="sat-sec" id="test"><h2>The test</h2>
+  <p class="sec-sub">Two sections, each in two modules, on College Board’s Bluebook app. {total - 10} minutes of testing, {rw_q + m_q} questions, and a 10-minute break in the middle.</p>
+  <div class="sat-strip" role="img" aria-label="Reading and Writing: two 32-minute modules of 27 questions. A 10-minute break. Math: two 35-minute modules of 22 questions.">{strip}</div>
+  <div class="ss-legend"><span class="ss-k ss-rw">Reading and Writing · {rw_min} min</span><span class="ss-k ss-break">Break</span><span class="ss-k ss-math">Math · {m_min} min</span></div>
+  <div class="sat-facts">
+    <div class="sf"><b>400–1600</b><span>Your score: Reading and Writing plus Math, each 200–800.</span></div>
+    <div class="sf"><b>Adaptive</b><span>How you do on module 1 decides whether module 2 is harder or easier.</span></div>
+    <div class="sf"><b>Guess</b><span>Wrong answers cost nothing, so never leave a question blank.</span></div>
+    <div class="sf"><b>Desmos</b><span>A graphing and scientific calculator is built in, or bring your own approved one.</span></div>
+  </div>
+  <div class="sat-doms">{doms("rw", "Reading and Writing", rw_min, rw_q)}{doms("math", "Math", m_min, m_q)}</div>
+  <p class="c-src">Two questions in each module are being tried out and don’t count. Sources: <a href="{e(src['structure'])}" target="_blank" rel="noopener">structure</a>, <a href="{e(src['scoring'])}" target="_blank" rel="noopener">scoring</a>, <a href="{e(src['calculator'])}" target="_blank" rel="noopener">calculators</a>, <a href="{e(src['rw'])}" target="_blank" rel="noopener">Reading and Writing</a> and <a href="{e(src['math'])}" target="_blank" rel="noopener">Math</a> specifications.</p>
+</section>
+
+<section class="sat-sec" id="timer"><h2>Practice timer</h2>
+  <p class="sec-sub">Real module timing, with your pace question by question. Use it with a Bluebook practice test or a set from the question bank.</p>
+  <div id="sat-timer" class="st"><p class="meta">The timer needs JavaScript.</p></div>
+</section>
+
+<section class="sat-sec" id="practice"><div class="si-h"><h2>Free official practice</h2><a class="cl-dlink" href="{e(src['practice'])}" target="_blank" rel="noopener">All of it on College Board ↗</a></div>
+  <p class="sec-sub">All free. The practice tests in Bluebook are the closest thing to the real test.</p>
+  <ul class="sat-res">{res}</ul>
+</section>
+
+<section class="sat-sec" id="posts"><div class="si-h"><h2>From Wilcox students</h2><a class="cl-dlink" href="../submit/?kind=sat">Write one →</a></div>
+  <p class="sec-sub">Tips, study plans and notes from students who took it, checked by a reviewer before they go up.</p>
+  <div id="sat-posts"><div class="meta">Loading…</div></div>
+</section>
+
+<section class="sat-sec" id="comments"><h2>Ask &amp; answer</h2>
+  <p class="sec-sub">Ask about studying, signing up or test day, or answer someone. Don’t share questions from a real test you took: College Board’s rules forbid it. New members’ comments appear after a reviewer approves them. <a href="../rules/">Rules</a></p>
+  <form id="comment-form" class="comment-form">
+    <div id="replying" class="meta" hidden>Replying to a comment · <button type="button" class="linkish" id="cancel-reply">cancel</button></div>
+    <label class="sr" for="comment-prompt">Topic</label><select id="comment-prompt"></select>
+    <label class="sr" for="comment-body">Comment</label>
+    <textarea id="comment-body" rows="3" maxlength="2000" placeholder="Ask a question, or share what worked for you"></textarea>
+    <button class="btn">Post</button>
+  </form>
+  <div id="comment-list"></div>
+</section>
+
+<p class="c-src sat-src">Dates, deadlines and the facts above are from College Board, checked {checked:%B} {checked.day}, {checked.year}. College Board can change them: before you register, check <a href="{e(src['dates'])}" target="_blank" rel="noopener">collegeboard.org</a>. Wilkipedia is run by students and isn’t part of College Board. SAT is a trademark of College Board.</p>""",
+         active="sat/", data={"page": "sat", "dates": sat["dates"], "parts": parts, "school": school, "scores": src["scores"], "register": src["dates"], "bring": src["bring"]},
+         desc="The SAT at Wilcox: 2026–27 test dates and deadlines, what’s on the digital SAT, a practice timer, free official practice, and tips from Wilcox students.")
 
 
 def build_search_index(depts, courses, teachers):
@@ -1265,7 +1365,7 @@ def build_seo(courses, teachers, depts):
             (ROOT / f).unlink(missing_ok=True)
         return
     base = SITE_URL.rstrip("/")
-    urls = ["", "subjects/", "bounties/", "summer/", "school/", "teachers/", "about/", "rules/", "terms/", "privacy/", "map/", "campus/", "calendar/"]
+    urls = ["", "subjects/", "bounties/", "summer/", "school/", "sat/", "teachers/", "about/", "rules/", "terms/", "privacy/", "map/", "campus/", "calendar/"]
     urls += [f"subjects/{d['slug']}/" for d in depts] + [f"courses/{s}/" for s in courses] + [f"teachers/{t['slug']}/" for t in teachers]
     (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{e(base + '/' + u)}</loc></url>\n" for u in urls) + "</urlset>\n")
@@ -1471,6 +1571,7 @@ def main():
     build_courses(depts, courses)
     build_teachers(teachers, courses)
     build_static()
+    build_sat()
     build_seo(courses, teachers, depts)
     build_campus()
     build_calendar()

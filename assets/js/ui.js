@@ -548,6 +548,7 @@ export function placeOf(x, courseName = {}) {
   if (x.kind === 'room_schedule') return [`Room ${x.payload?.room || '?'}`, `${root}map/#${encodeURIComponent(normRoom(x.payload?.room))}`];
   if (x.kind === 'club') return [x.payload?.name || 'Club', `${root}clubs/#${slugify(x.payload?.name)}`];
   if (x.kind === 'sport') return [x.payload?.name || 'Sports team', `${root}sports/#${slugify(x.payload?.name)}`];
+  if (x.kind === 'sat') return ['SAT', `${root}sat/#p-${x.id}`];
   if (x.course_slug) return [courseName[x.course_slug] || x.course_slug, `${root}courses/${x.course_slug}/`];
   return ['School info', `${root}school/`];
 }
@@ -576,7 +577,9 @@ export function applyClassTheme(user, pref = classPref()) {
   try { resolved ? localStorage.setItem(CLASS_KEY + '-applied', resolved) : localStorage.removeItem(CLASS_KEY + '-applied'); } catch { /* ignore */ }
 }
 
-export const courseUrl = (slug) => `${root}courses/${slug}/`;
+// Pages that aren't classes but have a comment thread (comments.course_slug): [name, path]
+export const THREADS = { sat: ['SAT', 'sat/'] };
+export const courseUrl = (slug) => `${root}${THREADS[slug]?.[1] || `courses/${slug}/`}`;
 export const roleLabel = (r) => ({ contributor: 'Contributor', trusted: 'Trusted', reviewer: 'Reviewer', admin: 'Founder' }[r] || r);
 
 // ── Terms of Service ──

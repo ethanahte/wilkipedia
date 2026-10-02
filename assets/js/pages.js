@@ -859,6 +859,10 @@ const pages = {
     (await import('./bell.js')).mountBellPage();
   },
 
+  async sat() {
+    (await import('./sat.js')).mountSat(s);
+  },
+
   // The teachers list: by subject, with a find box
   teachers() {
     const items = $$('#tl-groups li');

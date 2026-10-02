@@ -1,0 +1,53 @@
+{
+  "_note": "Hand-kept from College Board's own pages (sources below). Check them again before each school year and when College Board posts new dates. Everything on the SAT page that isn't written by students comes from here or from the school's calendar (data/calendar.json, events titled PSAT or SAT).",
+  "checked": "2026-10-02",
+  "sources": {
+    "dates": "https://satsuite.collegeboard.org/sat/dates-deadlines",
+    "scores": "https://satsuite.collegeboard.org/scores/score-release-dates",
+    "structure": "https://satsuite.collegeboard.org/sat/whats-on-the-test/structure",
+    "scoring": "https://satsuite.collegeboard.org/scores/what-scores-mean/how-scores-calculated",
+    "calculator": "https://satsuite.collegeboard.org/sat/what-to-bring-do/calculator-policy",
+    "rw": "https://satsuite.collegeboard.org/k12-educators/about/alignment/reading",
+    "math": "https://satsuite.collegeboard.org/k12-educators/about/alignment/math",
+    "practice": "https://satsuite.collegeboard.org/sat/practice-preparation",
+    "bring": "https://satsuite.collegeboard.org/sat/what-to-bring-do/what-to-bring"
+  },
+  "dates": [
+    {"test": "2026-10-03", "register": "2026-09-18", "changes": "2026-09-22", "scores": "2026-10-16"},
+    {"test": "2026-11-07", "register": "2026-10-23", "changes": "2026-10-27", "scores": "2026-11-20"},
+    {"test": "2026-12-05", "register": "2026-11-20", "changes": "2026-11-24", "scores": "2026-12-18"},
+    {"test": "2027-03-06", "register": "2027-02-19", "changes": "2027-02-23", "scores": "2027-03-19"},
+    {"test": "2027-05-01", "register": "2027-04-16", "changes": "2027-04-20", "scores": "2027-05-14"},
+    {"test": "2027-06-05", "register": "2027-05-21", "changes": "2027-05-25", "scores": "2027-06-21"}
+  ],
+  "datesNote": "SAT Weekend dates. College Board: these dates and deadlines apply to all students, U.S. and international.",
+  "parts": [
+    {"id": "rw1", "section": "rw", "label": "Reading and Writing", "module": 1, "minutes": 32, "questions": 27},
+    {"id": "rw2", "section": "rw", "label": "Reading and Writing", "module": 2, "minutes": 32, "questions": 27},
+    {"id": "break", "section": "break", "label": "Break", "minutes": 10},
+    {"id": "m1", "section": "math", "label": "Math", "module": 1, "minutes": 35, "questions": 22},
+    {"id": "m2", "section": "math", "label": "Math", "module": 2, "minutes": 35, "questions": 22}
+  ],
+  "domains": {
+    "rw": [
+      {"name": "Information and Ideas", "share": 26, "about": "Finding, reading and combining information and ideas from texts, tables and graphs."},
+      {"name": "Craft and Structure", "share": 28, "about": "Words and phrases in context, how a text is built, and connections between related texts."},
+      {"name": "Expression of Ideas", "share": 20, "about": "Revising a text so it says what it means to, and meets a goal."},
+      {"name": "Standard English Conventions", "share": 26, "about": "Editing for sentence structure, usage and punctuation."}
+    ],
+    "math": [
+      {"name": "Algebra", "share": 35},
+      {"name": "Advanced Math", "share": 35},
+      {"name": "Problem-Solving and Data Analysis", "share": 15},
+      {"name": "Geometry and Trigonometry", "share": 15}
+    ]
+  },
+  "resources": [
+    {"name": "Bluebook", "url": "https://bluebook.collegeboard.org/students", "what": "College Board’s testing app. Take a free, full-length practice test in it, the same way you’ll take the real one."},
+    {"name": "My Practice", "url": "https://mypractice.collegeboard.org", "what": "The Student Question Bank, your practice test results, and practice picked from them."},
+    {"name": "Official SAT Prep on Khan Academy", "url": "https://www.khanacademy.org/test-prep/digital-sat", "what": "Free lessons and practice, with a study plan made for you."},
+    {"name": "Question of the Day", "url": "https://qotd.collegeboard.org/", "what": "One official question a day."},
+    {"name": "Schoolhouse.world SAT tutoring", "url": "https://schoolhouse.world/sat-bootcamp?ref=cb-sat-practice", "what": "Free, live small-group sessions led by trained peer tutors (College Board’s partner)."},
+    {"name": "Desmos graphing calculator", "url": "https://www.desmos.com/calculator", "what": "The calculator built into Bluebook. Practice with it before test day."}
+  ]
+}

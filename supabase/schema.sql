@@ -152,7 +152,7 @@ create table public.submissions (
   course_slug text,                                   -- null for school-wide info
   kind        text not null check (kind in
               ('course_overview', 'teacher_section', 'resource', 'tip', 'summer_hw', 'school_info',
-               'club', 'sport', 'room_schedule')),
+               'club', 'sport', 'room_schedule', 'sat')),
   teacher     text,
   payload     jsonb not null,
   -- withdrawn = taken back by the author; merged = an approved update, copied onto `replaces`
@@ -460,6 +460,7 @@ language sql immutable as $$
   select case
     when s.kind = 'club'  then 'clubs/'
     when s.kind = 'sport' then 'sports/'
+    when s.kind = 'sat'   then 'sat/#p-' || s.id
     when s.course_slug is not null then 'courses/' || s.course_slug || '/'
     else 'school/' end
 $$;
@@ -470,6 +471,7 @@ language sql immutable as $$
     when 'course_overview' then 'course overview' when 'teacher_section' then 'teacher section'
     when 'resource' then 'resource' when 'tip' then 'tip' when 'summer_hw' then 'summer homework info'
     when 'school_info' then 'school info article' when 'club' then 'club info' when 'sport' then 'team info'
+    when 'sat' then 'SAT post'
     else 'submission' end
 $$;
 
@@ -808,6 +810,12 @@ begin
 end $$;
 
 -- ───────── comments: replies, and a reviewer's decision ─────────
+-- Where a thread lives: a class page, or a page with its own thread (THREADS in ui.js; migration 019)
+create function public.comment_link(slug text) returns text
+language sql immutable as $$
+  select case slug when 'sat' then 'sat/#comments' else 'courses/' || slug || '/#comments' end
+$$;
+
 create function public.on_comment_notify() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
@@ -818,7 +826,7 @@ begin
   if new.status = 'visible' and (tg_op = 'INSERT' or old.status <> 'visible') then
     if tg_op = 'UPDATE' and public.is_reviewer() then
       perform public.notify(new.user_id, 'comment_live', 'comment:' || new.id,
-        'Your comment was approved and is live on the class page.', 'courses/' || new.course_slug || '/#comments');
+        'Your comment was approved and is live now.', public.comment_link(new.course_slug));
     end if;
     if new.parent_id is not null then
       select user_id into parent_author from public.comments where id = new.parent_id;
@@ -826,7 +834,7 @@ begin
         select display_name into who from public.profiles where id = new.user_id;
         perform public.notify(parent_author, 'reply', 'comment:' || new.id,
           format('%s replied to your comment: %s', coalesce(who, 'Someone'), left(new.body, 140)),
-          'courses/' || new.course_slug || '/#comments');
+          public.comment_link(new.course_slug));
       end if;
     end if;
   elsif tg_op = 'UPDATE' and new.status = 'hidden' and old.status = 'visible' and public.is_reviewer() then

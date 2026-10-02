@@ -3,7 +3,7 @@
 //   ?bounty=<id>                                 (from a claimed bounty)
 
 import { initHeader, requireUser, renderFields, withUploads, showResult, suggestions, refreshPeriodOptions, drafts, courses, dataUrl, $, $$, esc, guard, courseUrl, root, byLastName } from './ui.js';
-import { KINDS, schoolYear } from './forms.js';
+import { KINDS, schoolYear, optionsOf } from './forms.js';
 
 const s = await initHeader();
 import('./charts.js').then((m) => m.mountCascade(s));
@@ -87,6 +87,10 @@ function paint() {
   if (q.get('room')) preset.room = q.get('room').toUpperCase();
   if (q.get('name')) preset.name = q.get('name');
   if (q.get('topic')) preset.topic = q.get('topic');                  // from School info's "Not written yet"
+  for (const k of ['type', 'section']) {                               // from the SAT page's "Write one" links
+    const f = KINDS[state.kind].fields.find((x) => x.key === k && x.type === 'select');
+    if (f && q.get(k) && optionsOf(f).includes(q.get(k))) preset[k] = q.get(k);
+  }
   if (state.kind === 'room_schedule') preset.school_year = schoolYear(0);   // this year's, unless they change it
   const draft = drafts.get(draftKey());
   if (draft?.teacher && !state.teacher) state.teacher = draft.teacher;
@@ -155,7 +159,7 @@ $('#submit-form').addEventListener('submit', async (e) => {
   drafts.clear(draftKey());
   $('#submit-form').hidden = true;
   // a clear result, and the way back to where it'll live
-  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'], room_schedule: [`${root}map/`, 'the map'] }[state.kind]
+  const back = { club: [`${root}clubs/`, 'clubs'], sport: [`${root}sports/`, 'sports'], room_schedule: [`${root}map/`, 'the map'], sat: [`${root}sat/`, 'the SAT page'] }[state.kind]
     || (!noCourse(scope) && state.course ? [courseUrl(state.course), bySlug[state.course].name] : null);
   const again = () => {
     $('#submit-form').reset();

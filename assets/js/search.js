@@ -87,6 +87,7 @@ export async function addLive(store) {
       const text = [...Object.values(p), ...Object.values(p.periods || {})].filter((v) => typeof v === 'string').join(' ');
       let n, u, d;
       if (x.kind === 'school_info') { n = p.title || 'School info'; u = 'school/'; d = `School info · ${p.topic || ''}`; }
+      else if (x.kind === 'sat') { n = p.title || 'SAT post'; u = `sat/#p-${x.id}`; d = `SAT · ${p.type || ''}${p.section ? ` · ${p.section}` : ''}`; }
       else if (x.kind === 'club' || x.kind === 'sport') return null;   // folded into their cards below
       else if (x.kind === 'room_schedule') { n = `Room ${p.room || ''}`; u = `map/#${encodeURIComponent(p.room || '')}`; d = `${x.teacher || 'Teacher'} · ${p.school_year || ''} schedule`; }
       else if (x.course_slug) {

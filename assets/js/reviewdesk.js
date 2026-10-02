@@ -3,7 +3,7 @@
 // are posted and edited on the Bounty board itself.)
 // The database only answers these queries for reviewers (see is_reviewer() in schema.sql).
 
-import { popconfirm, courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
+import { THREADS, popconfirm, courses, toast, placeOf, openEditor, linkPdfs, fileSize, openBountyEditor, $, $$, esc, byline, prose, safeUrl, ago, guard, courseUrl, fmtDate, paintAnnouncements, announceHref, ANNOUNCE_KINDS, scheduleBlock } from './ui.js';
 import { KINDS } from './forms.js';
 
 let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
@@ -12,7 +12,7 @@ let s, data, bySlug = {}, tab = 'submissions', panelEl, redraw = () => {};
 const SHORTCUT = /\bfull (points|credit|marks)\b|\bwithout (doing|reading|studying|actually)\b|\b(don'?t|doesn'?t|never|not|aren'?t|isn'?t|rarely|barely)( really| fully| even| actually)? (check|checked|read|grade|graded|look at)\b|\bskip(ping)? (the )?(homework|reading|assignments?|work)\b|\bcheat|\bcopy (the |someone|answers|off)|\bget away with\b|\b(chatgpt|ai) (to )?(do|write)s?\b/i;
 const shortcutFlag = (p) => (SHORTCUT.test(Object.values(p || {}).filter((v) => typeof v === 'string').join(' '))
   ? '<p class="upd-note shortcut-flag"><span class="tag st-changes">Check</span> This might be a way around the work (<a href="../rules/" target="_blank">rule 2</a>). Tips on doing the work well are fine; ways to skip it aren’t.</p>' : '');
-const courseName = (slug) => bySlug[slug]?.name || slug || 'School-wide';
+const courseName = (slug) => bySlug[slug]?.name || THREADS[slug]?.[0] || slug || 'School-wide';
 
 // Draw one desk section into `panel`. `again` redraws it (after an action).
 export async function deskTab(panel, store, name, again) {

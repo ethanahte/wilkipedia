@@ -25,6 +25,11 @@ export function parseSchedule(text) {
 
 export const GUIDE = 'Study guide (student-made)';
 
+// SAT posts (the SAT page filters and labels by these, so keep the wording in step)
+export const SAT_PLAN = 'How I studied', SAT_NOTES = 'Study notes (PDF)', SAT_LINK = 'Resource (link)';
+export const SAT_TYPES = ['Tip', SAT_PLAN, SAT_NOTES, SAT_LINK];
+export const SAT_SECTIONS = ['Reading and Writing', 'Math', 'Both sections', 'Test day & planning'];
+
 export const KINDS = {
   course_overview: {
     label: 'Course overview',
@@ -156,6 +161,27 @@ export const KINDS = {
       { key: 'text', label: 'Details', type: 'textarea', required: true },
       { key: 'source', label: 'Where this comes from', type: 'text',
         hint: 'e.g. the student handbook, the counseling office page, or "from experience".' },
+    ],
+  },
+
+  // The SAT page (sat/, migration 019). Not tied to a class. Like everything else, it links to
+  // College Board's material and never copies it: no real test questions, no answer keys.
+  sat: {
+    label: 'SAT post',
+    blurb: 'A tip, how you studied, your own notes or a useful link for the SAT.',
+    scope: 'school',
+    fields: [
+      { key: 'type', label: 'What is it?', type: 'select', required: true, options: SAT_TYPES },
+      { key: 'section', label: 'Which part of the SAT?', type: 'select', required: true, options: SAT_SECTIONS },
+      { key: 'title', label: 'Title', type: 'text', required: true, max: 90,
+        hint: 'e.g. "Do the Bluebook practice tests under real timing".' },
+      { key: 'text', label: 'Details', type: 'textarea', required: true, max: 3000,
+        hint: 'What to do and why it helped. Never paste real SAT questions or answers: link to them instead.' },
+      { key: 'pdf', label: 'Your notes (PDF)', type: 'pdf', required: true, when: ['type', SAT_NOTES],
+        hint: 'Notes you made yourself. Up to 5 MB. No copied College Board or prep-book pages.' },
+      { key: 'url', label: 'Link', type: 'url', required: true, when: ['type', SAT_LINK] },
+      { key: 'score', label: 'Your score, if you want to share it', type: 'text', max: 40, when: ['type', SAT_PLAN],
+        hint: 'Optional, e.g. "1280 → 1430". It gives your plan context. Leave it blank if you’d rather not.' },
     ],
   },
 

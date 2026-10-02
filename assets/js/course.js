@@ -1,8 +1,9 @@
 // A course page. The static HTML (tools/build.py) carries the catalog facts and
 // the teacher list; everything students contributed is fetched and drawn here.
 
-import { popconfirm, initHeader, requireUser, drafts, openEditor, suggestLink, linkPdfs, courses, $, esc, byline, avatarHtml, prose, safeUrl, fmtDate, ago, guard, toast, root } from './ui.js';
+import { initHeader, requireUser, openEditor, suggestLink, linkPdfs, courses, $, esc, byline, prose, safeUrl, fmtDate, guard, root } from './ui.js';
 import { KINDS, staleness } from './forms.js';
+import { mountComments } from './comments.js';
 import { REVIEWER_ROLES } from './store.js';
 
 const page = JSON.parse($('#page-data').textContent);
@@ -187,57 +188,10 @@ function spy() {
 addEventListener('scroll', () => spy.mark?.(), { passive: true });
 
 // ── comments ──
-async function drawComments() {
-  const me = s.user();
-  const mod = me && REVIEWER_ROLES.includes(me.role);
-  const all = await s.comments(page.slug);
-  const top = all.filter((c) => !c.parent_id).reverse();
-  const one = (c, reply = false) => `
-    <div class="comment ${reply ? 'reply' : ''}" data-id="${c.id}">
-      <div class="c-head">${avatarHtml(c)}<b>${esc(c.author)}</b>${byline('', c.verified)} <span class="meta">${ago(c.created_at)}</span>
-        ${c.prompt && c.prompt !== 'General' ? `<span class="tag">${esc(c.prompt)}</span>` : ''}
-        ${c.status === 'held' ? '<span class="tag warn">Waiting for approval</span>' : ''}
-        ${c.status === 'hidden' ? '<span class="tag warn">Hidden (reported)</span>' : ''}</div>
-      <div class="c-body">${prose(c.body)}</div>
-      <div class="c-actions">
-        <button class="linkish" data-like="${c.id}" aria-pressed="${c.liked}">${c.liked ? '♥' : '♡'} ${c.likes || ''}</button>
-        ${reply ? '' : `<button class="linkish" data-reply="${c.id}">Reply</button>`}
-        ${me && (me.id === c.user_id || mod) ? `<button class="linkish" data-del="${c.id}">Delete</button>` : ''}
-        ${me && me.id !== c.user_id ? `<button class="linkish" data-flag="${c.id}">Report</button>` : ''}
-      </div>
-      ${reply ? '' : all.filter((r) => r.parent_id === c.id).map((r) => one(r, true)).join('')}
-    </div>`;
-  $('#comment-list').innerHTML = top.length ? top.map((c) => one(c)).join('')
-    : '<div class="empty">No comments yet. Be the first to share what this class is like.</div>';
-  const n = $('#c-toc [data-sec="comments"] .n');
-  if (n) n.textContent = all.filter((c) => c.status === 'visible' || !c.status).length || '—';
-}
-
-$('#comment-prompt').innerHTML = PROMPTS.map((p) => `<option>${esc(p)}</option>`).join('');
-drafts.bind($('#comment-body'), `comment:${page.slug}`);
-
-$('#comment-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const body = $('#comment-body').value.trim();
-  if (!body) return;
-  if (!(await requireUser(s, 'to comment'))) return;
-  const parent_id = Number($('#comment-form').dataset.parent) || null;
-  const ok = await guard(() => s.addComment({ course_slug: page.slug, body, parent_id,
-                                              prompt: parent_id ? null : $('#comment-prompt').value }));
-  if (!ok) return;
-  $('#comment-body').value = '';
-  drafts.clear(`comment:${page.slug}`);
-  delete $('#comment-form').dataset.parent;
-  $('#replying').hidden = true;
-  const mine = (await s.comments(page.slug)).filter((c) => c.user_id === s.user().id).pop();
-  toast(mine?.status === 'held' ? 'Thanks! Your comment will appear after a reviewer approves it.' : 'Posted.', 'good');
-  drawComments();
-});
-
-$('#cancel-reply').addEventListener('click', () => {
-  delete $('#comment-form').dataset.parent;
-  $('#replying').hidden = true;
-});
+const comments = mountComments(s, { slug: page.slug, prompts: PROMPTS,
+  empty: 'No comments yet. Be the first to share what this class is like.',
+  onCount: (n) => { const el = $('#c-toc [data-sec="comments"] .n'); if (el) el.textContent = n || '—'; } });
+const drawComments = comments.draw;
 
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('button');
@@ -273,26 +227,6 @@ document.addEventListener('click', async (e) => {
     if (note === null) return;
     await guard(() => s.report({ kind: 'outdated', course_slug: page.slug, target: t.dataset.report, note: note || null }),
                 'Thanks. A reviewer will check it.');
-  } else if (t.dataset.like) {
-    if (!(await requireUser(s, 'to like comments'))) return;
-    const id = Number(t.dataset.like);
-    await guard(() => (t.getAttribute('aria-pressed') === 'true' ? s.unlike(id) : s.like(id)));
-    drawComments();
-  } else if (t.dataset.reply) {
-    $('#comment-form').dataset.parent = t.dataset.reply;
-    $('#replying').hidden = false;
-    $('#comment-body').focus();
-  } else if (t.dataset.del) {
-    if (!(await popconfirm(t, { title: 'Delete this comment?', ok: 'Delete', key: 'comment-delete' }))) return;
-    await guard(() => s.deleteComment(Number(t.dataset.del)), 'Deleted.');
-    drawComments();
-  } else if (t.dataset.flag) {
-    const note = prompt('Why should a reviewer look at this comment?');
-    if (note === null) return;
-    await guard(() => s.report({ kind: 'inappropriate', course_slug: page.slug,
-                                 target: `comment:${t.dataset.flag}`, note: note || null }),
-                'Reported. It is hidden until a reviewer checks it.');
-    drawComments();
   }
 });
 

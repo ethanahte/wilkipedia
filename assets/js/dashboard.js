@@ -17,7 +17,7 @@
 // #feedback(-planned|-done) #published(-off) #announcements #people #person/<id> #edit-<submission id>.
 // Old /inbox/ and /review/ addresses forward here, and so does #bounties (to the board).
 
-import { popconfirm, initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
+import { THREADS, popconfirm, initHeader, setNoteCount, courses, placeOf, openEditor, linkPdfs, $, $$, esc, byline, prose, ago, fmtDate,
          guard, courseUrl, roleLabel, avatarHtml, root } from './ui.js';
 import { KINDS } from './forms.js';
 import { REVIEWER_ROLES, canEditOwn } from './store.js';
@@ -25,7 +25,7 @@ import { deskTab } from './reviewdesk.js';
 
 const s = await initHeader();
 const data = await courses();
-const cname = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
+const cname = { ...Object.fromEntries(data.courses.map((c) => [c.slug, c.name])), ...Object.fromEntries(Object.entries(THREADS).map(([k, [n]]) => [k, n])) };
 const app = $('#dash-app');
 
 const STATUS = { pending: 'In review', changes: 'Sent back', approved: 'Published', rejected: 'Not accepted', withdrawn: 'Withdrawn', merged: 'Update published' };
