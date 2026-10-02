@@ -279,6 +279,10 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
     out = ROOT / path if path.endswith(".html") else ROOT / path / "index.html"
     depth = len(out.relative_to(ROOT).parts) - 1
     r = "../" * depth or "./"
+    # GitHub Pages shows 404.html at whatever address was missing (/teachers/nobody/…), so its links
+    # can't be relative: they start at the site root (wilcoxwiki.org is served from the domain root)
+    if path == "404.html":
+        r = "/"
     full_title = f"{title} · Wilkipedia" if title != "Wilkipedia" else "Wilkipedia: everything about Wilcox High School"
     canon = ""
     if private:                    # members-only pages (Ethan 2026-10-01): kept out of search engines too
@@ -1086,6 +1090,55 @@ def build_static():
 </ol>
 </div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
+    page("bell/", "Bell schedule", """
+<header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1></header>
+<section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
+<section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
+<section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
+<a class="bp-cal" href="../calendar/"><b>Days off, breaks and finals</b><span>The whole school year, with countdowns, is on the Calendar</span><i aria-hidden="true">→</i></a>
+<p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},
+         desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
+
+    # "By the numbers" was retired (its a–g chart moved to All classes, its coverage
+    # chart to Contribute); the old address forwards to the a–g chart.
+    (ROOT / "numbers").mkdir(exist_ok=True)
+    (ROOT / "numbers" / "index.html").write_text('<!doctype html><meta charset="utf-8"><title>Moved</title>'
+        '<meta http-equiv="refresh" content="0; url=../subjects/#ag"><link rel="canonical" href="../subjects/">'
+        '<p>This page moved to <a href="../subjects/#ag">All classes</a>.</p>\n')
+
+    page("guides/", "Study guides", f"""
+<h1>Study guides</h1>
+<p class="lede">Every study guide and resource students have shared, as a graph. The big dots are subjects, each class hangs off its subject, and each guide hangs off every class it’s for.</p>
+<div class="gv" id="gv-graph" translate="no">
+  <div class="gv-bar">
+    <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>
+    <span class="gv-count" id="gv-count"></span>
+    <button type="button" class="gv-gear" id="gv-gear" aria-expanded="false" aria-label="Graph settings" title="Graph settings">{ICONS["settings"]}</button>
+  </div>
+  <div id="gv-chart" class="gv-chart" role="img" aria-label="Graph of subjects, classes and study guides. The list below has every guide."></div>
+  <div class="gv-panel" id="gv-panel" hidden></div>
+  <aside class="gv-info" id="gv-info" hidden></aside>
+  <div class="gv-foot">
+    <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
+    <div class="gv-legend" id="gv-legend" role="group" aria-label="What the dots are. Click a kind of resource to hide or show it."></div>
+  </div>
+</div>
+<section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
+  <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",
+         desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
+
+    page("settings/", "Settings", """
+<header class="set-head">
+  <p class="set-kicker">Preferences</p>
+  <h1>Settings</h1>
+  <p class="lede">Make Wilkipedia work the way you like. Everything here is saved in this browser, so set it once on each device you use.</p>
+</header>
+<div class="set-layout">
+  <nav class="set-toc" aria-label="Settings sections" id="set-toc"></nav>
+  <div id="settings" class="settings"><div class="meta">Loading…</div></div>
+</div>""", data={"page": "settings"},
+         desc="Theme, text size, motion, language and other Wilkipedia settings.")
+
     # Credits: the thank-you and the sources are public; the lists of students (reviewers,
     # contributors, people whose ideas shipped) are for signed-in members (pages.credits).
     page("credits/", "Credits", """
@@ -1110,7 +1163,15 @@ def build_static():
          desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")
 
     page("404.html", "Page not found", """
-<h1>Page not found</h1><p>Try <a href="./search/">searching</a> or <a href="./subjects/">browse all classes</a>.</p>""", data={"page": "static"})
+<header class="cl-head"><p class="c-kicker">Error 404</p><h1>Page not found</h1>
+  <p class="cl-lede">This page doesn’t exist, or it moved. Try one of these instead.</p></header>
+<nav class="si-grid nf-links" aria-label="Places to go">
+  <a class="si-tile" href="/"><b>Home</b><span>Search everything at Wilcox</span><i aria-hidden="true">→</i></a>
+  <a class="si-tile" href="/subjects/"><b>All classes</b><span>Every class in the catalog</span><i aria-hidden="true">→</i></a>
+  <a class="si-tile" href="/teachers/"><b>Teachers</b><span>By subject</span><i aria-hidden="true">→</i></a>
+  <a class="si-tile" href="/map/"><b>Campus map</b><span>Find a room</span><i aria-hidden="true">→</i></a>
+</nav>
+<p class="c-src">Followed a link here from Wilkipedia? <a href="/feedback/">Tell us</a> so we can fix it.</p>""", data={"page": "static"})
 
 
 def build_data(depts, courses, teachers):
@@ -1378,6 +1439,25 @@ def build_calendar():
     (ROOT / "calendar" / ics_name).write_text("\r\n".join(lines) + "\r\n")
 
 
+def check_links():
+    """Every internal link and asset in the built pages must exist, or the build stops. (2026-10-01:
+    a template edit once cut out the Bell schedule, Study guides and Settings pages, and every link
+    to them went to the 404 page without anyone noticing.)"""
+    bad = {}
+    for p in ROOT.rglob("*.html"):
+        if any(x in p.parts for x in ("tools", "node_modules", ".git", "vendor")):
+            continue
+        for href in re.findall(r'(?:href|src)="([^"#?]+)', p.read_text(errors="ignore")):
+            if re.match(r"(https?:|mailto:|tel:|data:|javascript:|//)", href):
+                continue
+            t = (ROOT / href.lstrip("/")) if href.startswith("/") else (p.parent / href).resolve()
+            if not (t.is_file() or (t / "index.html").is_file()):
+                bad.setdefault(href, set()).add(str(p.relative_to(ROOT)))
+    if bad:
+        lines = [f"  {h}  (from {', '.join(sorted(v)[:3])}{' …' if len(v) > 3 else ''})" for h, v in sorted(bad.items())[:20]]
+        raise SystemExit("Broken internal links, so the build stopped:\n" + "\n".join(lines))
+
+
 def main():
     for css in (ROOT / "assets" / "style.css", CAMPUS / "campus.css"):
         check_css(css)                          # before anything is deleted
@@ -1394,6 +1474,7 @@ def main():
     build_seo(courses, teachers, depts)
     build_campus()
     build_calendar()
+    check_links()
     linked = sum(1 for c in courses.values() if c["teachers"])
     print(f"Built {len(courses)} course pages ({linked} with teachers), {len(teachers)} teacher pages, {len(depts)} subjects.")
 

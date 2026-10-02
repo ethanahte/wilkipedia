@@ -83,6 +83,12 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   only when the Orrery opens; ESO's licence requires the visible "Sky: ESO/S.
   Brunier" credit in the Orrery (and on the Credits page). Never remove it. Unlike the personal app, bounties here pay
   leaderboard points, so the Ledger reports points paid out.
+- **Build link check** (`check_links()` at the end of `main`): every internal href/src in the built
+  pages must exist, or the build stops and lists them. Added 2026-10-01 after a template edit (cutting
+  build.py from one `page(...)` call to the next) silently deleted the Bell schedule, Study guides
+  and Settings pages. When replacing a page's template, cut only that call, never up to "the next
+  page I know of". The 404 page uses root-relative links (`r = "/"`), since GitHub Pages serves it
+  at any missing address.
 - **Members-only pages** (Ethan 2026-10-01: lists of students shouldn't be easy to find for
   "random people that find this web"). Leaderboard: signed out, a sign-in gate and no fetch.
   Credits: founders and sources for everyone, the reviewer / contributor / feedback-credit lists
