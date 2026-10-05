@@ -1960,6 +1960,9 @@ html.pal-open { overflow: hidden; }
 .gv-k { font-size: .75rem; color: #8a8a8a; }
 .gv-m { color: #9a9a9a; font-size: .8rem; }
 .gv-open { display: inline-block; margin-top: 4px; font-weight: 600; }
+.gv-opens { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 4px; }
+.gv-open.alt { font-weight: 500; }
+.gv-legend .gv-both i { width: 7px; height: 7px; background: #dcddde; box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 3.5px #dcddde; margin-right: 3px; }
 .gv-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; background: none; color: #8a8a8a; cursor: pointer; }
 /* the hint and the legend share one strip along the bottom, so they can't run into each other:
    the hint takes what room is left and moves up a line when there's none */

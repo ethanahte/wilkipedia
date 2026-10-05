@@ -40,7 +40,11 @@ const dept = Object.fromEntries(data.departments.map((d) => [d.slug, d.name]));
 const classesOf = (g) => [...new Set([g.course_slug, ...(g.payload.also || [])])].filter((x) => bySlug[x]);
 // Uploaded study guides open through short-lived links, fetched once for the page
 const pdfLinks = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
-const openUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] : null) || safeUrl(g.payload.url);
+const pdfUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] || null : null);
+const webUrl = (g) => safeUrl(g.payload.url) || null;
+const openUrl = (g) => pdfUrl(g) || webUrl(g);
+// A guide uploaded as a PDF can also link its live web version (a Google Doc): both, drawn with a ring
+const both = (g) => !!(g.payload.pdf?.path && webUrl(g));
 
 let opts = { orphans: false, apColor: true, labels: 1, size: 1, thick: 1, repel: 60, link: 40, gravity: .08, hide: [] };
 try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
@@ -179,7 +183,12 @@ function render() {
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .15);
     ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? TYPE[n.type]?.color || C.guide : n.ap && opts.apColor ? C.ap : C.node;
-    ctx.beginPath(); ctx.arc(n.x, n.y, n.r * (n === hover ? 1 + .25 * fade : 1), 0, Math.PI * 2); ctx.fill();
+    const r = n.r * (n === hover ? 1 + .25 * fade : 1);
+    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();
+    if (n.kind === 'guide' && both(n.g)) {                     // PDF + web version: a ring around the dot
+      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = Math.max(.8, r * .3);
+      ctx.beginPath(); ctx.arc(n.x, n.y, r * 1.7, 0, Math.PI * 2); ctx.stroke();
+    }
   }
   // titles fade out as you zoom out (Obsidian's text fade threshold); the dot
   // you point at and its neighbours always keep theirs
@@ -310,13 +319,17 @@ function info(n) {
   if (!n) { card.hidden = true; return; }
   const count = (list) => `${list.length} study guide${list.length === 1 ? '' : 's'} & resource${list.length === 1 ? '' : 's'}`;
   if (n.kind === 'guide') {
-    const g = n.g, u = openUrl(g);
+    const g = n.g, pdf = pdfUrl(g), web = webUrl(g), hasPdf = !!g.payload.pdf?.path;
+    const webLink = (label, alt) => `<a class="gv-open${alt ? ' alt' : ''}" href="${esc(web)}" target="_blank" rel="noopener nofollow">${label} ↗</a>`;
+    const opens = hasPdf
+      ? `<div class="gv-opens">${pdf ? `<a class="gv-open" href="${esc(pdf)}" target="_blank" rel="noopener">Open the PDF ↗</a>` : '<span class="gv-m">The PDF isn’t available right now.</span>'}${web ? webLink('Open the web version', !!pdf) : ''}</div>`
+      : web ? webLink(`Open the ${g.type === 'guide' ? 'web version' : esc(TYPE[g.type].label.toLowerCase())}`) : '';
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k"><i class="gv-dot" style="background:${TYPE[g.type].color}"></i>${esc(TYPE[g.type].label)}${g.payload.pdf ? ' · PDF' : ''}</div><h3>${esc(g.payload.title)}</h3>
+      <div class="gv-k"><i class="gv-dot" style="background:${TYPE[g.type].color}"></i>${esc(TYPE[g.type].label)}${hasPdf && web ? ' · PDF and web version' : hasPdf ? ' · PDF' : g.type === 'guide' && web ? ' · web version' : ''}</div><h3>${esc(g.payload.title)}</h3>
       <p class="gv-m">${g.classes.map((c) => `<a href="${courseUrl(c)}">${esc(bySlug[c].name)}</a>`).join(' · ')}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p>
       ${g.payload.note ? `<p>${esc(g.payload.note)}</p>` : ''}
       <p class="gv-m">${g.payload.author ? `Made by ${esc(g.payload.author)} · shared by ${esc(g.author)}` : `Made by ${esc(g.author)}`}</p>
-      ${u ? `<a class="gv-open" href="${esc(u)}" target="_blank" rel="noopener nofollow">Open ${g.payload.pdf ? 'the PDF' : TYPE[g.type].label.toLowerCase()} ↗</a>` : ''}`;
+      ${opens}`;
   } else if (n.kind === 'class') {
     const list = current.G.filter((g) => g.classes.includes(n.slug));
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
@@ -340,7 +353,12 @@ function list() {
   for (const g of guides) for (const c of classesOf(g)) (by[c] ||= []).push(g);
   const subj = {};
   for (const slug of Object.keys(by)) (subj[bySlug[slug].department] ||= []).push(slug);
-  const card = (g) => { const u = openUrl(g); return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
+  const card = (g) => { const u = openUrl(g);
+    if (both(g)) return `<div class="res-card has-pdf"><a class="res-main" href="${esc(u)}" target="_blank" rel="noopener"><b>${esc(g.payload.title)}</b></a>
+      ${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
+      <span class="meta"><span class="rtype" style="--c:${TYPE[typeOf(g)].color}">${esc(TYPE[typeOf(g)].label)}</span>PDF · ${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>
+      <a class="res-alt" href="${esc(webUrl(g))}" target="_blank" rel="noopener nofollow">Web version ↗</a><span class="arrow" aria-hidden="true">📄</span></div>`;
+    return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
       <b>${esc(g.payload.title)}</b>${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
       <span class="meta"><span class="rtype" style="--c:${TYPE[typeOf(g)].color}">${esc(TYPE[typeOf(g)].label)}</span>${g.payload.pdf ? 'PDF · ' : ''}${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? `<span class="arrow" aria-hidden="true">${g.payload.pdf ? '📄' : '↗'}</span>` : ''}</a>`; };
   $('#gv-list').innerHTML = Object.keys(by).length ? data.departments.filter((d) => subj[d.slug]).map((d) => `
@@ -356,6 +374,7 @@ function legend() {
   const present = TYPES.filter(([k]) => guides.some((g) => typeOf(g) === k));
   const hidden = new Set(opts.hide || []);
   $('#gv-legend').innerHTML = `<span><i class="s"></i>Subject</span><span class="ap"><i class="a"></i>AP class</span><span><i class="c"></i>Class</span>`
+    + (guides.some(both) ? '<span class="gv-both" title="A ring means it has a PDF and a web version"><i></i>PDF + web</span>' : '')
     + present.map(([k, label, color]) => `<button type="button" class="gv-type" data-type="${k}" aria-pressed="${!hidden.has(k)}" title="${hidden.has(k) ? 'Show' : 'Hide'} ${esc(label.toLowerCase())}"><i style="background:${color}"></i>${esc(label)}</button>`).join('');
   $('#gv-legend').classList.toggle('no-ap', !opts.apColor);
 }

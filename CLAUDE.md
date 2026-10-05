@@ -230,6 +230,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   the wiring reads (`#theme-seg [data-theme-pref]`, `#class-seg
   [data-class-pref]`, `[data-v]`). The Account page still uses the plain
   `themeSeg()` / `classSeg()`.
+- **Editing posts** (`openEditor` in ui.js; fixed 2026-10-04 after Ethan couldn't add PDFs to the AP Macro
+  Unit 1 and 2 guides). A reviewer's edit uploads any PDF picked in the form first (`withUploads`; it
+  used to be dropped silently). The file goes in the reviewer's own folder, which
+  `check_submission_pdf` accepts from a reviewer since migration 020. The note to the author writes
+  itself from what changed (`describeEdit`: "Added a PDF version.") until the reviewer types their
+  own. A reviewer editing their own post gets no note box and saves straight away. When a link-only
+  guide gets a PDF, its Link field becomes the optional "live version".
 - **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
   with the Community rules and the Privacy page. A signed-in member whose
   `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen
@@ -387,6 +394,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     turns it off, and a legend sits bottom right. Guides get no text tag on the graph
     (Jonathan asked; decided 2026-09-29): the link to their class is the tag, and pointing
     at a guide lights up its classes.
+  - A study guide can have both a PDF and a link to its live web version (a Google Doc). The graph
+    draws those dots with a ring (legend "PDF + web"), the card has "Open the PDF" and "Open the web
+    version" (the web link stays when the PDF can't be opened), and the list below gives a "Web
+    version" link beside the PDF. Double-click still opens the PDF.
   - A resource can be for several classes: the `also` field (type `courses`, up
     to 3 more slugs in payload.also) on the submit form. `approved({course_slug})`
     also returns rows whose payload.also has that class, so the guide shows on

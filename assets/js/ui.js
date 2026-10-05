@@ -846,6 +846,26 @@ export async function requireUser(s, why = 'to do that') {
   return s.user();
 }
 
+// What an edit changed, in words, for the note the author gets: "Added a PDF version; changed the title"
+export function describeEdit(kind, before, after, files = {}) {
+  const out = [];
+  for (const f of KINDS[kind]?.fields || []) {
+    const k = f.key, label = f.label.replace(/\s*\(.*\)\s*$/, '').replace(/[?:]$/, '').toLowerCase();
+    if (f.type === 'pdf') {
+      if (files[k]) out.push(before[k]?.path ? 'replaced the PDF' : 'added a PDF version');
+      else if (before[k]?.path && !after[k]) out.push('removed the PDF');
+      continue;
+    }
+    const a = JSON.stringify(before[k] ?? ''), b = JSON.stringify(after[k] ?? '');
+    if (a === b) continue;
+    // a question-style label ("Who made it?") reads better quoted
+    const what = /\?\s*$/.test(f.label) ? `“${f.label.replace(/\s*\?\s*$/, '')}”` : `the ${label}`;
+    out.push(!before[k] ? `added ${what}` : !after[k] ? `removed ${what}` : `changed ${what}`);
+  }
+  const s = out.join('; ');
+  return s ? s[0].toUpperCase() + s.slice(1) + '.' : '';
+}
+
 // ── reviewer editing ──
 // Opens the submission's own form, filled in, plus a required reason. Saving
 // keeps the old version and notifies the author (edit_submission in schema.sql).
@@ -857,8 +877,12 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
   const what = (KINDS[sub.kind]?.label || 'submission').toLowerCase();
   const own = mode === 'author';
   const live = own && sub.status === 'approved';
-  const [title, blurb, button] = !own
-    ? [`Edit ${esc(KINDS[sub.kind]?.label || 'submission')}`, `By ${esc(sub.author)}. They’ll get a notice with your reason, and the old version is kept.`, 'Save changes']
+  // a reviewer editing their own post: saved straight away, with no one to explain it to
+  const mine = !own && sub.user_id && sub.user_id === store.user()?.id;
+  const [title, blurb, button] = mine
+    ? [`Edit your ${esc(what)}`, 'You’re a reviewer, so your change goes live right away. The old version is kept.', 'Save changes']
+    : !own
+    ? [`Edit ${esc(KINDS[sub.kind]?.label || 'submission')}`, `By ${esc(sub.author)}. They’ll get a notice with the note below, and the old version is kept.`, 'Save changes']
     : live ? [`Suggest a change to your ${esc(what)}`, 'Your live version stays on the site until a reviewer approves the change.', 'Send for review']
     : sub.status === 'changes' ? [`Fix your ${esc(what)}`, `A reviewer asked: “${esc(sub.review_note || 'for changes')}”. Saving sends it back to the reviewers.`, 'Resubmit']
     : [`Edit your ${esc(what)}`, 'It’s still waiting for review, so reviewers will see the new version.', 'Save changes'];
@@ -869,8 +893,8 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
         <p class="meta">${blurb}</p></div>
         <button type="button" class="icon-btn lang-x" data-close aria-label="Close">✕</button></div>
       <div id="ed-fields"></div>
-      ${own ? '' : `<div class="field"><label for="ed-note">What did you change, and why? <span class="req">*</span></label>
-        <div class="hint">The author sees this, e.g. “Fixed a typo in the grading weights”.</div>
+      ${own || mine ? '' : `<div class="field"><label for="ed-note">Note for the author <span class="req">*</span></label>
+        <div class="hint">Written for you from what you change. Add why if it helps, e.g. “Fixed a typo in the grading weights”.</div>
         <input id="ed-note" maxlength="500" required></div>`}
       <p class="error" id="ed-err" hidden></p>
       <div class="r-actions"><button class="btn">${button}</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
@@ -882,6 +906,15 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
   }
   const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
   const close = () => wrap.remove();
+  // The note writes itself from what changed ("Added a PDF version"), until the reviewer types their own
+  const noteEl = $('#ed-note', wrap);
+  let typed = false;
+  if (noteEl) {
+    noteEl.addEventListener('input', () => { typed = !!noteEl.value.trim(); });
+    const autoNote = () => { if (!typed) noteEl.value = describeEdit(sub.kind, sub.payload || {}, fields.values(), fields.files()); };
+    $('#ed-fields', wrap).addEventListener('input', autoNote);
+    $('#ed-fields', wrap).addEventListener('change', autoNote);
+  }
   wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
   $('form', wrap).addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -904,12 +937,20 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
       }
       return;
     }
-    const note = $('#ed-note', wrap).value.trim();
-    if (!note) return err('Please say what you changed and why.');
-    const ok = await guard(() => store.editSubmission(sub.id, payload, note), 'Saved. The author has been notified.');
+    if (!Object.keys(fields.files()).length && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
+    const note = mine ? describeEdit(sub.kind, sub.payload || {}, fields.values(), fields.files()) || 'Updated by the author'
+      : noteEl.value.trim();
+    if (!note) return err('Please say what you changed.');
+    // a new PDF goes up first (to the reviewer's own folder; migration 020 lets a reviewer attach it)
+    const ok = await guard(async () => {
+      await withUploads(store, fields, payload);
+      try { return await store.editSubmission(sub.id, payload, note); }
+      catch (e) { throw /isn.t one you uploaded/.test(e.message) ? new Error('Adding a PDF to someone else’s post needs migration 020 run in Supabase first.') : e; }
+    },
+      mine ? 'Saved.' : 'Saved. The author has been notified.');
     if (ok) { close(); onSaved?.(); }
   });
-  ($('#ed-note', wrap) || $('#ed-fields input, #ed-fields textarea, #ed-fields select', wrap))?.focus();
+  $('#ed-fields input, #ed-fields textarea, #ed-fields select', wrap)?.focus();
 }
 
 // ── bounty editor (admins) ──
@@ -1058,7 +1099,8 @@ export function renderFields(el, kind, preset = {}, files = {}) {
       const box = $(`[data-f="${f.key}"]`, el);
       box.hidden = !shown(f);
       if (!f.whenAlt) continue;
-      const alt = on(f.whenAlt) && !legacyLink;
+      // a link-only guide getting its PDF: from now on the link is the optional live version
+      const alt = on(f.whenAlt) && (!legacyLink || fields.some((g) => g.type === 'pdf' && chosen(g)));
       $('.lbl', box).textContent = alt ? f.whenAlt[2] : f.label;
       $('.req', box)?.toggleAttribute('hidden', alt);
       const h = $('.hint', box); h.textContent = alt ? f.whenAlt[3] : f.hint || ''; h.hidden = !h.textContent;
@@ -1106,7 +1148,7 @@ export function renderFields(el, kind, preset = {}, files = {}) {
     const input = $(`[name="${k}"][type="file"]`, el);
     if (input && file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; }
   }
-  el.addEventListener('change', (e) => { if (fields.some((f) => (f.when || f.whenAlt)?.[0] === e.target.name)) apply(); });
+  el.addEventListener('change', (e) => { if (e.target.type === 'file' || fields.some((f) => (f.when || f.whenAlt)?.[0] === e.target.name)) apply(); });
   // Period boxes: "No class" fills in (or clears) that period, so an empty period can be said out loud
   const paintNone = (input) => {
     const on = NO_CLASS.test(input.value.trim());

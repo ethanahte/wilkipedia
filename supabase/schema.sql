@@ -638,11 +638,16 @@ create policy "published guides are public, own and reviewers see all" on storag
     or exists (select 1 from public.submissions s
                 where s.status = 'approved' and s.payload -> 'pdf' ->> 'path' = objects.name)));
 
+-- A post points at its author's file, or (migration 020) at a file the reviewer saving it uploaded
 create function public.check_submission_pdf() returns trigger
 language plpgsql set search_path = public as $$
+declare
+  p text := coalesce(new.payload -> 'pdf' ->> 'path', '');
+  shape text := '/[0-9a-f-]{36}\.pdf$';
 begin
   if new.payload ? 'pdf' and (tg_op = 'INSERT' or new.payload -> 'pdf' is distinct from old.payload -> 'pdf') then
-    if coalesce(new.payload -> 'pdf' ->> 'path', '') !~ ('^' || new.user_id::text || '/[0-9a-f-]{36}\.pdf$') then
+    if not (p ~ ('^' || coalesce(new.user_id::text, '-') || shape)
+            or (public.is_reviewer() and p ~ ('^' || coalesce(auth.uid()::text, '-') || shape))) then
       raise exception 'That PDF isn''t one you uploaded';
     end if;
   end if;
