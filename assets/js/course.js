@@ -20,7 +20,7 @@ const isMod = () => REVIEWER_ROLES.includes(s.user()?.role);
 let subsById = {};
 const unpub = (sub) => (isMod() ? ` · <button class="linkish" data-edit="${sub.id}">Edit</button> · <button class="linkish danger-link" data-unpub="${sub.id}">Unpublish</button>` : suggestLink(s, sub));
 // edited_by is the author when their own update was approved (migration 014)
-const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">${sub.edited_by && sub.edited_by === sub.user_id ? 'updated' : 'edited by a reviewer'} ${fmtDate(sub.edited_at)}</span>` : '');
+const edited = (sub) => (sub.edited_at ? ` · <span class="edited-mark">${sub.edited_by && sub.edited_by === sub.user_id ? 'updated' : 'edited'} ${fmtDate(sub.edited_at)}</span>` : '');
 
 function meta(sub, target) {
   const stale = staleness(sub);

@@ -256,8 +256,10 @@ export const badge = (verified) => (verified
   ? ' <span class="badge-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : '');
 export const byline = (name, verified) => esc(name) + badge(verified);
 // On live work: the author (not a reviewer, who has Edit) can send a change for review
-export const suggestLink = (st, sub) => (canEditOwn(sub) && sub.user_id && sub.user_id === st.user()?.id && !REVIEWER_ROLES.includes(st.user()?.role)
-  ? ` · <button class="linkish" data-suggest="${sub.id}">Suggest a change</button>` : '');
+// "Suggest an edit" on a live post, for everyone not on the review team (they have Edit, which also
+// suggests when the post isn't theirs). Signed-out readers are asked to sign in when they click it.
+export const suggestLink = (st, sub) => (canEditOwn(sub) && sub.status === 'approved' && !REVIEWER_ROLES.includes(st.user()?.role)
+  ? ` · <button class="linkish" data-suggest="${sub.id}">Suggest an edit</button>` : '');
 
 // ── profile pictures ──
 // A fixed set of icons and colours: nothing to moderate, no photos of students.
@@ -858,34 +860,43 @@ export function describeEdit(kind, before, after, files = {}) {
     }
     const a = JSON.stringify(before[k] ?? ''), b = JSON.stringify(after[k] ?? '');
     if (a === b) continue;
-    // a question-style label ("Who made it?") reads better quoted
-    const what = /\?\s*$/.test(f.label) ? `“${f.label.replace(/\s*\?\s*$/, '')}”` : `the ${label}`;
+    // a question-style label ("Who made it?", "What it is good for") reads better quoted
+    const what = /\?\s*$/.test(f.label) || /^(what|who|how|which|when|where|why)\b/i.test(f.label)
+      ? `“${f.label.replace(/\s*\?\s*$/, '')}”` : `the ${label}`;
     out.push(!before[k] ? `added ${what}` : !after[k] ? `removed ${what}` : `changed ${what}`);
   }
   const s = out.join('; ');
   return s ? s[0].toUpperCase() + s.slice(1) + '.' : '';
 }
 
-// ── reviewer editing ──
-// Opens the submission's own form, filled in, plus a required reason. Saving
-// keeps the old version and notifies the author (edit_submission in schema.sql).
-// mode 'reviewer': edit anyone's work in place, with a reason the author sees.
-// mode 'author': your own work. Waiting or sent back: edit it (a sent-back one
-// goes back to the reviewers). Live: send a change for review; the live version
-// stays until it's approved.
+// ── editing posts ──
+// Opens the post's own form, filled in. What saving does depends on who you are and whose post it is
+// (Ethan 2026-10-04: anyone can suggest an edit, the review team approves it, the author is told):
+//   own        your post, waiting or sent back: edit it (a sent-back one goes back to the reviewers);
+//              live: your change waits for review (a reviewer's own live post saves straight away)
+//   suggest    someone else's live post, for everyone including reviewers: the edit and a note
+//              (written for you from what changed) wait in the review queue; someone else approves
+//              it, and the author is notified when it goes live (on_status_notify, migration 021)
+//   direct     a reviewer fixing someone else's work that's still waiting for review, with a note
+// `mode` is kept for the callers: 'author' from "Suggest an edit", 'reviewer' from "Edit".
 export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
+  if (!store.user() && !(await requireUser(store, 'to suggest an edit'))) return;
+  const me = store.user(), team = REVIEWER_ROLES.includes(me.role);
   const what = (KINDS[sub.kind]?.label || 'submission').toLowerCase();
-  const own = mode === 'author';
-  const live = own && sub.status === 'approved';
-  // a reviewer editing their own post: saved straight away, with no one to explain it to
-  const mine = !own && sub.user_id && sub.user_id === store.user()?.id;
-  const [title, blurb, button] = mine
-    ? [`Edit your ${esc(what)}`, 'You’re a reviewer, so your change goes live right away. The old version is kept.', 'Save changes']
-    : !own
-    ? [`Edit ${esc(KINDS[sub.kind]?.label || 'submission')}`, `By ${esc(sub.author)}. They’ll get a notice with the note below, and the old version is kept.`, 'Save changes']
-    : live ? [`Suggest a change to your ${esc(what)}`, 'Your live version stays on the site until a reviewer approves the change.', 'Send for review']
-    : sub.status === 'changes' ? [`Fix your ${esc(what)}`, `A reviewer asked: “${esc(sub.review_note || 'for changes')}”. Saving sends it back to the reviewers.`, 'Resubmit']
-    : [`Edit your ${esc(what)}`, 'It’s still waiting for review, so reviewers will see the new version.', 'Save changes'];
+  const mine = !!sub.user_id && sub.user_id === me.id;
+  const live = sub.status === 'approved';
+  const how = mine ? (live && team ? 'own-now' : 'own') : live ? 'suggest' : team ? 'direct' : null;
+  if (!how) { toast('Only the review team can change work that’s waiting for review.', 'bad'); return; }
+  const by = esc(sub.author || 'a former student');
+  const [title, blurb, button] = {
+    'own-now': [`Edit your ${esc(what)}`, 'You’re on the review team, so your change to your own post goes live right away. The old version is kept.', 'Save changes'],
+    own: live ? [`Suggest a change to your ${esc(what)}`, 'Your live version stays on the site until a reviewer approves the change.', 'Send for review']
+      : sub.status === 'changes' ? [`Fix your ${esc(what)}`, `A reviewer asked: “${esc(sub.review_note || 'for changes')}”. Saving sends it back to the reviewers.`, 'Resubmit']
+      : [`Edit your ${esc(what)}`, 'It’s still waiting for review, so reviewers will see the new version.', 'Save changes'],
+    suggest: [`Suggest an edit`, `To ${by}’s ${esc(what)}. ${team ? 'Another reviewer or an admin' : 'A reviewer'} checks it before it goes live, and ${by} gets a notification when it does. The live version stays until then.`, 'Send for review'],
+    direct: [`Edit ${esc(KINDS[sub.kind]?.label || 'submission')}`, `By ${by}, waiting for review. They’ll get a notice with the note below, and the old version is kept.`, 'Save changes'],
+  }[how];
+  const noteBox = how === 'suggest' || how === 'direct';
   const wrap = document.createElement('div');
   wrap.className = 'modal';
   wrap.innerHTML = `<form class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ed-title">
@@ -893,9 +904,9 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
         <p class="meta">${blurb}</p></div>
         <button type="button" class="icon-btn lang-x" data-close aria-label="Close">✕</button></div>
       <div id="ed-fields"></div>
-      ${own || mine ? '' : `<div class="field"><label for="ed-note">Note for the author <span class="req">*</span></label>
-        <div class="hint">Written for you from what you change. Add why if it helps, e.g. “Fixed a typo in the grading weights”.</div>
-        <input id="ed-note" maxlength="500" required></div>`}
+      ${noteBox ? `<div class="field"><label for="ed-note">${how === 'suggest' ? 'What did you change?' : 'Note for the author'} <span class="req">*</span></label>
+        <div class="hint">Written for you from what you change. Add why if it helps${how === 'suggest' ? `: reviewers and ${by} see it` : ', e.g. “Fixed a typo in the grading weights”'}.</div>
+        <input id="ed-note" maxlength="500" required></div>` : ''}
       <p class="error" id="ed-err" hidden></p>
       <div class="r-actions"><button class="btn">${button}</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
     </form>`;
@@ -906,12 +917,13 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
   }
   const fields = renderFields($('#ed-fields', wrap), sub.kind, sub.payload || {});
   const close = () => wrap.remove();
-  // The note writes itself from what changed ("Added a PDF version"), until the reviewer types their own
+  const changes = () => describeEdit(sub.kind, sub.payload || {}, fields.values(), fields.files());
+  // The note writes itself from what changed ("Added a PDF version.") until you type your own
   const noteEl = $('#ed-note', wrap);
   let typed = false;
   if (noteEl) {
     noteEl.addEventListener('input', () => { typed = !!noteEl.value.trim(); });
-    const autoNote = () => { if (!typed) noteEl.value = describeEdit(sub.kind, sub.payload || {}, fields.values(), fields.files()); };
+    const autoNote = () => { if (!typed) noteEl.value = changes(); };
     $('#ed-fields', wrap).addEventListener('input', autoNote);
     $('#ed-fields', wrap).addEventListener('change', autoNote);
   }
@@ -922,33 +934,31 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
     const missing = fields.check();
     if (missing) return err(missing);
     const payload = { ...sub.payload, ...fields.values() };
-    if (own) {
-      if (sub.status !== 'changes' && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
-      const ok = await guard(async () => { await withUploads(store, fields, payload); return live ? store.proposeUpdate(sub, payload) : store.editOwn(sub.id, payload); },
-        live || sub.status === 'changes' ? null : 'Saved.');
-      if (!ok) return;
-      close(); onSaved?.();
-      // resubmitting or suggesting a change gets a clear answer, then back to where you were
-      if (live || sub.status === 'changes') {
-        showResult(null, { status: 'good', title: live ? 'Your change is with the reviewers' : 'Resubmitted. It’s back with the reviewers.',
-          text: live ? 'Your live version stays on the site until a reviewer approves the change. You’ll get a notification either way.'
-            : 'You’ll get a notification when they’ve looked again. If you want to explain what you changed, write to them in the conversation.',
-          actions: [{ label: 'Back to the page', primary: true }, { label: 'Open the conversation', href: `${root}dashboard/#thread/submission:${sub.id}` }] });
-      }
-      return;
-    }
-    if (!Object.keys(fields.files()).length && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
-    const note = mine ? describeEdit(sub.kind, sub.payload || {}, fields.values(), fields.files()) || 'Updated by the author'
-      : noteEl.value.trim();
-    if (!note) return err('Please say what you changed.');
-    // a new PDF goes up first (to the reviewer's own folder; migration 020 lets a reviewer attach it)
+    const files = Object.keys(fields.files()).length;
+    if (sub.status !== 'changes' && !files && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
+    const note = noteEl ? noteEl.value.trim() : changes() || 'Updated by the author';
+    if (noteBox && !note) return err('Please say what you changed.');
+    const review = how === 'suggest' || (how === 'own' && (live || sub.status === 'changes'));
+    // a new PDF goes up first, into your own folder (migrations 020 and 021 let the post point at it)
     const ok = await guard(async () => {
       await withUploads(store, fields, payload);
-      try { return await store.editSubmission(sub.id, payload, note); }
-      catch (e) { throw /isn.t one you uploaded/.test(e.message) ? new Error('Adding a PDF to someone else’s post needs migration 020 run in Supabase first.') : e; }
-    },
-      mine ? 'Saved.' : 'Saved. The author has been notified.');
-    if (ok) { close(); onSaved?.(); }
+      try {
+        if (how === 'suggest' || (how === 'own' && live)) return await store.proposeUpdate(sub, payload, how === 'suggest' ? note : null);
+        if (how === 'own') return await store.editOwn(sub.id, payload);
+        return await store.editSubmission(sub.id, payload, note);
+      } catch (x) { throw /isn.t one you uploaded/.test(x.message) ? new Error('Adding a PDF here needs migrations 020 and 021 run in Supabase first.') : x; }
+    }, review ? null : how === 'direct' ? 'Saved. The author has been notified.' : 'Saved.');
+    if (!ok) return;
+    close(); onSaved?.();
+    // anything that waits for review gets a clear answer, then back to where you were
+    if (review) {
+      showResult(null, { status: 'good',
+        title: how === 'suggest' ? 'Your edit is with the reviewers' : live ? 'Your change is with the reviewers' : 'Resubmitted. It’s back with the reviewers.',
+        text: how === 'suggest' ? `The live version stays as it is until ${team ? 'another reviewer or an admin' : 'a reviewer'} approves your edit. You’ll get a notification either way, and ${by} gets one when it goes live.`
+          : live ? 'Your live version stays on the site until a reviewer approves the change. You’ll get a notification either way.'
+          : 'You’ll get a notification when they’ve looked again. If you want to explain what you changed, write to them in the conversation.',
+        actions: [{ label: 'Back to the page', primary: true }, { label: 'Track it in your Dashboard', href: `${root}dashboard/#work` }] });
+    }
   });
   $('#ed-fields input, #ed-fields textarea, #ed-fields select', wrap)?.focus();
 }

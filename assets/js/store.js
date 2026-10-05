@@ -17,7 +17,7 @@
 //   Submission {id, user_id, author, verified, avatar, color, bounty_id, course_slug, kind, teacher, payload,
 //               status ('pending' | 'approved' | 'changes' | 'rejected' | 'withdrawn' | 'merged'),
 //               review_note, reviewed_at, created_at, replaces (the live submission an update is for),
-//               original (pending() only: {id, payload, status} of that live submission)}
+//               edit_note (a suggested edit's note), original (pending() only: that live submission, with its author)}
 //   Comment    {id, course_slug, user_id, author, verified, avatar, color, parent_id, prompt, body, status,
 //               created_at, likes, liked}
 //   Report     {id, kind, course_slug, target, note, author, resolved, created_at}
@@ -215,7 +215,7 @@ async function live() {
         .order('created_at')).map(withAuthor);
       // An update is shown against the live version it would replace
       const ids = [...new Set(list.map((x) => x.replaces).filter(Boolean))];
-      const orig = ids.length ? ok(await sb.from('submissions').select('id, payload, status').in('id', ids)) : [];
+      const orig = ids.length ? ok(await sb.from('submissions').select(SUB).in('id', ids)).map(withAuthor) : [];
       const byId = Object.fromEntries(orig.map((o) => [o.id, o]));
       return list.map((x) => (x.replaces ? { ...x, original: byId[x.replaces] ?? null } : x));
     },
@@ -266,9 +266,13 @@ async function live() {
       return Object.fromEntries((data || []).filter((x) => x.signedUrl && !x.error).map((x) => [x.path, x.signedUrl]));
     },
     async withdraw(id) { ok014(await sb.rpc('withdraw_submission', { p_id: id })); },
-    async proposeUpdate(orig, payload) {
-      ok014(await sb.from('submissions').insert({ user_id: me.id, kind: orig.kind, course_slug: orig.course_slug,
-                                                  teacher: orig.teacher, payload, replaces: orig.id }));
+    // A suggested edit to live work, the author's own or (migration 021) anyone's: it waits for
+    // review, and approving it copies it onto the live post (on_review() in schema.sql)
+    async proposeUpdate(orig, payload, note = null) {
+      const { error } = await sb.from('submissions').insert({ user_id: me.id, kind: orig.kind, course_slug: orig.course_slug,
+        teacher: orig.teacher, payload, replaces: orig.id, ...(note ? { edit_note: note.slice(0, 500) } : {}) });
+      if (error && /edit_note/.test(error.message)) throw new Error('Suggesting edits needs migration 021 run in Supabase first.');
+      ok014({ error });
     },
 
     async comments(course_slug) {
@@ -546,7 +550,7 @@ async function demo() {
     async pending() {
       reviewer();
       return db.submissions.filter((s) => s.status === 'pending')
-        .map((s) => ({ ...sub(s), ...(s.replaces ? { original: db.submissions.find((o) => o.id === s.replaces) ?? null } : {}) }));
+        .map((s) => { const o = s.replaces && db.submissions.find((x) => x.id === s.replaces); return { ...sub(s), ...(s.replaces ? { original: o ? sub(o) : null } : {}) }; });
     },
     async byStatus(status) { reviewer(); return db.submissions.filter((s) => s.status === status).sort(byReviewed).map(sub); },
     async review(sid, status, review_note = null) {
@@ -554,16 +558,20 @@ async function demo() {
       const s = db.submissions.find((x) => x.id === sid);
       const wasApproved = s.status === 'approved';
       // Approving an update copies it onto the live submission (mirrors on_review())
+      if (status === 'approved' && !wasApproved && s.replaces && s.user_id === u.id) throw new Error('You can’t approve your own edit. Another reviewer or an admin has to.');
       const orig = status === 'approved' && !wasApproved && s.replaces
         && db.submissions.find((x) => x.id === s.replaces && x.status === 'approved');
+      const theirs = s.replaces && db.submissions.find((x) => x.id === s.replaces)?.user_id !== s.user_id;
       if (orig) {
-        Object.assign(orig, { payload: s.payload, edited_at: now(), edited_by: orig.user_id, reviewed_by: u.id, reviewed_at: now() });
+        Object.assign(orig, { payload: s.payload, edited_at: now(), edited_by: s.user_id, reviewed_by: u.id, reviewed_at: now() });
         status = 'merged';
+        if (theirs && orig.user_id) (db.notes ??= []).unshift({ id: id(), user_id: orig.user_id, read: false, created_at: now(), link: 'account/',
+          message: `${db.users[s.user_id]?.name || 'A member'} edited your ${orig.kind.replace('_', ' ')}, and a reviewer approved it. ${s.edit_note || ''} The old version is kept.` });
       }
       if (s.status !== status && s.user_id && s.user_id !== u.id) {
         const what = s.kind.replace('_', ' ');
         (db.notes ??= []).unshift({ id: id(), user_id: s.user_id, read: false, created_at: now(), link: 'account/',
-          message: status === 'merged' ? `Your update to your ${what} was approved and is live now. Thank you!`
+          message: status === 'merged' ? `Your ${theirs ? `edit to the ${what}` : `update to your ${what}`} was approved and is live now. Thank you!`
             : status === 'approved' ? `Your ${what} was published. Thank you!` : status === 'changes'
             ? `A reviewer asked for changes to your ${what}: ${review_note || ''}` : wasApproved
             ? `Your ${what} was unpublished. Reason: ${review_note || ''}` : s.replaces
@@ -683,21 +691,22 @@ async function demo() {
       x.status = 'withdrawn';
       save();
     },
-    async proposeUpdate(orig, payload) {
+    async proposeUpdate(orig, payload, note = null) {
       const u = need();
       const o = db.submissions.find((y) => y.id === orig.id);
-      if (!o || o.user_id !== u.id || o.status !== 'approved') throw new Error('You can only send an update for your own published work');
-      if (db.submissions.some((y) => y.replaces === o.id && ['pending', 'changes'].includes(y.status))) {
-        throw new Error('You already have an update waiting for review. Edit that one instead.');
-      }
+      if (!o || o.status !== 'approved') throw new Error('You can only suggest an edit to something that’s on the site');
+      const waiting = db.submissions.find((y) => y.replaces === o.id && ['pending', 'changes'].includes(y.status));
+      if (waiting) throw new Error(waiting.user_id === u.id ? 'You already have an edit to this waiting for review. Change that one instead (Dashboard → Your work).'
+        : 'Someone else’s edit to this is waiting for review. Try again once a reviewer has looked at it.');
       db.submissions.push({ id: id(), user_id: u.id, status: 'pending', review_note: null, reviewed_at: null, created_at: now(),
-                            bounty_id: null, kind: o.kind, course_slug: o.course_slug, teacher: o.teacher, payload, replaces: o.id });
+                            bounty_id: null, kind: o.kind, course_slug: o.course_slug, teacher: o.teacher, payload, replaces: o.id, edit_note: note || null });
       save();
     },
     async editSubmission(sid, payload, note) {
       const u = reviewer();
       if (!note?.trim()) throw new Error('Say what you changed and why');
       const x = db.submissions.find((y) => y.id === sid);
+      if (x.status === 'approved' && x.user_id !== u.id) throw new Error('Edits to someone else’s live post go to review now: suggest the edit instead.');
       Object.assign(x, { payload, edited_at: now(), edited_by: u.id });
       if (x.user_id && x.user_id !== u.id) {
         (db.notes ??= []).unshift({ id: id(), user_id: x.user_id, message: `${u.name} (reviewer) edited your ${x.kind.replace('_', ' ')}. Reason: ${note.trim()}`, link: 'account/', read: false, created_at: now() });

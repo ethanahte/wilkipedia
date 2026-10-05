@@ -230,13 +230,25 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   the wiring reads (`#theme-seg [data-theme-pref]`, `#class-seg
   [data-class-pref]`, `[data-v]`). The Account page still uses the plain
   `themeSeg()` / `classSeg()`.
-- **Editing posts** (`openEditor` in ui.js; fixed 2026-10-04 after Ethan couldn't add PDFs to the AP Macro
-  Unit 1 and 2 guides). A reviewer's edit uploads any PDF picked in the form first (`withUploads`; it
-  used to be dropped silently). The file goes in the reviewer's own folder, which
-  `check_submission_pdf` accepts from a reviewer since migration 020. The note to the author writes
-  itself from what changed (`describeEdit`: "Added a PDF version.") until the reviewer types their
-  own. A reviewer editing their own post gets no note box and saves straight away. When a link-only
-  guide gets a PDF, its Link field becomes the optional "live version".
+- **Editing posts** (`openEditor` in ui.js; Ethan 2026-10-04: anyone can suggest an edit, the review team
+  approves it, the author is told). Who you are and whose post it is decide what saving does:
+  - **Suggest an edit** (`suggestLink`): every member not on the review team sees it on every live post,
+    theirs or not; signed-out readers are asked to sign in. Reviewers' and admins' **Edit** on someone
+    else's live post does the same thing. A suggestion is a submission with `replaces` = the live post,
+    `user_id` = the suggester and `edit_note` = their note (written for them by `describeEdit`, e.g.
+    "Added a PDF version.", until they type their own). One waiting edit per post at a time.
+  - It waits in the review queue as "Suggested edit", with the changed fields marked against the live
+    version. **Nobody approves their own suggestion** (`on_review` refuses, and the desk hides Approve).
+    Approving copies it onto the live post (old version kept in `submission_edits`, `edited_by` = the
+    suggester), the suggester hears the decision, and the post's author gets "<name> edited your …"
+    (`on_status_notify`). Pages mark such posts "edited <date>"; the author's own update is "updated".
+  - Direct edits, no review: your own post while it's waiting or sent back (`edit_own_submission`), a
+    reviewer's own live post, and a reviewer fixing someone else's work that is still waiting for review
+    (`edit_submission`, which refuses someone else's live post since migration 021).
+  - PDFs picked in the editor are uploaded first (`withUploads`) into the editor's own folder.
+    `check_submission_pdf` accepts the author's folder, a reviewer's own folder (020), and a file a
+    suggested edit brought while it's being approved (021). When a link-only guide gets a PDF, its Link
+    field becomes the optional "live version".
 - **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
   with the Community rules and the Privacy page. A signed-in member whose
   `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen

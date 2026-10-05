@@ -158,7 +158,8 @@ create table public.submissions (
   -- withdrawn = taken back by the author; merged = an approved update, copied onto `replaces`
   status      text not null default 'pending'
               check (status in ('pending', 'approved', 'changes', 'rejected', 'withdrawn', 'merged')),
-  replaces    bigint references public.submissions on delete set null,   -- an author's update to their live work
+  replaces    bigint references public.submissions on delete set null,   -- a suggested edit to live work (the author's or anyone's, migration 021)
+  edit_note   text check (edit_note is null or char_length(edit_note) <= 500),   -- the suggester's note on that edit
   review_note text,
   reviewed_by uuid references public.profiles on delete set null,
   reviewed_at timestamptz,
@@ -182,15 +183,23 @@ create function public.on_review() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
   orig public.submissions;
+  who text;
 begin
   if new.status = 'approved' and old.status <> 'approved' and new.replaces is not null then
+    if new.user_id = auth.uid() then
+      raise exception 'You can''t approve your own edit. Another reviewer or an admin has to.';
+    end if;
     select * into orig from public.submissions where id = new.replaces for update;
     if found and orig.status = 'approved' then
+      select display_name into who from public.profiles where id = new.user_id;
       insert into public.submission_edits (submission_id, editor_id, old_payload, new_payload, note)
-      values (orig.id, auth.uid(), orig.payload, new.payload,
-              format('Update from the author (submission %s), approved by a reviewer', new.id));
+      values (orig.id, new.user_id, orig.payload, new.payload, left(
+        case when new.user_id is not distinct from orig.user_id
+             then format('Update from the author (submission %s), approved by a reviewer', new.id)
+             else format('Edit by %s (submission %s), approved by a reviewer: %s', coalesce(who, 'a member'), new.id,
+                         coalesce(nullif(btrim(new.edit_note), ''), 'no note')) end, 500));
       update public.submissions
-         set payload = new.payload, edited_at = now(), edited_by = orig.user_id,
+         set payload = new.payload, edited_at = now(), edited_by = new.user_id,
              reviewed_by = auth.uid(), reviewed_at = now()
        where id = orig.id;
       new.status := 'merged';
@@ -212,21 +221,26 @@ end $$;
 create trigger submissions_review before update on public.submissions
   for each row execute function public.on_review();
 
--- An update must point at the author's own published work, copies where that
--- work lives, and there is one waiting update per published submission at a time.
+-- A suggested edit must point at published work (anyone's, since migration 021), copies where
+-- that work lives, and there is one waiting edit per published submission at a time.
 create function public.on_submission_insert() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
   orig public.submissions;
+  waiting public.submissions;
 begin
   if new.replaces is not null then
     select * into orig from public.submissions where id = new.replaces;
-    if not found or orig.user_id is distinct from auth.uid() or orig.status <> 'approved' then
-      raise exception 'You can only send an update for your own published work';
+    if not found or orig.status <> 'approved' then
+      raise exception 'You can only suggest an edit to something that''s on the site';
     end if;
-    if exists (select 1 from public.submissions
-                where replaces = new.replaces and status in ('pending', 'changes')) then
-      raise exception 'You already have an update waiting for review. Edit that one instead.';
+    select * into waiting from public.submissions
+     where replaces = new.replaces and status in ('pending', 'changes') limit 1;
+    if found then
+      if waiting.user_id = auth.uid() then
+        raise exception 'You already have an edit to this waiting for review. Change that one instead (Dashboard → Your work).';
+      end if;
+      raise exception 'Someone else''s edit to this is waiting for review. Try again once a reviewer has looked at it.';
     end if;
     new.kind := orig.kind;
     new.course_slug := orig.course_slug;
@@ -638,7 +652,8 @@ create policy "published guides are public, own and reviewers see all" on storag
     or exists (select 1 from public.submissions s
                 where s.status = 'approved' and s.payload -> 'pdf' ->> 'path' = objects.name)));
 
--- A post points at its author's file, or (migration 020) at a file the reviewer saving it uploaded
+-- A post points at its author's file, at a file the reviewer saving it uploaded (migration 020), or
+-- at a file its suggested edit brought, while that edit is approved (migration 021)
 create function public.check_submission_pdf() returns trigger
 language plpgsql set search_path = public as $$
 declare
@@ -647,7 +662,9 @@ declare
 begin
   if new.payload ? 'pdf' and (tg_op = 'INSERT' or new.payload -> 'pdf' is distinct from old.payload -> 'pdf') then
     if not (p ~ ('^' || coalesce(new.user_id::text, '-') || shape)
-            or (public.is_reviewer() and p ~ ('^' || coalesce(auth.uid()::text, '-') || shape))) then
+            or (public.is_reviewer() and p ~ ('^' || coalesce(auth.uid()::text, '-') || shape))
+            or (tg_op = 'UPDATE' and exists (select 1 from public.submissions u
+                                              where u.replaces = new.id and u.payload -> 'pdf' ->> 'path' = p))) then
       raise exception 'That PDF isn''t one you uploaded';
     end if;
   end if;
@@ -763,6 +780,9 @@ begin
   if coalesce(btrim(p_note), '') = '' then raise exception 'Say what you changed and why'; end if;
   select * into s from public.submissions where id = p_id for update;
   if not found then raise exception 'That submission no longer exists'; end if;
+  if s.status = 'approved' and s.user_id is distinct from auth.uid() then
+    raise exception 'Edits to someone else''s live post go to review now: suggest the edit instead.';
+  end if;
 
   insert into public.submission_edits (submission_id, editor_id, old_payload, new_payload, note)
   values (p_id, auth.uid(), s.payload, p_payload, btrim(p_note));
@@ -782,8 +802,15 @@ language plpgsql security definer set search_path = public as $$
 declare
   subj text := 'submission:' || new.id;
   author text;
+  orig public.submissions;
+  theirs boolean := false;      -- an edit to someone else's post
+  what text;
 begin
   if new.status is not distinct from old.status then return new; end if;
+  if new.replaces is not null then
+    select * into orig from public.submissions where id = new.replaces;
+    theirs := found and orig.user_id is distinct from new.user_id;
+  end if;
   -- the author sent a sent-back post in again: note it, and tell the reviewer who asked
   if old.status = 'changes' and new.status = 'pending' and auth.uid() = new.user_id then
     insert into public.messages (subject, kind, status, body) values (subj, 'decision', 'pending', 'Made the changes and resubmitted.');
@@ -792,22 +819,33 @@ begin
       format('%s resubmitted the %s you sent back.', coalesce(author, 'The author'), public.kind_label(new.kind)), 'review/');
     return new;
   end if;
+  -- someone else's edit to your post went live
+  if new.status = 'merged' and theirs and orig.user_id is not null then
+    select display_name into author from public.profiles where id = new.user_id;
+    perform public.notify(orig.user_id, 'edited', 'submission:' || orig.id,
+      format('%s edited your %s, and a reviewer approved it. %s The old version is kept.', coalesce(author, 'A member'),
+             public.kind_label(new.kind), coalesce(nullif(btrim(new.edit_note), ''), '')),
+      public.submission_link(orig));
+  end if;
   if new.user_id is null or new.user_id = coalesce(auth.uid(), '00000000-0000-0000-0000-000000000000') then return new; end if;
   if new.status in ('approved', 'merged', 'changes', 'rejected') then
     insert into public.messages (subject, kind, status, body)
     values (subj, 'decision', new.status, coalesce(nullif(btrim(new.review_note), ''),
       case new.status when 'approved' then 'Published.' when 'merged' then 'Update approved.' else 'No note.' end));
   end if;
+  what := case when theirs then format('edit to the %s', public.kind_label(new.kind))
+               else format('update to your %s', public.kind_label(new.kind)) end;
   perform public.notify(new.user_id,
     case when new.status in ('approved', 'merged') then 'published' when new.status = 'changes' then 'sent_back'
          when old.status = 'approved' then 'unpublished' else 'not_accepted' end,
     subj,
     case
-      when new.status = 'merged'   then format('Your update to your %s was approved and is live now. Thank you!', public.kind_label(new.kind))
+      when new.status = 'merged'   then format('Your %s was approved and is live now. Thank you!', what)
       when new.status = 'approved' then format('Your %s was published. Thank you!', public.kind_label(new.kind))
-      when new.status = 'changes'  then format('A reviewer asked for changes to your %s: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
+      when new.status = 'changes'  then format('A reviewer asked for changes to your %s: %s',
+                                               case when new.replaces is not null then what else public.kind_label(new.kind) end, coalesce(new.review_note, ''))
       when old.status = 'approved' then format('Your %s was unpublished. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
-      when new.replaces is not null then format('Your update to your %s wasn''t accepted, so the live version stays as it was. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
+      when new.replaces is not null then format('Your %s wasn''t accepted, so the live version stays as it was. Reason: %s', what, coalesce(new.review_note, ''))
       else format('Your %s wasn''t accepted. Reason: %s', public.kind_label(new.kind), coalesce(new.review_note, ''))
     end,
     case when new.status in ('approved', 'merged') then public.submission_link(new) else 'inbox/#thread/' || subj end);
