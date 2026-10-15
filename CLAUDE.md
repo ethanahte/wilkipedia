@@ -406,6 +406,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     turns it off, and a legend sits bottom right. Guides get no text tag on the graph
     (Jonathan asked; decided 2026-09-29): the link to their class is the tag, and pointing
     at a guide lights up its classes.
+  - PDF links are signed for 6 hours (`pdfUrls`), so a tab left open longer showed an error instead of
+    the file (Ethan, 2026-10-15). A site-wide click handler in ui.js reads the link's expiry and, when
+    it's gone or under 2 minutes, opens a fresh one (`openSigned`; the graph's double-click uses it too).
   - A study guide can have both a PDF and a link to its live web version (a Google Doc). The graph
     draws those dots with a ring (legend "PDF + web"), the card has "Open the PDF" and "Open the web
     version" (the web link stays when the PDF can't be opened), and the list below gives a "Web

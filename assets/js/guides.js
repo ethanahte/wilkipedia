@@ -10,7 +10,7 @@
 // A guide shared across classes (payload.also) links to each, so it sits between them.
 // Classes with no guides yet are dim, like Obsidian's unresolved notes.
 
-import { initHeader, $, esc, courses, courseUrl, safeUrl, root, lessMotion } from './ui.js';
+import { initHeader, openSigned, $, esc, courses, courseUrl, safeUrl, root, lessMotion } from './ui.js';
 import { GUIDE } from './forms.js';
 
 // Each kind of resource has its own colour (Ethan), from the Type the poster picked on the form.
@@ -299,7 +299,9 @@ cv.addEventListener('dblclick', (e) => {
   if (!n) return;
   if (n.kind === 'subject') return;
   const u = n.kind === 'guide' ? openUrl(n.g) : courseUrl(n.slug);
-  if (u) window.open(u, n.kind === 'guide' ? '_blank' : '_self', 'noopener');
+  if (!u) return;
+  if (n.kind === 'guide') openSigned(u);            // a PDF link may have expired while the page was open
+  else window.open(u, '_self');
 });
 
 // Obsidian-style settings: Filters / Display / Forces, plus Animate

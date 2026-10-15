@@ -1308,6 +1308,39 @@ export async function withUploads(st, form, payload) {
   return payload;
 }
 
+// PDF links are signed for 6 hours (pdfUrls in store.js), so a page left open longer than that
+// would show an error instead of the file (Ethan, 2026-10-15: the AP Bio ch. 9 PDF "can't be
+// opened"). Any click on a signed guide link, on any page, checks the signature's expiry and, when
+// it's gone or nearly gone, opens a freshly signed one instead. The tab opens synchronously in the
+// click (or a browser would block it) and is pointed at the new link once it's signed.
+const SIGNED = /\/storage\/v1\/object\/sign\/guides\/([^?#]+)\?token=([\w.-]+)/;
+const signedPath = (u) => { const m = SIGNED.exec(String(u || '')); return m ? decodeURIComponent(m[1]) : null; };
+function signatureLeft(u) {            // seconds until a signed link stops working (0 when unreadable)
+  try {
+    const part = SIGNED.exec(u)[2].split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(part + '==='.slice((part.length + 3) % 4))).exp - Date.now() / 1000;
+  } catch { return 0; }
+}
+export function openSigned(u) {
+  const path = signedPath(u);
+  if (!path || signatureLeft(u) > 120) { const w = window.open(u, '_blank'); if (w) w.opener = null; return; }
+  const w = window.open('', '_blank');
+  if (w) { w.opener = null; w.document.title = 'Opening the PDF…'; w.document.body.textContent = 'Opening the PDF…'; }
+  store().then((st) => st.pdfUrls([path])).then((urls) => {
+    const fresh = urls[path];
+    if (!fresh) throw new Error('gone');
+    document.querySelectorAll('a[href]').forEach((a) => { if (signedPath(a.href) === path) a.href = fresh; });
+    if (w) w.location.href = fresh; else location.href = fresh;
+  }).catch(() => { if (w) w.close(); toast('That PDF isn’t available right now. Try reloading the page.', 'bad'); });
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest?.('a[href]');
+  if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || !signedPath(a.href)) return;
+  if (signatureLeft(a.href) > 120) return;          // still good: let the link open normally
+  e.preventDefault();
+  openSigned(a.href);
+});
+
 // Point every <a data-pdf="path"> under el at a short-lived link to that file. A file this
 // viewer may not open (or that's missing) stays a dead link with a note.
 export async function linkPdfs(el, st = null) {
