@@ -32,7 +32,7 @@ const typeOf = (g) => {
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
-const C = { bg: '#1e1e1e', node: '#a8a8a8', guide: '#dcddde', subject: '#c9a227', ap: '#7aa7ff', empty: '#4a4a4a', line: '#3f3f3f', accent: '#f5c400', text: '#dcddde' };
+const C = { bg: '#1e1e1e', node: '#a3a8b0', guide: '#dcddde', subject: '#d8b24a', ap: '#7f9dff', empty: '#6a6a6a', line: '#3a3a3a', accent: '#f5c400', text: '#cfcfcf' };
 
 const [data, guides] = await Promise.all([courses(), s.approved({ kind: 'resource' }).catch(() => [])]);
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
@@ -79,25 +79,34 @@ function graph(filter = '') {
 }
 
 // ── the engine: a small force simulation drawn on a canvas ──
+// Redrawn 2026-10-19 (Ethan: clearer, more designed, "use Obsidian as reference again"):
+//   labels are placed by priority (what you point at and its neighbours, search matches,
+//   subjects, classes, then guides) and a label that would overlap one already drawn is skipped,
+//   so text never piles up; guide titles appear as you zoom in (the text fade threshold).
+//   Dots have a collision force so they never overlap, a dark outline to separate them, and
+//   subjects a soft glow. Classes with no guides are hollow (Obsidian's unresolved notes).
+//   Clicking a dot keeps it lit and glides the camera to it; + / − / fit buttons by the gear.
 const box = $('#gv-chart');
 const cv = document.createElement('canvas');
 cv.className = 'gv-canvas';
 box.append(cv);
 const ctx = cv.getContext('2d');
-let W = 0, H = 0, DPR = 1;
+let W = 0, H = 0, DPR = 1, bgFill = C.bg;
 const view = { x: 0, y: 0, k: 1 };                 // screen = world * k + centre + (x, y)
 let N = [], L = [], byId = new Map(), nbr = new Map();
-let alpha = 1, alphaTarget = 0, raf = 0, hover = null, fade = 0, current;
+let alpha = 1, alphaTarget = 0, raf = 0, hover = null, sel = null, fade = 0, current, cam = null;
 const still = lessMotion();
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toWorld = (sx, sy) => [(sx - W / 2 - view.x) / view.k, (sy - H / 2 - view.y) / view.k];
+const toScreen = (x, y) => [W / 2 + view.x + x * view.k, H / 2 + view.y + y * view.k];
+const clip = (t, n) => (t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t);
 
 // Three sizes: subject areas biggest, then classes, then guides. Hubs grow a little with what hangs off them.
 function radius(n) {
   const d = current.deg[n.id] || 0;
-  return (n.kind === 'subject' ? 12 + Math.sqrt(d) * 1.6
-    : n.kind === 'class' ? (n.has ? 6.5 + Math.sqrt(d) * 1.2 : 3.2)
-    : 3.8 + Math.max(0, d - 1) * .8) * opts.size;                     // a guide shared across classes is a touch bigger
+  return (n.kind === 'subject' ? 13 + Math.sqrt(d) * 1.8
+    : n.kind === 'class' ? (n.has ? 7 + Math.sqrt(d) * 1.3 : 4)
+    : 4.6 + Math.max(0, d - 1) * .9) * opts.size;                     // a guide shared across classes is a touch bigger
 }
 
 // Rebuild the nodes, keeping where every surviving dot already is
@@ -106,18 +115,18 @@ function load(replay) {
   const old = byId;
   byId = new Map(); nbr = new Map();
   // Start from the hierarchy: subjects round a circle, their classes round each subject,
-  // guides round their (first) class. The forces then only have to relax it.
+  // guides fanned out beyond their (first) class. The forces then only have to relax it.
   const seed = new Map(), subs = current.nodes.filter((n) => n.kind === 'subject');
-  const R = subs.length < 2 ? 0 : 70 + 32 * subs.length;
+  const R = subs.length < 2 ? 0 : 80 + 34 * subs.length;
   subs.forEach((n, i) => { const a = i / subs.length * Math.PI * 2 - Math.PI / 2; seed.set(n.id, [Math.cos(a) * R, Math.sin(a) * R, a]); });
   for (const d of subs) {
     const cls = current.nodes.filter((n) => n.kind === 'class' && bySlug[n.slug].department === d.slug), [dx, dy, da] = seed.get(d.id);
-    cls.forEach((n, i) => { const a = da + (i - (cls.length - 1) / 2) * Math.min(.7, 2.6 / cls.length); seed.set(n.id, [dx + Math.cos(a) * 80, dy + Math.sin(a) * 80, a]); });
+    cls.forEach((n, i) => { const a = da + (i - (cls.length - 1) / 2) * Math.min(.8, 3.4 / cls.length); seed.set(n.id, [dx + Math.cos(a) * 115, dy + Math.sin(a) * 115, a]); });
   }
   for (const n of current.nodes.filter((x) => x.kind === 'guide')) {
     const sibs = current.G.filter((g) => g.classes[0] === n.g.classes[0]), k = sibs.indexOf(n.g), home = seed.get('c:' + n.g.classes[0]) || [0, 0, 0];
-    const a = home[2] + (k - (sibs.length - 1) / 2) * Math.min(.9, 3.2 / sibs.length);   // fanned out, away from the subject
-    seed.set(n.id, [home[0] + Math.cos(a) * 42, home[1] + Math.sin(a) * 42, a]);
+    const a = home[2] + (k - (sibs.length - 1) / 2) * Math.min(1, 4 / sibs.length);
+    seed.set(n.id, [home[0] + Math.cos(a) * 66, home[1] + Math.sin(a) * 66, a]);
   }
   N = current.nodes.map((n) => {
     const was = !replay && old.get(n.id), [sx, sy] = seed.get(n.id) || [0, 0];
@@ -127,20 +136,21 @@ function load(replay) {
   });
   L = current.links.map((l) => ({ ...l, a: byId.get(l.source), b: byId.get(l.target) })).filter((l) => l.a && l.b);
   for (const l of L) { nbr.get(l.a.id).add(l.b.id); nbr.get(l.b.id).add(l.a.id); }
-  for (const n of N) { n.r = radius(n); n.w = n.kind === 'subject' ? 3.2 : n.kind === 'class' ? 1.7 : 1; }   // hubs push harder, so subjects spread out
+  for (const n of N) { n.r = radius(n); n.w = n.kind === 'subject' ? 3.4 : n.kind === 'class' ? 1.8 : 1.15; }   // hubs push harder, so subjects spread out
+  if (sel) sel = byId.get(sel.id) || null;
   const count = (k) => N.filter((n) => n.kind === k).length, g = count('guide'), c = count('class'), d = count('subject');
   $('#gv-count').textContent = `${g} study guide${g === 1 ? '' : 's'} & resources · ${c} class${c === 1 ? '' : 'es'} · ${d} subject${d === 1 ? '' : 's'}`;
 }
 
 function tick() {
-  const rep = opts.repel * 14, dist = opts.link * 1.3, grav = opts.gravity * 0.06;
+  const rep = opts.repel * 16, dist = opts.link * 1.3, grav = opts.gravity * 0.11;
   for (let i = 0; i < N.length; i++) {
     const a = N[i];
     for (let j = i + 1; j < N.length; j++) {                        // everything pushes everything apart
       const b = N[j];
       let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
       if (d2 < 1) { dx = Math.random() - .5; dy = Math.random() - .5; d2 = 1; }
-      if (d2 > 250000) continue;
+      if (d2 > 360000) continue;
       const f = rep * alpha * a.w * b.w / d2, d = Math.sqrt(d2);
       a.vx -= dx / d * f; a.vy -= dy / d * f; b.vx += dx / d * f; b.vy += dy / d * f;
     }
@@ -148,92 +158,157 @@ function tick() {
   }
   for (const l of L) {                                              // links act as springs
     const dx = l.b.x - l.a.x, dy = l.b.y - l.a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const want = dist * (l.kind === 'class' ? .75 : 1.6), f = (d - want) / d * .09 * alpha;   // guides close to their class, classes further out from their subject
+    const want = dist * (l.kind === 'class' ? 1.15 : 1.65), f = (d - want) / d * .08 * alpha;   // guides a little way out from their class, classes further from their subject
     l.a.vx += dx * f; l.a.vy += dy * f; l.b.vx -= dx * f; l.b.vy -= dy * f;
   }
   for (const n of N) {
     if (n.fx != null) { n.x = n.fx; n.y = n.fy; n.vx = n.vy = 0; continue; }
     n.vx *= .6; n.vy *= .6; n.x += n.vx; n.y += n.vy;
   }
+  // collisions: no two dots overlap, with a little air between them
+  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
+    const a = N[i], b = N[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .01;
+    const min = a.r + b.r + (a.kind === 'guide' && b.kind === 'guide' ? 9 : 14);
+    if (d >= min) continue;
+    const push = (min - d) / d * .5;
+    if (a.fx == null) { a.x -= dx * push; a.y -= dy * push; }
+    if (b.fx == null) { b.x += dx * push; b.y += dy * push; }
+  }
   alpha += (alphaTarget - alpha) * .025;
 }
 
-function fit() {
-  if (!N.length) return;
+// The view that shows everything, with room for the bar on top and the legend underneath
+function fitView() {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (const n of N) { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x); y1 = Math.max(y1, n.y); }
-  view.k = Math.min(2, Math.max(.2, Math.min((W - 60) / (x1 - x0 + 40), (H - 110) / (y1 - y0 + 40))));
-  view.x = -(x0 + x1) / 2 * view.k; view.y = -(y0 + y1) / 2 * view.k + 10;
+  for (const n of N) { x0 = Math.min(x0, n.x - n.r); y0 = Math.min(y0, n.y - n.r); x1 = Math.max(x1, n.x + n.r); y1 = Math.max(y1, n.y + n.r + 14); }
+  const k = Math.min(1.6, Math.max(.2, Math.min((W - 80) / (x1 - x0 || 1), (H - 150) / (y1 - y0 || 1))));
+  return { k, x: -(x0 + x1) / 2 * k, y: -(y0 + y1) / 2 * k + 6 };
 }
-
-function render() {
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
-  ctx.setTransform(DPR * view.k, 0, 0, DPR * view.k, DPR * (W / 2 + view.x), DPR * (H / 2 + view.y));
-  const k = view.k, near = hover ? nbr.get(hover.id) : null;
-  // the rest of the graph fades back while one dot is pointed at
-  const dim = (id) => (near && !near.has(id) ? 1 - .85 * fade : 1);
-  for (const l of L) {
-    const on = near && (l.a === hover || l.b === hover);
-    ctx.globalAlpha = (on ? 1 : Math.min(dim(l.a.id), dim(l.b.id)) * .8) * ((l.a.hit && l.b.hit) ? 1 : .2);
-    ctx.strokeStyle = on ? C.accent : C.line;
-    ctx.lineWidth = ((on ? 1.6 : l.kind === 'subject' ? 1.1 : .8) * opts.thick) / Math.max(.5, k);
-    ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
-  }
-  for (const n of N) {
-    ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .15);
-    ctx.fillStyle = n === hover ? C.accent : n.kind === 'subject' ? C.subject : n.has === false ? C.empty : n.kind === 'guide' ? TYPE[n.type]?.color || C.guide : n.ap && opts.apColor ? C.ap : C.node;
-    const r = n.r * (n === hover ? 1 + .25 * fade : 1);
-    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();
-    if (n.kind === 'guide' && both(n.g)) {                     // PDF + web version: a ring around the dot
-      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = Math.max(.8, r * .3);
-      ctx.beginPath(); ctx.arc(n.x, n.y, r * 1.7, 0, Math.PI * 2); ctx.stroke();
-    }
-  }
-  // titles fade out as you zoom out (Obsidian's text fade threshold); the dot
-  // you point at and its neighbours always keep theirs
-  const t = opts.labels, base = smooth(t * .6, t, k), faint = smooth(t * 1.1, t * 1.7, k);   // classes with no guides need a closer look
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  for (const n of N) {
-    const focus = near?.has(n.id);
-    // subject names stay readable when zoomed right out
-    let a = focus ? Math.max(base, fade) : (n.kind === 'subject' ? 1 : n.has === false ? faint * .7 : base) * dim(n.id);
-    if (!n.hit) a *= .2;
-    if (a < .02) continue;
-    const size = n.kind === 'subject' ? 14 : n.kind === 'guide' ? 11 : 10;
-    ctx.font = `${n === hover || n.kind === 'subject' ? 600 : 400} ${size / Math.max(n.kind === 'subject' ? .5 : 1, k * .9)}px ui-sans-serif, system-ui, sans-serif`;
-    ctx.globalAlpha = a;
-    ctx.fillStyle = n === hover ? '#fff' : n.has === false ? '#8a8a8a' : C.text;
-    const label = n.name.length > 34 ? n.name.slice(0, 32) + '…' : n.name;
-    ctx.fillText(label, n.x, n.y + n.r + 3 / Math.max(.6, k));
-  }
-  ctx.globalAlpha = 1;
+function fit(animated = false) { if (N.length) goTo(fitView(), animated); }
+// glide the camera (or jump, with reduced motion)
+function goTo(to, animated = true) {
+  if (!animated || still) { Object.assign(view, to); cam = null; wake(); return; }
+  cam = { from: { ...view }, to, t0: performance.now(), dur: 420 };
+  wake();
 }
-
-function frame() {
-  raf = 0;
-  const target = hover ? 1 : 0;
-  fade = still ? target : fade + (target - fade) * .25;             // hover focus fades in fast
-  if (alpha > .004 || alphaTarget > 0) tick();
-  render();
-  if (alpha > .004 || alphaTarget > 0 || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
+function focusOn(n) {
+  const k = Math.max(view.k, n.kind === 'guide' ? 1.5 : 1.1);
+  goTo({ k, x: -n.x * k, y: -n.y * k });
 }
-const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
 
 function size() {
   const r = box.getBoundingClientRect();
   DPR = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height;
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   cv.style.width = `${W}px`; cv.style.height = `${H}px`;
+  // a soft vignette: a touch lighter in the middle, like a lit desk
+  const g = ctx.createRadialGradient(W / 2, H * .45, 0, W / 2, H * .45, Math.max(W, H) * .75);
+  g.addColorStop(0, '#262626'); g.addColorStop(1, '#1a1a1a');
+  bgFill = g;
   wake();
 }
+
+const colorOf = (n) => (n.kind === 'subject' ? C.subject : n.kind === 'guide' ? TYPE[n.type]?.color || C.guide
+  : n.has === false ? C.empty : n.ap && opts.apColor ? C.ap : C.node);
+
+function render() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = bgFill; ctx.fillRect(0, 0, W, H);
+  ctx.setTransform(DPR * view.k, 0, 0, DPR * view.k, DPR * (W / 2 + view.x), DPR * (H / 2 + view.y));
+  const k = view.k, focus = hover || sel, near = focus ? nbr.get(focus.id) : null;
+  const searching = !!$('#gv-q').value.trim();
+  // the rest of the graph fades back while a dot is pointed at (or picked)
+  const dim = (id) => (near && !near.has(id) ? 1 - .86 * fade : 1);
+  const px = 1 / k;                                                    // one screen pixel, in world units
+  // links
+  for (const l of L) {
+    const on = near && (l.a === focus || l.b === focus);
+    ctx.globalAlpha = (on ? .95 : Math.min(dim(l.a.id), dim(l.b.id)) * .75) * ((l.a.hit && l.b.hit) ? 1 : .15);
+    ctx.strokeStyle = on ? C.accent : C.line;
+    ctx.lineWidth = ((on ? 1.7 : l.kind === 'subject' ? 1.3 : 1) * opts.thick) * px;
+    ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
+  }
+  // dots
+  for (const n of N) {
+    const a = dim(n.id) * (n.hit ? 1 : .14);
+    ctx.globalAlpha = a;
+    const col = colorOf(n), r = n.r * (n === hover ? 1 + .18 * fade : 1);
+    if (n.kind === 'subject') {                                        // a soft glow round each subject
+      const g = ctx.createRadialGradient(n.x, n.y, r * .6, n.x, n.y, r * 2.6);
+      g.addColorStop(0, 'rgba(216, 178, 74, .28)'); g.addColorStop(1, 'rgba(216, 178, 74, 0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, r * 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+    if (n.kind === 'class' && n.has === false) {                       // hollow: nothing shared yet
+      ctx.fillStyle = C.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.4 * px; ctx.stroke();
+    } else {
+      ctx.fillStyle = col; ctx.fill();
+      ctx.strokeStyle = C.bg; ctx.lineWidth = 1.6 * px; ctx.stroke();  // a dark outline keeps touching dots apart
+    }
+    if (n.kind === 'guide' && both(n.g)) {                             // PDF + web version: a fine ring
+      ctx.strokeStyle = col; ctx.lineWidth = 1.1 * px;
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 3 * px, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (n === focus) {                                                 // the dot you're on: a gold ring
+      ctx.globalAlpha = 1; ctx.strokeStyle = C.accent; ctx.lineWidth = 2 * px;
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 4.5 * px, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  // labels, in screen space so they stay crisp at any zoom
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round';
+  const t = opts.labels;
+  const rank = (n) => (n === focus ? 0 : near?.has(n.id) ? 1 : searching && n.hit ? 2 : n.kind === 'subject' ? 3 : n.kind === 'class' ? 4 : 5);
+  const show = (n) => {                                                // how visible this label is at this zoom (Obsidian's text fade)
+    if (near?.has(n.id)) return Math.max(fade, n.kind === 'guide' ? smooth(1.05 * t, 1.5 * t, k) : 1);
+    if (searching && n.hit && n.kind !== 'subject') return 1;
+    const z = n.kind === 'subject' ? 1 : n.kind === 'class' ? (n.has ? smooth(.4 * t, .62 * t, k) : smooth(.95 * t, 1.3 * t, k) * .8) : smooth(1.05 * t, 1.5 * t, k);
+    return z * dim(n.id) ** 2 * (n.hit ? 1 : .2);                   // faded dots lose their labels entirely
+  };
+  const placed = [];
+  // dots are obstacles too: a label never covers another dot (only what you're pointing at may)
+  const dots = N.filter((n) => dim(n.id) * (n.hit ? 1 : .14) > .3).map((n) => { const [x, y] = toScreen(n.x, n.y), r = n.r * view.k + 2; return [x - r, y - r, x + r, y + r, n]; });
+  const order = N.map((n) => [n, rank(n), current.deg[n.id] || 0]).sort((a, b) => a[1] - b[1] || b[2] - a[2]);
+  for (const [n, r] of order) {
+    const a = show(n);
+    if (a < .04) continue;
+    const size = n.kind === 'subject' ? 14 : n.kind === 'class' ? 12 : 11.5;
+    ctx.font = `${n.kind === 'subject' || n === focus ? 600 : n.kind === 'class' ? 500 : 400} ${size}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
+    const text = clip(n.name, n.kind === 'guide' ? 30 : 30);
+    const [sx, sy] = toScreen(n.x, n.y), y = sy + n.r * view.k + 4, w = ctx.measureText(text).width;
+    const rect = [sx - w / 2 - 3, y - 1, sx + w / 2 + 3, y + size + 2];
+    const over = (q) => rect[0] < q[2] && rect[2] > q[0] && rect[1] < q[3] && rect[3] > q[1];
+    if (r > 0 && (placed.some(over) || (r > 1 && dots.some((q) => q[4] !== n && over(q))))) continue;   // never pile labels up
+    placed.push(rect);
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = C.bg; ctx.lineWidth = 3.5; ctx.strokeText(text, sx, y);   // a dark halo so text reads over lines
+    ctx.fillStyle = n === focus ? '#ffffff' : n.kind === 'subject' ? '#f1e3b8' : n.has === false ? '#8a8a8a' : r <= 2 ? '#ececec' : C.text;
+    ctx.fillText(text, sx, y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function frame(now) {
+  raf = 0;
+  const target = hover || sel ? 1 : 0;
+  fade = still ? target : fade + (target - fade) * .22;             // focus fades in fast
+  if (cam) {
+    const u = Math.min(1, (now - cam.t0) / cam.dur), e = 1 - Math.pow(1 - u, 3);
+    for (const key of ['x', 'y', 'k']) view[key] = cam.from[key] + (cam.to[key] - cam.from[key]) * e;
+    if (u >= 1) cam = null;
+  }
+  if (alpha > .004 || alphaTarget > 0) tick();
+  render();
+  if (cam || alpha > .004 || alphaTarget > 0 || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
+}
+const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
 
 function draw(replay = false) {
   load(replay);
   alpha = 1;
-  const warm = still ? 500 : replay ? 30 : 320;                     // settle most of the way first (less for Animate, to watch it settle)
+  const warm = still ? 600 : replay ? 30 : 420;                     // settle most of the way first (less for Animate, to watch it settle)
   for (let i = 0; i < warm; i++) tick();
-  fit();
+  fit(false);
   wake();
 }
 
@@ -241,7 +316,7 @@ function draw(replay = false) {
 function hit(sx, sy) {
   const [x, y] = toWorld(sx, sy);
   let best = null, bd = Infinity;
-  for (const n of N) { const d = Math.hypot(n.x - x, n.y - y); if (d < n.r + 5 / view.k && d < bd) { bd = d; best = n; } }
+  for (const n of N) { const d = Math.hypot(n.x - x, n.y - y); if (d < n.r + 6 / view.k && d < bd) { bd = d; best = n; } }
   return best;
 }
 const pts = new Map();
@@ -249,6 +324,7 @@ let press = null, pinch = null;
 cv.addEventListener('pointerdown', (e) => {
   cv.setPointerCapture(e.pointerId);
   pts.set(e.pointerId, [e.offsetX, e.offsetY]);
+  cam = null;
   if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), k: view.k }; press = null; return; }
   const n = hit(e.offsetX, e.offsetY);
   press = { n, sx: e.offsetX, sy: e.offsetY, vx: view.x, vy: view.y, moved: false };
@@ -265,8 +341,8 @@ cv.addEventListener('pointermove', (e) => {
   if (press) {
     const dx = e.offsetX - press.sx, dy = e.offsetY - press.sy;
     if (Math.hypot(dx, dy) > 3) press.moved = true;
-    if (press.n) { [press.n.fx, press.n.fy] = toWorld(e.offsetX, e.offsetY); alphaTarget = .25; alpha = Math.max(alpha, .25); }
-    else { view.x = press.vx + dx; view.y = press.vy + dy; }
+    if (press.n && press.moved) { [press.n.fx, press.n.fy] = toWorld(e.offsetX, e.offsetY); alphaTarget = .25; alpha = Math.max(alpha, .25); }
+    else if (!press.n) { view.x = press.vx + dx; view.y = press.vy + dy; }
     wake();
     return;
   }
@@ -278,7 +354,11 @@ const release = (e) => {
   if (pts.size < 2) pinch = null;
   if (!press) return;
   if (press.n) { press.n.fx = press.n.fy = null; alphaTarget = 0; }
-  if (!press.moved) info(press.n);
+  if (!press.moved) {                                                 // a click: pick it (or let go, on the background)
+    sel = press.n;
+    info(press.n);
+    if (press.n) focusOn(press.n);
+  }
   press = null;
   cv.classList.remove('grabbing');
   wake();
@@ -293,7 +373,7 @@ function zoomAt(sx, sy, by) {
   view.k = k;
   wake();
 }
-cv.addEventListener('wheel', (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, { passive: false });
+cv.addEventListener('wheel', (e) => { e.preventDefault(); cam = null; zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, { passive: false });
 cv.addEventListener('dblclick', (e) => {
   const n = hit(e.offsetX, e.offsetY);
   if (!n) return;
@@ -302,6 +382,20 @@ cv.addEventListener('dblclick', (e) => {
   if (!u) return;
   if (n.kind === 'guide') openSigned(u);            // a PDF link may have expired while the page was open
   else window.open(u, '_self');
+});
+// the camera buttons by the gear: zoom in, zoom out, fit everything
+$('#gv-zoom')?.addEventListener('click', (e) => {
+  const z = e.target.closest('[data-z]')?.dataset.z;
+  if (z === 'fit') fit(true);
+  else if (z) { const by = z === 'in' ? 1.35 : 1 / 1.35, k = Math.min(6, Math.max(.12, view.k * by)); goTo({ k, x: view.x * k / view.k, y: view.y * k / view.k }); }
+});
+// keys on the graph: + / − to zoom, 0 to fit, Esc to let go of the picked dot
+box.tabIndex = 0;
+box.addEventListener('keydown', (e) => {
+  if (e.key === '+' || e.key === '=') $('#gv-zoom [data-z="in"]')?.click();
+  else if (e.key === '-') $('#gv-zoom [data-z="out"]')?.click();
+  else if (e.key === '0') fit(true);
+  else if (e.key === 'Escape') { sel = null; info(null); wake(); }
 });
 
 // Obsidian-style settings: Filters / Display / Forces, plus Animate
@@ -408,4 +502,4 @@ $('#gv-panel').addEventListener('input', (e) => {
   else { for (const n of N) n.r = radius(n); wake(); }            // display: just redraw
 });
 $('#gv-panel').addEventListener('click', (e) => { if (e.target.id === 'gv-animate') draw(true); });
-$('#gv-info').addEventListener('click', (e) => { if (e.target.closest('.gv-x')) info(null); });
+$('#gv-info').addEventListener('click', (e) => { if (e.target.closest('.gv-x')) { sel = null; info(null); wake(); } });

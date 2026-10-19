@@ -398,6 +398,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     The legend (built in JS) has a chip per type present; clicking hides/shows it, saved in
     `opts.hide`. The info card and the list name the type. Guide node ids are `g:<submission id>`
     so dots keep their place when a type is hidden. A new Type option needs a `TYPES` entry.
+  - **Redrawn 2026-10-19** (Ethan: "even more clear, more designed, more beautiful", Obsidian again):
+    labels are placed by priority (the dot you point at or picked and its neighbours, search matches,
+    subjects, classes by size, then guides) and skipped when they would overlap another label or dot, so
+    text never piles up; each has a dark halo and is drawn in screen space (crisp at any zoom). Guide titles
+    fade in as you zoom in. A collision force keeps dots apart; dots have a dark outline, subjects a soft
+    glow, classes with no guides are hollow. Hover or click lights the dot and its links in gold and fades
+    the rest; a click keeps it lit and glides the camera to it (Esc or ✕ lets go). + / − / fit buttons
+    by the gear (and keys + − 0). Background is a soft vignette.
   - Physics: a force simulation (repel, springs, centre pull, cooling alpha).
     Node size grows with link count, dragging a dot pulls its neighbours, and
     scroll or pinch zooms toward the pointer.

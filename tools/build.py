@@ -1115,13 +1115,14 @@ def build_static():
   <div class="gv-bar">
     <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>
     <span class="gv-count" id="gv-count"></span>
+    <span class="gv-zoom" id="gv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="in" aria-label="Zoom in" title="Zoom in (+)">+</button><button type="button" data-z="out" aria-label="Zoom out" title="Zoom out (−)">−</button><button type="button" data-z="fit" aria-label="Fit everything" title="Fit everything (0)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></span>
     <button type="button" class="gv-gear" id="gv-gear" aria-expanded="false" aria-label="Graph settings" title="Graph settings">{ICONS["settings"]}</button>
   </div>
   <div id="gv-chart" class="gv-chart" role="img" aria-label="Graph of subjects, classes and study guides. The list below has every guide."></div>
   <div class="gv-panel" id="gv-panel" hidden></div>
   <aside class="gv-info" id="gv-info" hidden></aside>
   <div class="gv-foot">
-    <p class="gv-hint">Scroll to zoom · drag to move · drag a dot and the rest follows · click for details · double-click to open</p>
+    <p class="gv-hint">Scroll or pinch to zoom · drag to move · click a dot for details · double-click to open · zoom in to see every title</p>
     <div class="gv-legend" id="gv-legend" role="group" aria-label="What the dots are. Click a kind of resource to hide or show it."></div>
   </div>
 </div>
