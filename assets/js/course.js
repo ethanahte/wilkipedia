@@ -30,6 +30,16 @@ function meta(sub, target) {
       ${edited(sub)} · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
 }
 
+// Review-only files (a syllabus PDF): never shown to readers, since a syllabus often lists the teacher's
+// email or phone. The review team and the post's author get a private link (storage lets only them open it).
+function privateDocs(sub) {
+  const me = s.user();
+  if (!me || !(isMod() || me.id === sub.user_id)) return '';
+  const docs = KINDS[sub.kind].fields.filter((f) => f.reviewOnly && f.type === 'pdf' && sub.payload[f.key]?.path);
+  return docs.map((f) => `<p class="private-doc"><a data-pdf="${esc(sub.payload[f.key].path)}" href="#" aria-disabled="true" target="_blank" rel="noopener">📄 ${esc(f.label.replace(/\s*\(.*\)$/, '').replace(/^The /, '').replace(/^./, (c) => c.toUpperCase()))} (PDF)</a>
+    <span class="meta">Only the review team${isMod() ? '' : ' and you'} can see this.</span></p>`).join('');
+}
+
 function fieldList(kind, payload, skip = []) {
   const facts = KINDS[kind].fields
     .filter((f) => payload[f.key] && !skip.includes(f.key) && f.key !== 'school_year' && !f.reviewOnly)   // review-only files stay off the page
@@ -87,7 +97,7 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
   // with tabs the name is already on the tab, so the card leads with the room and the teacher's page
   const card = ([t, sec]) => `<article class="teacher">
       <header class="t-head">${written.length >= 2 ? (page.teacherSlugs?.[t] ? `<a class="t-page" href="${root}teachers/${page.teacherSlugs[t]}/">${esc(t)}’s teacher page →</a>` : '') : `<h3>${tLink(t)}</h3>`}${room(sec)}</header>
-      ${fieldList('teacher_section', sec.payload, ['room', 'source']) + meta(sec, `teacher:${t}`)}
+      ${fieldList('teacher_section', sec.payload, ['room', 'source']) + privateDocs(sec) + meta(sec, `teacher:${t}`)}
       <a class="edit" href="${submitUrl('teacher_section', t)}">Suggest an update</a></article>`;
   // Several written: one at a time, with tabs, and a Compare tab to see them side by side
   const COMPARE = [['test_style', 'Tests'], ['grading', 'Grading'], ['homework', 'Homework'], ['late_policy', 'Late work'], ['retakes', 'Retakes']];
@@ -107,6 +117,7 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
     : `${tabs}${shown}
       ${unwritten.length ? `<div class="t-missing">${written.length ? '<p class="t-missing-h">Not written yet</p>' : '<p class="empty-line">Nobody has described a teacher’s version yet. Took it? Pick your teacher:</p>'}
         <ul>${unwritten.map(([t]) => `<li><span>${tLink(t)}</span><a class="add-link" href="${submitUrl('teacher_section', t)}">Fill it in →</a></li>`).join('')}</ul></div>` : ''}`;
+  linkPdfs($('#teachers'), s);                    // the review team's syllabus links
 
   // ── Study guides and resources ──
   const res = subs.filter((x) => x.kind === 'resource');

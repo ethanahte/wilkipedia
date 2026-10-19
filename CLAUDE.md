@@ -250,7 +250,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     suggested edit brought while it's being approved (021). When a link-only guide gets a PDF, its Link
     field becomes the optional "live version".
 - **Syllabi are PDFs only** (Ethan, 2026-10-19). `teacher_section.syllabus_url` is `legacy: true`: hidden on new forms,
-  kept where a section already has a link. `syllabus_pdf` is review-only and never public.
+  kept where a section already has a link. `syllabus_pdf` is review-only and never public: on the class page
+  only the review team and the post's author get a private link to it (`privateDocs` in course.js).
 - **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
   with the Community rules and the Privacy page. A signed-in member whose
   `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen
