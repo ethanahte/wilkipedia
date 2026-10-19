@@ -30,6 +30,16 @@ export const SAT_PLAN = 'How I studied', SAT_NOTES = 'Study notes (PDF)', SAT_LI
 export const SAT_TYPES = ['Tip', SAT_PLAN, SAT_NOTES, SAT_LINK];
 export const SAT_SECTIONS = ['Reading and Writing', 'Math', 'Both sections', 'Test day & planning'];
 
+// Fields that were retired: never shown, and dropped from a post when it's next edited. The data stays
+// in the database (nothing is deleted), it just isn't used. Syllabi are PDFs only (Ethan, 2026-10-19):
+// a syllabus link was public, and a syllabus often lists the teacher's email or phone.
+export const RETIRED = { teacher_section: ['syllabus_url'] };
+export const withoutRetired = (kind, payload) => {
+  const out = { ...payload };
+  for (const k of RETIRED[kind] || []) delete out[k];
+  return out;
+};
+
 export const KINDS = {
   course_overview: {
     label: 'Course overview',
@@ -66,14 +76,11 @@ export const KINDS = {
       { key: 'retakes', label: 'Retakes / test corrections', type: 'textarea' },
       { key: 'routine', label: 'Class routine', type: 'textarea',
         hint: 'e.g. "Warm-up quiz every Monday." Describe the class, not the person.' },
-      // Syllabi are PDFs only (Ethan, 2026-10-19). Sections that already have a link keep it.
-      { key: 'syllabus_url', label: 'Link to the syllabus', type: 'url', legacy: true,
-        hint: 'School Google Drive links usually only open for SCUSD accounts, so reviewers can’t check them. Uploading the PDF below is surer.' },
-      // Private to the review team: proof for the facts above, never shown on the class page. A
-      // syllabus is the teacher's own document and often lists their email or phone, which the
-      // site doesn't publish. (Only the `pdf` key ever becomes public in storage; this one never does.)
-      { key: 'syllabus_pdf', label: 'The syllabus (PDF, only reviewers see it)', type: 'pdf', reviewOnly: true,
-        hint: 'Upload it as a PDF (links aren’t accepted). Only the review team can open it, to check the facts above; it’s never shown on the class page. Up to 5 MB. A paper copy? Scan it with your phone’s Notes or Files app.' },
+      // Public on the class page since migration 023 (Ethan, 2026-10-19). A syllabus often lists the
+      // teacher's email or phone, which the site doesn't publish, so the form asks for them to be blacked
+      // out and the review desk reminds reviewers to check.
+      { key: 'syllabus_pdf', label: 'The syllabus (PDF)', type: 'pdf',
+        hint: 'Upload it as a PDF (links aren’t accepted). Everyone can open it on the class page, so black out or crop the teacher’s email and phone number first. Up to 5 MB. A paper copy? Scan it with your phone’s Notes or Files app.' },
       { key: 'room', label: 'Room number', type: 'text',
         hint: 'As it appears on the campus map, e.g. B204 or P116. This puts the class on the map. The period-by-period schedule is its own form: Room schedule.' },
       // Replaced by the room_schedule kind. Old sections keep and show theirs; new forms don't ask.

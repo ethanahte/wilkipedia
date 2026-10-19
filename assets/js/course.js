@@ -30,8 +30,8 @@ function meta(sub, target) {
       ${edited(sub)} · <button class="linkish" data-report="${esc(target)}">Report outdated</button>${unpub(sub)}</div>`;
 }
 
-// Review-only files (a syllabus PDF): never shown to readers, since a syllabus often lists the teacher's
-// email or phone. The review team and the post's author get a private link (storage lets only them open it).
+// Review-only files (fields with reviewOnly; none right now: the syllabus PDF went public in migration 023)
+// are never shown to readers. The review team and the post's author get a private link to them.
 function privateDocs(sub) {
   const me = s.user();
   if (!me || !(isMod() || me.id === sub.user_id)) return '';
@@ -45,7 +45,9 @@ function fieldList(kind, payload, skip = []) {
     .filter((f) => payload[f.key] && !skip.includes(f.key) && f.key !== 'school_year' && !f.reviewOnly)   // review-only files stay off the page
     .map((f) => {
       const v = payload[f.key];
-      const body = f.type === 'url'
+      const body = f.type === 'pdf'
+        ? (v?.path ? `<a class="doc-link" data-pdf="${esc(v.path)}" href="#" aria-disabled="true" target="_blank" rel="noopener">📄 Open the PDF ↗</a>` : '')
+        : f.type === 'url'
         ? (safeUrl(v) ? `<a href="${esc(safeUrl(v))}" target="_blank" rel="noopener nofollow">Open link ↗</a>` : esc(v))
         : f.type === 'textarea' ? prose(v) : esc(v);
       return `<div><dt>${esc(f.label)}</dt><dd>${body}</dd></div>`;
@@ -117,7 +119,7 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
     : `${tabs}${shown}
       ${unwritten.length ? `<div class="t-missing">${written.length ? '<p class="t-missing-h">Not written yet</p>' : '<p class="empty-line">Nobody has described a teacher’s version yet. Took it? Pick your teacher:</p>'}
         <ul>${unwritten.map(([t]) => `<li><span>${tLink(t)}</span><a class="add-link" href="${submitUrl('teacher_section', t)}">Fill it in →</a></li>`).join('')}</ul></div>` : ''}`;
-  linkPdfs($('#teachers'), s);                    // the review team's syllabus links
+  linkPdfs($('#teachers'), s);                    // syllabus PDFs
 
   // ── Study guides and resources ──
   const res = subs.filter((x) => x.kind === 'resource');

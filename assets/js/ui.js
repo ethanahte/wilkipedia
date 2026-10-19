@@ -2,7 +2,7 @@
 // form renderer used by the submit page and the course page's quick-add.
 
 import { store, MODE, REVIEWER_ROLES, TERMS_VERSION, canEditOwn, PDF_MAX } from './store.js';
-import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear } from './forms.js';
+import { KINDS, optionsOf, PERIODS, parseSchedule, schoolYear, withoutRetired } from './forms.js';
 import { AVATAR_LINES } from './avatar-art.js';
 
 export const root = document.body.dataset.root || './';
@@ -933,9 +933,9 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
     const err = (m) => { $('#ed-err', wrap).textContent = m; $('#ed-err', wrap).hidden = false; };
     const missing = fields.check();
     if (missing) return err(missing);
-    const payload = { ...sub.payload, ...fields.values() };
+    const payload = withoutRetired(sub.kind, { ...sub.payload, ...fields.values() });
     const files = Object.keys(fields.files()).length;
-    if (sub.status !== 'changes' && !files && JSON.stringify(payload) === JSON.stringify(sub.payload)) return err('You haven’t changed anything yet.');
+    if (sub.status !== 'changes' && !files && JSON.stringify(payload) === JSON.stringify(withoutRetired(sub.kind, sub.payload))) return err('You haven’t changed anything yet.');
     const note = noteEl ? noteEl.value.trim() : changes() || 'Updated by the author';
     if (noteBox && !note) return err('Please say what you changed.');
     const review = how === 'suggest' || (how === 'own' && (live || sub.status === 'changes'));

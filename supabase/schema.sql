@@ -651,23 +651,31 @@ create policy "published guides are public, own and reviewers see all" on storag
     or public.is_reviewer()
     or exists (select 1 from public.submissions s
                 where s.status = 'approved' and s.payload -> 'pdf' ->> 'path' = objects.name)));
+-- Syllabus PDFs too, once their post is published (migration 023)
+create policy "published syllabi are public" on storage.objects for select
+  using (bucket_id = 'guides' and exists (select 1 from public.submissions s
+          where s.status = 'approved' and s.payload -> 'syllabus_pdf' ->> 'path' = objects.name));
 
 -- A post points at its author's file, at a file the reviewer saving it uploaded (migration 020), or
 -- at a file its suggested edit brought, while that edit is approved (migration 021)
 create function public.check_submission_pdf() returns trigger
 language plpgsql set search_path = public as $$
 declare
-  p text := coalesce(new.payload -> 'pdf' ->> 'path', '');
+  k text;
+  p text;
   shape text := '/[0-9a-f-]{36}\.pdf$';
 begin
-  if new.payload ? 'pdf' and (tg_op = 'INSERT' or new.payload -> 'pdf' is distinct from old.payload -> 'pdf') then
-    if not (p ~ ('^' || coalesce(new.user_id::text, '-') || shape)
-            or (public.is_reviewer() and p ~ ('^' || coalesce(auth.uid()::text, '-') || shape))
-            or (tg_op = 'UPDATE' and exists (select 1 from public.submissions u
-                                              where u.replaces = new.id and u.payload -> 'pdf' ->> 'path' = p))) then
-      raise exception 'That PDF isn''t one you uploaded';
+  foreach k in array array['pdf', 'syllabus_pdf'] loop
+    if new.payload ? k and (tg_op = 'INSERT' or new.payload -> k is distinct from old.payload -> k) then
+      p := coalesce(new.payload -> k ->> 'path', '');
+      if not (p ~ ('^' || coalesce(new.user_id::text, '-') || shape)
+              or (public.is_reviewer() and p ~ ('^' || coalesce(auth.uid()::text, '-') || shape))
+              or (tg_op = 'UPDATE' and exists (select 1 from public.submissions u
+                                                where u.replaces = new.id and u.payload -> k ->> 'path' = p))) then
+        raise exception 'That PDF isn''t one you uploaded';
+      end if;
     end if;
-  end if;
+  end loop;
   return new;
 end $$;
 

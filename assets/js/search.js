@@ -6,6 +6,7 @@
 // ("Ms. Dutton"), plurals and one-letter typos ("chemestry") all still work.
 
 import { dataUrl, esc, root } from './ui.js';
+import { withoutRetired } from './forms.js';
 
 const TYPES = {
   c: ['Class', 'M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5'],
@@ -84,7 +85,7 @@ export async function addLive(store) {
     const courseNames = Object.fromEntries((await load()).filter((x) => x.t === 'c').map((x) => [x.u, x.n]));
     live = subs.map((x) => {
       const p = x.payload || {};
-      const text = [...Object.values(p), ...Object.values(p.periods || {})].filter((v) => typeof v === 'string').join(' ');
+      const text = [...Object.values(withoutRetired(x.kind, p)), ...Object.values(p.periods || {})].filter((v) => typeof v === 'string').join(' ');
       let n, u, d;
       if (x.kind === 'school_info') { n = p.title || 'School info'; u = 'school/'; d = `School info · ${p.topic || ''}`; }
       else if (x.kind === 'sat') { n = p.title || 'SAT post'; u = `sat/#p-${x.id}`; d = `SAT · ${p.type || ''}${p.section ? ` · ${p.section}` : ''}`; }
