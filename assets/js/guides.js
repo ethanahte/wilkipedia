@@ -15,13 +15,15 @@ import { GUIDE } from './forms.js';
 
 // Each kind of resource has its own colour (Ethan), from the Type the poster picked on the form.
 // The legend's type chips show or hide that kind.
+// Muted on purpose (Ethan 2026-10-19: the bright set felt cheap; "more 高级"): dusty tones that sit
+// together on the dark card, with gold kept for what you point at.
 const TYPES = [
-  ['guide', 'Study guide', '#f4efe2'],
-  ['textbook', 'Textbook', '#b58cff'],
-  ['practice', 'Practice problems', '#5fd4a6'],
-  ['video', 'Video', '#ff8a7a'],
-  ['website', 'Website', '#4fc7c7'],
-  ['other', 'Other', '#9c948a'],
+  ['guide', 'Study guide', '#d8d2c4'],
+  ['textbook', 'Textbook', '#a89cc8'],
+  ['practice', 'Practice problems', '#8fb9a5'],
+  ['video', 'Video', '#c39389'],
+  ['website', 'Website', '#88b0b2'],
+  ['other', 'Other', '#8e8981'],
 ];
 const TYPE = Object.fromEntries(TYPES.map(([k, label, color]) => [k, { label, color }]));
 const typeOf = (g) => {
@@ -32,7 +34,7 @@ const typeOf = (g) => {
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
-const C = { bg: '#1e1e1e', node: '#a3a8b0', guide: '#dcddde', subject: '#d8b24a', ap: '#7f9dff', empty: '#6a6a6a', line: '#3a3a3a', accent: '#f5c400', text: '#cfcfcf' };
+const C = { bg: '#161616', node: '#8c9098', guide: '#d8d2c4', subject: '#c8b07a', ap: '#8b9cc6', empty: '#5c5c5c', line: '#2f2f2f', accent: '#d9bd78', text: '#a9a9a9' };
 
 const [data, guides] = await Promise.all([courses(), s.approved({ kind: 'resource' }).catch(() => [])]);
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
@@ -203,7 +205,7 @@ function size() {
   cv.style.width = `${W}px`; cv.style.height = `${H}px`;
   // a soft vignette: a touch lighter in the middle, like a lit desk
   const g = ctx.createRadialGradient(W / 2, H * .45, 0, W / 2, H * .45, Math.max(W, H) * .75);
-  g.addColorStop(0, '#262626'); g.addColorStop(1, '#1a1a1a');
+  g.addColorStop(0, '#1d1d1d'); g.addColorStop(1, '#111111');
   bgFill = g;
   wake();
 }
@@ -223,9 +225,9 @@ function render() {
   // links
   for (const l of L) {
     const on = near && (l.a === focus || l.b === focus);
-    ctx.globalAlpha = (on ? .95 : Math.min(dim(l.a.id), dim(l.b.id)) * .75) * ((l.a.hit && l.b.hit) ? 1 : .15);
+    ctx.globalAlpha = (on ? .85 : Math.min(dim(l.a.id), dim(l.b.id)) * .9) * ((l.a.hit && l.b.hit) ? 1 : .15);
     ctx.strokeStyle = on ? C.accent : C.line;
-    ctx.lineWidth = ((on ? 1.7 : l.kind === 'subject' ? 1.3 : 1) * opts.thick) * px;
+    ctx.lineWidth = ((on ? 1.4 : l.kind === 'subject' ? 1.1 : .8) * opts.thick) * px;
     ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
   }
   // dots
@@ -235,7 +237,7 @@ function render() {
     const col = colorOf(n), r = n.r * (n === hover ? 1 + .18 * fade : 1);
     if (n.kind === 'subject') {                                        // a soft glow round each subject
       const g = ctx.createRadialGradient(n.x, n.y, r * .6, n.x, n.y, r * 2.6);
-      g.addColorStop(0, 'rgba(216, 178, 74, .28)'); g.addColorStop(1, 'rgba(216, 178, 74, 0)');
+      g.addColorStop(0, 'rgba(200, 176, 122, .14)'); g.addColorStop(1, 'rgba(200, 176, 122, 0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, r * 2.6, 0, Math.PI * 2); ctx.fill();
     }
     ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
@@ -250,7 +252,7 @@ function render() {
       ctx.beginPath(); ctx.arc(n.x, n.y, r + 3 * px, 0, Math.PI * 2); ctx.stroke();
     }
     if (n === focus) {                                                 // the dot you're on: a gold ring
-      ctx.globalAlpha = 1; ctx.strokeStyle = C.accent; ctx.lineWidth = 2 * px;
+      ctx.globalAlpha = 1; ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5 * px;
       ctx.beginPath(); ctx.arc(n.x, n.y, r + 4.5 * px, 0, Math.PI * 2); ctx.stroke();
     }
   }
@@ -272,17 +274,17 @@ function render() {
   for (const [n, r] of order) {
     const a = show(n);
     if (a < .04) continue;
-    const size = n.kind === 'subject' ? 14 : n.kind === 'class' ? 12 : 11.5;
-    ctx.font = `${n.kind === 'subject' || n === focus ? 600 : n.kind === 'class' ? 500 : 400} ${size}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
+    const size = n.kind === 'subject' ? 13.5 : n.kind === 'class' ? 11.5 : 11;
+    ctx.font = `${n.kind === 'subject' || n === focus ? 500 : 400} ${size}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
     const text = clip(n.name, n.kind === 'guide' ? 30 : 30);
     const [sx, sy] = toScreen(n.x, n.y), y = sy + n.r * view.k + 4, w = ctx.measureText(text).width;
     const rect = [sx - w / 2 - 3, y - 1, sx + w / 2 + 3, y + size + 2];
     const over = (q) => rect[0] < q[2] && rect[2] > q[0] && rect[1] < q[3] && rect[3] > q[1];
-    if (r > 0 && (placed.some(over) || (r > 1 && dots.some((q) => q[4] !== n && over(q))))) continue;   // never pile labels up
+    if (r > 0 && (placed.some(over) || (r > 3 && dots.some((q) => q[4] !== n && over(q))))) continue;   // never pile labels up (subject names may cross a dot)
     placed.push(rect);
     ctx.globalAlpha = a;
     ctx.strokeStyle = C.bg; ctx.lineWidth = 3.5; ctx.strokeText(text, sx, y);   // a dark halo so text reads over lines
-    ctx.fillStyle = n === focus ? '#ffffff' : n.kind === 'subject' ? '#f1e3b8' : n.has === false ? '#8a8a8a' : r <= 2 ? '#ececec' : C.text;
+    ctx.fillStyle = n === focus ? '#f2ead6' : n.kind === 'subject' ? '#ddd0ac' : n.has === false ? '#6f6f6f' : r <= 2 ? '#d6d6d6' : n.kind === 'class' ? '#b4b4b4' : '#8f8f8f';
     ctx.fillText(text, sx, y);
   }
   ctx.globalAlpha = 1;

@@ -406,6 +406,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     glow, classes with no guides are hollow. Hover or click lights the dot and its links in gold and fades
     the rest; a click keeps it lit and glides the camera to it (Esc or ✕ lets go). + / − / fit buttons
     by the gear (and keys + − 0). Background is a soft vignette.
+  - **Palette is muted on purpose** (Ethan, same day: the bright set felt cheap, "more 高级"): near-black card
+    (#161616 vignette), champagne subjects (#c8b07a, faint glow), slate-blue AP classes, cool-grey classes,
+    dusty type colours (`TYPES`), quiet grey labels, and gold (#d9bd78) only for the dot you point at or
+    picked. The card's buttons are champagne outlines, not bright yellow. Keep new colours in this register.
   - Physics: a force simulation (repel, springs, centre pull, cooling alpha).
     Node size grows with link count, dragging a dot pulls its neighbours, and
     scroll or pinch zooms toward the pointer.
