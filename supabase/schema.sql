@@ -186,7 +186,7 @@ declare
   who text;
 begin
   if new.status = 'approved' and old.status <> 'approved' and new.replaces is not null then
-    if new.user_id = auth.uid() then
+    if new.user_id = auth.uid() and not public.is_admin() then   -- admins may (migration 022)
       raise exception 'You can''t approve your own edit. Another reviewer or an admin has to.';
     end if;
     select * into orig from public.submissions where id = new.replaces for update;

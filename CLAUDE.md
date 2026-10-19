@@ -238,7 +238,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     `user_id` = the suggester and `edit_note` = their note (written for them by `describeEdit`, e.g.
     "Added a PDF version.", until they type their own). One waiting edit per post at a time.
   - It waits in the review queue as "Suggested edit", with the changed fields marked against the live
-    version. **Nobody approves their own suggestion** (`on_review` refuses, and the desk hides Approve).
+    version. **Nobody but an admin approves their own suggestion** (`on_review` refuses reviewers, and the desk hides their Approve; admins may since migration 022, because Ethan is the admin who reviews).
     Approving copies it onto the live post (old version kept in `submission_edits`, `edited_by` = the
     suggester), the suggester hears the decision, and the post's author gets "<name> edited your …"
     (`on_status_notify`). Pages mark such posts "edited <date>"; the author's own update is "updated".
@@ -249,6 +249,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     `check_submission_pdf` accepts the author's folder, a reviewer's own folder (020), and a file a
     suggested edit brought while it's being approved (021). When a link-only guide gets a PDF, its Link
     field becomes the optional "live version".
+- **Syllabi are PDFs only** (Ethan, 2026-10-19). `teacher_section.syllabus_url` is `legacy: true`: hidden on new forms,
+  kept where a section already has a link. `syllabus_pdf` is review-only and never public.
 - **Terms of Service** (`terms/`, footer link). Plain language, and it must agree
   with the Community rules and the Privacy page. A signed-in member whose
   `profiles.terms_version` is below `TERMS_VERSION` (store.js) gets an agree screen

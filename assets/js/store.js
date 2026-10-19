@@ -558,7 +558,7 @@ async function demo() {
       const s = db.submissions.find((x) => x.id === sid);
       const wasApproved = s.status === 'approved';
       // Approving an update copies it onto the live submission (mirrors on_review())
-      if (status === 'approved' && !wasApproved && s.replaces && s.user_id === u.id) throw new Error('You can’t approve your own edit. Another reviewer or an admin has to.');
+      if (status === 'approved' && !wasApproved && s.replaces && s.user_id === u.id && u.role !== 'admin') throw new Error('You can’t approve your own edit. Another reviewer or an admin has to.');
       const orig = status === 'approved' && !wasApproved && s.replaces
         && db.submissions.find((x) => x.id === s.replaces && x.status === 'approved');
       const theirs = s.replaces && db.submissions.find((x) => x.id === s.replaces)?.user_id !== s.user_id;

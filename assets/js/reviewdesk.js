@@ -66,12 +66,12 @@ const tabs = {
             ? `${theirs ? `${esc(x.author)} suggests a change to ${esc(x.original.author || 'a former student')}’s post. Approving replaces the live version and tells ${esc(x.original.author || 'the author')}` : 'The author wants to change something already on the site. Approving replaces the live version'}; it stays up until then.`
             : 'The live version it was meant to update has been unpublished, so approving publishes this on its own.'}</p>
             ${x.edit_note ? `<p class="upd-note">Their note: “${esc(x.edit_note)}”</p>` : ''}
-            ${self ? '<p class="upd-note meta">You suggested this edit, so another reviewer or an admin approves it.</p>' : ''}`; })() : ''}
+            ${self ? `<p class="upd-note meta">${s.user()?.role === 'admin' ? 'You suggested this edit. As an admin you can approve it yourself.' : 'You suggested this edit, so another reviewer or an admin approves it.'}</p>` : ''}`; })() : ''}
         ${x.review_note ? `<p class="upd-note meta">Resubmitted. Last time a reviewer asked: “${esc(x.review_note)}”</p>` : ''}
         ${payloadHtml(x.kind, x.payload, x.original?.status === 'approved' ? x.original.payload : null)}
         ${shortcutFlag(x.payload)}<div class="checklist meta">Check: facts have a source · no real test questions or answer keys · no ways to skip the work · nothing personal about a teacher · links work${x.payload?.pdf ? ' · the whole PDF, including any names or emails in it' : ''}</div>
         <div class="r-actions">
-          ${x.replaces && x.user_id === s.user()?.id ? '' : '<button class="btn" data-act="approved">Approve</button>'}
+          ${x.replaces && x.user_id === s.user()?.id && s.user()?.role !== 'admin' ? '' : '<button class="btn" data-act="approved">Approve</button>'}
           <button class="btn ghost" data-act="changes">Needs changes…</button>
           <button class="btn ghost" data-editpub>Edit…</button>
           <button class="btn ghost danger" data-act="rejected">Reject…</button>
