@@ -445,24 +445,39 @@ function info(n) {
   card.hidden = false;
 }
 
-// The accessible version: every guide, by subject and class (a shared one is listed under each class)
+// The accessible version: every guide, by subject and class (a shared one is listed under each class).
+// Laid out like a book's index (Ethan 2026-10-19: the card list was hard to read; no bubbles, nothing
+// that looks generated): a ruled heading per subject, the class as a small header, then one row per
+// guide — title, a two-line note, who made it — with its files as plain text links on the right.
 function list() {
   const by = {};
   for (const g of guides) for (const c of classesOf(g)) (by[c] ||= []).push(g);
   const subj = {};
   for (const slug of Object.keys(by)) (subj[bySlug[slug].department] ||= []).push(slug);
-  const card = (g) => { const u = openUrl(g);
-    if (both(g)) return `<div class="res-card has-pdf"><a class="res-main" href="${esc(u)}" target="_blank" rel="noopener"><b>${esc(g.payload.title)}</b></a>
-      ${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
-      <span class="meta"><span class="rtype" style="--c:${TYPE[typeOf(g)].color}">${esc(TYPE[typeOf(g)].label)}</span>PDF · ${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>
-      <a class="res-alt" href="${esc(webUrl(g))}" target="_blank" rel="noopener nofollow">Web version ↗</a><span class="arrow" aria-hidden="true">📄</span></div>`;
-    return `<a class="res-card" ${u ? `href="${esc(u)}" target="_blank" rel="noopener nofollow"` : ''}>
-      <b>${esc(g.payload.title)}</b>${g.payload.note ? `<span class="note-line">${esc(g.payload.note.slice(0, 160))}${g.payload.note.length > 160 ? '…' : ''}</span>` : ''}
-      <span class="meta"><span class="rtype" style="--c:${TYPE[typeOf(g)].color}">${esc(TYPE[typeOf(g)].label)}</span>${g.payload.pdf ? 'PDF · ' : ''}${esc(g.payload.author || g.author)}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</span>${u ? `<span class="arrow" aria-hidden="true">${g.payload.pdf ? '📄' : '↗'}</span>` : ''}</a>`; };
-  $('#gv-list').innerHTML = Object.keys(by).length ? data.departments.filter((d) => subj[d.slug]).map((d) => `
-    <h2 class="gv-subject">${esc(d.name)}</h2>
-    ${subj[d.slug].sort((a, b) => bySlug[a].name.localeCompare(bySlug[b].name)).map((slug) => `
-    <section class="gv-class"><h3><a href="${courseUrl(slug)}">${esc(bySlug[slug].name)}</a></h3>${by[slug].map(card).join('')}</section>`).join('')}`).join('')
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const ext = 'target="_blank" rel="noopener nofollow"';
+  const row = (g) => {
+    const pdf = pdfUrl(g), web = webUrl(g), main = pdf || web, t = typeOf(g);
+    const who = [t === 'guide' ? '' : TYPE[t].label, g.payload.author || g.author ? `Made by ${g.payload.author || g.author}` : '', g.teacher ? `${g.teacher}’s class` : '']
+      .filter(Boolean).map(esc).join(' · ');
+    const files = [pdf ? `<a href="${esc(pdf)}" ${ext}>PDF</a>` : g.payload.pdf?.path ? '<span class="gl-off" title="The PDF isn’t available right now">PDF</span>' : '',
+      web ? `<a href="${esc(web)}" ${ext}>${t === 'guide' && pdf ? 'Web' : t === 'video' ? 'Watch' : 'Open'}</a>` : ''].filter(Boolean).join('');
+    return `<li class="gl-row">
+      <div class="gl-text">${main ? `<a class="gl-title" href="${esc(main)}" ${ext}>${esc(g.payload.title)}</a>` : `<span class="gl-title">${esc(g.payload.title)}</span>`}
+        ${g.payload.note ? `<p class="gl-note">${esc(g.payload.note)}</p>` : ''}
+        ${who ? `<p class="gl-who">${who}</p>` : ''}</div>
+      ${files ? `<div class="gl-files">${files}</div>` : ''}</li>`;
+  };
+  const byTitle = (a, b) => a.payload.title.localeCompare(b.payload.title);
+  $('#gv-list').innerHTML = Object.keys(by).length ? data.departments.filter((d) => subj[d.slug]).map((d) => {
+    const n = new Set(subj[d.slug].flatMap((c) => by[c])).size;
+    return `<section class="gl-subject">
+      <header class="gl-subject-h"><h2>${esc(d.name)}</h2><span>${plural(n, 'guide')}</span></header>
+      ${subj[d.slug].sort((a, b) => bySlug[a].name.localeCompare(bySlug[b].name)).map((slug) => `
+      <section class="gl-class"><h3><a href="${courseUrl(slug)}#s-resources">${esc(bySlug[slug].name)}</a><span>${by[slug].length}</span></h3>
+        <ol class="gl-rows">${by[slug].sort(byTitle).map(row).join('')}</ol></section>`).join('')}
+    </section>`;
+  }).join('')
     : `<p class="empty-line">No study guides yet. Made one? <a class="add-link" href="${root}submit/?kind=resource">Share it →</a></p>`;
 }
 
