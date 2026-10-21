@@ -1406,3 +1406,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   macOS notification only once backups are 9 or more days overdue. The log is
   `~/Wilkipedia-backups/backup.log`, and `--unschedule` turns it off. If the repo
   moves, run `--schedule` again, because the plist stores the script's path.
+
+- **Readability pass (2026-10-20, Ethan: "texts are too close… too text heavy… don't use bubble
+  shapes"; leaderboard/profile chips crowded).** The last block of style.css ("Readability pass")
+  overrides the older blocks: 17px body at 1.7 line height, quieter meta/hints on shorter lines, tags
+  as plain small words, chips and toggles with 4px corners (pills only for switches, counters and the
+  round buttons), panels at 6px, footer links without underlines, and spaced capitals toned down to
+  .07em / at least .7rem. Who someone is renders through `personFacts()` (ui.js): role · Class of
+  YYYY (with a class-colour dot) · SCUSD ✓ as one wrapping line, used on the leaderboard and profile.
+  Keep new styles in that language: no bubbles, no stacked badge chips.
+- **Study guide lists are index rows** (`.gl-*`): the Study guides page list and the class page's
+  "Study guides & resources" share them. Only the title (and the PDF/Web links) are links; a card-sized
+  link once covered the row and made Edit / Suggest an edit open the PDF. Never put buttons inside a
+  link or under a stretched-link overlay.

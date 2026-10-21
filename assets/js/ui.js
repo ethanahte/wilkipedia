@@ -255,6 +255,14 @@ export function courses() {
 export const badge = (verified) => (verified
   ? ' <span class="badge-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : '');
 export const byline = (name, verified) => esc(name) + badge(verified);
+// Who someone is, as one quiet line of plain words (2026-10-20: the stacked SCUSD / role / ’27 chips
+// crowded each other): "Reviewer · Class of 2028 · SCUSD ✓". Each part is optional.
+export const personFacts = ({ role = '', grad_year = null, school = false } = {}) => {
+  const parts = [role && role !== 'contributor' ? esc(roleLabel(role)) : '',
+    grad_year ? `<span class="pf-class c-${classColorOf(grad_year)}">Class of ${grad_year}</span>` : '',
+    school ? '<span class="pf-school" title="Signed in with a Santa Clara Unified school account">SCUSD ✓</span>' : ''].filter(Boolean);
+  return parts.length ? `<span class="person-facts">${parts.join('<span class="pf-sep" aria-hidden="true"> · </span>')}</span>` : '';
+};
 // On live work: the author (not a reviewer, who has Edit) can send a change for review
 // "Suggest an edit" on a live post, for everyone not on the review team (they have Edit, which also
 // suggests when the post isn't theirs). Signed-out readers are asked to sign in when they click it.

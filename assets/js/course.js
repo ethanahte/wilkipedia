@@ -132,23 +132,23 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
   const resFilter = resTeachers.length >= 2 || (resTeachers.length === 1 && res.some((r) => !r.teacher))
     ? `<div class="vtabs res-filter" role="group" aria-label="Show">${['All', ...resTeachers].map((t, i) =>
         `<button type="button" class="vtab" data-res-t="${i ? esc(t) : ''}" aria-pressed="${!i}">${i ? `${esc(t)}’s class` : 'All'}</button>`).join('')}</div>` : '';
-  $('#resources').innerHTML = res.length ? `${resFilter}<div class="res-list">${res.map((r) => {
-    const u = safeUrl(r.payload.url);
-    const by = `<span class="meta">${r.payload.author
-        ? `By <b>${esc(r.payload.author)}</b> · shared by ${byline(r.author, r.verified)}`
-        : `Made by ${byline(r.author, r.verified)}`}${alsoFor(r)}${unpub(r)}</span>`;
-    const tags = `<span class="res-tags"><span class="tag">${esc(r.payload.type)}</span>${r.payload.pdf?.path ? '<span class="tag">PDF</span>' : ''}${r.teacher ? `<span class="tag teacher-tag">For ${esc(r.teacher)}’s class</span>` : ''}</span>`;
-    // An uploaded study guide: the card opens the PDF, and a link to its live version sits beside it
-    if (r.payload.pdf?.path) {
-      return `<div class="res-card has-pdf" data-teacher="${esc(r.teacher || '')}">${tags}
-        <a class="res-main" data-pdf="${esc(r.payload.pdf.path)}" href="#" aria-disabled="true" target="_blank" rel="noopener"><b>${esc(r.payload.title)}</b></a>
-        ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}
-        ${by}${u ? `<a class="res-alt" href="${esc(u)}" target="_blank" rel="noopener nofollow">Live version ↗</a>` : ''}
-        <span class="arrow" aria-hidden="true">↗</span></div>`;
-    }
-    return `<${u ? `a href="${esc(u)}" target="_blank" rel="noopener nofollow"` : 'div'} class="res-card" data-teacher="${esc(r.teacher || '')}">${tags}<b>${esc(r.payload.title)}</b>
-      ${r.payload.note ? `<span class="note-line">${esc(r.payload.note)}</span>` : ''}${by}${u ? '<span class="arrow" aria-hidden="true">↗</span>' : ''}</${u ? 'a' : 'div'}>`;
-  }).join('')}</div><a class="edit" href="${submitUrl('resource')}">Share another</a>` : '';
+  // One row per guide, like the Study guides index (2026-10-20): title, note, who and which class, and
+  // the files as plain links on the right. Only the title is a link, so Edit / Suggest an edit in the
+  // meta line can never be swallowed by a card-sized link (they used to open the PDF).
+  const ext = 'target="_blank" rel="noopener nofollow"';
+  $('#resources').innerHTML = res.length ? `${resFilter}<ol class="gl-rows res-rows">${res.map((r) => {
+    const u = safeUrl(r.payload.url), pdf = r.payload.pdf?.path;
+    const title = pdf ? `<a class="gl-title" data-pdf="${esc(pdf)}" href="#" aria-disabled="true" ${ext}>${esc(r.payload.title)}</a>`
+      : u ? `<a class="gl-title" href="${esc(u)}" ${ext}>${esc(r.payload.title)}</a>` : `<span class="gl-title">${esc(r.payload.title)}</span>`;
+    const kind = [esc(r.payload.type), r.teacher ? `${esc(r.teacher)}’s class` : ''].filter(Boolean).join(' · ');
+    const who = r.payload.author ? `By ${esc(r.payload.author)} · shared by ${byline(r.author, r.verified)}` : `Made by ${byline(r.author, r.verified)}`;
+    const files = [pdf ? `<a data-pdf="${esc(pdf)}" href="#" aria-disabled="true" ${ext}>PDF</a>` : '', u ? `<a href="${esc(u)}" ${ext}>${pdf ? 'Web' : 'Open'}</a>` : ''].filter(Boolean).join('');
+    return `<li class="gl-row" data-teacher="${esc(r.teacher || '')}">
+      <div class="gl-text"><p class="gl-kind">${kind}</p>${title}
+        ${r.payload.note ? `<p class="gl-note">${esc(r.payload.note)}</p>` : ''}
+        <p class="gl-who">${who}${alsoFor(r)}${unpub(r)}</p></div>
+      ${files ? `<div class="gl-files">${files}</div>` : ''}</li>`;
+  }).join('')}</ol><a class="edit" href="${submitUrl('resource')}">Share another</a>` : '';
   linkPdfs($('#resources'), s);
 
   // ── Tips ──
@@ -214,7 +214,7 @@ document.addEventListener('click', async (e) => {
     const want = t.dataset.resT;
     document.querySelectorAll('.res-filter .vtab').forEach((c) => c.setAttribute('aria-pressed', c === t));
     // "All" shows everything; a teacher shows theirs plus guides for any teacher
-    document.querySelectorAll('.res-card').forEach((c) => (c.hidden = !!want && !!c.dataset.teacher && c.dataset.teacher !== want));
+    document.querySelectorAll('.res-rows > .gl-row').forEach((c) => (c.hidden = !!want && !!c.dataset.teacher && c.dataset.teacher !== want));
     return;
   }
   if (t.dataset.edit) {

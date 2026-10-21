@@ -4,7 +4,7 @@
 import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
-         cookiePrefs, setCookiePrefs, storedKeys, storeGroup } from './ui.js';
+         cookiePrefs, setCookiePrefs, storedKeys, storeGroup , personFacts} from './ui.js';
 import { KINDS, GUIDE, staleness, schoolYear } from './forms.js';
 import { MODE, SIZE_POINTS, REVIEWER_ROLES, canEditOwn } from './store.js';
 
@@ -268,7 +268,7 @@ async function homeGuides(data, name) {
   const links = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
   box.innerHTML = guides.map((g) => {
     const u = (g.payload.pdf?.path && links[g.payload.pdf.path]) || safeUrl(g.payload.url);
-    const where = classesOf(g).map((c) => name[c]).join(' · ') || 'Study guide';
+    const cl = classesOf(g), where = cl.length ? `${name[cl[0]]}${cl.length > 1 ? ` and ${cl.length - 1} more` : ''}` : 'Study guide';
     const inner = `<span class="hg-title">${esc(g.payload.title)}</span>
         <span class="hg-meta"><span class="hg-class">${esc(where)}</span><span>${esc(g.payload.author || g.author)}${g.payload.pdf ? ' · PDF' : ''}</span></span>
         <span class="hg-go" aria-hidden="true">↗</span>`;
@@ -399,9 +399,9 @@ const pages = {
         app.innerHTML = `<div class="vtabs lb-tabs" role="group" aria-label="Show"><button type="button" class="vtab" data-lb="points" aria-pressed="${key === 'points'}">All time</button>
             <button type="button" class="vtab" data-lb="semester_points" aria-pressed="${key === 'semester_points'}">This semester</button></div>
           ${sorted.length ? `<ol class="lb-podium">${order.map(({ r, place }) => `<li class="p${place}${r.id === me.id ? ' me' : ''}">${avatarHtml(r, 'lg')}
-              <b>${esc(r.display_name)}</b>${badge(r.school_verified)}<span class="lb-pts">${r[key]}<small>pts</small></span><span class="lb-step"><i>${place}</i></span></li>`).join('')}</ol>
+              <b>${esc(r.display_name)}</b>${personFacts({ role: r.role, grad_year: r.grad_year, school: r.school_verified })}<span class="lb-pts">${r[key]}<small>pts</small></span><span class="lb-step"><i>${place}</i></span></li>`).join('')}</ol>
             ${rest.length ? `<ol class="lb-list" start="4">${rest.map((r, i) => `<li class="${r.id === me.id ? 'me' : ''}"><span class="lb-n">${i + 4}</span>
-              <span class="lb-who">${avatarHtml(r)}<b>${esc(r.display_name)}</b>${badge(r.school_verified)}${r.role !== 'contributor' ? `<span class="tag">${esc(roleLabel(r.role))}</span>` : ''}${classChip(r.grad_year)}</span>
+              <span class="lb-who">${avatarHtml(r)}<span class="lb-id"><b>${esc(r.display_name)}</b>${personFacts({ role: r.role, grad_year: r.grad_year, school: r.school_verified })}</span></span>
               <span class="lb-bar"><i style="width:${((r[key] / most) * 100).toFixed(1)}%"></i></span><span class="lb-meta">${r.approved} approved</span><b class="lb-p">${r[key]}</b></li>`).join('')}</ol>` : ''}
             <p class="lb-you">${mine >= 0 ? `You’re <b>#${mine + 1}</b> with ${sorted[mine][key]} points.` : me.show_on_leaderboard === false ? 'You’ve hidden yourself from the leaderboard.' : 'You’re not on the board yet: your first approved post puts you here.'}
               <a href="${root}bounties/">Find a bounty →</a></p>`
@@ -508,8 +508,8 @@ const pages = {
         $('#account').innerHTML = `
           <section class="card profile">
             <div class="profile-head">${avatarHtml(me, 'lg')}
-              <div><b class="profile-name">${esc(me.name)}</b>${badge(me.school)}
-                <div class="meta">${esc(roleLabel(me.role))}${classChip(me.grad_year, true)}</div></div></div>
+              <div><b class="profile-name">${esc(me.name)}</b>
+                ${personFacts({ role: me.role === 'contributor' ? '' : me.role, grad_year: me.grad_year, school: me.school })}</div></div>
             <p class="meta">${me.school
               ? 'You signed in with your school account, so your work shows the SCUSD ✓ badge.'
               : `You signed in with a personal account.${REVIEWER_ROLES.includes(me.role) ? '' : ' Your comments always go to a reviewer first.'} Sign in with your @scusd.net school account to get the SCUSD ✓ badge.`}</p>
