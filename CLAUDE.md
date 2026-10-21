@@ -1436,3 +1436,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   bounty. The form warns on real tests/answer keys (Community rule 1). One module draws the page and
   the class page's own "Requests" section (top four, in the side index). Until 024 is run the page
   says it's almost ready and class pages hide the section. Demo store mirrors it (`db.requests`, `db.rvotes`).
+- **Merged listings** (`data/course-merges.json`, Ethan 2026-10-21: "there is only one kind of
+  biology class"). A catalog listing Wilcox runs as the same class folds into it: its page is removed,
+  `courses/<old>/` becomes a redirect to the class it joins, its directory teachers move there, and its
+  name still means that class when typed. Now: BSC Biology of the Living Earth and PRT Biology →
+  Biology of the Living Earth (AP Biology stays separate). Add entries only when Ethan confirms.

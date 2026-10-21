@@ -1,0 +1,5 @@
+{
+  "_about": "Catalog listings Wilkipedia folds into one class page, because Wilcox runs them as one class (Ethan confirms each). The listing's page is removed, its address redirects to the class it joins, its directory teachers move there, and its names still mean that class when typed. Edit, then run tools/build.py.",
+  "bsc-biology-of-the-living-earth": { "into": "biology-of-the-living-earth" },
+  "prt-biology": { "into": "biology-of-the-living-earth" }
+}

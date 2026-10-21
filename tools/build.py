@@ -63,6 +63,9 @@ def slugify(s):
 
 # ─────────────────────────── data ───────────────────────────
 
+MERGED = {}                     # old slug -> {into, name}, filled by load() from data/course-merges.json
+
+
 def load():
     catalog = json.loads((DATA / "catalog.json").read_text())
     directory = json.loads((DATA / "directory-raw.json").read_text())
@@ -73,6 +76,20 @@ def load():
     unknown = sorted({a for a, s in aliases.items() if s and s not in courses})
     if unknown:
         raise SystemExit(f"course-aliases.json points at slugs not in the catalog: {unknown}")
+
+    # Listings folded into one class (data/course-merges.json; Ethan 2026-10-21: "there is only one kind
+    # of biology class"): drop the listing, send its directory courses to the class it joins, and let its
+    # names still mean that class when typed. Its old address redirects (build_merged_redirects).
+    merges = json.loads((DATA / "course-merges.json").read_text())
+    merges.pop("_about", None)
+    for old, m in merges.items():
+        if old not in courses or m["into"] not in courses:
+            raise SystemExit(f"course-merges.json: {old!r} -> {m.get('into')!r} must both be catalog slugs")
+    MERGED.clear()
+    for old, m in merges.items():
+        MERGED[old] = {"into": m["into"], "name": courses[old]["name"]}
+        del courses[old]
+    aliases = {a: MERGED[s]["into"] if s in MERGED else s for a, s in aliases.items()}
 
     # One teacher can appear in several departments, and the department pages and
     # the directory sometimes spell a name differently. The directory name is the
@@ -111,6 +128,12 @@ def load():
     # Typed names must each mean one class; a 'shared' call is shown only, so it
     # may repeat another class's call (never a catalog name)
     seen = {c["name"].lower(): slug for slug, c in courses.items()}
+    for old in MERGED:
+        nick.pop(old, None)
+    for old, m in MERGED.items():                      # the folded listing's name still means the class
+        nick.setdefault(m["into"], {}).setdefault("also", [])
+        if m["name"] not in nick[m["into"]]["also"]:
+            nick[m["into"]]["also"].append(m["name"])
     for slug, v in sorted(nick.items(), key=lambda kv: bool(kv[1].get("shared"))):
         if slug not in courses:
             raise SystemExit(f"course-nicknames.json: no class with slug {slug!r}")
@@ -1569,6 +1592,18 @@ def check_links():
         raise SystemExit("Broken internal links, so the build stopped:\n" + "\n".join(lines))
 
 
+def build_merged_redirects(courses):
+    """Folded listings keep their old address: a tiny page that sends you to the class it joined."""
+    for old, m in MERGED.items():
+        to = courses[m["into"]]
+        d = ROOT / "courses" / old
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "index.html").write_text(f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=../{to['slug']}/">
+<link rel="canonical" href="../{to['slug']}/"><title>{e(to['name'])} · Wilkipedia</title></head>
+<body><p>{e(m['name'])} is part of <a href="../{to['slug']}/">{e(to['name'])}</a> on Wilkipedia.</p></body></html>""")
+
+
 def main():
     for css in (ROOT / "assets" / "style.css", CAMPUS / "campus.css"):
         check_css(css)                          # before anything is deleted
@@ -1580,6 +1615,7 @@ def main():
     build_home(depts, courses, teachers)
     build_subjects(depts)
     build_courses(depts, courses)
+    build_merged_redirects(courses)
     build_teachers(teachers, courses)
     build_static()
     build_sat()
