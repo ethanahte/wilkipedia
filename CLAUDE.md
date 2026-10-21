@@ -1426,3 +1426,13 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Editing a live post twice** opens your edit that is still waiting (`myWaitingEdit`, both stores)
   instead of failing on "one waiting edit per post". Non-admin reviewers still can't approve their
   own suggested edit (migration 022); the card says so.
+- **Requests** (`requests/`, `requests.js`, migration 024; Ethan 2026-10-20: "students could request
+  resources and people can see it, so people know what people need"). A request is one line for a
+  class (or the whole school) and a kind (study guide, practice, notes, teacher's version, overview,
+  other). Others tap "Me too" (`request_votes`); "Most wanted" sorts by votes + 1 (the asker). The
+  review team and SCUSD accounts post instantly, personal accounts wait for a reviewer (held), like
+  comments but lighter. The asker or a reviewer marks it done with an optional link and note, and the
+  asker and everyone who said "Me too" are notified (kind `request`). Admins can turn one into a
+  bounty. The form warns on real tests/answer keys (Community rule 1). One module draws the page and
+  the class page's own "Requests" section (top four, in the side index). Until 024 is run the page
+  says it's almost ready and class pages hide the section. Demo store mirrors it (`db.requests`, `db.rvotes`).

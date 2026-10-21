@@ -150,6 +150,8 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
       ${files ? `<div class="gl-files">${files}</div>` : ''}</li>`;
   }).join('')}</ol><a class="edit" href="${submitUrl('resource')}">Share another</a>` : '';
   linkPdfs($('#resources'), s);
+  // what students are asking for in this class (requests.js; quiet until migration 024 is run)
+  import('./requests.js').then((m) => m.mountRequests($('#class-requests'), s, { course: page.slug, compact: true })).catch(() => {});
 
   // ── Tips ──
   const tips = subs.filter((x) => x.kind === 'tip');

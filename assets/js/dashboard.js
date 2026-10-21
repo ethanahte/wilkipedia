@@ -49,11 +49,11 @@ function kindOf(n) {
 const GROUP = {
   published: 'posts', sent_back: 'posts', not_accepted: 'posts', unpublished: 'posts', edited: 'posts', resubmitted: 'posts',
   reply: 'talk', message: 'talk', comment_live: 'comments', comment_hidden: 'comments', feedback: 'feedback', report: 'feedback',
-  role: 'account', other: 'posts',
+  role: 'account', request: 'posts', other: 'posts',
 };
 const ICON = { published: ['good', '✓'], sent_back: ['back', '↩'], not_accepted: ['bad', '✕'], unpublished: ['bad', '⤓'], edited: ['', '✎'],
   resubmitted: ['back', '↻'], reply: ['talk', '💬'], message: ['talk', '✉'], comment_live: ['good', '✓'], comment_hidden: ['bad', '⊘'],
-  feedback: ['good', '💡'], report: ['good', '⚑'], role: ['', '★'], other: ['', '•'] };
+  feedback: ['good', '💡'], report: ['good', '⚑'], role: ['', '★'], request: ['good', '✓'], other: ['', '•'] };
 const FILTERS = [['all', 'All'], ['unread', 'Unread'], ['posts', 'Your posts'], ['talk', 'Replies & messages'], ['comments', 'Comments'],
   ['feedback', 'Feedback & reports']];
 

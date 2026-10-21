@@ -3347,3 +3347,56 @@ footer.site p { margin-bottom: 1.2em; }
 /* the facts wrap as whole words with space between, never a line ending in "·" */
 .person-facts { display: flex; flex-wrap: wrap; column-gap: .9em; row-gap: 1px; }
 .person-facts .pf-sep { display: none; }
+
+/* ── Requests (requests/, requests.js; Ethan 2026-10-20) ──
+   An index like the study guides list: how many want it and "Me too" on the left, the ask in the
+   middle, who and where underneath. Square corners, no bubbles. */
+.rq-ask { margin-top: 8px; padding: 22px 0 26px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
+.rq-ask h2 { margin: 0 0 14px; font-size: 1.5rem; }
+.rq-form { max-width: 720px; }
+.rq-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px 18px; }
+.rq-f { display: grid; gap: 6px; margin: 0; }
+.rq-f > span { font-size: .86rem; font-weight: 600; }
+.rq-f-wide { margin-top: 16px; }
+.rq-f input[name="body"] { font-size: 1.05rem; padding: 11px 12px; }
+.rq-form .hint { margin: 8px 0 0; }
+.rq-warn { margin: 10px 0 0; padding: 10px 12px; border-left: 3px solid var(--warn); background: var(--warn-soft); color: var(--warn); font-size: .9rem; }
+.rq-send { margin-top: 16px; }
+.rq-board { margin-top: 34px; }
+.rq-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; border-bottom: 1px solid var(--rule); }
+.rq-bar .vtabs { margin-bottom: -1px; }
+.rq-count { margin-left: auto; font-variant-numeric: tabular-nums; }
+.rq-bar input[type="search"] { width: 240px; max-width: 100%; margin: 6px 0; padding: 7px 10px; font-size: .9rem; }
+.rq-list { list-style: none; margin: 0; padding: 0; }
+.rq-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 4px 22px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
+.rq-want { display: grid; justify-items: start; align-content: start; gap: 2px; }
+.rq-want b { font: 500 1.9rem/1 var(--serif); font-variant-numeric: tabular-nums; }
+.rq-want > span { font-size: .76rem; color: var(--muted); }
+.rq-vote { margin-top: 8px; font: 600 .82rem var(--sans); padding: 5px 10px; border: 1px solid var(--ink); border-radius: 4px;
+  background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
+.rq-vote:hover { background: var(--accent-soft); }
+.rq-vote[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.rq-you { margin-top: 10px; font-size: .78rem; color: var(--muted); }
+.rq-body { margin: 2px 0 0; font: 500 1.18rem/1.4 var(--serif); max-width: 40em; }
+.rq-meta { margin: 8px 0 0; font-size: .84rem; line-height: 1.6; color: var(--muted); }
+.rq-meta a { color: var(--ink); }
+.rq-state { margin-right: .7em; font-weight: 600; color: var(--warn); }
+.rq-state.bad { color: var(--bad); }
+.rq-state.done { color: var(--accent); }
+.rq-row.is-done .rq-body { color: var(--muted); }
+.rq-done { margin: 8px 0 0; font-size: .9rem; }
+.rq-empty { padding: 26px 0; color: var(--muted); font: italic 1.08rem/1.5 var(--serif); }
+/* on a class page: the top few, under the study guides */
+.rq-class .rq-list { border-top: 1px solid var(--rule); }
+.rq-class .rq-row { grid-template-columns: 76px minmax(0, 1fr); padding: 16px 0; }
+.rq-class .rq-want b { font-size: 1.5rem; }
+.rq-class .rq-body { font-size: 1.05rem; }
+.rq-more { margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: .9rem; }
+.gl-acts { display: flex; flex-wrap: wrap; gap: 8px 26px; }
+@media (max-width: 640px) {
+  .rq-grid { grid-template-columns: minmax(0, 1fr); }
+  .rq-row, .rq-class .rq-row { grid-template-columns: 64px minmax(0, 1fr); gap: 4px 14px; }
+  .rq-want b { font-size: 1.5rem; }
+  .rq-count { margin-left: 0; }
+  .rq-bar input[type="search"] { width: 100%; }
+}

@@ -378,6 +378,12 @@ const pages = {
   },
 
 
+  // Requests (requests.js): ask, "Me too", and what's been made
+  async requests() {
+    const { mountRequests } = await import('./requests.js');
+    await mountRequests($('#rq-app'), s);
+  },
+
   // Members only: signed out, nothing is fetched (and the database refuses anyway, migration 018)
   async leaderboard() {
     const app = $('#lb-app');

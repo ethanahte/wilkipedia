@@ -154,6 +154,7 @@ ICONS = {
     "food": _I('<path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-2 1.5-3 4-3 7v2h3"/>'),
     "clubs": _I('<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>'),
     "sports": _I('<circle cx="12" cy="12" r="9"/><path d="M3.5 9.5c5 1 12 1 17 0M3.5 14.5c5-1 12-1 17 0M12 3c-3 5-3 13 0 18M12 3c3 5 3 13 0 18"/>'),
+    "requests": _I('<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>'),
     "feedback": _I('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/>'),
     "bell": _I('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
     "globe": _I('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
@@ -182,6 +183,7 @@ MORE_GROUPS = [
                     ("sat/", "SAT", "target", "Test dates, a practice timer, students’ tips")]),
     ("Get involved", [("clubs/", "Clubs", "clubs", "85 clubs and how to join"),
                       ("sports/", "Sports", "sports", "Chargers teams by season"),
+                      ("requests/", "Requests", "requests", "What students are asking for"),
                       ("leaderboard/", "Leaderboard", "leaderboard", "Top contributors"),
                       ("feedback/", "Send feedback", "feedback", "Ideas, bugs, feature requests")]),
     ("About Wilkipedia", [("teachers/", "Teachers", "teachers", "Every teacher and their classes"),
@@ -602,6 +604,7 @@ def build_courses(depts, courses):
     <a href="#s-overview" data-sec="overview">What students say<span class="n"></span></a>
     <a href="#s-teachers" data-sec="teachers">Teachers<span class="n"></span></a>
     <a href="#s-resources" data-sec="resources">Study guides<span class="n"></span></a>
+    <a href="#s-requests" data-sec="requests">Requests<span class="n"></span></a>
     <a href="#s-tips" data-sec="tips">Tips<span class="n"></span></a>
     <a href="#s-summer" data-sec="summer">Summer homework<span class="n"></span></a>
     <a href="#comments" data-sec="comments">Comments<span class="n"></span></a>
@@ -616,6 +619,7 @@ def build_courses(depts, courses):
 </section>
 
 <section id="s-resources" class="c-sec">{sec_head("resources", "Study guides &amp; resources")}<div id="resources" class="dyn"></div></section>
+<section id="s-requests" class="c-sec">{sec_head("requests", "Requests", "What students in this class are asking for. Tap “Me too” on the ones you need too, so the people who make guides know what to make next.")}<div id="class-requests" class="dyn rq-class"></div></section>
 <section id="s-tips" class="c-sec">{sec_head("tips", "Tips from past students")}<div id="tips" class="dyn"></div></section>
 <section id="s-summer" class="c-sec">{sec_head("summer", "Summer homework")}<div id="summer" class="dyn"></div></section>
 <section id="s-todo" class="c-sec c-todo" hidden><h2>Help finish this page</h2><p class="sec-sub">Took this class? These parts aren’t written yet. Each one takes a few minutes, and a reviewer checks it before it goes up.</p><div id="todo" class="c-todo-grid"></div></section>
@@ -815,6 +819,12 @@ def build_static():
 <div id="lb-app"><div class="meta">Loading…</div></div>
 <p class="c-src lb-rules">Points: a small bounty 10, medium 30, large 60, anything outside a bounty 5. Everyone who contributes in the first year is a <b>Founding Contributor</b>. Don’t want to be listed? Turn it off on <a href="../account/">your profile</a>.</p>""",
          active="leaderboard/", data={"page": "leaderboard"}, private=True)
+
+    page("requests/", "Requests", """
+<header class="cl-head"><p class="c-kicker">What students need</p><h1>Requests</h1>
+  <p class="cl-lede">Ask for a study guide, practice problems or notes for a class. Tap “Me too” on the ones you need too, so the people who make guides know what to make next.</p></header>
+<div id="rq-app"><div class="meta">Loading…</div></div>""", active="requests/", data={"page": "requests"},
+         desc="What Wilcox students are asking for: study guides, practice problems and notes, sorted by how many people need them.")
 
     page("summer/", "Summer homework", """
 <h1>Summer homework</h1>
@@ -1127,7 +1137,7 @@ def build_static():
   </div>
 </div>
 <section class="entry-sec"><h2>All study guides</h2><p class="sec-sub">The same guides as a list, by subject and class.</p><div id="gv-list"><div class="meta">Loading…</div></div>
-  <p><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a></p></section>""", active="guides/", script="guides.js",
+  <p class="gl-acts"><a class="add-link" href="../submit/?kind=resource">Share a study guide →</a> <a class="add-link" href="../requests/">See what students are asking for →</a></p></section>""", active="guides/", script="guides.js",
          desc="Every study guide Wilcox students have shared, shown as a connected graph by class and topic.")
 
     page("settings/", "Settings", """

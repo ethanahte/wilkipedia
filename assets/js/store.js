@@ -310,6 +310,29 @@ async function live() {
     },
     async moderateComment(id, status) { ok(await sb.from('comments').update({ status }).eq('id', id)); },
 
+    // ── Requests (migration 024): what students need, with "Me too" votes ──
+    // null means the tables aren't there yet (migration 024 not run), so pages can say so.
+    async requests({ course } = {}) {
+      let q = sb.from('requests').select(`*, profiles!requests_user_id_fkey(${WHO}), request_votes(user_id)`)
+        .order('created_at', { ascending: false }).limit(500);
+      if (course !== undefined) q = course === null ? q.is('course_slug', null) : q.eq('course_slug', course);
+      const { data, error } = await q;
+      if (error) { if (/requests|schema cache|does not exist/.test(error.message)) return null; throw new Error(error.message); }
+      return data.map((r) => ({ ...withAuthor(r), votes: r.request_votes.length,
+        voted: !!me && r.request_votes.some((v) => v.user_id === me.id), request_votes: undefined }));
+    },
+    async addRequest(r) {
+      const res = await sb.from('requests').insert(r).select('status').single();
+      if (res.error && /requests|schema cache/.test(res.error.message)) throw new Error('Requests need migration 024 run in Supabase first.');
+      return ok(res).status;
+    },
+    async voteRequest(id, on) {
+      if (on) ok(await sb.from('request_votes').insert({ request_id: id }));
+      else ok(await sb.from('request_votes').delete().eq('request_id', id).eq('user_id', me.id));
+    },
+    async setRequest(id, fields) { ok(await sb.from('requests').update(fields).eq('id', id)); },
+    async deleteRequest(id) { ok(await sb.from('requests').delete().eq('id', id)); },
+
     async report(r) { ok(await sb.from('reports').insert(r)); },
     async reports() {
       return ok(await sb.from('reports').select('*, profiles(display_name)')
@@ -612,6 +635,43 @@ async function demo() {
       db.comments.push({ id: id(), user_id: u.id, parent_id: null, prompt: null, created_at: now(), ...c,
                          status: postsInstantly(u) ? 'visible' : 'held' });
       save();
+    },
+    // Requests: mirrors migration 024 (who posts instantly, the asker may only mark done/reopen)
+    async requests({ course } = {}) {
+      const u = me(), mod = REVIEWER_ROLES.includes(u?.role);
+      db.requests ??= []; db.rvotes ??= [];
+      return db.requests.filter((r) => (course === undefined || r.course_slug === course)
+          && (['open', 'done'].includes(r.status) || r.user_id === u?.id || mod))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .map((r) => ({ ...r, ...who(r.user_id), votes: db.rvotes.filter((v) => v.request_id === r.id).length,
+                       voted: !!u && db.rvotes.some((v) => v.request_id === r.id && v.user_id === u.id) }));
+    },
+    async addRequest(r) {
+      const u = need(); db.requests ??= [];
+      if (db.requests.filter((x) => x.user_id === u.id && Date.now() - new Date(x.created_at) < 864e5).length >= 10) throw new Error('That’s 10 requests today. Try again tomorrow.');
+      const status = REVIEWER_ROLES.includes(u.role) || u.school ? 'open' : 'held';
+      db.requests.push({ id: id(), course_slug: r.course_slug ?? null, teacher: r.teacher || null, kind: r.kind, body: String(r.body).trim(),
+                         user_id: u.id, status, done_note: null, done_link: null, done_by: null, done_at: null, created_at: now() });
+      save(); return status;
+    },
+    async voteRequest(rid, on) {
+      const u = need(); db.rvotes ??= [];
+      db.rvotes = db.rvotes.filter((v) => !(v.request_id === rid && v.user_id === u.id));
+      if (on) db.rvotes.push({ request_id: rid, user_id: u.id });
+      save();
+    },
+    async setRequest(rid, f) {
+      const u = need(), r = db.requests.find((x) => x.id === rid), mod = REVIEWER_ROLES.includes(u.role);
+      if (!mod && (r.user_id !== u.id || !((r.status === 'open' && f.status === 'done') || (r.status === 'done' && f.status === 'open')))) throw new Error('Only the review team can change that.');
+      Object.assign(r, f);
+      if (f.status === 'done') Object.assign(r, { done_by: u.id, done_at: now() });
+      if (f.status === 'open') Object.assign(r, { done_by: null, done_at: null, done_note: null, done_link: null });
+      save();
+    },
+    async deleteRequest(rid) {
+      const u = need(), r = db.requests.find((x) => x.id === rid);
+      if (r.user_id !== u.id) reviewer();
+      db.requests = db.requests.filter((x) => x.id !== rid); db.rvotes = (db.rvotes || []).filter((v) => v.request_id !== rid); save();
     },
     async like(cid) { const u = need(); db.likes.push({ comment_id: cid, user_id: u.id }); save(); },
     async unlike(cid) {
