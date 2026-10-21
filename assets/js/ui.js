@@ -895,6 +895,11 @@ export async function openEditor(store, sub, onSaved, mode = 'reviewer') {
   const live = sub.status === 'approved';
   const how = mine ? (live && team ? 'own-now' : 'own') : live ? 'suggest' : team ? 'direct' : null;
   if (!how) { toast('Only the review team can change work that’s waiting for review.', 'bad'); return; }
+  // Editing a live post again while your first edit still waits: change that one (there can only be one)
+  if (how === 'suggest' || (how === 'own' && live)) {
+    const waiting = await store.myWaitingEdit?.(sub.id).catch(() => null);
+    if (waiting) { toast('You already have an edit to this waiting for review, so you’re changing that one.', 'info'); return openEditor(store, waiting, onSaved, mode); }
+  }
   const by = esc(sub.author || 'a former student');
   const [title, blurb, button] = {
     'own-now': [`Edit your ${esc(what)}`, 'You’re on the review team, so your change to your own post goes live right away. The old version is kept.', 'Save changes'],

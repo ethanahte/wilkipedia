@@ -1419,3 +1419,10 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   "Study guides & resources" share them. Only the title (and the PDF/Web links) are links; a card-sized
   link once covered the row and made Edit / Suggest an edit open the PDF. Never put buttons inside a
   link or under a stretched-link overlay.
+- **The signed-in profile survives a failed refresh** (store.js `loadMe`, 2026-10-20). Supabase
+  re-announces the session when the tab regains focus (a file picker closing does it). A failed
+  profile fetch used to reset you to "New member / contributor", which hid a reviewer's Approve
+  button mid-review. It now retries once and otherwise keeps the profile it had.
+- **Editing a live post twice** opens your edit that is still waiting (`myWaitingEdit`, both stores)
+  instead of failing on "one waiting edit per post". Non-admin reviewers still can't approve their
+  own suggested edit (migration 022); the card says so.

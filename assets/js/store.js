@@ -80,10 +80,16 @@ async function live() {
   const listeners = new Set();
   let me = null;
 
+  // Supabase re-announces the session whenever the tab regains focus (e.g. after a file picker
+  // closes). If the profile can't be fetched just then, keep who we already know: falling back to
+  // "New member / contributor" made a reviewer's Approve button vanish mid-review (2026-10-20).
   async function loadMe(session) {
     if (!session) { me = null; return; }
-    const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-    me = toUser(data || { id: session.user.id, display_name: 'New member', role: 'contributor' });
+    let r = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (r.error) r = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();   // one retry
+    if (r.data) { me = toUser(r.data); return; }
+    if (me && me.id === session.user.id) return;            // a failed refresh: keep the known profile
+    me = toUser({ id: session.user.id, display_name: 'New member', role: 'contributor' });
   }
   const { data: { session } } = await sb.auth.getSession();
   await loadMe(session);
@@ -231,6 +237,12 @@ async function live() {
     // live work gets an update that waits for review, and approving it copies the
     // update onto the live submission (on_review() in schema.sql).
     async editOwn(id, payload) { ok014(await sb.rpc('edit_own_submission', { p_id: id, p_payload: payload })); },
+    // Your edit to a live post that is still waiting for review, if there is one (one per post: on_submission_insert)
+    async myWaitingEdit(liveId) {
+      if (!me) return null;
+      const r = await sb.from('submissions').select(SUB).eq('replaces', liveId).eq('user_id', me.id).in('status', ['pending', 'changes']).limit(1);
+      return r.data?.[0] ? withAuthor(r.data[0]) : null;
+    },
     // Study guide PDFs (migration 016): a private bucket. A file opens for its uploader and
     // reviewers, and for everyone once the submission pointing at it is published.
     // Sent with XMLHttpRequest rather than supabase-js, because only XHR reports upload progress
@@ -674,6 +686,11 @@ async function demo() {
       const out = {};
       for (const p of paths) if (db.files?.[p]) out[p] = URL.createObjectURL(await (await fetch(db.files[p])).blob());
       return out;
+    },
+    async myWaitingEdit(liveId) {
+      const u = me(); if (!u) return null;
+      const x = db.submissions.find((y) => y.replaces === liveId && y.user_id === u.id && ['pending', 'changes'].includes(y.status));
+      return x ? sub(x) : null;
     },
     async editOwn(sid, payload) {
       const u = need();
