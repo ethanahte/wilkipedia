@@ -216,6 +216,22 @@ const view = { x: 0, y: 0, k: 1 };                 // screen = world * k + centr
 let N = [], L = [], byId = new Map(), nbr = new Map();
 let energy = 0, dragging = false, raf = 0, hover = null, sel = null, fade = 0, current, cam = null;
 const still = lessMotion();
+// Life (Ethan, same day: "easy to read but less fun"). Nothing here moves the layout; it plays on top of it:
+//   drift     every dot floats a pixel or two round its place, each on its own slow rhythm
+//   flow      small lights travel along the links, guide → class → subject, like work flowing in
+//   stars     a faint field behind the graph that moves a little slower than the graph when you pan
+//   breathe   subject halos swell and settle
+//   new       the five newest guides of the last week send out a soft ripple now and then
+//   bloom     the first time the graph comes into view it grows out of its subjects
+//   ripple    a click sends a ring out from the dot
+// All of it is off with reduced motion, and the loop sleeps while the card is off screen or the tab hidden.
+let T = 0, onscreen = true, held = false;
+const live = () => !still && onscreen && !document.hidden;
+const STARS = Array.from({ length: 170 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() < .12 ? 1.1 : .6, a: .05 + Math.random() * .2, ph: Math.random() * 6.3, w: .4 + Math.random() * 1.2, d: .15 + Math.random() * .35 }));
+const FRESH = 7 * 864e5;
+// only the five newest guides of the last week ripple, so it stays a signal and never a field of rings
+const bornOf = (g) => Date.parse(g?.reviewed_at || g?.created_at || '') || 0;
+const NEWEST = new Set(guides.filter((g) => Date.now() - bornOf(g) < FRESH).sort((a, b) => bornOf(b) - bornOf(a)).slice(0, 5).map((g) => g.id));
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toWorld = (sx, sy) => [(sx - W / 2 - view.x) / view.k, (sy - H / 2 - view.y) / view.k];
 const toScreen = (x, y) => [W / 2 + view.x + x * view.k, H / 2 + view.y + y * view.k];
@@ -245,7 +261,7 @@ function load(replay) {
     const [hx, hy] = home.get(n.id) || [0, 0], was = !replay && old.get(n.id);
     // Animate: everything starts at its subject and blooms out
     const from = replay ? home.get('d:' + n.dept) || [0, 0] : was ? [was.x, was.y] : [hx, hy];
-    const o = { ...n, hx, hy, x: from[0] + (replay ? (Math.random() - .5) * 4 : 0), y: from[1] + (replay ? (Math.random() - .5) * 4 : 0), vx: 0, vy: 0, fx: null, fy: null };
+    const o = { ...n, ph: Math.random() * 6.3, ws: .35 + Math.random() * .4, fresh: n.kind === 'guide' && NEWEST.has(n.g.id), ripple: -9, hx, hy, x: from[0] + (replay ? (Math.random() - .5) * 4 : 0), y: from[1] + (replay ? (Math.random() - .5) * 4 : 0), vx: 0, vy: 0, fx: null, fy: null };
     byId.set(n.id, o); nbr.set(n.id, new Set([n.id]));
     return o;
   });
@@ -255,7 +271,7 @@ function load(replay) {
   // full; the others are a faint thread (they light up when you point at it), so a shared fan stays clean.
   const near = new Map();
   for (const l of L) if (l.kind === 'class' && (!near.has(l.a.id) || l.rest < near.get(l.a.id).rest)) near.set(l.a.id, l);
-  for (const l of L) l.extra = l.kind === 'class' && near.get(l.a.id) !== l;
+  for (const l of L) { l.extra = l.kind === 'class' && near.get(l.a.id) !== l; l.ph = Math.random(); l.sp = .1 + Math.random() * .08; l.bend = (Math.random() < .5 ? -1 : 1) * (.05 + Math.random() * .05); }
   for (const n of N) n.r = radius(n);
   if (sel) sel = byId.get(sel.id) || null;
   const count = (k) => N.filter((n) => n.kind === k).length, g = count('guide'), c = count('class'), d = count('subject');
@@ -275,7 +291,7 @@ function tick() {
   let e = 0;
   for (const n of N) {
     if (n.fx != null) { n.x = n.fx; n.y = n.fy; n.vx = n.vy = 0; continue; }
-    n.vx *= .78; n.vy *= .78; n.x += n.vx; n.y += n.vy;
+    n.vx *= .82; n.vy *= .82; n.x += n.vx; n.y += n.vy;
     e = Math.max(e, Math.abs(n.vx) + Math.abs(n.vy), Math.abs(n.hx - n.x) * .02 + Math.abs(n.hy - n.y) * .02);
   }
   energy = e;
@@ -330,8 +346,20 @@ const mark = (kind, color) => `<svg class="gv-mark" viewBox="0 0 12 12" width="1
 function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = bgFill; ctx.fillRect(0, 0, W, H);
+  const moving = !still;
+  // stars, in screen space, drifting slower than the graph when you pan (depth)
+  for (const st of STARS) {
+    const x = ((st.x * W + view.x * st.d) % W + W) % W, y = ((st.y * H + view.y * st.d) % H + H) % H;
+    ctx.globalAlpha = st.a * (moving ? .65 + .35 * Math.sin(T * st.w + st.ph) : 1);
+    ctx.fillStyle = '#c9ccd6'; ctx.fillRect(x, y, st.r, st.r);
+  }
   ctx.setTransform(DPR * view.k, 0, 0, DPR * view.k, DPR * (W / 2 + view.x), DPR * (H / 2 + view.y));
   const k = view.k, focus = hover || sel, near = focus ? nbr.get(focus.id) : null;
+  // where each dot is drawn: its place plus a slow float (subjects barely move; guides most)
+  for (const n of N) {
+    const amp = moving && n !== focus && n.fx == null ? (n.kind === 'guide' ? 2.2 : n.kind === 'class' ? 1.3 : .6) : 0;
+    n.qx = n.x + Math.sin(T * n.ws + n.ph) * amp; n.qy = n.y + Math.cos(T * n.ws * .83 + n.ph * 1.7) * amp;
+  }
   const searching = !!$('#gv-q').value.trim();
   // the rest of the graph fades back while a dot is pointed at (or picked)
   const dim = (id) => (near && !near.has(id) ? 1 - .84 * fade : 1);
@@ -342,19 +370,40 @@ function render() {
     ctx.globalAlpha = (on ? .95 : Math.min(dim(l.a.id), dim(l.b.id))) * ((l.a.hit && l.b.hit) ? 1 : .15);
     ctx.strokeStyle = on ? mix(h, '#ffffff', .35) : l.kind === 'subject' ? rgba(h, .42) : rgba(h, l.extra ? .07 : .26);
     ctx.lineWidth = ((on ? 1.5 : l.kind === 'subject' ? 1.3 : .9) * opts.thick) * px;
-    ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
+    // a gentle curve, not a ruler line
+    const mx = (l.a.qx + l.b.qx) / 2, my = (l.a.qy + l.b.qy) / 2, cx = mx - (l.b.qy - l.a.qy) * l.bend, cy = my + (l.b.qx - l.a.qx) * l.bend;
+    l.cx = cx; l.cy = cy;
+    ctx.beginPath(); ctx.moveTo(l.a.qx, l.a.qy); ctx.quadraticCurveTo(cx, cy, l.b.qx, l.b.qy); ctx.stroke();
+  }
+  // flow: a small light runs along each link toward the subject; brighter and quicker on what you point at
+  if (moving) for (const l of L) {
+    if (l.extra && !(near && (l.a === focus || l.b === focus))) continue;
+    const on = near && (l.a === focus || l.b === focus), base = Math.min(dim(l.a.id), dim(l.b.id)) * ((l.a.hit && l.b.hit) ? 1 : .1);
+    if (base < .2 && !on) continue;
+    const u = (T * l.sp * (on ? 2.4 : 1) + l.ph) % 1, v = 1 - u;
+    const x = v * v * l.a.qx + 2 * v * u * l.cx + u * u * l.b.qx, y = v * v * l.a.qy + 2 * v * u * l.cy + u * u * l.b.qy;
+    ctx.globalAlpha = (on ? .95 : .55 * base) * Math.sin(Math.PI * u);
+    ctx.fillStyle = mix(hueOf[l.a.dept] || '#888888', '#ffffff', .6);
+    ctx.beginPath(); ctx.arc(x, y, (on ? 2 : 1.4) * px, 0, Math.PI * 2); ctx.fill();
   }
   // dots
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .14);
     const col = colorOf(n), r = drawR(n) * (n === hover ? 1 + .15 * fade : 1);
-    if (n.kind === 'subject') {                                        // a soft halo in its own colour
-      const h = hueOf[n.dept], g = ctx.createRadialGradient(n.x, n.y, r * .8, n.x, n.y, r * 2.4);
-      g.addColorStop(0, rgba(h, .2)); g.addColorStop(1, rgba(h, 0));
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, r * 2.4, 0, Math.PI * 2); ctx.fill();
+    const x = n.qx, y = n.qy;
+    if (n.kind === 'subject') {                                        // a soft halo in its own colour, breathing
+      const h = hueOf[n.dept], R = r * (2.4 + (moving ? .35 * Math.sin(T * .9 + n.ph) : 0)), g = ctx.createRadialGradient(x, y, r * .8, x, y, R);
+      g.addColorStop(0, rgba(h, .22)); g.addColorStop(1, rgba(h, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill();
+    }
+    if (moving && (n.fresh || T - n.ripple < .9)) {                    // new this fortnight, or just clicked: a ring goes out
+      const u = T - n.ripple < .9 ? (T - n.ripple) / .9 : Math.min(1, ((T * .2 + n.ph) % 1) * 2.2);   // one ring, then a rest
+      ctx.save(); ctx.globalAlpha *= (1 - u) * (T - n.ripple < .9 ? .9 : .55);
+      ctx.strokeStyle = mix(hueOf[n.dept], '#ffffff', .5); ctx.lineWidth = 1.2 * px;
+      ctx.beginPath(); ctx.arc(x, y, r + (3 + u * 16) * px, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
     }
     const kind = n.kind === 'guide' ? TYPE[n.type].shape : 'circle';
-    shape(ctx, kind === 'ring' ? 'circle' : kind, n.x, n.y, r);
+    shape(ctx, kind === 'ring' ? 'circle' : kind, x, y, r);
     if ((n.kind === 'class' && n.has === false) || kind === 'ring') {  // hollow: nothing shared yet, or "Other"
       ctx.fillStyle = C.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.5 * px; ctx.stroke();
     } else {
@@ -363,7 +412,7 @@ function render() {
     }
     if (n === focus) {                                                 // the dot you're on: a fine light ring
       ctx.globalAlpha = 1; ctx.strokeStyle = C.focus; ctx.lineWidth = 1.5 * px;
-      ctx.beginPath(); ctx.arc(n.x, n.y, r + 4 * px, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, r + 4 * px, 0, Math.PI * 2); ctx.stroke();
     }
   }
   // labels, in screen space so they stay crisp at any zoom
@@ -400,15 +449,17 @@ function render() {
     if (!at) continue;
     placed.push(at[2]);
     ctx.globalAlpha = a;
-    ctx.strokeStyle = '#121315'; ctx.lineWidth = 4; ctx.strokeText(text, at[0], at[1]);   // a dark halo so text reads over lines
+    const ox = (n.qx - n.x) * view.k, oy = (n.qy - n.y) * view.k;     // placed by the dot's place, drawn where it floats
+    ctx.strokeStyle = '#121315'; ctx.lineWidth = 4; ctx.strokeText(text, at[0] + ox, at[1] + oy);   // a dark halo so text reads over lines
     ctx.fillStyle = n === focus ? C.focus : n.kind === 'subject' ? mix(hueOf[n.dept], '#ffffff', .45) : n.has === false ? '#6c6e72' : r <= 2 ? '#dcdcdc' : n.kind === 'class' ? '#c4c6ca' : '#94969a';
-    ctx.fillText(text, at[0], at[1]);
+    ctx.fillText(text, at[0] + ox, at[1] + oy);
   }
   ctx.globalAlpha = 1;
 }
 
 function frame(now) {
   raf = 0;
+  T = now / 1000;
   const target = hover || sel ? 1 : 0;
   fade = still ? target : fade + (target - fade) * .22;             // focus fades in fast
   if (cam) {
@@ -416,9 +467,9 @@ function frame(now) {
     for (const key of ['x', 'y', 'k']) view[key] = cam.from[key] + (cam.to[key] - cam.from[key]) * e;
     if (u >= 1) cam = null;
   }
-  if (energy > .01 || dragging) { tick(); if (!dragging) tick(); }  // two steps a frame: it settles in about a second
+  if (!held && (energy > .01 || dragging)) { tick(); if (!dragging) tick(); }  // two steps a frame: it settles in about a second
   render();
-  if (cam || energy > .01 || dragging || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
+  if (live() || cam || (!held && energy > .01) || dragging || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
 }
 const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
 const stir = () => { energy = Math.max(energy, 1); wake(); };
@@ -474,6 +525,7 @@ const release = (e) => {
   if (press.n) { press.n.fx = press.n.fy = null; dragging = false; stir(); }
   if (!press.moved) {                                                 // a click: pick it (or let go, on the background)
     sel = press.n;
+    if (press.n) press.n.ripple = T;
     info(press.n);
     if (press.n) focusOn(press.n);
   }
@@ -615,9 +667,19 @@ list();
 panel();
 new ResizeObserver(size).observe(box);
 size();
-draw();
+draw(!still);                                     // starts folded into its subjects…
 legend();
 fit(false);                                       // again, now the legend's height is known
+if (!still) {
+  held = true;                                    // …and blooms out the first time it's on screen
+  const bloom = () => { if (held) { held = false; stir(); } };
+  new IntersectionObserver((es) => {
+    onscreen = es.some((e) => e.isIntersecting);
+    if (onscreen) { bloom(); wake(); }
+  }, { threshold: .25 }).observe(box);
+  setTimeout(bloom, 2500);                        // in case the browser never reports it in view
+  document.addEventListener('visibilitychange', wake);
+}
 $('#gv-q').addEventListener('input', () => {        // search: dim what doesn't match, don't move anything
   const g = graph($('#gv-q').value), hits = new Map(g.nodes.map((n) => [n.id, n.hit]));
   for (const n of N) n.hit = hits.get(n.id) ?? true;
