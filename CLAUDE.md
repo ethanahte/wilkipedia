@@ -393,45 +393,42 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Study guides graph** (`guides/`, `guides.js`): Obsidian's graph view,
   hand-written on a canvas. It has no library; ECharts was dropped at Ethan's
   request for Obsidian behaviour.
-  - Resource types are colours (Ethan): `TYPES` in guides.js maps the form's Type to Study guide,
-    Textbook, Practice problems, Video, Website, Other (`typeOf`; a PDF counts as a study guide).
-    The legend (built in JS) has a chip per type present; clicking hides/shows it, saved in
-    `opts.hide`. The info card and the list name the type. Guide node ids are `g:<submission id>`
-    so dots keep their place when a type is hidden. A new Type option needs a `TYPES` entry.
-  - **Redrawn 2026-10-19** (Ethan: "even more clear, more designed, more beautiful", Obsidian again):
-    labels are placed by priority (the dot you point at or picked and its neighbours, search matches,
-    subjects, classes by size, then guides) and skipped when they would overlap another label or dot, so
-    text never piles up; each has a dark halo and is drawn in screen space (crisp at any zoom). Guide titles
-    fade in as you zoom in. A collision force keeps dots apart; dots have a dark outline, subjects a soft
-    glow, classes with no guides are hollow. Hover or click lights the dot and its links in gold and fades
-    the rest; a click keeps it lit and glides the camera to it (Esc or ✕ lets go). + / − / fit buttons
-    by the gear (and keys + − 0). Background is a soft vignette.
-  - **Palette is muted on purpose** (Ethan, same day: the bright set felt cheap, "more 高级"): near-black card
-    (#161616 vignette), champagne subjects (#c8b07a, faint glow), slate-blue AP classes, cool-grey classes,
-    dusty type colours (`TYPES`), quiet grey labels, and gold (#d9bd78) only for the dot you point at or
-    picked. The card's buttons are champagne outlines, not bright yellow. Keep new colours in this register.
-  - Physics: a force simulation (repel, springs, centre pull, cooling alpha).
-    Node size grows with link count, dragging a dot pulls its neighbours, and
-    scroll or pinch zooms toward the pointer.
-  - Labels: titles fade smoothly as you zoom out (`smooth()` against the
-    "Text fade threshold" slider). Classes with no guides need a closer zoom.
-  - Hover: the pointed-at dot and its neighbours light up and label while
-    everything else fades back.
-  - Click opens the info card; double-click opens the guide or class.
-  - Links (Ethan, 2026-09-28): hubs only, three tiers. Subject area
-    (department: Math, English…) is the biggest dot, then classes linked to their
-    subject, then guides and resources linked to every class they're for. The
-    keyword links and prerequisite links were dropped. The list below the graph
-    (by subject, then class) is the accessible version.
-  - AP classes (name starts "AP ") are blue (`C.ap`); Display → "Colour AP classes"
-    turns it off, and a legend sits bottom right. Guides get no text tag on the graph
-    (Jonathan asked; decided 2026-09-29): the link to their class is the tag, and pointing
-    at a guide lights up its classes.
+  - **Redesigned 2026-10-22** (Ethan: "I still don't like the graph arrangement, the dots arrangements,
+    the colour and the size of each dot"). Replaces the 2026-10-19 force layout and muted palette:
+    - **Colour = subject.** `HUE` in guides.js gives each department one soft hue (English terracotta,
+      Math blue, Social Science violet, Science sage, …; `SPARE` for any new department). The subject dot
+      is the full hue with a halo, its classes a step lighter, its guides a pale tint, links the hue at low
+      alpha. AP classes are no longer a separate colour (the "Colour AP classes" toggle is gone).
+    - **Shape = kind of resource** (`TYPES`): study guide ●, textbook ■, practice ◆, video ▲, website ⬢,
+      other ○. The legend has a row of subject colours and a row of shape chips; clicking a chip hides or
+      shows that kind (`opts.hide`). The card and legend draw the same shapes as SVG (`mark()`). A new
+      Type option needs a `TYPES` entry. The "PDF + web" ring is gone from the graph (it read as bubbles);
+      the card still has both buttons and says "PDF and web version".
+    - **Planned layout, not physics.** `flower()` lays each subject out as a flower: classes that share
+      guides (AP Calc AB, BC and Calculus) form one unit, standing in a short row, and the unit's guides fan
+      out beyond them in arcs (a guide nearest the class it belongs to). Units are spaced round the subject
+      by the room they need. `layout()` packs the flowers by their real dots (`CLEAR` apart; each one tried
+      in 8 turns from 32 directions) and keeps the spot that lets the whole graph show biggest on the card.
+    - **Springs only.** Every dot is tied to its home and to its neighbours by springs at their home
+      length (`tick()`); dragging stretches them so neighbours follow, and letting go settles back
+      (~100 steps, two per frame). Animate blooms everything out from its subject. The Forces sliders
+      became one "Spacing" slider (`opts.spread`).
+    - A shared guide's link to its nearest class is drawn in full and its other links as a faint thread
+      (`l.extra`), so the Calculus fan stays clean; pointing at it lights them all.
+    - Sizes: subject 16–20, class 7.5–12 (grows with guides), guide 5.6, each with a minimum screen size
+      (`drawR`) so the zoomed-out view stays legible. Labels try below, above, right, then left of the dot
+      and never leave the card. The fit leaves room for the legend by measuring it (`pads()`).
+  - Links (Ethan, 2026-09-28): hubs only, three tiers: subject area (department) → class → every guide or
+    resource for that class. No keyword or prerequisite links. Guides get no text tag (Jonathan, decided
+    2026-09-29): pointing at a guide lights up its classes. The list below the graph is the accessible version.
+  - Kept from Obsidian: titles fade in as you zoom (`smooth()` against the "Text fade threshold" slider),
+    labels placed by priority and skipped rather than piled up, hover lights a dot and its neighbours while
+    the rest fades back, click opens the card and glides to the dot (Esc or ✕ lets go), double-click opens
+    the guide or class, + / − / fit buttons and keys. Classes without guides (Filters toggle) are hollow.
   - PDF links are signed for 6 hours (`pdfUrls`), so a tab left open longer showed an error instead of
     the file (Ethan, 2026-10-15). A site-wide click handler in ui.js reads the link's expiry and, when
     it's gone or under 2 minutes, opens a fresh one (`openSigned`; the graph's double-click uses it too).
-  - A study guide can have both a PDF and a link to its live web version (a Google Doc). The graph
-    draws those dots with a ring (legend "PDF + web"), the card has "Open the PDF" and "Open the web
+  - A study guide can have both a PDF and a link to its live web version (a Google Doc). The card has "Open the PDF" and "Open the web
     version" (the web link stays when the PDF can't be opened), and the list below gives a "Web
     version" link beside the PDF. Double-click still opens the PDF.
   - A resource can be for several classes: the `also` field (type `courses`, up
