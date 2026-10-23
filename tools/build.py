@@ -1150,7 +1150,7 @@ def build_static():
 
     page("guides/", "Study guides", f"""
 <h1>Study guides</h1>
-<p class="lede">Every study guide and resource students have shared, as a graph. Each subject has its own colour: the big dot is the subject, its classes sit round it, and each guide hangs off every class it’s for. The shape of a dot says what kind of resource it is.</p>
+<p class="lede">Every study guide and resource students have shared, as a graph. The big dot is the subject, its classes sit round it, and each guide hangs off every class it’s for. The shape of a dot says what kind of resource it is.</p>
 <div class="gv" id="gv-graph" translate="no">
   <div class="gv-bar">
     <label class="gv-search"><span class="sr-only">Filter the graph</span><input id="gv-q" type="search" placeholder="Search files…" autocomplete="off"></label>

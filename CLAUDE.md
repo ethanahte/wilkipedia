@@ -420,7 +420,7 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   request for Obsidian behaviour.
   - **Redesigned 2026-10-22** (Ethan: "I still don't like the graph arrangement, the dots arrangements,
     the colour and the size of each dot"). Replaces the 2026-10-19 force layout and muted palette:
-    - **Colour = subject.** `HUE` in guides.js gives each department one soft hue (English terracotta,
+    - *(Superseded by Swiss below: no subject colours now.)* **Colour = subject.** `HUE` in guides.js gave each department one soft hue (English terracotta,
       Math blue, Social Science violet, Science sage, …; `SPARE` for any new department). The subject dot
       is the full hue with a halo, its classes a step lighter, its guides a pale tint, links the hue at low
       alpha. AP classes are no longer a separate colour (the "Colour AP classes" toggle is gone).
@@ -443,19 +443,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - Sizes: subject 16–20, class 7.5–12 (grows with guides), guide 5.6, each with a minimum screen size
       (`drawR`) so the zoomed-out view stays legible. Labels try below, above, right, then left of the dot
       and never leave the card. The fit leaves room for the legend by measuring it (`pads()`).
-  - **Life on top of the layout** (Ethan, 2026-10-22: "easy to read but less fun"). None of it moves the
-    planned layout; it's drawn on top, and all of it is off with reduced motion:
-    - drift (`n.qx/qy`): each dot floats a pixel or two on its own slow rhythm. Labels are *placed* by the
-      dot's real position and *drawn* at the floated one, so they never flicker between spots;
-    - links are gentle curves (`l.bend`), and a small light runs along each toward the subject (`l.ph`,
-      `l.sp`), brighter and quicker on the links of what you point at (faint `extra` links only then);
-    - a star field (`STARS`) behind, panning slower than the graph; subject halos breathe;
-    - the five newest guides of the last week (`NEWEST`, by reviewed_at/created_at) ripple now and then.
-      Kept to five on purpose: when most guides were new, rings everywhere read as bubbles again;
-    - a click sends a ring out from the dot; springs are a touch bouncier (damping .82);
-    - bloom: the graph starts folded into its subjects (`held`) and grows out the first time it's a
-      quarter on screen (IntersectionObserver, with a 2.5 s fallback for browsers that never report it).
-    - The loop now runs every frame while `live()` (on screen, tab visible) and sleeps otherwise.
+  - **Swiss (2026-10-23, Ethan: "more 简约, try the Swiss style", plus "a white background option").**
+    Replaces the per-subject colours and all the "life" effects of the same week (drift, flowing lights,
+    stars, ripples, halos, bloom: removed from the code). Ink on paper: `palette()` gives White
+    (#fff, ink #111) or Black (#0b0b0b, ink #f3f2ee); `opts.bg` is 'white' / 'black' / 'auto' (auto follows
+    the site's night mode, watched with a MutationObserver), switched by the White / Black words in the bar
+    (`.gv-bg`, sets `gv-light` / `gv-dark` on `#gv-graph`). Straight hairlines; solid dots with no
+    outlines (subjects and classes ink, guides grey, empty classes hollow); one accent, red, for the dot
+    you point at or pick. Labels in Helvetica, set to the right of the dot (then left, under, over):
+    subjects bold, classes medium, guides small grey. The card is a plain field between a 2px ink rule
+    and a hairline; every control is a word (underline search, White / Black, + − fit, gear); settings and
+    the info card are flat sheets with a rule on top. The legend is one line of shapes. Styles: the
+    "Study guides graph, Swiss" block at the end of style.css (vars `--gx-*`).
   - Links (Ethan, 2026-09-28): hubs only, three tiers: subject area (department) → class → every guide or
     resource for that class. No keyword or prerequisite links. Guides get no text tag (Jonathan, decided
     2026-09-29): pointing at a guide lights up its classes. The list below the graph is the accessible version.

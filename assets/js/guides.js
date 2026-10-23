@@ -13,16 +13,10 @@
 import { initHeader, openSigned, $, esc, courses, courseUrl, safeUrl, root, lessMotion } from './ui.js';
 import { GUIDE } from './forms.js';
 
-// Redesigned 2026-10-22 (Ethan: "I still don't like the graph arrangement, the dots arrangements, the
-// colour and the size of each dot"). Three changes:
-//   colour  = subject. Each subject has its own hue and everything under it wears it: the subject dot
-//             in full, its classes a step quieter, its guides a pale tint. A cluster reads at a glance.
-//   shape   = kind of resource (study guide ●, textbook ■, practice ◆, video ▲, website ⬢, other ○),
-//             so the type still shows without a second set of colours. The legend's chips hide or show a kind.
-//   layout  = planned, not left to the physics: every subject is a flower (subject in the middle, its
-//             classes round it, each class's guides fanned out beyond it), and the flowers are packed
-//             side by side. Physics only makes it springy: drag a dot and its neighbours follow, let go
-//             and everything settles back home.
+// Shape = kind of resource (study guide ●, textbook ■, practice ◆, video ▲, website ⬢, other ○); the
+// legend's chips hide or show a kind. Layout is planned, not left to physics (2026-10-22): every subject
+// is a flower (subject in the middle, its classes round it, each class's guides fanned out beyond), the
+// flowers packed side by side; springs only make it draggable. Look: Swiss, ink on paper (see palette()).
 const TYPES = [
   ['guide', 'Study guide', 'circle'],
   ['textbook', 'Textbook', 'square'],
@@ -40,22 +34,10 @@ const typeOf = (g) => {
 
 const s = await initHeader();
 const OPTS_KEY = 'wilkipedia-graph';
-const C = { bg: '#131416', edge: '#2a2c30', focus: '#f4efe4', text: '#a4a6aa' };
-// One hue per subject: soft, even in brightness, so no subject shouts over another on the dark card
-const HUE = {
-  english: '#e39a7f', math: '#7ea8ea', 'social-science': '#b59ce4', science: '#7cc6a0',
-  'world-language': '#e3c171', 'physical-education': '#6fc3cc', 'visual-performing-arts': '#e690b2',
-  'practical-arts': '#cfa27c', electives: '#a9b2c0', svcte: '#a3ad8c',
-};
-const SPARE = ['#d3a6d8', '#9fc3e8', '#d8c48c', '#8fd0be'];
-const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-const mix = (h, to, t) => { const a = hex(h), b = hex(to); return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`; };
-const rgba = (h, al) => `rgba(${hex(h).join(',')},${al})`;
 
 const [data, guides] = await Promise.all([courses(), s.approved({ kind: 'resource' }).catch(() => [])]);
 const bySlug = Object.fromEntries(data.courses.map((c) => [c.slug, c]));
 const dept = Object.fromEntries(data.departments.map((d) => [d.slug, d.name]));
-const hueOf = Object.fromEntries(data.departments.map((d, i) => [d.slug, HUE[d.slug] || SPARE[i % SPARE.length]]));
 const classesOf = (g) => [...new Set([g.course_slug, ...(g.payload.also || [])])].filter((x) => bySlug[x]);
 // Uploaded study guides open through short-lived links, fetched once for the page
 const pdfLinks = await s.pdfUrls(guides.map((g) => g.payload.pdf?.path).filter(Boolean)).catch(() => ({}));
@@ -63,7 +45,7 @@ const pdfUrl = (g) => (g.payload.pdf?.path ? pdfLinks[g.payload.pdf.path] || nul
 const webUrl = (g) => safeUrl(g.payload.url) || null;
 const openUrl = (g) => pdfUrl(g) || webUrl(g);
 
-let opts = { orphans: false, labels: 1, size: 1, thick: 1, spread: 1, hide: [] };
+let opts = { orphans: false, labels: 1, size: 1, thick: 1, spread: 1, hide: [], bg: 'auto' };
 try { Object.assign(opts, JSON.parse(localStorage.getItem(OPTS_KEY)) || {}); } catch { /* storage blocked */ }
 const save = () => { try { localStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch { /* ignore */ } };
 
@@ -211,27 +193,23 @@ const cv = document.createElement('canvas');
 cv.className = 'gv-canvas';
 box.append(cv);
 const ctx = cv.getContext('2d');
-let W = 0, H = 0, DPR = 1, bgFill = C.bg;
+let W = 0, H = 0, DPR = 1, bgFill = '#ffffff';
 const view = { x: 0, y: 0, k: 1 };                 // screen = world * k + centre + (x, y)
 let N = [], L = [], byId = new Map(), nbr = new Map();
 let energy = 0, dragging = false, raf = 0, hover = null, sel = null, fade = 0, current, cam = null;
 const still = lessMotion();
-// Life (Ethan, same day: "easy to read but less fun"). Nothing here moves the layout; it plays on top of it:
-//   drift     every dot floats a pixel or two round its place, each on its own slow rhythm
-//   flow      small lights travel along the links, guide → class → subject, like work flowing in
-//   stars     a faint field behind the graph that moves a little slower than the graph when you pan
-//   breathe   subject halos swell and settle
-//   new       the five newest guides of the last week send out a soft ripple now and then
-//   bloom     the first time the graph comes into view it grows out of its subjects
-//   ripple    a click sends a ring out from the dot
-// All of it is off with reduced motion, and the loop sleeps while the card is off screen or the tab hidden.
-let T = 0, onscreen = true, held = false;
-const live = () => !still && onscreen && !document.hidden;
-const STARS = Array.from({ length: 170 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() < .12 ? 1.1 : .6, a: .05 + Math.random() * .2, ph: Math.random() * 6.3, w: .4 + Math.random() * 1.2, d: .15 + Math.random() * .35 }));
-const FRESH = 7 * 864e5;
-// only the five newest guides of the last week ripple, so it stays a signal and never a field of rings
-const bornOf = (g) => Date.parse(g?.reviewed_at || g?.created_at || '') || 0;
-const NEWEST = new Set(guides.filter((g) => Date.now() - bornOf(g) < FRESH).sort((a, b) => bornOf(b) - bornOf(a)).slice(0, 5).map((g) => g.id));
+// Swiss (Ethan 2026-10-23: "more 简约, try the Swiss style", and "a white background option"). The
+// earlier drift, flowing lights, stars, ripples, halos and bloom are gone. The graph is ink on paper:
+// straight hairlines, solid dots, type doing the hierarchy (subjects bold, classes regular, guides small
+// and grey), one accent (red) for the dot you point at or pick. The background is White or Black
+// (`opts.bg`; Auto follows the site's night mode), switched from the bar.
+const night = () => document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+const dark = () => (opts.bg === 'black' || (opts.bg !== 'white' && night()));
+let P;
+const palette = () => (P = dark()
+  ? { bg: '#0b0b0b', ink: '#f3f2ee', soft: '#9a9893', faint: '#4a4946', line: 'rgba(243,242,238,.22)', lineFaint: 'rgba(243,242,238,.07)', accent: '#ff3b30' }
+  : { bg: '#ffffff', ink: '#111111', soft: '#6b6a66', faint: '#c9c7c0', line: 'rgba(17,17,17,.24)', lineFaint: 'rgba(17,17,17,.07)', accent: '#e2231a' });
+palette();
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const toWorld = (sx, sy) => [(sx - W / 2 - view.x) / view.k, (sy - H / 2 - view.y) / view.k];
 const toScreen = (x, y) => [W / 2 + view.x + x * view.k, H / 2 + view.y + y * view.k];
@@ -247,10 +225,7 @@ function radius(n) {
 // how big a dot is drawn: never smaller than a few screen pixels, so the far-out view stays legible
 const drawR = (n) => Math.max(n.r, (n.kind === 'subject' ? 7 : n.kind === 'class' ? 4 : 2.6) / view.k);
 
-const colorOf = (n) => {
-  const h = hueOf[n.dept] || '#a9b2c0';
-  return n.kind === 'subject' ? h : n.kind === 'class' ? (n.has === false ? mix(h, C.bg, .45) : mix(h, '#ffffff', .08)) : mix(h, '#ffffff', .36);
-};
+const colorOf = (n) => (n.kind === 'guide' ? P.soft : n.kind === 'class' && n.has === false ? P.faint : P.ink);
 
 // Rebuild the nodes. Surviving dots start where they are and spring to their new homes.
 function load(replay) {
@@ -261,7 +236,7 @@ function load(replay) {
     const [hx, hy] = home.get(n.id) || [0, 0], was = !replay && old.get(n.id);
     // Animate: everything starts at its subject and blooms out
     const from = replay ? home.get('d:' + n.dept) || [0, 0] : was ? [was.x, was.y] : [hx, hy];
-    const o = { ...n, ph: Math.random() * 6.3, ws: .35 + Math.random() * .4, fresh: n.kind === 'guide' && NEWEST.has(n.g.id), ripple: -9, hx, hy, x: from[0] + (replay ? (Math.random() - .5) * 4 : 0), y: from[1] + (replay ? (Math.random() - .5) * 4 : 0), vx: 0, vy: 0, fx: null, fy: null };
+    const o = { ...n, hx, hy, x: from[0] + (replay ? (Math.random() - .5) * 4 : 0), y: from[1] + (replay ? (Math.random() - .5) * 4 : 0), vx: 0, vy: 0, fx: null, fy: null };
     byId.set(n.id, o); nbr.set(n.id, new Set([n.id]));
     return o;
   });
@@ -271,7 +246,7 @@ function load(replay) {
   // full; the others are a faint thread (they light up when you point at it), so a shared fan stays clean.
   const near = new Map();
   for (const l of L) if (l.kind === 'class' && (!near.has(l.a.id) || l.rest < near.get(l.a.id).rest)) near.set(l.a.id, l);
-  for (const l of L) { l.extra = l.kind === 'class' && near.get(l.a.id) !== l; l.ph = Math.random(); l.sp = .1 + Math.random() * .08; l.bend = (Math.random() < .5 ? -1 : 1) * (.05 + Math.random() * .05); }
+  for (const l of L) { l.extra = l.kind === 'class' && near.get(l.a.id) !== l; }
   for (const n of N) n.r = radius(n);
   if (sel) sel = byId.get(sel.id) || null;
   const count = (k) => N.filter((n) => n.kind === k).length, g = count('guide'), c = count('class'), d = count('subject');
@@ -322,10 +297,7 @@ function size() {
   DPR = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height;
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   cv.style.width = `${W}px`; cv.style.height = `${H}px`;
-  // a soft vignette: a touch lighter in the middle, like a lit desk
-  const g = ctx.createRadialGradient(W / 2, H * .45, 0, W / 2, H * .45, Math.max(W, H) * .75);
-  g.addColorStop(0, '#1a1b1e'); g.addColorStop(1, '#101113');
-  bgFill = g;
+  bgFill = P.bg;
   wake();
 }
 
@@ -345,131 +317,87 @@ const mark = (kind, color) => `<svg class="gv-mark" viewBox="0 0 12 12" width="1
 
 function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = bgFill; ctx.fillRect(0, 0, W, H);
-  const moving = !still;
-  // stars, in screen space, drifting slower than the graph when you pan (depth)
-  for (const st of STARS) {
-    const x = ((st.x * W + view.x * st.d) % W + W) % W, y = ((st.y * H + view.y * st.d) % H + H) % H;
-    ctx.globalAlpha = st.a * (moving ? .65 + .35 * Math.sin(T * st.w + st.ph) : 1);
-    ctx.fillStyle = '#c9ccd6'; ctx.fillRect(x, y, st.r, st.r);
-  }
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
   ctx.setTransform(DPR * view.k, 0, 0, DPR * view.k, DPR * (W / 2 + view.x), DPR * (H / 2 + view.y));
   const k = view.k, focus = hover || sel, near = focus ? nbr.get(focus.id) : null;
-  // where each dot is drawn: its place plus a slow float (subjects barely move; guides most)
-  for (const n of N) {
-    const amp = moving && n !== focus && n.fx == null ? (n.kind === 'guide' ? 2.2 : n.kind === 'class' ? 1.3 : .6) : 0;
-    n.qx = n.x + Math.sin(T * n.ws + n.ph) * amp; n.qy = n.y + Math.cos(T * n.ws * .83 + n.ph * 1.7) * amp;
-  }
   const searching = !!$('#gv-q').value.trim();
-  // the rest of the graph fades back while a dot is pointed at (or picked)
-  const dim = (id) => (near && !near.has(id) ? 1 - .84 * fade : 1);
+  // the rest of the graph steps back while a dot is pointed at (or picked)
+  const dim = (id) => (near && !near.has(id) ? 1 - .85 * fade : 1);
   const px = 1 / k;                                                    // one screen pixel, in world units
-  // links, in the colour of their subject
+  // links: straight hairlines; a shared guide's extra links barely there until you point at it
   for (const l of L) {
-    const on = near && (l.a === focus || l.b === focus), h = hueOf[l.a.dept] || '#888888';
-    ctx.globalAlpha = (on ? .95 : Math.min(dim(l.a.id), dim(l.b.id))) * ((l.a.hit && l.b.hit) ? 1 : .15);
-    ctx.strokeStyle = on ? mix(h, '#ffffff', .35) : l.kind === 'subject' ? rgba(h, .42) : rgba(h, l.extra ? .07 : .26);
-    ctx.lineWidth = ((on ? 1.5 : l.kind === 'subject' ? 1.3 : .9) * opts.thick) * px;
-    // a gentle curve, not a ruler line
-    const mx = (l.a.qx + l.b.qx) / 2, my = (l.a.qy + l.b.qy) / 2, cx = mx - (l.b.qy - l.a.qy) * l.bend, cy = my + (l.b.qx - l.a.qx) * l.bend;
-    l.cx = cx; l.cy = cy;
-    ctx.beginPath(); ctx.moveTo(l.a.qx, l.a.qy); ctx.quadraticCurveTo(cx, cy, l.b.qx, l.b.qy); ctx.stroke();
+    const on = near && (l.a === focus || l.b === focus);
+    ctx.globalAlpha = (on ? 1 : Math.min(dim(l.a.id), dim(l.b.id))) * ((l.a.hit && l.b.hit) ? 1 : .15);
+    ctx.strokeStyle = on ? P.ink : l.extra ? P.lineFaint : P.line;
+    ctx.lineWidth = ((on ? 1.25 : l.kind === 'subject' ? 1 : .75) * opts.thick) * px;
+    ctx.beginPath(); ctx.moveTo(l.a.x, l.a.y); ctx.lineTo(l.b.x, l.b.y); ctx.stroke();
   }
-  // flow: a small light runs along each link toward the subject; brighter and quicker on what you point at
-  if (moving) for (const l of L) {
-    if (l.extra && !(near && (l.a === focus || l.b === focus))) continue;
-    const on = near && (l.a === focus || l.b === focus), base = Math.min(dim(l.a.id), dim(l.b.id)) * ((l.a.hit && l.b.hit) ? 1 : .1);
-    if (base < .2 && !on) continue;
-    const u = (T * l.sp * (on ? 2.4 : 1) + l.ph) % 1, v = 1 - u;
-    const x = v * v * l.a.qx + 2 * v * u * l.cx + u * u * l.b.qx, y = v * v * l.a.qy + 2 * v * u * l.cy + u * u * l.b.qy;
-    ctx.globalAlpha = (on ? .95 : .55 * base) * Math.sin(Math.PI * u);
-    ctx.fillStyle = mix(hueOf[l.a.dept] || '#888888', '#ffffff', .6);
-    ctx.beginPath(); ctx.arc(x, y, (on ? 2 : 1.4) * px, 0, Math.PI * 2); ctx.fill();
-  }
-  // dots
+  // dots: solid, no outlines or glows
   for (const n of N) {
     ctx.globalAlpha = dim(n.id) * (n.hit ? 1 : .14);
-    const col = colorOf(n), r = drawR(n) * (n === hover ? 1 + .15 * fade : 1);
-    const x = n.qx, y = n.qy;
-    if (n.kind === 'subject') {                                        // a soft halo in its own colour, breathing
-      const h = hueOf[n.dept], R = r * (2.4 + (moving ? .35 * Math.sin(T * .9 + n.ph) : 0)), g = ctx.createRadialGradient(x, y, r * .8, x, y, R);
-      g.addColorStop(0, rgba(h, .22)); g.addColorStop(1, rgba(h, 0));
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill();
-    }
-    if (moving && (n.fresh || T - n.ripple < .9)) {                    // new this fortnight, or just clicked: a ring goes out
-      const u = T - n.ripple < .9 ? (T - n.ripple) / .9 : Math.min(1, ((T * .2 + n.ph) % 1) * 2.2);   // one ring, then a rest
-      ctx.save(); ctx.globalAlpha *= (1 - u) * (T - n.ripple < .9 ? .9 : .55);
-      ctx.strokeStyle = mix(hueOf[n.dept], '#ffffff', .5); ctx.lineWidth = 1.2 * px;
-      ctx.beginPath(); ctx.arc(x, y, r + (3 + u * 16) * px, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-    }
-    const kind = n.kind === 'guide' ? TYPE[n.type].shape : 'circle';
-    shape(ctx, kind === 'ring' ? 'circle' : kind, x, y, r);
+    const r = drawR(n), kind = n.kind === 'guide' ? TYPE[n.type].shape : 'circle', col = n === focus ? P.accent : colorOf(n);
+    shape(ctx, kind === 'ring' ? 'circle' : kind, n.x, n.y, r);
     if ((n.kind === 'class' && n.has === false) || kind === 'ring') {  // hollow: nothing shared yet, or "Other"
-      ctx.fillStyle = C.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.5 * px; ctx.stroke();
-    } else {
-      ctx.fillStyle = col; ctx.fill();
-      ctx.strokeStyle = C.bg; ctx.lineWidth = 1.5 * px; ctx.stroke(); // a dark edge keeps neighbours apart
-    }
-    if (n === focus) {                                                 // the dot you're on: a fine light ring
-      ctx.globalAlpha = 1; ctx.strokeStyle = C.focus; ctx.lineWidth = 1.5 * px;
-      ctx.beginPath(); ctx.arc(x, y, r + 4 * px, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = P.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.25 * px; ctx.stroke();
+    } else { ctx.fillStyle = col; ctx.fill(); }
+    if (n === focus) {                                                 // the dot you're on: a red ring
+      ctx.globalAlpha = 1; ctx.strokeStyle = P.accent; ctx.lineWidth = 1.25 * px;
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 4 * px, 0, Math.PI * 2); ctx.stroke();
     }
   }
-  // labels, in screen space so they stay crisp at any zoom
+  // labels, in screen space so they stay crisp at any zoom; set flush left of the dot, Swiss
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   const t = opts.labels;
   const rank = (n) => (n === focus ? 0 : near?.has(n.id) ? 1 : searching && n.hit ? 2 : n.kind === 'subject' ? 3 : n.kind === 'class' ? 4 : 5);
   const show = (n) => {                                                // how visible this label is at this zoom (Obsidian's text fade)
     if (near?.has(n.id)) return Math.max(fade, n.kind === 'guide' ? smooth(1.05 * t, 1.5 * t, k) : 1);
     if (searching && n.hit && n.kind !== 'subject') return 1;
-    const z = n.kind === 'subject' ? 1 : n.kind === 'class' ? (n.has ? smooth(.32 * t, .5 * t, k) : smooth(.95 * t, 1.3 * t, k) * .8)   : smooth(1.25 * t, 1.75 * t, k);
-    return z * dim(n.id) ** 2 * (n.hit ? 1 : .2);                   // faded dots lose their labels entirely
+    const z = n.kind === 'subject' ? 1 : n.kind === 'class' ? (n.has ? smooth(.32 * t, .5 * t, k) : smooth(.95 * t, 1.3 * t, k) * .8) : smooth(1.25 * t, 1.75 * t, k);
+    return z * dim(n.id) ** 2 * (n.hit ? 1 : .2);
   };
   const placed = [];
-  // dots are obstacles too: a label never covers another dot
   const dots = N.filter((n) => dim(n.id) * (n.hit ? 1 : .14) > .3).map((n) => { const [x, y] = toScreen(n.x, n.y), r = drawR(n) * view.k + 2; return [x - r, y - r, x + r, y + r, n]; });
   const order = N.map((n) => [n, rank(n), current.deg[n.id] || 0]).sort((a, b) => a[1] - b[1] || b[2] - a[2]);
+  const FONT = '"Helvetica Neue", Helvetica, Inter, Arial, system-ui, sans-serif';
   for (const [n, r] of order) {
     const a = show(n);
     if (a < .04) continue;
     const size = n.kind === 'subject' ? 14 : n.kind === 'class' ? 12 : 11;
-    ctx.font = `${n.kind === 'subject' ? 600 : n === focus ? 500 : 400} ${size}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
-    const text = clip(n.name, 32);
+    ctx.font = `${n.kind === 'subject' ? 700 : n === focus || n.kind === 'class' ? 500 : 400} ${size}px ${FONT}`;
+    const text = clip(n.name, 34);
     const [sx, sy] = toScreen(n.x, n.y), rr = drawR(n) * view.k, w = ctx.measureText(text).width;
-    // try under the dot, then over it, then to either side; skip it if every spot is taken
-    const spots = [[sx, sy + rr + 4], [sx, sy - rr - 4 - size], [sx + rr + 6 + w / 2, sy - size / 2], [sx - rr - 6 - w / 2, sy - size / 2]];
+    // right of the dot first (flush left text), then left of it, then under, then over
+    const spots = [[sx + rr + 9, sy], [sx - rr - 9 - w, sy], [sx - w / 2, sy + rr + 4 + size / 2], [sx - w / 2, sy - rr - 4 - size / 2]];
     let at = null;
     for (const [x, y] of spots) {
-      const rect = [x - w / 2 - 3, y - 1, x + w / 2 + 3, y + size + 2];
+      const rect = [x - 2, y - size / 2 - 1, x + w + 2, y + size / 2 + 1];
       const over = (q) => rect[0] < q[2] && rect[2] > q[0] && rect[1] < q[3] && rect[3] > q[1];
-      const inside = rect[0] > 4 && rect[2] < W - 4 && rect[1] > 4 && rect[3] < H - 4;   // never run off the card
+      const inside = rect[0] > 4 && rect[2] < W - 4 && rect[1] > 4 && rect[3] < H - 4;
       if (r === 0 || (inside && !(placed.some(over) || dots.some((q) => q[4] !== n && (r > 1 || q[4] === focus) && over(q))))) { at = [x, y, rect]; break; }
     }
     if (!at) continue;
     placed.push(at[2]);
     ctx.globalAlpha = a;
-    const ox = (n.qx - n.x) * view.k, oy = (n.qy - n.y) * view.k;     // placed by the dot's place, drawn where it floats
-    ctx.strokeStyle = '#121315'; ctx.lineWidth = 4; ctx.strokeText(text, at[0] + ox, at[1] + oy);   // a dark halo so text reads over lines
-    ctx.fillStyle = n === focus ? C.focus : n.kind === 'subject' ? mix(hueOf[n.dept], '#ffffff', .45) : n.has === false ? '#6c6e72' : r <= 2 ? '#dcdcdc' : n.kind === 'class' ? '#c4c6ca' : '#94969a';
-    ctx.fillText(text, at[0] + ox, at[1] + oy);
+    ctx.strokeStyle = P.bg; ctx.lineWidth = 4; ctx.strokeText(text, at[0], at[1]);   // a paper halo so text reads over lines
+    ctx.fillStyle = n === focus ? P.accent : n.kind === 'guide' ? (r <= 2 ? P.ink : P.soft) : n.has === false ? P.soft : P.ink;
+    ctx.fillText(text, at[0], at[1]);
   }
   ctx.globalAlpha = 1;
 }
 
 function frame(now) {
   raf = 0;
-  T = now / 1000;
   const target = hover || sel ? 1 : 0;
-  fade = still ? target : fade + (target - fade) * .22;             // focus fades in fast
+  fade = still ? target : fade + (target - fade) * .22;
   if (cam) {
     const u = Math.min(1, (now - cam.t0) / cam.dur), e = 1 - Math.pow(1 - u, 3);
     for (const key of ['x', 'y', 'k']) view[key] = cam.from[key] + (cam.to[key] - cam.from[key]) * e;
     if (u >= 1) cam = null;
   }
-  if (!held && (energy > .01 || dragging)) { tick(); if (!dragging) tick(); }  // two steps a frame: it settles in about a second
+  if (energy > .01 || dragging) { tick(); if (!dragging) tick(); }
   render();
-  if (live() || cam || (!held && energy > .01) || dragging || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
+  if (cam || energy > .01 || dragging || Math.abs(fade - target) > .01) raf = requestAnimationFrame(frame);
 }
 const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
 const stir = () => { energy = Math.max(energy, 1); wake(); };
@@ -525,7 +453,6 @@ const release = (e) => {
   if (press.n) { press.n.fx = press.n.fy = null; dragging = false; stir(); }
   if (!press.moved) {                                                 // a click: pick it (or let go, on the background)
     sel = press.n;
-    if (press.n) press.n.ripple = T;
     info(press.n);
     if (press.n) focusOn(press.n);
   }
@@ -590,7 +517,7 @@ function info(n) {
       ? `<div class="gv-opens">${pdf ? `<a class="gv-open" href="${esc(pdf)}" target="_blank" rel="noopener">Open the PDF ↗</a>` : '<span class="gv-m">The PDF isn’t available right now.</span>'}${web ? webLink('Open the web version', !!pdf) : ''}</div>`
       : web ? webLink(`Open the ${g.type === 'guide' ? 'web version' : esc(TYPE[g.type].label.toLowerCase())}`) : '';
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k">${mark(TYPE[g.type].shape, colorOf(n))}${esc(TYPE[g.type].label)}${hasPdf && web ? ' · PDF and web version' : hasPdf ? ' · PDF' : g.type === 'guide' && web ? ' · web version' : ''}</div><h3>${esc(g.payload.title)}</h3>
+      <div class="gv-k">${mark(TYPE[g.type].shape, 'currentColor')}${esc(TYPE[g.type].label)}${hasPdf && web ? ' · PDF and web version' : hasPdf ? ' · PDF' : g.type === 'guide' && web ? ' · web version' : ''}</div><h3>${esc(g.payload.title)}</h3>
       <p class="gv-m">${g.classes.map((c) => `<a href="${courseUrl(c)}">${esc(bySlug[c].name)}</a>`).join(' · ')}${g.teacher ? ` · ${esc(g.teacher)}’s class` : ''}</p>
       ${g.payload.note ? `<p>${esc(g.payload.note)}</p>` : ''}
       <p class="gv-m">${g.payload.author ? `Made by ${esc(g.payload.author)} · shared by ${esc(g.author)}` : `Made by ${esc(g.author)}`}</p>
@@ -598,14 +525,14 @@ function info(n) {
   } else if (n.kind === 'class') {
     const list = current.G.filter((g) => g.classes.includes(n.slug));
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k">${mark('circle', hueOf[n.dept])}${esc(dept[n.dept] || 'Class')}</div><h3>${esc(n.name)}</h3>
+      <div class="gv-k">${esc(dept[n.dept] || 'Class')}</div><h3>${esc(n.name)}</h3>
       <p class="gv-m">${list.length ? count(list) : 'Nothing shared yet.'}</p>
       <a class="gv-open" href="${list.length ? courseUrl(n.slug) + '#s-resources' : `${root}submit/?course=${n.slug}&kind=resource`}">${list.length ? 'Open the class page →' : 'Share the first one →'}</a>`;
   } else {
     const cls = data.courses.filter((c) => c.department === n.slug)
       .map((c) => [c, current.G.filter((g) => g.classes.includes(c.slug)).length]).filter(([, k]) => k).sort((a, b) => b[1] - a[1]);
     card.innerHTML = `<button type="button" class="gv-x" aria-label="Close">✕</button>
-      <div class="gv-k">${mark('circle', hueOf[n.dept])}Subject</div><h3>${esc(n.name)}</h3>
+      <div class="gv-k">Subject</div><h3>${esc(n.name)}</h3>
       <p class="gv-m">${cls.length ? `${count(current.G.filter((g) => g.classes.some((c) => bySlug[c].department === n.slug)))} in ${cls.length} class${cls.length === 1 ? '' : 'es'}` : 'Nothing shared yet.'}</p>
       ${cls.length ? `<p class="gv-m">${cls.map(([c, k]) => `<a href="${courseUrl(c.slug)}#s-resources">${esc(c.name)}</a> (${k})`).join(' · ')}</p>` : ''}`;
   }
@@ -649,13 +576,11 @@ function list() {
 }
 
 // ── wire up ──
-// the legend: a colour per subject on the graph, and a shape chip per kind of resource there is (click to hide or show it)
+// the legend: one plain line, a shape per kind of resource there is (click to hide or show it)
 function legend() {
   const present = TYPES.filter(([k]) => guides.some((g) => typeOf(g) === k));
   const hidden = new Set(opts.hide || []);
-  const shown = new Set((current?.nodes || []).filter((n) => n.kind === 'subject').map((n) => n.dept));
-  $('#gv-legend').innerHTML = `<span class="gv-subs">${data.departments.filter((d) => shown.has(d.slug)).map((d) => `<span><i style="background:${hueOf[d.slug]}"></i>${esc(d.name)}</span>`).join('')}</span>`
-    + `<span class="gv-types">${present.map(([k, label, shp]) => `<button type="button" class="gv-type" data-type="${k}" aria-pressed="${!hidden.has(k)}" title="${hidden.has(k) ? 'Show' : 'Hide'} ${esc(label.toLowerCase())}">${mark(shp, '#d9dadc')}${esc(label)}</button>`).join('')}</span>`;
+  $('#gv-legend').innerHTML = `<span class="gv-types">${present.map(([k, label, shp]) => `<button type="button" class="gv-type" data-type="${k}" aria-pressed="${!hidden.has(k)}" title="${hidden.has(k) ? 'Show' : 'Hide'} ${esc(label.toLowerCase())}">${mark(shp, 'currentColor')}${esc(label)}</button>`).join('')}</span>`;
 }
 $('#gv-legend').addEventListener('click', (e) => {
   const b = e.target.closest('[data-type]'); if (!b) return;
@@ -667,19 +592,18 @@ list();
 panel();
 new ResizeObserver(size).observe(box);
 size();
-draw(!still);                                     // starts folded into its subjects…
+draw();
 legend();
 fit(false);                                       // again, now the legend's height is known
-if (!still) {
-  held = true;                                    // …and blooms out the first time it's on screen
-  const bloom = () => { if (held) { held = false; stir(); } };
-  new IntersectionObserver((es) => {
-    onscreen = es.some((e) => e.isIntersecting);
-    if (onscreen) { bloom(); wake(); }
-  }, { threshold: .25 }).observe(box);
-  setTimeout(bloom, 2500);                        // in case the browser never reports it in view
-  document.addEventListener('visibilitychange', wake);
-}
+// White / Black / Auto (follows the site's night mode), from the bar
+const bgSeg = document.createElement('span');
+bgSeg.className = 'gv-bg'; bgSeg.setAttribute('role', 'group'); bgSeg.setAttribute('aria-label', 'Background');
+const paintBg = () => { bgSeg.innerHTML = [['white', 'White'], ['black', 'Black']].map(([k, l]) => `<button type="button" data-bg="${k}" aria-pressed="${dark() === (k === 'black')}">${l}</button>`).join('');
+  $('#gv-graph').classList.toggle('gv-dark', dark()); $('#gv-graph').classList.toggle('gv-light', !dark()); };
+$('#gv-zoom').before(bgSeg);
+bgSeg.addEventListener('click', (e) => { const b = e.target.closest('[data-bg]'); if (!b) return; opts.bg = b.dataset.bg; save(); palette(); bgFill = P.bg; paintBg(); legend(); wake(); });
+new MutationObserver(() => { if (opts.bg !== 'white' && opts.bg !== 'black') { palette(); paintBg(); legend(); wake(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+paintBg();
 $('#gv-q').addEventListener('input', () => {        // search: dim what doesn't match, don't move anything
   const g = graph($('#gv-q').value), hits = new Map(g.nodes.map((n) => [n.id, n.hit]));
   for (const n of N) n.hit = hits.get(n.id) ?? true;
