@@ -127,54 +127,63 @@ export async function mountBellPage() {
     return null;
   };
 
-  // the countdown in a ring that fills as the period goes; digits that change roll in
-  let lastCount = '';
-  const ring = ([text, label], p) => {
-    const C = 2 * Math.PI * 92, roll = !lessMotion();
-    const digits = [...text].map((ch, i) => `<span class="${roll && lastCount && lastCount[i] !== ch && /\d/.test(ch) ? 'roll' : ''}">${ch}</span>`).join('');
-    lastCount = text;
-    const ticks = Array.from({ length: 60 }, (_, i) => { const a = (i / 60) * Math.PI * 2, r0 = i % 5 ? 101 : 98;
-      return `<line x1="${110 + Math.sin(a) * r0}" y1="${110 - Math.cos(a) * r0}" x2="${110 + Math.sin(a) * 105}" y2="${110 - Math.cos(a) * 105}"/>`; }).join('');
-    return `<div class="bp-ring" role="timer" aria-label="${esc(text)} ${esc(label)}">
-      <svg viewBox="0 0 220 220" aria-hidden="true"><g class="bp-ticks">${ticks}</g><circle class="bp-ring-bg" cx="110" cy="110" r="92"/>
-        <circle class="bp-ring-fg" cx="110" cy="110" r="92" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - Math.max(0, Math.min(1, p)))).toFixed(1)}"/>
-        <circle class="bp-ring-dot" cx="${110 + Math.sin(p * Math.PI * 2) * 92}" cy="${110 - Math.cos(p * Math.PI * 2) * 92}" r="6"/></svg>
-      <p class="bp-count"><span class="bp-digits">${digits}</span><small>${esc(label)}</small></p></div>`;
-  };
-
-  const paintNow = () => {
-    const now = new Date(), plan = dayPlan(bell, now), secs = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    let kicker = esc(dayName(now)), big = '', sub = '', count = '', prog = null, line = '', ringP = 0;
+  // ── the countdown stage (2026-10-23, Ethan: "a very cool countdown … like bell.plus") ──
+  // The top of the page is a dark stage the height of the screen: how long is left in big digits that
+  // roll as they change, what's on now and what's next, and behind them a clock hand sweeping round as
+  // the period passes, the elapsed part shaded. The browser tab shows the countdown too, so it can sit
+  // in a tab all day. Full screen (button or F) turns it into a classroom display and keeps the screen
+  // awake. The last minute turns the digits gold; the bell itself flashes the stage.
+  // Everything runs off the device clock against data/bell.json.
+  const secsOf = (t) => mins(t) * 60;
+  const nowSecs = (d) => d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
+  const atTime = (d, t) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(t.slice(0, 2)), Number(t.slice(3)), 0, 0);
+  const tidy = (label) => label.replace(/^\w+(\/\w+)? · /, '');
+  // what's happening at `now`, to the second
+  const phase = (now) => {
+    const plan = dayPlan(bell, now), s = nowSecs(now);
     if (plan.periods) {
-      kicker += ` · ${esc(plan.label.replace(/^\w+(\/\w+)? · /, ''))}`;
-      const w = where(plan, now);
-      const until = (t) => mins(t) * 60 - secs;
-      if (w.state === 'during') {
-        big = esc(short(w.cur[0])); sub = `${clock(w.cur[1])} – ${clock(w.cur[2])}${/announcements/.test(w.cur[0]) ? ' · with announcements' : ''}`;
-        count = [hms(until(w.cur[2])), 'left'];
-        prog = ringP = (secs - mins(w.cur[1]) * 60) / ((mins(w.cur[2]) - mins(w.cur[1])) * 60);
-        if (w.next) sub += ` · then ${esc(short(w.next[0]))} at ${clock(w.next[1])}`;
-      } else if (w.state === 'passing') {
-        big = 'Passing period'; sub = `${esc(short(w.next[0]))} starts at ${clock(w.next[1])}`; count = [hms(until(w.next[1])), 'to the bell'];
-        const gapA = mins(plan.periods[w.i - 1][2]) * 60, gapB = mins(w.next[1]) * 60; ringP = (secs - gapA) / Math.max(1, gapB - gapA);
-      } else if (w.state === 'before') {
-        big = 'Before school'; sub = `First bell at ${clock(w.next[1])}`; count = [hms(until(w.next[1])), 'to the first bell'];
-        ringP = 1 - Math.min(1, until(w.next[1]) / 3600);                  // the ring fills over the last hour
-      } else {
-        big = 'School’s out';
-        const [d, p] = nextSchoolDay(bell, now);
-        sub = d ? `Next: ${esc(dayName(d))}${p.periods ? ` · ${esc(p.label.replace(/^\w+(\/\w+)? · /, ''))} · first bell ${clock(p.periods[0][1])}` : ''}` : '';
+      const ps = plan.periods;
+      if (s < secsOf(ps[0][1])) return { plan, kind: 'before', name: 'Before school', start: secsOf(ps[0][1]) - 3600, end: secsOf(ps[0][1]), next: ps[0], s };
+      for (let i = 0; i < ps.length; i++) {
+        const a = secsOf(ps[i][1]), b = secsOf(ps[i][2]);
+        if (s >= a && s < b) return { plan, kind: /lunch|brunch/i.test(ps[i][0]) ? 'meal' : 'period', name: short(ps[i][0]), cur: ps[i], i, start: a, end: b, next: ps[i + 1], s };
+        if (ps[i + 1] && s >= b && s < secsOf(ps[i + 1][1])) return { plan, kind: 'passing', name: 'Passing period', i, start: b, end: secsOf(ps[i + 1][1]), next: ps[i + 1], s };
       }
-      line = timeline(plan, now, true);
-    } else {
-      const [d, p] = nextSchoolDay(bell, now);
-      big = plan.adjusted ? 'Adjusted schedule' : plan.off === 'Weekend' ? 'No school today' : esc(plan.off);
-      sub = plan.adjusted ? `${esc(plan.adjusted)}. The school hasn’t posted times. <a href="${esc(bell.source)}" target="_blank" rel="noopener">Official page ↗</a>`
-        : d ? `Back ${esc(dayName(d))}, ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}${p.periods ? ` · first bell ${clock(p.periods[0][1])}` : ''}` : '';
-      if (d && p.periods) line = `<p class="bp-line-h">${esc(dayName(d))} · ${esc(p.label.replace(/^\w+(\/\w+)? · /, ''))}</p>${timeline(p, d, false)}`;
     }
+    // after the last bell, or a day off: count down to the next first bell
+    const [d, p] = nextSchoolDay(bell, now);
+    const to = d && p.periods ? atTime(d, p.periods[0][1]) : null;
+    return { plan, kind: 'off', name: plan.periods ? 'School’s out' : plan.adjusted ? 'Adjusted schedule' : plan.off === 'Weekend' ? 'Weekend' : plan.off,
+             nextDay: d, nextPlan: p, to, s };
+  };
+  const remaining = (ph, now) => (ph.kind === 'off' ? (ph.to ? (ph.to - now) / 1000 : null) : ph.end - ph.s);
+  const fmt = (sec) => {
+    const n = Math.max(0, Math.ceil(sec)), dd = Math.floor(n / 86400), h = Math.floor((n % 86400) / 3600), m = Math.floor((n % 3600) / 60), x = n % 60;
+    return dd ? `${dd}d ${h}:${pad(m)}` : h ? `${h}:${pad(m)}:${pad(x)}` : `${m}:${pad(x)}`;
+  };
+  // digits that change slide down out of their window while the new one drops in, blurred in motion
+  const setDigits = (box, str) => {
+    const pat = str.replace(/\d/g, '0');
+    if (box.dataset.pat !== pat) {
+      box.dataset.pat = pat;
+      box.innerHTML = [...str].map((c) => (/\d/.test(c) ? `<span class="cd-d"><span>${c}</span></span>` : /[a-z]/.test(c) ? `<span class="cd-u">${c}</span>` : `<span class="cd-sep">${c === ' ' ? '&nbsp;' : c}</span>`)).join('');
+      return;
+    }
+    const cells = box.querySelectorAll('.cd-d');
+    let k = 0;
+    for (const c of str) {
+      if (!/\d/.test(c)) continue;
+      const cell = cells[k++], cur = cell.lastElementChild;
+      if (cur.textContent === c) continue;
+      if (lessMotion()) { cur.textContent = c; continue; }
+      const n = document.createElement('span');
+      n.textContent = c; n.className = 'in'; cur.className = 'out';
+      cell.append(n);
+      setTimeout(() => { if (cur.isConnected) cur.remove(); }, 460);
+    }
+  };
+  const factsHtml = (now, plan) => {
     const off = nextOff(now);
-    // the weekend starts at Friday's last bell
     const fri = new Date(now); fri.setHours(12, 0, 0, 0); fri.setDate(fri.getDate() + ((5 - fri.getDay() + 7) % 7));
     const fp = dayPlan(bell, fri), fEnd = new Date(fri);
     if (fp.periods) fEnd.setHours(Number(fp.periods.at(-1)[2].slice(0, 2)), Number(fp.periods.at(-1)[2].slice(3)), 0, 0);
@@ -182,12 +191,81 @@ export async function mountBellPage() {
       : `${Math.floor(toWk / 864e5) ? `${Math.floor(toWk / 864e5)} d ` : ''}${Math.floor((toWk % 864e5) / 36e5)} h ${Math.floor((toWk % 36e5) / 6e4)} min`;
     const facts = [plan.periods ? ['Today ends', clock(plan.periods.at(-1)[2])] : null, ['The weekend', wk === 'Now' ? 'It’s here' : `in ${wk}`],
       off ? ['Next day off', `<a href="${root}calendar/">${off[0].toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${esc(off[1])}</a><small>in ${Math.round((off[0] - new Date(new Date(now).setHours(12, 0, 0, 0))) / 864e5)} days</small>`] : null].filter(Boolean);
-    nowEl.innerHTML = `<div class="bp-now-main"><p class="c-kicker" translate="no">${kicker}</p><h2 class="bp-big">${big}</h2><p class="bp-sub">${sub}</p>
-        ${prog !== null ? `<span class="bp-prog" role="img" aria-label="${Math.round(prog * 100)}% through"><i style="width:${(prog * 100).toFixed(1)}%"></i></span>` : ''}</div>
-      ${count ? ring(count, ringP) : ''}
-      <div class="bp-day">${line}</div>
-      ${facts.length ? `<dl class="bp-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>` : ''}`;
+    return `<dl class="cd-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
   };
+  const subOf = (ph) => {
+    if (ph.kind === 'period' || ph.kind === 'meal') return `${clock(ph.cur[1])} – ${clock(ph.cur[2])}${/announcements/.test(ph.cur[0]) ? ' · with announcements' : ''}${ph.next ? ` · then <b>${esc(short(ph.next[0]))}</b> at ${clock(ph.next[1])}` : ' · the last bell'}`;
+    if (ph.kind === 'passing') return `<b>${esc(short(ph.next[0]))}</b> starts at ${clock(ph.next[1])}`;
+    if (ph.kind === 'before') return `First bell at ${clock(ph.next[1])} · ${esc(short(ph.next[0]))}`;
+    if (ph.plan.adjusted) return `${esc(ph.plan.adjusted)}. The school hasn’t posted times. <a href="${esc(bell.source)}" target="_blank" rel="noopener">Official page ↗</a>`;
+    return ph.nextDay ? `Back ${esc(dayName(ph.nextDay))}, ${ph.nextDay.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}${ph.nextPlan.periods ? ` · first bell ${clock(ph.nextPlan.periods[0][1])}` : ''}` : '';
+  };
+  const unitOf = (ph) => (ph.kind === 'period' || ph.kind === 'meal' ? 'left' : ph.kind === 'passing' ? 'to the bell' : ph.kind === 'before' ? 'to the first bell' : ph.to ? 'to the first bell' : '');
+
+  const baseTitle = document.title;
+  let key = '', lastSec = -1, lastKind = '', wake = null;
+  nowEl.classList.add('cd-host');
+  const build = (ph, now) => {
+    const kicker = `${esc(dayName(now))}${ph.plan.periods ? ` · ${esc(tidy(ph.plan.label))}` : ''}`;
+    nowEl.innerHTML = `<div class="cd" data-kind="${ph.kind}">
+      <div class="cd-sky" aria-hidden="true"><div class="cd-sweep"></div><div class="cd-hand"></div><div class="cd-face"></div></div>
+      <div class="cd-top"><p class="cd-kicker" translate="no">Bell schedule · ${kicker}</p>
+        <button type="button" class="cd-fs" aria-label="Full screen" title="Full screen (F)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Full screen</span></button></div>
+      <div class="cd-mid">
+        <p class="cd-digits" role="timer" aria-live="off"></p>
+        <p class="cd-unit"></p>
+        <h2 class="cd-name">${esc(ph.name)}</h2>
+        <p class="cd-sub">${subOf(ph)}</p>
+      </div>
+      <div class="cd-bot"><div class="cd-day"></div><div class="cd-factsbox"></div></div>
+      <a class="cd-down" href="#bp-week-h" aria-label="The week and every schedule"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    </div>`;
+    $('.cd-fs', nowEl).onclick = toggleFull;
+  };
+  const toggleFull = async () => {
+    const st = $('.cd-host');
+    if (document.fullscreenElement) { await document.exitFullscreen?.(); return; }
+    try { await st.requestFullscreen?.(); } catch { return; }
+    try { wake = await navigator.wakeLock?.request('screen'); } catch { wake = null; }   // keep a classroom screen on
+  };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) { wake?.release?.(); wake = null; } });
+  document.addEventListener('visibilitychange', async () => { if (document.fullscreenElement && document.visibilityState === 'visible' && !wake) { try { wake = await navigator.wakeLock?.request('screen'); } catch { /* fine */ } } });
+  addEventListener('keydown', (e) => {
+    if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey && !/input|textarea|select/i.test(e.target.tagName) && !e.target.isContentEditable) toggleFull();
+  });
+
+  // every frame: the hand and the shaded sweep (smooth, not once a second); every second: the rest
+  const frame = () => {
+    const now = new Date(), ph = phase(now), k = `${ph.kind}|${ph.name}|${ph.plan.key || ph.plan.off || ''}|${iso(now)}`;
+    if (k !== key) {
+      if (key && lastKind && !lessMotion()) nowEl.classList.add('cd-flash');           // the bell
+      setTimeout(() => nowEl.classList.remove('cd-flash'), 1200);
+      key = k; build(ph, now); lastSec = -1;
+    }
+    lastKind = ph.kind;
+    const cd = $('.cd', nowEl), rem = remaining(ph, now);
+    const p = ph.kind === 'off' ? 0 : Math.max(0, Math.min(1, (ph.s - ph.start) / (ph.end - ph.start)));
+    cd.style.setProperty('--p', p.toFixed(5));
+    const sec = Math.floor(ph.s);
+    if (sec !== lastSec) {
+      lastSec = sec;
+      const str = rem == null ? '—' : fmt(rem);
+      setDigits($('.cd-digits', cd), str);
+      $('.cd-unit', cd).textContent = unitOf(ph);
+      $('.cd-digits', cd).setAttribute('aria-label', `${str} ${unitOf(ph)}`);
+      cd.classList.toggle('final', rem != null && rem <= 60 && ph.kind !== 'off');
+      cd.classList.toggle('last10', rem != null && rem <= 10 && ph.kind !== 'off');
+      if (rem != null && rem <= 10 && ph.kind !== 'off') { cd.classList.remove('beat'); void cd.offsetWidth; cd.classList.add('beat'); }
+      document.title = rem == null ? baseTitle : `${str} · ${ph.name} | Wilkipedia`;
+      if (sec % 5 === 0 || !$('.cd-day', cd).innerHTML) {             // the timeline's needle and the facts move slowly
+        const plan = ph.plan.periods ? ph.plan : ph.nextPlan?.periods ? ph.nextPlan : null;
+        $('.cd-day', cd).innerHTML = plan ? `${plan === ph.plan ? '' : `<p class="bp-line-h">${esc(dayName(ph.nextDay))} · ${esc(tidy(plan.label))}</p>`}${timeline(plan, plan === ph.plan ? now : ph.nextDay, plan === ph.plan)}` : '';
+        $('.cd-factsbox', cd).innerHTML = factsHtml(now, ph.plan);
+      }
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
 
   // this week, Monday to Friday (next week from Saturday on)
   const paintWeek = () => {
@@ -221,10 +299,9 @@ export async function mountBellPage() {
     <div class="bp-tables">${['monday', 'odd', 'even'].map(table).join('')}</div>
     <details class="bp-finals"><summary>Finals schedules</summary><div class="bp-tables">${['finals1', 'finals2', 'finals3'].map(table).join('')}</div></details>`;
 
-  paintNow(); paintWeek();
+  paintWeek();
   // phones: the week scrolls sideways, so start it at today (once; after that it's yours)
   const bw = $('.bw', weekEl), td = bw && $('.bw-day.today', bw);
   if (td && bw.scrollWidth > bw.clientWidth) bw.scrollLeft = td.offsetLeft - bw.offsetLeft - 40;
-  setInterval(paintNow, 1000);
   setInterval(paintWeek, 30000);
 }

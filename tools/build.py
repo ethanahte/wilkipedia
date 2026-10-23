@@ -1126,9 +1126,9 @@ def build_static():
 </div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
     page("bell/", "Bell schedule", """
-<header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1></header>
+<h1 class="sr">Bell schedule</h1>
 <section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
-<section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
+<section class="bp-sec"><h2 id="bp-week-h">This week</h2><div id="bp-week"></div></section>
 <section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
 <a class="bp-cal" href="../calendar/"><b>Days off, breaks and finals</b><span>The whole school year, with countdowns, is on the Calendar</span><i aria-hidden="true">→</i></a>
 <p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},

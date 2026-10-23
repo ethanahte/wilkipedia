@@ -143,10 +143,20 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   "what day is it". Don't put countdowns to dates, the school-year bar or the special-days list
   back on the bell page.
   - **Bell schedule page** (`bell/`: `mountBellPage` in bell.js, styles `.bp-*`/`.bw-*`). From
-    data/bell.json. Now: a dark panel with the current period big, a countdown in a clock-face
-    ring (60 ticks, a gold arc for how far through, a dot at now; changed digits roll in, not
-    with reduced motion), the day as a bar with a needle, and facts: today ends, the weekend
-    (to Friday's last bell) and the next day off (links to the Calendar). This week: Mon–Fri,
+    data/bell.json. Now is the **countdown stage** (2026-10-23, Ethan: "a very cool countdown like
+    bell.plus"; replaced the ring panel): full width, a screen tall, always dark. `phase()` works out
+    to the second what's on (period, lunch/brunch = `meal`, passing, before school with the last hour
+    as its span, `off` = after school or a day off, counting to the next first bell; `1d 21:44` past a
+    day). Huge digits that slide/blur in as they change (`setDigits`, per cell, not a rebuild), the
+    unit ("left", "to the bell"), the period name and what's next. Behind: a conic wedge of the
+    elapsed period plus a clock hand at `--p`, set every animation frame, and a ring of 60 ticks.
+    Colour by kind (`--hue`: class gold, meal amber, passing white, before/off dim gold). Last minute:
+    gold digits; last 10 s: a beat per second; when the phase changes (the bell) the stage flashes.
+    The tab title is the countdown ("31:07 · Period 4 | Wilkipedia"). Full screen (button or F) keeps
+    the screen awake (Wake Lock) for a classroom display. The day bar with its needle and the facts
+    (today ends, the weekend, next day off) sit along the bottom. The page `<h1>` is visually
+    hidden; `#main` drops its top padding on this page. To test a time, override `Date` before load
+    (the flow kit's `init` step). This week: Mon–Fri,
     each period a block at its real time over 8:30–4:00 (420px: 56px an hour), today tinted
     with a now-line; on phones it scrolls and starts at today. Every schedule, with one line
     on minutes a week, finals in a fold, then a link to the Calendar.
