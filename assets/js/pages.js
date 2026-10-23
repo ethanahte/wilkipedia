@@ -289,9 +289,13 @@ const pages = {
     const [recent, data] = await Promise.all([s.recent(4), courses()]);
     const name = Object.fromEntries(data.courses.map((c) => [c.slug, c.name]));
     homeGuides(data, name);
-    $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name); return `<a href="${href}">
-      ${esc(KINDS[x.kind].label)}${x.teacher ? ` · ${esc(x.teacher)}` : ''}: <b>${esc(where)}</b>
-      <span class="meta">by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`; }).join('')
+    // What it is leads (a guide's own title, else the class or room); the kind, teacher, who and when
+    // follow as one quiet line (Refactoring UI: labels are a last resort, 2026-10-23)
+    $('#home-recent').innerHTML = recent.map((x) => { const [where, href] = placeOf(x, name);
+      const title = x.kind === 'resource' && x.payload?.title ? x.payload.title : where;
+      const bits = [x.kind === 'resource' && x.payload?.title ? where : KINDS[x.kind].label, x.teacher ? `${x.teacher}’s class` : ''].filter(Boolean).map(esc).join(' · ');
+      return `<a href="${href}"><b>${esc(title)}</b>
+      <span class="meta">${bits} · by ${byline(x.author, x.verified)} · ${ago(x.reviewed_at)}</span></a>`; }).join('')
       || '<div class="meta">Nothing yet. The first pages are being written now.</div>';
   },
 

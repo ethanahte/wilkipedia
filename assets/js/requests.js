@@ -93,7 +93,7 @@ export async function mountRequests(el, s, { course, compact = false } = {}) {
     if (compact) {
       const top = list.filter((r) => r.status === 'open').sort((a, b) => want(b) - want(a)).slice(0, 4);
       const n = document.querySelector('#c-toc [data-sec="requests"] .n'); if (n) n.textContent = open || '—';
-      el.innerHTML = `${top.length ? `<ol class="rq-list">${top.map((r) => row(r, s, names, { showClass: false })).join('')}</ol>` : '<p class="meta">Nobody has asked for anything for this class yet.</p>'}
+      el.innerHTML = `${top.length ? `<ol class="rq-list">${top.map((r) => row(r, s, names, { showClass: false })).join('')}</ol>` : '<p class="rq-empty">Nobody has asked for anything for this class yet. Need a study guide or notes for a unit? Ask, and the people who make guides will see it.</p>'}
         <p class="rq-more"><a class="add-link" href="${root}requests/?course=${encodeURIComponent(course)}#ask">Ask for something →</a>${open > top.length ? ` <a href="${root}requests/?course=${encodeURIComponent(course)}">All ${open} requests</a>` : ''}</p>`;
       return;
     }

@@ -1417,6 +1417,36 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   `~/Wilkipedia-backups/backup.log`, and `--unschedule` turns it off. If the repo
   moves, run `--schedule` again, because the plist stores the script's path.
 
+- **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
+  his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
+  readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
+  - spacing `--sp-1…10` (4 8 12 16 24 32 48 64 96 128), type `--fs-xs…5xl` (12 14 16 18 20 24 30 36 48 60),
+    nine warm greys `--g-50…900` (redefined in night mode so the same names work), nine golds
+    `--y-50…900` (500 = Wilcox gold, 700 = gold as text), shadows `--sh-1…5` (two-part), radii
+    `--r-1/2/3` = 4/6/8px (Ethan: no pills, no bubbles). The old names (--paper, --ink, --muted, --rule,
+    --card, --accent…) now point into the scales; `--faint` is the third, quietest text colour and
+    `--sunk` a ground darker than the page (footer, empty states).
+  - The page is off-white (`--g-50`) and anything raised is a white panel: 8px corners, `--sh-1` plus a
+    hairline ring, no grey border. One selector list in the system makes every card on the site
+    (kind cards, menu days, calendar, inbox, teacher class cards…) the same panel. Lists of guides sit in
+    one panel with rows divided inside.
+  - Hierarchy by weight and colour first: titles serif 600 (page heads) or sans 600 (rows), secondary text
+    `--muted`, tertiary `--faint`. Labels are a last resort: tracked small capitals in `--faint` where
+    they stay; kickers above titles are sentence case in gold-700. `var(--mono)` labels were all routed to
+    `var(--label)` (= sans); `--mono` is only for code.
+  - Links: running text gets a 2px gold underline under the letters; nav, rails, footers and row actions
+    have none until hovered. Buttons have three levels: `.btn` gold and raised, `.btn.ghost` white and
+    raised, and plain words (`.edit`, `.add-link`, with an arrow) for the rest.
+  - Removed labels in markup: class-page guide rows no longer print "Study guide (student-made) · X's
+    class" above every title (the kind shows only when it isn't a study guide; the teacher joins the
+    byline), and home "Recently added" leads with what was added, not "Resource or study guide ·".
+  - Empty states are sunk panels that say what would go here and offer the first step (`.rq-empty`).
+  - Heavy 1–2px ink rules over lists were all softened to `--rule` (fewer borders); section separation
+    is spacing.
+  - **Gotchas:** inputs use `input:where(…)` so component paddings (e.g. the search icon's 42px) still
+    win; the system's wide-screen grid rules are restated for phones in a `max-width: 760px` block and
+    the class rail's tab bar in `max-width: 1000px`. Headings don't set a colour, so headings inside dark
+    panels stay light.
 - **Readability pass (2026-10-20, Ethan: "texts are too close… too text heavy… don't use bubble
   shapes"; leaderboard/profile chips crowded).** The last block of style.css ("Readability pass")
   overrides the older blocks: 17px body at 1.7 line height, quieter meta/hints on shorter lines, tags

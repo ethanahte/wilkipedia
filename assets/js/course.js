@@ -140,11 +140,15 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
     const u = safeUrl(r.payload.url), pdf = r.payload.pdf?.path;
     const title = pdf ? `<a class="gl-title" data-pdf="${esc(pdf)}" href="#" aria-disabled="true" ${ext}>${esc(r.payload.title)}</a>`
       : u ? `<a class="gl-title" href="${esc(u)}" ${ext}>${esc(r.payload.title)}</a>` : `<span class="gl-title">${esc(r.payload.title)}</span>`;
-    const kind = [esc(r.payload.type), r.teacher ? `${esc(r.teacher)}’s class` : ''].filter(Boolean).join(' · ');
-    const who = r.payload.author ? `By ${esc(r.payload.author)} · shared by ${byline(r.author, r.verified)}` : `Made by ${byline(r.author, r.verified)}`;
+    // Labels are a last resort (Refactoring UI, 2026-10-23): no "Study guide (student-made)" line over every
+    // title. The kind is said only when it isn't a study guide, and the teacher joins the byline.
+    const kind = /study guide/i.test(r.payload.type || '') || pdf ? '' : esc(r.payload.type || '');
+    const who = [kind, r.teacher ? `${esc(r.teacher)}’s class` : '',
+      r.payload.author ? `By ${esc(r.payload.author)}` : `By ${byline(r.author, r.verified)}`].filter(Boolean).join(' · ')
+      + (r.payload.author ? ` <span class="gl-by">· shared by ${byline(r.author, r.verified)}</span>` : '');
     const files = [pdf ? `<a data-pdf="${esc(pdf)}" href="#" aria-disabled="true" ${ext}>PDF</a>` : '', u ? `<a href="${esc(u)}" ${ext}>${pdf ? 'Web' : 'Open'}</a>` : ''].filter(Boolean).join('');
     return `<li class="gl-row" data-teacher="${esc(r.teacher || '')}">
-      <div class="gl-text"><p class="gl-kind">${kind}</p>${title}
+      <div class="gl-text">${title}
         ${r.payload.note ? `<p class="gl-note">${esc(r.payload.note)}</p>` : ''}
         <p class="gl-who">${who}${alsoFor(r)}${unpub(r)}</p></div>
       ${files ? `<div class="gl-files">${files}</div>` : ''}</li>`;
