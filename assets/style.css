@@ -3938,3 +3938,8 @@ body:has(#cdx) #main { max-width: none; padding: 0; margin: 0; }
 .bp-cdlink:hover { color: #fff; background: #000; box-shadow: var(--sh-2); }
 :root[data-theme="dark"] .bp-cdlink { background: var(--y-500); color: #111; }
 @media (max-width: 560px) { .bp-head { grid-template-columns: minmax(0, 1fr); } .bp-cdlink { grid-column: 1; grid-row: auto; justify-self: start; margin-top: var(--sp-3); } }
+/* calm: only the figures (bell.js, after a few idle seconds or on entering full screen) */
+.cdx-top, .cdx-now, .cdx-bar, .cdx-grid { transition: opacity .8s ease; }
+.cdx.calm .cdx-top, .cdx.calm .cdx-now, .cdx.calm .cdx-bar, .cdx.calm .cdx-grid { opacity: 0; pointer-events: none; }
+.cdx.calm, .cdx.calm * { cursor: none; }
+@media (prefers-reduced-motion: reduce) { .cdx-top, .cdx-now, .cdx-bar, .cdx-grid { transition: none; } }

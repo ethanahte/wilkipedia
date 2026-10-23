@@ -172,6 +172,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     the figures changing on the second. Black on paper by day, white on black with a gold bar at night
     (Night toggles the site's theme). The last minute turns the figures and bar red (gold at night). The
     tab title is the countdown; full screen (button or F) asks for a Wake Lock. `phaseAt` is the logic.
+    **Calm** (Ethan, "like Spotify"): after 4 s with no pointer, tap, scroll or key (2.5 s in full screen,
+    and at once on entering it) everything but the figures fades out (`.cdx.calm`) and the pointer hides;
+    any input brings it back.
   - **Home page bell strip** (`mountBellStrip`): "Full schedule →" is a link to the bell page;
     it no longer expands in place.
   - **Calendar's school year panel** (`yearPanel` in calendar.js, above Coming up): "Day N of

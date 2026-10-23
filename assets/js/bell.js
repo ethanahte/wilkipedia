@@ -295,6 +295,15 @@ export async function mountCountdown(el) {
   });
   addEventListener('keydown', (e) => { if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) full(); });
   paintTheme();
+  // Calm (Ethan, same day: "like Spotify"): leave it alone for a few seconds, or go full screen, and
+  // everything but the figures fades away and the pointer hides. Any move, tap, scroll or key brings it
+  // all back, and it fades again after the same pause.
+  let idle = 0;
+  const calmIn = () => (document.fullscreenElement ? 2500 : 4000);
+  const stir = () => { el.classList.remove('calm'); clearTimeout(idle); idle = setTimeout(() => el.classList.add('calm'), calmIn()); };
+  for (const ev of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']) addEventListener(ev, stir, { passive: true });
+  document.addEventListener('fullscreenchange', () => { clearTimeout(idle); if (document.fullscreenElement) el.classList.add('calm'); else stir(); });
+  stir();
 
   const tick = () => {
     const now = new Date(), ph = phaseAt(bell, now);
