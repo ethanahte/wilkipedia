@@ -870,6 +870,10 @@ const pages = {
     (await import('./bell.js')).mountBellPage();
   },
 
+  async countdown() {
+    (await import('./bell.js')).mountCountdown($('#cdx'));
+  },
+
   async sat() {
     (await import('./sat.js')).mountSat(s);
   },

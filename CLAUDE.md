@@ -160,6 +160,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     each period a block at its real time over 8:30–4:00 (420px: 56px an hour), today tinted
     with a now-line; on phones it scrolls and starts at today. Every schedule, with one line
     on minutes a week, finals in a fold, then a link to the Calendar.
+  - **Countdown page** (`bell/countdown/`, `mountCountdown` in bell.js, styles `.cdx-*`; Ethan 2026-10-23:
+    "simple, Swiss design, immersive… keep the previous page, this is just another function"). A first
+    try that replaced the bell page's Now panel with a dark animated stage was reverted the same day;
+    the bell page is unchanged apart from an "Open the countdown →" button in its header. The countdown
+    is its own page with the site header, footer, notices and floating buttons hidden (`body:has(#cdx)`):
+    a four-column grid, Helvetica, flush left; the top line (school · date and schedule · Full screen /
+    Night / Close), what's on now with "65% through", the figures as big as the window allows (sized by
+    their length, `--len`, so `1d 21:44` never overflows), one bar that fills, and four facts (Started /
+    Ends / Next / School ends; other sets for passing, before school and days off). No animation beyond
+    the figures changing on the second. Black on paper by day, white on black with a gold bar at night
+    (Night toggles the site's theme). The last minute turns the figures and bar red (gold at night). The
+    tab title is the countdown; full screen (button or F) asks for a Wake Lock. `phaseAt` is the logic.
   - **Home page bell strip** (`mountBellStrip`): "Full schedule →" is a link to the bell page;
     it no longer expands in place.
   - **Calendar's school year panel** (`yearPanel` in calendar.js, above Coming up): "Day N of

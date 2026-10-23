@@ -1126,13 +1126,20 @@ def build_static():
 </div>""", data={"page": "feedback"},
          desc="Send the Wilkipedia team an idea, a bug report or a feature request.")
     page("bell/", "Bell schedule", """
-<h1 class="sr">Bell schedule</h1>
+<header class="cl-head bp-head"><p class="c-kicker">Wilcox High School · 2026–27</p><h1>Bell schedule</h1>
+  <a class="bp-cdlink" href="countdown/">Open the countdown <span aria-hidden="true">→</span></a></header>
 <section id="bp-now" class="bp-now" aria-label="Right now"><div class="meta">Loading…</div></section>
-<section class="bp-sec"><h2 id="bp-week-h">This week</h2><div id="bp-week"></div></section>
+<section class="bp-sec"><h2>This week</h2><div id="bp-week"></div></section>
 <section class="bp-sec"><h2>Every schedule</h2><p class="sec-sub">Mondays run all seven periods. Tuesdays and Thursdays are odd-period block days, Wednesdays and Fridays even.</p><div id="bp-all"></div></section>
 <a class="bp-cal" href="../calendar/"><b>Days off, breaks and finals</b><span>The whole school year, with countdowns, is on the Calendar</span><i aria-hidden="true">→</i></a>
 <p class="c-src">From the <a href="https://wilcox.santaclarausd.org/about/bell-schedule" target="_blank" rel="noopener">official Wilcox bell schedule ↗</a> and the school’s activities calendar. Times are your device’s clock. Schedules can change: when in doubt, trust the school.</p>""", active="bell/", data={"page": "bell"},
          desc="Wilcox High School bell schedule: period times for Monday, block days, finals and special days.")
+
+    # The countdown (Ethan 2026-10-23): its own full-window page, Swiss style; the bell page is unchanged
+    page("bell/countdown/", "Countdown", """
+<h1 class="sr">Bell countdown</h1>
+<div class="cdx" id="cdx"><p class="meta">Loading…</p></div>""", active="bell/", data={"page": "countdown"},
+         desc="How long is left in the current period at Wilcox High School, as a full-screen countdown.")
 
     # "By the numbers" was retired (its a–g chart moved to All classes, its coverage
     # chart to Contribute); the old address forwards to the a–g chart.
