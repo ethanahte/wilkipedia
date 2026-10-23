@@ -223,7 +223,7 @@ function radius(n) {
     : 5.6) * opts.size;
 }
 // how big a dot is drawn: never smaller than a few screen pixels, so the far-out view stays legible
-const drawR = (n) => Math.max(n.r, (n.kind === 'subject' ? 7 : n.kind === 'class' ? 4 : 2.6) / view.k);
+const drawR = (n) => Math.max(n.r, (n.kind === 'subject' ? 7 : n.kind === 'class' ? 4 : 2.6) * Math.min(1, opts.size) / view.k);   // the floor shrinks with Node size too
 
 const colorOf = (n) => (n.kind === 'guide' ? P.soft : n.kind === 'class' && n.has === false ? P.faint : P.ink);
 
@@ -501,7 +501,7 @@ function panel() {
   const tg = (k, label) => `<label class="gv-tg"><span>${label}</span><span class="tgl"><input type="checkbox" data-k="${k}" ${opts[k] ? 'checked' : ''}><span aria-hidden="true"></span></span></label>`;
   $('#gv-panel').innerHTML = `
     <details open><summary>Filters</summary>${tg('orphans', 'Classes without guides')}</details>
-    <details><summary>Display</summary>${sl('labels', 'Text fade threshold', .4, 3, .1)}${sl('size', 'Node size', .5, 2, .1)}${sl('thick', 'Link thickness', .5, 3, .1)}${sl('spread', 'Spacing', .7, 1.8, .05)}</details>
+    <details><summary>Display</summary>${sl('labels', 'Text fade threshold', .4, 3, .1)}${sl('size', 'Node size', .15, 2, .05)}${sl('thick', 'Link thickness', .5, 3, .1)}${sl('spread', 'Spacing', .7, 1.8, .05)}</details>
     <button type="button" class="gv-animate" id="gv-animate">Animate</button>`;
 }
 
@@ -609,7 +609,13 @@ $('#gv-q').addEventListener('input', () => {        // search: dim what doesn't 
   for (const n of N) n.hit = hits.get(n.id) ?? true;
   wake();
 });
-$('#gv-gear').addEventListener('click', () => { const p = $('#gv-panel'); p.hidden = !p.hidden; $('#gv-gear').setAttribute('aria-expanded', String(!p.hidden)); });
+const setPanel = (open) => { $('#gv-panel').hidden = !open; $('#gv-gear').setAttribute('aria-expanded', String(open)); };
+$('#gv-gear').addEventListener('click', () => setPanel($('#gv-panel').hidden));
+// the settings close on a click anywhere else (the graph included) or Escape, not only on the gear (Ethan)
+document.addEventListener('pointerdown', (e) => {
+  if (!$('#gv-panel').hidden && !e.target.closest('#gv-panel, #gv-gear')) setPanel(false);
+}, true);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#gv-panel').hidden) { setPanel(false); $('#gv-gear').focus(); } });
 $('#gv-panel').addEventListener('input', (e) => {
   const k = e.target.dataset.k; if (!k) return;
   opts[k] = e.target.type === 'checkbox' ? e.target.checked : Number(e.target.value);

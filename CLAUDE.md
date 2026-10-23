@@ -455,6 +455,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     and a hairline; every control is a word (underline search, White / Black, + − fit, gear); settings and
     the info card are flat sheets with a rule on top. The legend is one line of shapes. Styles: the
     "Study guides graph, Swiss" block at the end of style.css (vars `--gx-*`).
+    The settings panel closes on any click outside it and the gear (the graph included) or Escape
+    (`setPanel`). Node size goes down to 0.15, and the minimum on-screen dot size shrinks with it
+    (`drawR`), so dots can be pinpricks.
   - Links (Ethan, 2026-09-28): hubs only, three tiers: subject area (department) → class → every guide or
     resource for that class. No keyword or prerequisite links. Guides get no text tag (Jonathan, decided
     2026-09-29): pointing at a guide lights up its classes. The list below the graph is the accessible version.
