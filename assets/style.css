@@ -3520,7 +3520,8 @@ input:where(:not([type="checkbox"], [type="radio"], [type="range"])), select, te
 input:where(:not([type="checkbox"], [type="radio"], [type="range"])):hover, select:hover, textarea:hover { border-color: var(--g-400); }
 input:where(:focus), select:where(:focus), textarea:where(:focus) { outline: none; border-color: var(--y-600); box-shadow: 0 0 0 3px color-mix(in srgb, var(--y-400) 40%, transparent); }
 ::placeholder { color: var(--g-400); }
-.field label, .rq-f > span { font-size: var(--fs-sm); font-weight: 600; color: var(--g-700); }
+.field label, .rq-f > span:not(.combo) { font-size: var(--fs-sm); font-weight: 600; color: var(--g-700); }
+input, select, textarea { font-weight: 400; }
 
 /* ── the header: black, the gold only where you are ── */
 header.site { border-bottom: 0; box-shadow: inset 0 -3px 0 var(--y-500); }
@@ -3825,3 +3826,53 @@ legend { margin-bottom: var(--sp-3); }
   .c-toc a { border-left: 0; padding: var(--sp-3) 0; }
   .c-toc a[aria-current] { box-shadow: inset 0 -3px var(--y-500); }
 }
+
+/* ══ Interactions (2026-10-23, Ethan picked five from rareui.com; our own versions, no React) ══ */
+/* reading progress: the header's gold line as a gauge on long pages (ui.js mountReadBar) */
+header.site.reading { box-shadow: none; }
+.read-bar { display: none; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; pointer-events: none;
+  background: color-mix(in srgb, var(--y-500) 26%, #1a1916); }
+header.site.reading .read-bar { display: block; }
+.read-bar i { display: block; height: 100%; background: var(--y-500); transform-origin: left center; transform: scaleX(0); will-change: transform; }
+
+/* the class rail: a gold marker rides the line to the section you're reading; passed sections fill in */
+@media (min-width: 1001px) {
+  .c-toc { position: relative; --mark: 0px; }
+  .c-toc a { border-left-color: transparent !important; }
+  .c-toc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--g-200); }
+  .toc-fill { position: absolute; left: 0; top: 0; width: 2px; height: var(--mark); background: var(--y-500); transition: height .5s cubic-bezier(.3, 1.25, .5, 1); }
+  .toc-mark { position: absolute; left: -4px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--y-500);
+    box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px color-mix(in srgb, var(--y-600) 50%, transparent);
+    transform: translateY(calc(var(--mark) - 5px)); transition: transform .5s cubic-bezier(.3, 1.35, .5, 1); }
+  .c-toc a.passed { color: var(--g-700); }
+}
+@media (max-width: 1000px) { .toc-fill, .toc-mark { display: none; } }
+
+/* rolling numbers (ui.js roll / rollAll) */
+.odo { display: inline-flex; height: 1.2em; line-height: 1.2em; vertical-align: -.25em; overflow: hidden; font-variant-numeric: tabular-nums;
+  -webkit-mask-image: linear-gradient(transparent, #000 24%, #000 76%, transparent); mask-image: linear-gradient(transparent, #000 24%, #000 76%, transparent); }
+.odo-w { display: inline-block; height: 1.2em; overflow: hidden; }
+.odo-s { display: flex; flex-direction: column; transition: transform .75s cubic-bezier(.2, .9, .25, 1.06); }
+.odo-s > span { display: block; height: 1.2em; text-align: center; }
+
+/* the bell: swings when something new lands (harder for several), the badge rolls */
+@keyframes bell-swing { 0% { transform: rotate(0); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-13deg); } 45% { transform: rotate(9deg); }
+  60% { transform: rotate(-6deg); } 75% { transform: rotate(3deg); } 100% { transform: rotate(0); } }
+@keyframes bell-swing-hard { 0% { transform: rotate(0); } 12% { transform: rotate(26deg); } 26% { transform: rotate(-22deg); } 40% { transform: rotate(16deg); }
+  54% { transform: rotate(-11deg); } 68% { transform: rotate(6deg); } 84% { transform: rotate(-2deg); } 100% { transform: rotate(0); } }
+.inbox-btn.ring svg { transform-origin: 50% 3px; animation: bell-swing .9s cubic-bezier(.36, .07, .19, .97); }
+.inbox-btn.ring-hard svg { animation: bell-swing-hard 1.2s cubic-bezier(.36, .07, .19, .97); }
+.inbox-btn.ring .bell-n { animation: bell-pop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes bell-pop { from { transform: scale(.4); } to { transform: scale(1); } }
+
+/* delete in place: the button opens into "Yes, delete · Cancel" where it stood */
+.inc { display: inline-flex; align-items: center; gap: var(--sp-2); vertical-align: baseline; white-space: nowrap; overflow: hidden;
+  max-width: 0; opacity: 0; transition: max-width .3s cubic-bezier(.2, .9, .3, 1), opacity .2s; }
+.inc.in { max-width: 420px; opacity: 1; }
+.inc-q { font-size: var(--fs-xs); color: var(--muted); }
+.inc button { border: 0; border-radius: var(--r-1); padding: 3px 9px; font: 600 var(--fs-xs)/1.4 var(--sans); cursor: pointer; }
+.inc-yes { background: var(--bad); color: #fff; }
+.inc-yes:hover { filter: brightness(1.08); }
+.inc-no { background: var(--g-100); color: var(--g-800); }
+.inc-no:hover { background: var(--g-200); }
+@media (prefers-reduced-motion: reduce) { .inc { transition: none; } .toc-fill, .toc-mark, .odo-s { transition: none; } .inbox-btn.ring svg, .inbox-btn.ring .bell-n { animation: none; } }

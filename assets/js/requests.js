@@ -3,7 +3,7 @@
 // both the Requests page (requests/) and the short "Students are asking for" list on a class page.
 // Data: store.requests / addRequest / voteRequest / setRequest / deleteRequest (migration 024).
 
-import { $, $$, esc, root, courses, courseUrl, byline, ago, guard, toast, requireUser, popconfirm, openBountyEditor } from './ui.js';
+import { $, $$, esc, root, courses, courseUrl, byline, ago, guard, toast, requireUser, popconfirm, openBountyEditor, rollAll } from './ui.js';
 import { REVIEWER_ROLES } from './store.js';
 
 export const REQ_KINDS = [['guide', 'Study guide'], ['practice', 'Practice problems'], ['notes', 'Notes'],
@@ -37,7 +37,7 @@ function row(r, s, names, { showClass = true } = {}) {
   const done = r.status === 'done' && (r.done_note || r.done_link)
     ? `<p class="rq-done">${r.done_note ? esc(r.done_note) : 'Made.'}${r.done_link ? ` <a href="${esc(r.done_link)}"${/^https?:/.test(r.done_link) ? ' target="_blank" rel="noopener nofollow"' : ''}>Open it →</a>` : ''}</p>` : '';
   return `<li class="rq-row${r.status === 'done' ? ' is-done' : ''}" data-rid="${r.id}">
-    <div class="rq-want"><b>${want(r)}</b><span>${want(r) === 1 ? 'wants' : 'want'} this</span>
+    <div class="rq-want"><b data-roll-key="rq:${r.id}">${want(r)}</b><span>${want(r) === 1 ? 'wants' : 'want'} this</span>
       ${r.status === 'open' ? (mine ? '<span class="rq-you">You asked</span>'
         : `<button type="button" class="rq-vote" data-rq="vote" aria-pressed="${r.voted}">${r.voted ? 'Me too ✓' : 'Me too'}</button>`) : ''}</div>
     <div class="rq-main"><p class="rq-body">${esc(r.body)}</p>
@@ -95,6 +95,7 @@ export async function mountRequests(el, s, { course, compact = false } = {}) {
       const n = document.querySelector('#c-toc [data-sec="requests"] .n'); if (n) n.textContent = open || '—';
       el.innerHTML = `${top.length ? `<ol class="rq-list">${top.map((r) => row(r, s, names, { showClass: false })).join('')}</ol>` : '<p class="rq-empty">Nobody has asked for anything for this class yet. Need a study guide or notes for a unit? Ask, and the people who make guides will see it.</p>'}
         <p class="rq-more"><a class="add-link" href="${root}requests/?course=${encodeURIComponent(course)}#ask">Ask for something →</a>${open > top.length ? ` <a href="${root}requests/?course=${encodeURIComponent(course)}">All ${open} requests</a>` : ''}</p>`;
+      rollAll(el);
       return;
     }
     const rows = sorted().filter((r) => !q || `${r.body} ${names[r.course_slug] || 'whole school'} ${KIND[r.kind]} ${r.teacher || ''}`.toLowerCase().includes(q));
@@ -102,6 +103,7 @@ export async function mountRequests(el, s, { course, compact = false } = {}) {
     $('#rq-list', el).innerHTML = rows.length ? rows.map((r) => row(r, s, names)).join('')
       : `<li class="rq-empty">${q ? 'Nothing matches that.' : view === 'done' ? 'Nothing done yet.' : 'No requests yet. Be the first to ask.'}</li>`;
     $('#rq-count', el).textContent = `${open} open · ${doneN} done`;
+    rollAll(el);
     $$('#rq-tabs .vtab', el).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === view)));
   };
 
@@ -167,7 +169,7 @@ export async function mountRequests(el, s, { course, compact = false } = {}) {
     if (act === 'publish' && await guard(() => s.setRequest(rid, { status: 'open' }), 'Published.')) return load();
     if (act === 'hide' && await guard(() => s.setRequest(rid, { status: 'hidden' }), 'Hidden.')) return load();
     if (act === 'delete') {
-      if (!(await popconfirm(b, { title: 'Delete this request?', text: 'Its “Me too”s go with it.', key: 'request-delete' }))) return;
+      if (!(await popconfirm(b, { title: 'Delete this request?', key: 'request-delete', inline: true }))) return;
       if (await guard(() => s.deleteRequest(rid), 'Deleted.')) load();
       return;
     }

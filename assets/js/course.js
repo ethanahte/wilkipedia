@@ -193,13 +193,27 @@ async function draw(reuse = false) {             // reuse: just redraw (switchin
   spy();
 }
 
-// The side index marks the section you're reading
+// The side index marks the section you're reading. On wide screens a gold marker rides the rail to
+// it and the rail fills in behind (2026-10-23, after Rare UI's Rail TOC): the sections you've passed
+// are solid gold and darker text, the rest stay a quiet grey line. Clicking a name still jumps there.
 function spy() {
   const secs = [...document.querySelectorAll('.c-main > .c-sec:not([hidden])')];
+  const toc = $('#c-toc');
+  if (toc && !$('.toc-fill', toc)) toc.insertAdjacentHTML('afterbegin', '<i class="toc-fill" aria-hidden="true"></i><i class="toc-mark" aria-hidden="true"></i>');
   const mark = () => {
     const at = innerHeight + scrollY >= document.documentElement.scrollHeight - 4 ? secs.at(-1)
       : secs.filter((x) => x.getBoundingClientRect().top < 160).at(-1) || secs[0];
-    document.querySelectorAll('#c-toc a').forEach((a) => a.toggleAttribute('aria-current', a.getAttribute('href') === `#${at?.id}`));
+    let past = true, cur = null;
+    document.querySelectorAll('#c-toc a').forEach((a) => {
+      const on = a.getAttribute('href') === `#${at?.id}`;
+      a.toggleAttribute('aria-current', on);
+      if (on) { cur = a; past = false; }
+      a.classList.toggle('passed', past && !on);
+    });
+    if (toc && cur) {
+      const y = cur.offsetTop + cur.offsetHeight / 2;
+      toc.style.setProperty('--mark', `${y}px`);
+    }
   };
   spy.mark = mark;
   mark();

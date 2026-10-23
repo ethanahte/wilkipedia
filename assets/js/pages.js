@@ -1,7 +1,7 @@
 // Every page that isn't a course page, the bounty board, the submit form or the
 // review desk. Each page names itself in its #page-data block.
 
-import { safeUrl, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
+import { safeUrl, rollAll, popconfirm, confirmSkips, resetConfirms, toast, showResult, lessMotion, initHeader, courses, dataUrl, placeOf, slugify, drafts, openEditor, suggestLink, $, $$, esc, badge, byline, prose, fmtDate, ago, guard, courseUrl, roleLabel, root,
          avatarHtml, AVATARS, AVATAR_COLORS, themePref, setThemePref,
          CLASS_COLORS, classColorOf, classPref, applyClassTheme, classChip, getPref, setPref, paintAnnouncements, collectSchedules, scheduleBlock, classLinker,
          cookiePrefs, setCookiePrefs, storedKeys, storeGroup , personFacts} from './ui.js';
@@ -409,16 +409,17 @@ const pages = {
         app.innerHTML = `<div class="vtabs lb-tabs" role="group" aria-label="Show"><button type="button" class="vtab" data-lb="points" aria-pressed="${key === 'points'}">All time</button>
             <button type="button" class="vtab" data-lb="semester_points" aria-pressed="${key === 'semester_points'}">This semester</button></div>
           ${sorted.length ? `<ol class="lb-podium">${order.map(({ r, place }) => `<li class="p${place}${r.id === me.id ? ' me' : ''}">${avatarHtml(r, 'lg')}
-              <b>${esc(r.display_name)}</b>${personFacts({ role: r.role, grad_year: r.grad_year, school: r.school_verified })}<span class="lb-pts">${r[key]}<small>pts</small></span><span class="lb-step"><i>${place}</i></span></li>`).join('')}</ol>
+              <b>${esc(r.display_name)}</b>${personFacts({ role: r.role, grad_year: r.grad_year, school: r.school_verified })}<span class="lb-pts"><span data-roll-key="lb:${key}:${r.id}" data-roll-from="0">${r[key]}</span><small>pts</small></span><span class="lb-step"><i>${place}</i></span></li>`).join('')}</ol>
             ${rest.length ? `<ol class="lb-list" start="4">${rest.map((r, i) => `<li class="${r.id === me.id ? 'me' : ''}"><span class="lb-n">${i + 4}</span>
               <span class="lb-who">${avatarHtml(r)}<span class="lb-id"><b>${esc(r.display_name)}</b>${personFacts({ role: r.role, grad_year: r.grad_year, school: r.school_verified })}</span></span>
-              <span class="lb-bar"><i style="width:${((r[key] / most) * 100).toFixed(1)}%"></i></span><span class="lb-meta">${r.approved} approved</span><b class="lb-p">${r[key]}</b></li>`).join('')}</ol>` : ''}
+              <span class="lb-bar"><i style="width:${((r[key] / most) * 100).toFixed(1)}%"></i></span><span class="lb-meta">${r.approved} approved</span><b class="lb-p" data-roll-key="lbl:${key}:${r.id}" data-roll-from="0">${r[key]}</b></li>`).join('')}</ol>` : ''}
             <p class="lb-you">${mine >= 0 ? `You’re <b>#${mine + 1}</b> with ${sorted[mine][key]} points.` : me.show_on_leaderboard === false ? 'You’ve hidden yourself from the leaderboard.' : 'You’re not on the board yet: your first approved post puts you here.'}
               <a href="${root}bounties/">Find a bounty →</a></p>`
             : '<p class="empty-line">No points yet. <a href="../bounties/">Claim the first bounty</a>.</p>'}`;
       };
       paint();
-      app.onclick = (e) => { const b = e.target.closest('[data-lb]'); if (b) { key = b.dataset.lb; paint(); } };
+      rollAll(app);
+      app.onclick = (e) => { const b = e.target.closest('[data-lb]'); if (b) { key = b.dataset.lb; paint(); rollAll(app); } };
     };
     s.onAuth(draw);
     await draw();

@@ -3,7 +3,7 @@
 // #comment-form (#replying, #cancel-reply, #comment-prompt, #comment-body) and #comment-list.
 // The same rules everywhere: new members' comments wait for a reviewer (on_comment_insert).
 
-import { popconfirm, requireUser, drafts, $, esc, byline, avatarHtml, prose, ago, guard, toast } from './ui.js';
+import { popconfirm, requireUser, drafts, $, esc, byline, avatarHtml, prose, ago, guard, toast, rollAll } from './ui.js';
 import { REVIEWER_ROLES } from './store.js';
 
 // `onCount(n)` gets the number of visible comments after each draw
@@ -23,7 +23,7 @@ export function mountComments(s, { slug, prompts, empty, onCount = () => {} }) {
           ${c.status === 'hidden' ? '<span class="tag warn">Hidden (reported)</span>' : ''}</div>
         <div class="c-body">${prose(c.body)}</div>
         <div class="c-actions">
-          <button class="linkish" data-like="${c.id}" aria-pressed="${c.liked}">${c.liked ? '♥' : '♡'} ${c.likes || ''}</button>
+          <button class="linkish" data-like="${c.id}" aria-pressed="${c.liked}">${c.liked ? '♥' : '♡'} <span data-roll-key="like:${c.id}">${c.likes || ''}</span></button>
           ${reply ? '' : `<button class="linkish" data-reply="${c.id}">Reply</button>`}
           ${me && (me.id === c.user_id || mod) ? `<button class="linkish" data-del="${c.id}">Delete</button>` : ''}
           ${me && me.id !== c.user_id ? `<button class="linkish" data-flag="${c.id}">Report</button>` : ''}
@@ -31,6 +31,7 @@ export function mountComments(s, { slug, prompts, empty, onCount = () => {} }) {
         ${reply ? '' : all.filter((r) => r.parent_id === c.id).map((r) => one(r, true)).join('')}
       </div>`;
     list.innerHTML = top.length ? top.map((c) => one(c)).join('') : `<div class="empty">${esc(empty)}</div>`;
+    rollAll(list);                                  // a like you just gave rolls up
     onCount(all.filter((c) => c.status === 'visible' || !c.status).length);
   }
 
@@ -73,7 +74,7 @@ export function mountComments(s, { slug, prompts, empty, onCount = () => {} }) {
       $('#replying').hidden = false;
       $('#comment-body').focus();
     } else if (t.dataset.del) {
-      if (!(await popconfirm(t, { title: 'Delete this comment?', ok: 'Delete', key: 'comment-delete' }))) return;
+      if (!(await popconfirm(t, { title: 'Delete this comment?', ok: 'Delete', key: 'comment-delete', inline: true }))) return;
       await guard(() => s.deleteComment(Number(t.dataset.del)), 'Deleted.');
       draw();
     } else if (t.dataset.flag) {

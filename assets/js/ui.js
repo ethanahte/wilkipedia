@@ -115,10 +115,12 @@ export const confirmSkips = () => { try { return JSON.parse(localStorage.getItem
 export const resetConfirms = () => { try { localStorage.removeItem(NOASK); } catch { /* storage blocked */ } };
 let lastPress = null, lastPressAt = 0;                  // the button just pressed, when the caller can't say
 document.addEventListener('pointerdown', (e) => { lastPress = e.target.closest?.('button, a, select, [role="button"]') || null; lastPressAt = Date.now(); }, true);
-export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = 'Cancel', danger = true, key = null } = {}) {
+export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = 'Cancel', danger = true, key = null, inline = false } = {}) {
   if (key && confirmSkips().includes(key)) return Promise.resolve(true);
   document.querySelector('.popc')?.dispatchEvent(new Event('popc-cancel'));
+  document.querySelector('.inc')?.dispatchEvent(new Event('popc-cancel'));
   anchor = anchor?.isConnected ? anchor : lastPress?.isConnected ? lastPress : document.activeElement !== document.body ? document.activeElement : null;
+  if (inline && anchor) return confirmInPlace(anchor, { title, ok, cancel });
   return new Promise((resolve) => {
     const el = document.createElement('div'), uid = `popc-${Date.now()}`;
     el.className = 'popc';
@@ -176,6 +178,73 @@ export function popconfirm(anchor, { title, text = '', ok = 'Delete', cancel = '
     $('[data-yes]', el).onclick = () => done(true);
     $(danger ? '[data-no]' : '[data-yes]', el).focus({ preventScroll: true });   // Enter on a danger bubble never deletes by accident
   });
+}
+
+// The small, quick version (2026-10-23, after Rare UI's delete button): for a one-line "Delete?" the
+// button itself opens into "Yes, delete · Cancel" right where it was, instead of a bubble. Escape, a
+// click elsewhere or Cancel backs out and puts the button back. popconfirm(…, { inline: true }) uses it.
+function confirmInPlace(anchor, { title, ok, cancel }) {
+  return new Promise((resolve) => {
+    const g = document.createElement('span');
+    g.className = 'inc';
+    g.setAttribute('role', 'group');
+    g.setAttribute('aria-label', title);
+    g.innerHTML = '<span class="inc-q"></span><button type="button" class="inc-yes"></button><button type="button" class="inc-no"></button>';
+    $('.inc-q', g).textContent = title;
+    $('.inc-yes', g).textContent = ok === 'Delete' ? 'Yes, delete' : ok;
+    $('.inc-no', g).textContent = cancel;
+    anchor.hidden = true;
+    anchor.after(g);
+    requestAnimationFrame(() => g.classList.add('in'));
+    const done = (v) => {
+      document.removeEventListener('keydown', onKey, true); document.removeEventListener('pointerdown', onOut, true);
+      g.remove(); anchor.hidden = false;
+      if (!v) anchor.focus?.({ preventScroll: true });
+      resolve(v);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
+    const onOut = (e) => { if (!g.contains(e.target)) done(false); };
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(() => document.addEventListener('pointerdown', onOut, true));
+    g.addEventListener('popc-cancel', () => done(false));
+    $('.inc-yes', g).onclick = () => done(true);
+    $('.inc-no', g).onclick = () => done(false);
+    $('.inc-no', g).focus({ preventScroll: true });               // Enter never deletes by accident
+  });
+}
+
+// ── rolling numbers (2026-10-23, after Rare UI's animated counter) ──
+// A number that changes rolls to its new value on a wheel of digits, like an odometer, fading at the
+// top and bottom of each window. Lists here are redrawn with innerHTML, so the last value shown for
+// each thing is remembered by key: give the element data-roll-key="…" (and data-roll-from="0" to count
+// up the first time it shows) and call rollAll(container) after drawing. Screen readers get the
+// plain number; with reduced motion it just changes.
+const rolled = new Map();
+const WHEEL = ['', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+export function roll(el, value, from) {
+  if (!el) return;
+  const to = String(value);
+  if (lessMotion() || from == null || String(from) === to || !/^[\d,]+$/.test(to) || !/^[\d,]*$/.test(String(from))) { el.textContent = to; return; }
+  const f = String(from).padStart(to.length, ' ').slice(-to.length);
+  const idx = (c) => Math.max(0, WHEEL.indexOf(c === ' ' ? '' : c));
+  el.innerHTML = `<span class="odo" aria-hidden="true">${[...to].map((c, i) => (c === ',' ? '<span class="odo-c">,</span>'
+    : `<span class="odo-w"><span class="odo-s" style="transform:translateY(${-idx(f[i]) * 1.2}em)">${WHEEL.map((d) => `<span>${d || '&nbsp;'}</span>`).join('')}</span></span>`)).join('')}</span><span class="sr"></span>`;
+  $('.sr', el).textContent = to;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    [...el.querySelectorAll('.odo-s')].forEach((st, i) => { st.style.transitionDelay = `${i * 40}ms`; });
+    let k = 0;
+    [...to].forEach((c) => { if (c === ',') return; const st = el.querySelectorAll('.odo-s')[k++]; if (st) st.style.transform = `translateY(${-idx(c) * 1.2}em)`; });
+  }));
+  clearTimeout(el._roll);
+  el._roll = setTimeout(() => { if (el.isConnected && $('.sr', el)?.textContent === to) el.textContent = to; }, 1400);   // settle back to plain text
+}
+export function rollAll(root = document) {
+  for (const el of root.querySelectorAll('[data-roll-key]')) {
+    const k = el.dataset.rollKey, to = el.textContent.trim();
+    const from = rolled.has(k) ? rolled.get(k) : el.dataset.rollFrom;
+    rolled.set(k, to);
+    roll(el, to, from);
+  }
 }
 
 // Runs fn, toasting any error. Resolves to fn's result (or true) on success and
@@ -291,8 +360,17 @@ export function setNoteCount(n) {
   const b = $('.auth .bell-n'), bell = $('.auth .inbox-btn'), m = $('.auth [data-n="notes"]');
   if (m) { m.textContent = n > 99 ? '99+' : n || ''; m.hidden = !n; }
   if (!b) return;
+  // More than you last saw: the bell swings and the count rolls up (after Rare UI's notification bell)
+  let seen = 0;
+  try { seen = Number(localStorage.getItem('wilkipedia-bell-seen')) || 0; localStorage.setItem('wilkipedia-bell-seen', String(n || 0)); } catch { /* storage blocked */ }
   b.hidden = !n;
-  b.textContent = n > 9 ? '9+' : n || '';
+  const shown = n > 9 ? '9+' : n || '';
+  if (n > seen && !lessMotion()) {
+    roll(b, shown, seen > 9 ? '9+' : String(seen || ''));
+    bell.classList.remove('ring'); void bell.offsetWidth; bell.classList.add('ring');
+    bell.classList.toggle('ring-hard', n - seen >= 3);              // a few at once: it swings harder
+    setTimeout(() => bell.classList.remove('ring', 'ring-hard'), 1400);
+  } else b.textContent = shown;
   bell.title = n ? `Dashboard · ${n} new` : 'Dashboard';
   bell.setAttribute('aria-label', bell.title);
 }
@@ -636,6 +714,40 @@ function termsGate(s, u) {
 }
 
 // ── header ──
+// Reading progress (2026-10-23, after Rare UI's scroll progress): on a long page the gold line under the
+// header becomes a gauge. It dims to a dark gold and fills from the left as you read down, glides
+// rather than jumps (a light spring), and is full at the end. Short pages and the home page keep the
+// plain gold line. It's derived from the scroll position every time, so resizes and late content
+// (comments loading) keep it right.
+function mountReadBar() {
+  const h = $('header.site');
+  if (!h || document.body.classList.contains('home') || $('.read-bar', h)) return;
+  const bar = document.createElement('span');
+  bar.className = 'read-bar';
+  bar.setAttribute('aria-hidden', 'true');
+  bar.innerHTML = '<i></i>';
+  h.append(bar);
+  const fill = bar.firstChild;
+  let target = 0, shown = 0, raf = 0;
+  const step = () => {
+    raf = 0;
+    shown += (target - shown) * (lessMotion() ? 1 : .22);
+    if (Math.abs(target - shown) < .0015) shown = target;
+    fill.style.transform = `scaleX(${shown})`;
+    if (shown !== target) raf = requestAnimationFrame(step);
+  };
+  const measure = () => {
+    const max = document.documentElement.scrollHeight - innerHeight, long = max > innerHeight * 1.2;
+    h.classList.toggle('reading', long);
+    target = long ? Math.min(1, Math.max(0, scrollY / max)) : 1;
+    if (!raf) raf = requestAnimationFrame(step);
+  };
+  addEventListener('scroll', measure, { passive: true });
+  addEventListener('resize', measure);
+  new ResizeObserver(measure).observe(document.body);
+  measure();
+}
+
 export async function initHeader() {
   const slot = $('#auth');
   if (MODE === 'demo' && !$('.demo-banner')) {
@@ -645,6 +757,7 @@ export async function initHeader() {
     document.body.prepend(b);
   }
   paintCookieNotice();
+  mountReadBar();
   // Language picker (Google Translate loads only once a language is chosen)
   import('./translate.js').then((m) => m.initTranslate());
 

@@ -1447,6 +1447,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     win; the system's wide-screen grid rules are restated for phones in a `max-width: 760px` block and
     the class rail's tab bar in `max-width: 1000px`. Headings don't set a colour, so headings inside dark
     panels stay light.
+- **Interactions (2026-10-23, Ethan picked five from rareui.com; written fresh in vanilla JS, no React,
+  nothing copied).** All honour reduced motion. Styles: the "Interactions" block at the end of style.css.
+  - **Reading progress** (`mountReadBar` in ui.js, from `initHeader`): on pages taller than ~2 screens the
+    header's gold line becomes a gauge, dark gold filling to bright gold as you scroll (`header.site.reading`
+    + `.read-bar i` scaleX, light spring). Short pages and the home page keep the plain line.
+  - **Class rail marker** (course.js `spy()`): wide screens only. A gold dot rides the rail to the section
+    you're reading (`--mark` on `#c-toc`), the rail fills gold behind it, passed names darken (`.passed`).
+  - **Rolling numbers** (`roll` / `rollAll` in ui.js): odometer digits. Lists are redrawn with innerHTML, so
+    an element opts in with `data-roll-key` (the last value per key is remembered) and optional
+    `data-roll-from="0"` to count up on first show; call `rollAll(container)` after drawing. Used on
+    request "Me too" counts, comment likes and leaderboard points. Settles back to plain text after 1.4 s.
+  - **Bell** (`setNoteCount`): when unread is higher than last seen (localStorage `wilkipedia-bell-seen`)
+    the bell swings (harder for 3+) and the badge rolls up.
+  - **Delete in place** (`popconfirm(…, { inline: true })` → `confirmInPlace`): the button opens into
+    "Delete this …? [Yes, delete] [Cancel]" where it stood; Escape or a click elsewhere backs out. Used for
+    deleting your own comments and requests. Bigger or explained confirms keep the bubble.
 - **Readability pass (2026-10-20, Ethan: "texts are too close… too text heavy… don't use bubble
   shapes"; leaderboard/profile chips crowded).** The last block of style.css ("Readability pass")
   overrides the older blocks: 17px body at 1.7 line height, quieter meta/hints on shorter lines, tags
