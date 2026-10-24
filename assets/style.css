@@ -4818,4 +4818,4 @@ body.home footer.site { margin-top: 0 !important; background: var(--f-bg, #f7f4e
 .hx-sheet { box-shadow: 0 -1px 0 rgba(255, 255, 255, .5), 0 -12px 30px -18px rgba(0, 0, 0, .35); }
 :root[data-theme="dark"] body.home footer.site { background: #141311 !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.home footer.site { background: #141311 !important; } }
-@media (max-width: 560px) { body.home .hg-head { flex-direction: column; gap: 4px; } }
+@media (max-width: 560px) { body.home .hg-head { flex-direction: column; gap: 8px; } }
