@@ -1490,6 +1490,14 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     marker use the page's tone; the head drawing (::after) sits on a disc of that tone (::before, its own layer so
     night mode can invert the ink alone); kickers and small labels are Newsreader in spaced capitals; buttons are
     black with 8px corners; All classes' subject tiles wear their subject's tint; the notice takes the page's tint.
+  - **Overlap-proof heads (audit, same day: "check for icon overlapping and all the spacings").** The head
+    drawing is a right **float** (`::before` of `.cl-head` / `.c-hero` / plain-title `#main`), with its Morandi
+    disc as a second background of the same layer, so titles and intros wrap round it and the disc can't drift;
+    `::after` is unused there. `.c-hero-grid` / `.c-path` clear it; on plain-title pages everything after the
+    h1 and intro paragraphs clears it (so search boxes and tabs aren't squeezed). The bell page's head is a grid,
+    so its drawing stays absolutely placed in a reserved 200px column. Night mode inverts that one layer, which
+    turns the light disc into a dark one of the same hue (never set a solid background on these pseudo-elements
+    in night mode: it showed as a grey box). `tools/layout-audit.js` is the check: 33 pages × 4 widths, 0 issues.
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:

@@ -4417,8 +4417,6 @@ body:has(.look-fresh) .c-hero::before { right: 22px; top: 12px; width: 100px; he
 body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::after { right: 36px; top: 26px; width: 104px; height: 104px; }
 body:has(.look-fresh[data-p="home"]) #main::after, body:has(.look-fresh[data-p="map"]) #main::after { display: none; }
 body:has(.look-fresh) .bp-head::before { right: 34px; }
-:root[data-theme="dark"] body:has(.look-fresh) :is(.cl-head, .c-hero)::before, :root[data-theme="dark"] body:has(.look-fresh) #main::after { background: color-mix(in srgb, var(--m-tone) 30%, transparent); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body:has(.look-fresh) :is(.cl-head, .c-hero)::before, :root:not([data-theme="light"]) body:has(.look-fresh) #main::after { background: color-mix(in srgb, var(--m-tone) 30%, transparent); } }
 /* the header and the notice sit on the same ivory, the notice in the page's tint */
 body:has(.look-fresh) header.site { background: var(--f-bg); }
 body:has(.look-fresh) .ann { background: var(--m-tint) !important; }
@@ -4431,3 +4429,73 @@ body:has(.look-fresh) .ann-kind { background: var(--m-deep); }
   body:has(.look-fresh) .c-hero::before { right: 14px; top: 6px; }
   body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::after { right: 26px; top: 14px; }
 }
+
+/* ══ Overlap-proof page-head drawings (2026-10-23 audit, Ethan: "check for icon overlapping and all the
+   spacings"). Absolutely placed drawings ran under long class titles on laptops ("AP English Language and
+   Composition") and over the title and intro on phones. Now the drawing is a FLOAT at the top right of the
+   head (::before), so titles and intros wrap round it and can never sit under it; its disc is a separate
+   layer behind (::after, z-index -1) so night mode can still invert just the ink. The bell page's head is a
+   grid (a float can't live there), so it keeps a reserved column instead. ══ */
+body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head), body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx)) {
+  position: relative; isolation: isolate; }
+body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head)::before, body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::before {
+  content: ""; float: right; position: static; display: block; width: 168px; height: 140px; margin: 0 0 8px 28px; border-radius: 0; z-index: auto;
+  background: var(--doodle, none) center / 82% auto no-repeat; shape-outside: margin-box; transform-origin: 60% 80%;
+  animation: dd-in .8s .25s cubic-bezier(.3, 1.5, .5, 1) both; transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+body:has(.look-fresh) .c-hero::before { width: 150px; height: 125px; }
+body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head)::after, body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::after {
+  content: ""; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; transform: none; filter: none !important;
+  width: 112px; height: 112px; background: color-mix(in srgb, var(--m-tone) 48%, transparent); animation: dd-in .8s .15s cubic-bezier(.3, 1.5, .5, 1) both; }
+body:has(.look-fresh) .cl-head:not(.bp-head)::after { right: 28px; top: calc(var(--sp-7) + 16px); }
+body:has(.look-fresh) .c-hero::after { right: 25px; top: calc(var(--sp-7) + 12px); width: 100px; height: 100px; }
+body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::after { right: 44px; top: 32px; width: 104px; height: 104px; }
+body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::before { margin-top: 18px; }
+body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head):hover::before { transform: rotate(-6deg) translateY(-3px); }
+body:has(.look-fresh) .cl-head:not(.bp-head) { padding-right: 0; }
+body:has(.look-fresh) .c-hero .c-hero-grid, body:has(.look-fresh) .c-hero .c-path { clear: both; }
+:root[data-theme="dark"] body:has(.look-fresh) :is(.cl-head, .c-hero, #main)::before { filter: invert(.92) hue-rotate(180deg); }
+:root[data-theme="dark"] body:has(.look-fresh) :is(.cl-head, .c-hero, #main)::after { background: color-mix(in srgb, var(--m-tone) 30%, transparent); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body:has(.look-fresh) :is(.cl-head, .c-hero, #main)::before { filter: invert(.92) hue-rotate(180deg); }
+  :root:not([data-theme="light"]) body:has(.look-fresh) :is(.cl-head, .c-hero, #main)::after { background: color-mix(in srgb, var(--m-tone) 30%, transparent); }
+}
+/* the bell page's grid head: the drawing absolutely placed in a reserved column on the right */
+body:has(.look-fresh) .bp-head { position: relative; isolation: isolate; padding-right: 200px; }
+body:has(.look-fresh) .bp-head::before { content: ""; position: absolute; right: 4px; top: calc(var(--sp-7) - 6px); width: 168px; height: 140px; float: none;
+  background: var(--doodle, none) center / 82% auto no-repeat; animation: dd-in .8s .25s cubic-bezier(.3, 1.5, .5, 1) both; }
+body:has(.look-fresh) .bp-head::after { content: ""; position: absolute; z-index: -1; right: 32px; top: calc(var(--sp-7) + 10px); width: 112px; height: 112px; border-radius: 50%;
+  background: color-mix(in srgb, var(--m-tone) 48%, transparent); }
+/* the old absolute versions of these, retired */
+body:has(.look-fresh) .c-hero::after, body:has(.look-fresh) .cl-head::after { box-shadow: none; }
+@media (max-width: 760px) {
+  body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head)::before, body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::before { width: 92px; height: 78px; margin: 0 0 6px 14px; }
+  body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head)::after, body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::after { width: 62px; height: 62px; }
+  body:has(.look-fresh) .cl-head:not(.bp-head)::after { right: 15px; top: calc(var(--sp-6) + 8px); }
+  body:has(.look-fresh) .c-hero::after { right: 15px; top: calc(var(--sp-4) + 8px); }
+  body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::after { right: 31px; top: 26px; }
+  body:has(.look-fresh) #main:not(:has(.cl-head, .c-hero, .cdx))::before { margin-top: 14px; }
+  body:has(.look-fresh) .bp-head { padding-right: 0; }
+  body:has(.look-fresh) .bp-head::before { width: 80px; height: 68px; top: var(--sp-5); }
+  body:has(.look-fresh) .bp-head::after { width: 56px; height: 56px; right: 16px; top: calc(var(--sp-5) + 8px); }
+  body:has(.look-fresh) .bp-head :is(.c-kicker, h1) { margin-right: 86px; }
+}
+/* spacing the audit found crowded */
+body:has(.look-fresh) .stale { margin-bottom: var(--sp-3); }
+body:has(.look-fresh) .st-step { margin-top: 4px; }
+body:has(.look-fresh) .st-time { margin-top: var(--sp-3); }
+body:has(.look-fresh) .bp-facts dd, body:has(.look-fresh) .cd-facts dd { margin-top: 6px; }
+body:has(.look-fresh) .hero-split h1 { margin-top: var(--sp-3); }
+@media (prefers-reduced-motion: reduce) { body:has(.look-fresh) :is(.cl-head, .c-hero, #main, .bp-head)::before, body:has(.look-fresh) :is(.cl-head, .c-hero, #main, .bp-head)::after { animation: none; } }
+@media (max-width: 760px) {
+  body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::before { width: 92px; height: 78px; margin: 14px 0 6px 14px; }
+  body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::after { width: 62px; height: 62px; right: 31px; top: 26px; }
+}
+/* the disc lives in the same layer as its drawing (a second background), so the two can never drift apart;
+   in night mode the shared invert turns the light disc into a dark one of the same hue */
+body:has(.look-fresh) :is(.cl-head, .c-hero, .bp-head)::before, body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::before {
+  background: var(--doodle, none) center / 82% auto no-repeat, radial-gradient(circle closest-side at 50% 54%, color-mix(in srgb, var(--m-tone) 50%, transparent) 0 76%, transparent 77%); }
+body:has(.look-fresh) :is(.cl-head, .c-hero, .bp-head)::after, body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx))::after { display: none; }
+/* on plain-title pages, forms, tabs and panels start below the drawing instead of squeezing beside it */
+body:has(.look-fresh):not(:has(.look-fresh[data-p="map"])):not(:has(.look-fresh[data-p="home"])) #main:not(:has(.cl-head, .c-hero, .cdx)) > :not(h1):not(p):not(.lede):not(.crumbs):not(.look-fresh) { clear: right; }
+body:has(.look-fresh) :is(.cl-head, .c-hero):not(.bp-head)::before, body:has(.look-fresh) .bp-head::before {
+  background: var(--doodle, none) center / 82% auto no-repeat, radial-gradient(circle closest-side at 50% 54%, color-mix(in srgb, var(--m-tone) 50%, transparent) 0 76%, transparent 77%); }
