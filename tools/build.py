@@ -557,12 +557,11 @@ SEC_ICONS = {
 }
 
 
-TRIAL_LOOKS = {"ap-biology": "apple", "ap-calculus-bc": "notion"}
 DEPT_EMOJI = {"english": "📖", "math": "📐", "social-science": "🌍", "science": "🧪", "world-language": "💬",
               "physical-education": "🏃", "visual-performing-arts": "🎨", "practical-arts": "🛠️", "electives": "✨", "svcte": "🧰"}
-# The Notion-style cover: an original line drawing (an open book, a pencil, a mug, a lamp and some
-# sparkles) in black ink on a pastel ground. Drawn for Wilkipedia; not Notion's artwork.
-NOTION_COVER = """<svg viewBox="0 0 1200 240" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+# The class page hero's line drawing: an open book, a pencil, a mug, a lamp and some sparkles, in ink.
+# Drawn for Wilkipedia (original line art).
+HERO_ART = """<svg viewBox="0 0 1200 240" preserveAspectRatio="xMaxYMax meet" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
 <g class="nt-spark"><path d="M160 60v28M146 74h28"/><path d="M1040 150v22M1029 161h22"/><path d="M700 40l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/><path d="M330 170l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/><path d="M905 55l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/></g>
 <path d="M470 190c40-22 82-26 130-8 48-18 90-14 130 8V92c-40-22-82-26-130-8-48-18-90-14-130 8z"/><path d="M600 84v106"/>
 <path d="M496 112c24-8 50-9 78-2M496 132c24-8 50-9 78-2M496 152c24-8 50-9 78-2M626 110c28-7 54-6 78 2M626 130c28-7 54-6 78 2"/>
@@ -618,12 +617,11 @@ def build_courses(depts, courses):
     </ol>
     <p class="c-src">From the catalog’s prerequisites. <a href="../../subjects/#pw-fold">See every class’s path</a></p>
   </div>''' if bef or aft else "")
-        # Two style trials, one page each (Ethan 2026-10-23: "make the web page apple style, try on one of
-        # the pages first", then "or like Notion's 美工 style"): AP Biology is Apple, AP Calculus BC is the
-        # Notion / illustrated look; every other class page keeps the house design. TRIAL_LOOKS picks.
-        look = TRIAL_LOOKS.get(c["slug"])
-        rail = f"""<aside class="c-rail" aria-label="On this page">
-  <p class="nt-toc-h">On this page</p>
+        # The look (Ethan 2026-10-23, after trying Apple and Notion styles on one page each: "I like the
+        # Notion style more, but don't copy Notion's arrangement, just the 美工… don't change too much"):
+        # the house layout unchanged, drawn in the illustrated style (style.css "Illustrated" block).
+        # The hero carries two decorations: the subject's sticker (an emoji in a wavy badge) and a line drawing.
+        rail = """<aside class="c-rail" aria-label="On this page">
   <nav class="c-toc" id="c-toc">
     <a href="#s-overview" data-sec="overview">What students say<span class="n"></span></a>
     <a href="#s-teachers" data-sec="teachers">Teachers<span class="n"></span></a>
@@ -635,32 +633,13 @@ def build_courses(depts, courses):
   </nav>
   <div class="c-progress" id="c-progress" hidden></div>
 </aside>"""
-        if look == "apple":                # the side index becomes apple.com's sticky local nav
-            top = f"""<i class="look-apple" hidden></i>
-<nav class="ln" aria-label="{e(c['name'])}"><div class="ln-in">
-  <a class="ln-title" href="#main">{e(c['name'])}</a>
-  <div class="ln-links c-toc" id="c-toc">
-    <a href="#s-overview" data-sec="overview">Overview<span class="n"></span></a>
-    <a href="#s-teachers" data-sec="teachers">Teachers<span class="n"></span></a>
-    <a href="#s-resources" data-sec="resources">Study guides<span class="n"></span></a>
-    <a href="#s-requests" data-sec="requests">Requests<span class="n"></span></a>
-    <a href="#s-tips" data-sec="tips">Tips<span class="n"></span></a>
-    <a href="#s-summer" data-sec="summer">Summer homework<span class="n"></span></a>
-    <a href="#comments" data-sec="comments">Comments<span class="n"></span></a>
-  </div>
-  <a class="ln-cta" href="../../submit/?course={e(c['slug'])}">Share</a>
-</div></nav>"""
-            rail = '<div class="c-progress" id="c-progress" hidden></div>'
-        elif look == "notion":             # a cover with a line drawing, and the page icon over its edge
-            top = f"""<i class="look-notion" hidden></i>
-<div class="nt-cover" aria-hidden="true">{NOTION_COVER}</div>
-<div class="nt-icon" aria-hidden="true">{DEPT_EMOJI.get(c["department"], "📘")}</div>"""
-        else:
-            top = ""
+        top = '<i class="look-cute" hidden></i>'
         page(f"courses/{c['slug']}/", c["name"], f"""
 {top}
 {crumbs([("All classes", "../../subjects/"), (dept_name[c['department']], f"../../subjects/{c['department']}/")], c["name"], f"courses/{c['slug']}/")}
 <header class="c-hero">
+  <span class="cu-sticker" aria-hidden="true">{DEPT_EMOJI.get(c["department"], "📘")}</span>
+  <div class="cu-art" aria-hidden="true">{HERO_ART}</div>
   <p class="c-kicker">{kicker}</p>
   <h1>{e(c['name'])}</h1>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}

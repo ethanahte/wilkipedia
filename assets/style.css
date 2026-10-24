@@ -3995,358 +3995,156 @@ body:has(#cdx) #main { max-width: none; padding: 0; margin: 0; }
 .gv .gv-types .gv-type .gv-mark { color: var(--gx-ink); fill: var(--gx-ink); }
 .gv .gv-type[aria-pressed="false"] { opacity: .35; }
 
-/* ══ Apple style, tried on the class pages first (2026-10-23, Ethan: "make the web page apple style,
-   try on one of the pages first"). Scoped to body:has(.look-apple), which only class pages carry, so
-   every other page is untouched. apple.com's language: the system font (SF Pro on Apple devices),
-   big bold centred headlines, generous space, a light translucent global bar, a sticky local nav with
-   the product (class) name and a blue pill, full-width sections alternating white and #f5f5f7, rounded
-   18px cards, blue links with a › chevron. ══ */
-body:has(.look-apple) {
-  --a-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --a-bg: #ffffff; --a-alt: #f5f5f7; --a-ink: #1d1d1f; --a-soft: #6e6e73; --a-faint: #86868b; --a-line: #d2d2d7;
-  --a-link: #0066cc; --a-btn: #0071e3; --a-btn-h: #0077ed; --a-eyebrow: #b64400; --a-card: #ffffff; --a-glass: rgba(251, 251, 253, .8);
-  background: var(--a-bg); color: var(--a-ink); font-family: var(--a-font); font-size: 17px; line-height: 1.47; letter-spacing: -.022em; }
-:root[data-theme="dark"] body:has(.look-apple) { --a-bg: #000; --a-alt: #101011; --a-ink: #f5f5f7; --a-soft: #a1a1a6; --a-faint: #86868b; --a-line: #424245;
-  --a-link: #2997ff; --a-btn: #0071e3; --a-eyebrow: #ff9f45; --a-card: #1d1d1f; --a-glass: rgba(22, 22, 23, .8); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body:has(.look-apple) { --a-bg: #000; --a-alt: #101011; --a-ink: #f5f5f7; --a-soft: #a1a1a6;
-  --a-faint: #86868b; --a-line: #424245; --a-link: #2997ff; --a-btn: #0071e3; --a-eyebrow: #ff9f45; --a-card: #1d1d1f; --a-glass: rgba(22, 22, 23, .8); } }
-body:has(.look-apple) :is(h1, h2, h3, h4, .c-lead, .tip-card p, .gl-title, .tt-what) { font-family: var(--a-font); }
-body:has(.look-apple) a { color: var(--a-link); text-decoration: none; }
-body:has(.look-apple) a:hover { text-decoration: underline; text-decoration-color: currentColor; text-decoration-thickness: 1px; text-underline-offset: 2px; }
-
-/* the global bar: light glass, small type, not sticky (the local nav sticks instead) */
-body:has(.look-apple) header.site { position: relative; background: var(--a-glass); color: var(--a-ink); box-shadow: none; border-bottom: 0;
-  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
-body:has(.look-apple) header.site .read-bar { display: none; }
-body:has(.look-apple) .bar { min-height: 48px; }
-body:has(.look-apple) .brand { color: var(--a-ink); font: 600 1.2rem var(--serif); }
-body:has(.look-apple) .main-nav { font: 400 12px var(--a-font); letter-spacing: -.01em; gap: var(--sp-6); }
-body:has(.look-apple) .main-nav > a, body:has(.look-apple) .main-nav .more summary { color: var(--a-ink); opacity: .8; padding: 14px 0 13px; border-bottom: 0; }
-body:has(.look-apple) .main-nav > a:hover, body:has(.look-apple) .main-nav > a[aria-current] { opacity: 1; color: var(--a-ink); text-decoration: none; }
-body:has(.look-apple) .hsearch { background: rgba(0, 0, 0, .05); color: var(--a-soft); height: 30px; border-radius: 8px; font-size: 12px; }
-:root[data-theme="dark"] body:has(.look-apple) .hsearch { background: rgba(255, 255, 255, .08); }
-body:has(.look-apple) .hs-k { border-color: var(--a-line); color: var(--a-faint); }
-body:has(.look-apple) .icon-btn { color: var(--a-ink); }
-body:has(.look-apple) .icon-btn:hover { background: rgba(0, 0, 0, .05); }
-body:has(.look-apple) .auth .btn, body:has(.look-apple) .bar .btn { background: var(--a-btn); color: #fff; border-radius: 980px; padding: 5px 14px; font: 400 12px var(--a-font); box-shadow: none; }
-/* the ribbon (announcement): grey, centred, small, a blue link */
-body:has(.look-apple) .ann { background: var(--a-alt); border: 0; }
-body:has(.look-apple) .ann-in { justify-content: center; text-align: center; padding-top: 14px; padding-bottom: 14px; }
-body:has(.look-apple) .ann-kind { display: none; }
-body:has(.look-apple) .ann-msg { flex: 0 1 auto; max-width: 760px; color: var(--a-ink); font: 400 14px/1.43 var(--a-font); letter-spacing: -.016em; }
-body:has(.look-apple) .ann-msg a { color: var(--a-link); font-weight: 400; text-decoration: none; }
-body:has(.look-apple) .ann-x { color: var(--a-soft); }
-
-/* the local nav: class name on the left, the sections and a blue pill on the right, glass, sticky */
-body:has(.look-apple) #main { padding-top: 0; }
-.ln { display: none; }
-body:has(.look-apple) .ln { display: block; position: sticky; top: 0; z-index: 25; margin: 0 calc(50% - 50vw); background: var(--a-glass);
-  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid color-mix(in srgb, var(--a-line) 60%, transparent); }
-.ln-in { max-width: 1040px; margin: 0 auto; padding: 0 16px; height: 52px; display: flex; align-items: center; gap: var(--sp-6); }
-.ln-title { flex: none; font: 600 21px/1 var(--a-font); letter-spacing: .011em; color: var(--a-ink) !important; text-decoration: none !important; white-space: nowrap; }
-body:has(.look-apple) .ln-links { margin-left: auto; display: flex; gap: var(--sp-5); overflow-x: auto; scrollbar-width: none; position: static; }
-body:has(.look-apple) .ln-links::-webkit-scrollbar { display: none; }
-body:has(.look-apple) .ln-links::before, body:has(.look-apple) .ln-links .toc-fill, body:has(.look-apple) .ln-links .toc-mark { display: none; }
-body:has(.look-apple) .ln-links a { flex: none; padding: 0; border: 0 !important; font: 400 12px var(--a-font); letter-spacing: -.01em; color: var(--a-ink); opacity: .8; box-shadow: none !important; }
-body:has(.look-apple) .ln-links a:hover { opacity: 1; text-decoration: none; }
-body:has(.look-apple) .ln-links a[aria-current] { opacity: 1; font-weight: 600; color: var(--a-ink); }
-body:has(.look-apple) .ln-links a.empty { opacity: .45; }
-body:has(.look-apple) .ln-links .n { display: none; }
-.ln-cta { flex: none; padding: 4px 12px; border-radius: 980px; background: var(--a-btn); color: #fff !important; font: 400 12px/1.6 var(--a-font); text-decoration: none !important; }
-.ln-cta:hover { background: var(--a-btn-h); }
-
-/* the hero: centred, very large, quiet */
-body:has(.look-apple) .crumbs { text-align: center; margin: var(--sp-7) 0 0; font: 400 12px var(--a-font); }
-body:has(.look-apple) .crumbs a { color: var(--a-soft); }
-body:has(.look-apple) .c-hero { padding: var(--sp-5) 0 var(--sp-8); text-align: center; }
-body:has(.look-apple) .c-kicker { font: 600 17px/1.2 var(--a-font); letter-spacing: -.022em; color: var(--a-eyebrow); margin-bottom: var(--sp-2); }
-body:has(.look-apple) .c-hero h1 { max-width: none; font: 700 clamp(48px, 8vw, 96px)/1.05 var(--a-font); letter-spacing: -.015em; margin: 0 auto; text-wrap: balance; }
-body:has(.look-apple) .c-hero .aka { font: 400 21px/1.38 var(--a-font); color: var(--a-soft); margin-top: var(--sp-3); }
-body:has(.look-apple) .c-hero-grid { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: var(--sp-7); margin-top: var(--sp-6); }
-body:has(.look-apple) .c-about { max-width: 720px; }
-body:has(.look-apple) .c-lead { font: 400 21px/1.48 var(--a-font); letter-spacing: .011em; color: var(--a-ink); }
-body:has(.look-apple) .c-more summary { color: var(--a-link); font-size: 17px; }
-body:has(.look-apple) .c-src { font-size: 12px; color: var(--a-faint); margin-top: var(--sp-4); }
-body:has(.look-apple) .c-prereq { margin: var(--sp-6) auto 0; padding: 0; border: 0; max-width: 620px; font: 400 14px/1.43 var(--a-font); color: var(--a-soft); }
-body:has(.look-apple) .c-prereq span { font: 600 12px var(--a-font); letter-spacing: 0; text-transform: none; color: var(--a-ink); }
-/* the facts: a row of big figures on a grey tile, like a spec sheet */
-body:has(.look-apple) .c-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(100%, 880px); padding: var(--sp-6) var(--sp-5); gap: 0;
-  border-radius: 18px; background: var(--a-alt); box-shadow: none; }
-body:has(.look-apple) .c-facts > div { padding: 0 var(--sp-3) !important; border: 0 !important; align-items: center; text-align: center; }
-body:has(.look-apple) .c-facts dd { font: 600 clamp(28px, 3.4vw, 40px)/1.1 var(--a-font); letter-spacing: -.01em; }
-body:has(.look-apple) .c-facts dt { font: 400 14px var(--a-font); letter-spacing: 0; text-transform: none; color: var(--a-soft); margin-top: 6px; }
-/* where it fits: three centred lines with blue links */
-body:has(.look-apple) .c-path { margin: var(--sp-7) auto 0; max-width: 880px; }
-body:has(.look-apple) .c-path-h { font: 600 12px var(--a-font); letter-spacing: 0; text-transform: none; color: var(--a-soft); text-align: center; }
-body:has(.look-apple) .cp-side span a { background: none; box-shadow: none; padding: 0; font: 400 17px var(--a-font); color: var(--a-link); }
-body:has(.look-apple) .cp-side span a::after { content: " ›"; }
-body:has(.look-apple) .cp-side small { font: 400 12px var(--a-font); color: var(--a-faint); }
-body:has(.look-apple) .cp-now { background: var(--a-ink); color: var(--a-bg); border-radius: 980px; padding: 10px 22px; box-shadow: none; font: 600 17px var(--a-font); }
-body:has(.look-apple) .cp-now::before, body:has(.look-apple) .cp-now::after { background: var(--a-line); }
-body:has(.look-apple) .c-path .c-src { text-align: center; }
-body:has(.look-apple) .c-progress { text-align: center; margin: 0 0 var(--sp-6); }
-body:has(.look-apple) .c-progress p { font: 400 14px var(--a-font); color: var(--a-soft); }
-body:has(.look-apple) .c-progress p b { font: 600 17px var(--a-font); color: var(--a-ink); margin-right: 2px; }
-body:has(.look-apple) .c-progress .c-bar { width: 200px; margin: var(--sp-2) auto 0; }
-
-/* sections: full width, alternating white and grey, big centred headlines */
-body:has(.look-apple) .c-layout { display: block; border: 0; padding: 0; }
-body:has(.look-apple) .c-sec { padding: var(--sp-9) calc(50vw - 50%) var(--sp-9); margin: 0 calc(50% - 50vw); border: 0 !important; }
-body:has(.look-apple) .c-main > .c-sec:not([hidden]):nth-of-type(odd) { background: var(--a-alt); }
-body:has(.look-apple) .c-sec > * { max-width: 980px; margin-left: auto; margin-right: auto; }
-body:has(.look-apple) .c-sec > h2 { font: 700 clamp(32px, 4.6vw, 48px)/1.08 var(--a-font); letter-spacing: -.003em; text-align: center; margin-bottom: var(--sp-3); }
-body:has(.look-apple) .c-sec > .sec-sub { font: 400 21px/1.38 var(--a-font); color: var(--a-soft); text-align: center; max-width: 680px; margin-bottom: var(--sp-7); }
-body:has(.look-apple) .c-sec > .sec-sub a { color: var(--a-link); }
-/* study guides: a grid of rounded cards */
-body:has(.look-apple) .res-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: var(--sp-5); padding: 0; background: none; box-shadow: none; border: 0; margin-top: var(--sp-5); }
-body:has(.look-apple) .res-rows .gl-row { display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); padding: var(--sp-6) var(--sp-6) var(--sp-5);
-  border: 0; border-radius: 18px; background: var(--a-card); transition: transform .3s cubic-bezier(0, 0, .5, 1), box-shadow .3s; }
-body:has(.look-apple) .res-rows .gl-row:hover { transform: scale(1.015); box-shadow: 2px 4px 12px rgba(0, 0, 0, .08); }
-body:has(.look-apple) .c-main > .c-sec:nth-of-type(even) .res-rows .gl-row { background: var(--a-alt); }
-body:has(.look-apple) .gl-title { font: 600 21px/1.19 var(--a-font); letter-spacing: .011em; color: var(--a-ink); }
-body:has(.look-apple) .gl-title:hover { text-decoration: none; color: var(--a-link); }
-body:has(.look-apple) .gl-note { font: 400 14px/1.43 var(--a-font); color: var(--a-soft); margin-top: var(--sp-2); -webkit-line-clamp: 3; }
-body:has(.look-apple) .gl-who { font: 400 12px/1.33 var(--a-font); color: var(--a-faint); }
-body:has(.look-apple) .gl-files { gap: var(--sp-5); padding: 0; }
-body:has(.look-apple) .gl-files a, body:has(.look-apple) .gl-files .gl-off { padding: 0; background: none; border-radius: 0; font: 400 17px var(--a-font); letter-spacing: -.022em; color: var(--a-link); }
-body:has(.look-apple) .gl-files a::after { content: " ›"; }
-body:has(.look-apple) .gl-files a:hover { background: none; color: var(--a-link); text-decoration: underline; }
-body:has(.look-apple) .res-filter { justify-content: center; }
-/* links and buttons: blue words with a chevron, blue pills */
-body:has(.look-apple) :is(.edit, .add-link) { font: 400 17px var(--a-font); color: var(--a-link); margin-top: var(--sp-6); display: table; margin-left: auto; margin-right: auto; }
-body:has(.look-apple) .edit::after { content: " ›"; }
-body:has(.look-apple) .c-main .btn { border-radius: 980px; background: var(--a-btn); color: #fff; box-shadow: none; padding: 11px 22px; font: 400 17px var(--a-font); }
-body:has(.look-apple) .c-main .btn:hover { background: var(--a-btn-h); }
-/* tips, requests, teachers, the to-do tiles and the comment box as rounded cards */
-body:has(.look-apple) .tip-card { border-radius: 18px; background: var(--a-card); box-shadow: none; padding: var(--sp-7) var(--sp-7) var(--sp-6) var(--sp-9); }
-body:has(.look-apple) .tip-card::before { color: var(--a-eyebrow); font-family: Georgia, serif; }
-body:has(.look-apple) .tip-card p { font: 400 21px/1.45 var(--a-font); color: var(--a-ink); }
-body:has(.look-apple) .rq-empty, body:has(.look-apple) .c-sec .empty { border-radius: 18px; background: var(--a-card); padding: var(--sp-6); text-align: center; font: 400 17px/1.47 var(--a-font); color: var(--a-soft); }
-body:has(.look-apple) .c-main > .c-sec:nth-of-type(even) :is(.rq-empty, .empty, .tip-card) { background: var(--a-alt); }
-body:has(.look-apple) .rq-more { justify-content: center; }
-body:has(.look-apple) .rq-class .rq-list { border-radius: 18px; background: var(--a-card); padding: 0 var(--sp-6); border: 0; }
-body:has(.look-apple) .t-missing { text-align: center; }
-body:has(.look-apple) .t-missing ul { margin: var(--sp-5) auto 0; border-radius: 18px; background: var(--a-card); padding: 0 var(--sp-6); text-align: left; }
-body:has(.look-apple) .t-missing li { border-color: var(--a-line) !important; }
-body:has(.look-apple) .t-missing li:first-child { border-top: 0; }
-body:has(.look-apple) .t-missing li:last-child { border-bottom: 0; }
-body:has(.look-apple) .empty-line { font: 400 17px var(--a-font); color: var(--a-soft); text-align: center; }
-body:has(.look-apple) .c-todo-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-5); max-width: 760px; }
-body:has(.look-apple) .c-todo-item { border-radius: 18px; background: var(--a-card); box-shadow: none; padding: var(--sp-6); }
-body:has(.look-apple) .c-todo-item:hover { transform: scale(1.015); box-shadow: 2px 4px 12px rgba(0, 0, 0, .08); }
-body:has(.look-apple) .c-todo-item b { font: 600 21px var(--a-font); }
-body:has(.look-apple) .c-todo-item i { color: var(--a-link); }
-body:has(.look-apple) .comment-form { border-radius: 18px; background: var(--a-card); box-shadow: none; padding: var(--sp-6); max-width: 680px; }
-body:has(.look-apple) .comment-form :is(textarea, input, select, .combo-in) { border-radius: 12px; border-color: var(--a-line); background: var(--a-bg); font: 400 17px var(--a-font); box-shadow: none; }
-body:has(.look-apple) #comment-list { max-width: 680px; }
-body:has(.look-apple) .vtab[aria-pressed="true"]::after { background: var(--a-ink); height: 2px; }
-/* the footer: Apple's small grey type */
-body:has(.look-apple) footer.site { background: var(--a-alt); margin-top: 0; font: 400 12px/1.5 var(--a-font); color: var(--a-soft); }
-body:has(.look-apple) footer.site a { color: var(--a-ink); opacity: .8; }
-@media (max-width: 760px) {
-  .ln-in { gap: var(--sp-4); }
-  body:has(.look-apple) .ln-links { display: none; }
-  .ln-cta { margin-left: auto; }
-  .ln-title { font-size: 19px; overflow: hidden; text-overflow: ellipsis; }
-  body:has(.look-apple) .c-facts { grid-template-columns: 1fr 1fr; row-gap: var(--sp-5); }
-  body:has(.look-apple) .c-sec { padding-top: var(--sp-8); padding-bottom: var(--sp-8); }
-  body:has(.look-apple) .c-lead { font-size: 19px; }
-  body:has(.look-apple) .tip-card { padding: var(--sp-6) var(--sp-5) var(--sp-5) var(--sp-7); }
-}
-
-/* ══ Notion / illustrated style, tried on one page (AP Calculus BC; 2026-10-23, Ethan: "like Notion's
-   美工 style or things like this", with a screenshot of pastel cards, black line drawings and black pill
-   buttons). Scoped to body:has(.look-notion). A Notion page: a cover with an original line drawing, the
-   page icon over its edge, a 900px column, properties as rows with type icons, callouts, a table of
-   contents block, and the study guides as a gallery of cards with pastel covers and black pills. ══ */
-.nt-toc-h { display: none; }
-body:has(.look-notion) {
-  --n-font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
-  --n-bg: #ffffff; --n-ink: rgb(55, 53, 47); --n-soft: rgba(55, 53, 47, .65); --n-faint: rgba(55, 53, 47, .45); --n-line: rgba(55, 53, 47, .09);
-  --n-hover: rgba(55, 53, 47, .06); --n-callout: rgb(241, 241, 239); --n-pill: #191919; --n-pill-ink: #ffffff; --n-cover: #f6e7a6;
-  --n-c1: #f6e7a6; --n-c2: #d7e6f2; --n-c3: #e6e0f3; --n-c4: #dcefe2; --n-c5: #f8dfcf; --n-c6: #f5dde6; --n-doodle: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23191919%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E");
-  background: var(--n-bg); color: var(--n-ink); font-family: var(--n-font); font-size: 16px; line-height: 1.5; letter-spacing: 0; }
-:root[data-theme="dark"] body:has(.look-notion) { --n-bg: #191919; --n-ink: rgba(255, 255, 255, .81); --n-soft: rgba(255, 255, 255, .46); --n-faint: rgba(255, 255, 255, .32);
-  --n-line: rgba(255, 255, 255, .094); --n-hover: rgba(255, 255, 255, .055); --n-callout: rgb(37, 37, 37); --n-pill: #f1efe9; --n-pill-ink: #191919; --n-cover: #4a4227;
-  --n-c1: #4a4227; --n-c2: #263a4a; --n-c3: #3a3350; --n-c4: #2c4033; --n-c5: #4a3328; --n-c6: #4a2e3a; --n-doodle: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E"); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body:has(.look-notion) { --n-bg: #191919; --n-ink: rgba(255, 255, 255, .81); --n-soft: rgba(255, 255, 255, .46);
-  --n-faint: rgba(255, 255, 255, .32); --n-line: rgba(255, 255, 255, .094); --n-hover: rgba(255, 255, 255, .055); --n-callout: rgb(37, 37, 37); --n-pill: #f1efe9; --n-pill-ink: #191919;
-  --n-cover: #4a4227; --n-c1: #4a4227; --n-c2: #263a4a; --n-c3: #3a3350; --n-c4: #2c4033; --n-c5: #4a3328; --n-c6: #4a2e3a; --n-doodle: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E"); } }
-body:has(.look-notion) :is(h1, h2, h3, h4, .c-lead, .tip-card p, .gl-title) { font-family: var(--n-font); color: var(--n-ink); }
-body:has(.look-notion) a { color: inherit; text-decoration: underline; text-decoration-color: var(--n-faint); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-body:has(.look-notion) a:hover { color: inherit; text-decoration-color: var(--n-ink); }
-/* the top bar: plain white with a hairline, like Notion's */
-body:has(.look-notion) header.site { background: var(--n-bg); color: var(--n-ink); box-shadow: inset 0 -1px var(--n-line); }
-body:has(.look-notion) header.site .read-bar { display: none; }
-body:has(.look-notion) .brand { color: var(--n-ink); }
-body:has(.look-notion) .main-nav { font: 500 14px var(--n-font); }
-body:has(.look-notion) .main-nav > a, body:has(.look-notion) .main-nav .more summary { color: var(--n-soft); border-bottom-color: transparent; }
-body:has(.look-notion) .main-nav > a:hover, body:has(.look-notion) .main-nav > a[aria-current] { color: var(--n-ink); border-bottom-color: transparent; }
-body:has(.look-notion) .hsearch { background: var(--n-hover); color: var(--n-soft); border-radius: 6px; }
-body:has(.look-notion) .hs-k { border-color: var(--n-line); color: var(--n-faint); }
-body:has(.look-notion) .icon-btn { color: var(--n-ink); }
-body:has(.look-notion) .icon-btn:hover { background: var(--n-hover); }
-body:has(.look-notion) .bar .btn, body:has(.look-notion) .auth .btn { background: var(--n-pill); color: var(--n-pill-ink); border-radius: 980px; box-shadow: none; }
-body:has(.look-notion) .ann { background: var(--n-callout); border: 0; }
-body:has(.look-notion) .ann-kind { color: var(--n-ink); border-left-color: var(--n-ink); }
-body:has(.look-notion) .ann-msg, body:has(.look-notion) .ann-msg a, body:has(.look-notion) .ann-x { color: var(--n-ink); }
-/* cover, icon and the column */
-body:has(.look-notion) #main { max-width: 900px; padding: 0 24px; }
-.nt-cover, .nt-icon { display: none; }
-body:has(.look-notion) .nt-cover { display: block; height: 30vh; min-height: 180px; max-height: 280px; margin: 0 calc(50% - 50vw); background: var(--n-cover); color: var(--n-ink); overflow: hidden; }
-body:has(.look-notion) .nt-cover svg { width: 100%; height: 100%; display: block; }
-body:has(.look-notion) .nt-cover .nt-spark { stroke-width: 2.8; }
-body:has(.look-notion) .nt-icon { display: block; position: relative; z-index: 1; margin-top: -48px; font-size: 78px; line-height: 1.1; width: max-content;
+/* ══ Illustrated (2026-10-23). Ethan tried an Apple and a Notion style on one page each and chose the
+   Notion one for its art only: "don't copy Notion's arrangement, just the 美工… don't change too much".
+   So the class pages keep the house layout exactly (heading and facts, the side index, the sections) and
+   only the drawing changes: a warm cream page, pastel colour (butter, peach, lavender, sky, mint, rose),
+   soft round corners, ink line drawings, a wavy badge sticker, hand-drawn outlines, black pill buttons,
+   rounded type where the device has it (SF Rounded on Apple; no web font is fetched, for privacy).
+   Scoped to body:has(.look-cute), which every class page carries. All drawings are original. ══ */
+body:has(.look-cute) {
+  --k-round: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --k-bg: #fbf6f0; --k-card: #ffffff; --k-ink: #2b2522; --k-soft: rgba(43, 37, 34, .68); --k-faint: rgba(43, 37, 34, .46); --k-line: rgba(43, 37, 34, .1);
+  --k-butter: #f7eab6; --k-peach: #f6dfd0; --k-lav: #dccbea; --k-sky: #d6e5f1; --k-mint: #d7ecdd; --k-rose: #f3d7e1; --k-stage: #f4e3d6;
+  --k-pill: #241f1c; --k-pill-ink: #ffffff;
+  --k-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%23dccbea%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); --k-wob: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M14%209%20C120%204%20290%206%20386%2010%20C393%2011%20396%2016%20395%2024%20C397%2080%20394%20140%20393%20182%20C392%20190%20387%20193%20378%20193%20C270%20197%20120%20194%2020%20191%20C11%20190%206%20186%206%20177%20C4%20120%207%2060%207%2020%20C7%2012%209%209%2014%209%20Z%22%20fill%3D%22none%22%20stroke%3D%22%232b2522%22%20stroke-width%3D%222%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E"); --k-wob-w: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M14%209%20C120%204%20290%206%20386%2010%20C393%2011%20396%2016%20395%2024%20C397%2080%20394%20140%20393%20182%20C392%20190%20387%20193%20378%20193%20C270%20197%20120%20194%2020%20191%20C11%20190%206%20186%206%20177%20C4%20120%207%2060%207%2020%20C7%2012%209%209%2014%209%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E"); --k-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%232b2522%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E");
+  --k-d1: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%232b2522%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E"); --k-d2: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%232b2522%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M100%2018c-14%200-24%2010-24%2023%200%209%205%2014%2010%2019v8h28v-8c5-5%2010-10%2010-19%200-13-10-23-24-23z%22/%3E%3Cpath%20d%3D%22M90%2074h20M94%2080h12%22/%3E%3Cpath%20d%3D%22M60%2026l-8-6M140%2026l8-6M56%2046h-10M144%2046h10%22/%3E%3Cpath%20d%3D%22M152%2064l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3C/svg%3E"); --k-d3: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%232b2522%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M66%2072h70M70%2072V60h62v12M74%2060V48h54v12M80%2048V36h42v12%22/%3E%3Cpath%20d%3D%22M96%2036V30%22/%3E%3Cpath%20d%3D%22M150%2030v14M143%2037h14M42%2058c8-6%2016%206%2024%200%22/%3E%3C/svg%3E");
+  --paper: var(--k-bg); --ink: var(--k-ink); --muted: var(--k-soft); --faint: var(--k-faint); --rule: var(--k-line); --card: var(--k-card);
+  background: var(--k-bg); color: var(--k-ink); font-family: var(--k-round); }
+:root[data-theme="dark"] body:has(.look-cute) { --k-bg: #1b1917; --k-card: #24211e; --k-ink: #f1ece6; --k-soft: rgba(241, 236, 230, .66); --k-faint: rgba(241, 236, 230, .42);
+  --k-line: rgba(241, 236, 230, .1); --k-butter: #4a4227; --k-peach: #4a3328; --k-lav: #3a3350; --k-sky: #263a4a; --k-mint: #2c4033; --k-rose: #4a2e3a; --k-stage: #2c2420;
+  --k-pill: #f1ece6; --k-pill-ink: #1b1917; --k-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%233a3350%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); --k-wob: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M14%209%20C120%204%20290%206%20386%2010%20C393%2011%20396%2016%20395%2024%20C397%2080%20394%20140%20393%20182%20C392%20190%20387%20193%20378%20193%20C270%20197%20120%20194%2020%20191%20C11%20190%206%20186%206%20177%20C4%20120%207%2060%207%2020%20C7%2012%209%209%2014%209%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E"); --k-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E");
+  --k-d1: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E"); --k-d2: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M100%2018c-14%200-24%2010-24%2023%200%209%205%2014%2010%2019v8h28v-8c5-5%2010-10%2010-19%200-13-10-23-24-23z%22/%3E%3Cpath%20d%3D%22M90%2074h20M94%2080h12%22/%3E%3Cpath%20d%3D%22M60%2026l-8-6M140%2026l8-6M56%2046h-10M144%2046h10%22/%3E%3Cpath%20d%3D%22M152%2064l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3C/svg%3E"); --k-d3: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M66%2072h70M70%2072V60h62v12M74%2060V48h54v12M80%2048V36h42v12%22/%3E%3Cpath%20d%3D%22M96%2036V30%22/%3E%3Cpath%20d%3D%22M150%2030v14M143%2037h14M42%2058c8-6%2016%206%2024%200%22/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body:has(.look-cute) { --k-bg: #1b1917; --k-card: #24211e; --k-ink: #f1ece6; --k-soft: rgba(241, 236, 230, .66);
+  --k-faint: rgba(241, 236, 230, .42); --k-line: rgba(241, 236, 230, .1); --k-butter: #4a4227; --k-peach: #4a3328; --k-lav: #3a3350; --k-sky: #263a4a; --k-mint: #2c4033;
+  --k-rose: #4a2e3a; --k-stage: #2c2420; --k-pill: #f1ece6; --k-pill-ink: #1b1917; --k-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%233a3350%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); --k-wob: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M14%209%20C120%204%20290%206%20386%2010%20C393%2011%20396%2016%20395%2024%20C397%2080%20394%20140%20393%20182%20C392%20190%20387%20193%20378%20193%20C270%20197%20120%20194%2020%20191%20C11%20190%206%20186%206%20177%20C4%20120%207%2060%207%2020%20C7%2012%209%209%2014%209%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E");
+  --k-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E"); --k-d1: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M82%2070V22h30l12%2012v36z%22/%3E%3Cpath%20d%3D%22M112%2022v12h12M90%2044h26M90%2052h26M90%2060h18%22/%3E%3Cpath%20d%3D%22M52%2030v14M45%2037h14M150%2052l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3Cpath%20d%3D%22M40%2066c10-6%2018%206%2028%200%22/%3E%3C/svg%3E"); --k-d2: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M100%2018c-14%200-24%2010-24%2023%200%209%205%2014%2010%2019v8h28v-8c5-5%2010-10%2010-19%200-13-10-23-24-23z%22/%3E%3Cpath%20d%3D%22M90%2074h20M94%2080h12%22/%3E%3Cpath%20d%3D%22M60%2026l-8-6M140%2026l8-6M56%2046h-10M144%2046h10%22/%3E%3Cpath%20d%3D%22M152%2064l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%22/%3E%3C/svg%3E"); --k-d3: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%2090%22%20fill%3D%22none%22%20stroke%3D%22%23f1ece6%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M66%2072h70M70%2072V60h62v12M74%2060V48h54v12M80%2048V36h42v12%22/%3E%3Cpath%20d%3D%22M96%2036V30%22/%3E%3Cpath%20d%3D%22M150%2030v14M143%2037h14M42%2058c8-6%2016%206%2024%200%22/%3E%3C/svg%3E"); } }
+body:has(.look-cute) :is(h1, h2, h3, h4, .c-lead, .tip-card p, .gl-title, .tt-what, .c-facts dd) { font-family: var(--k-round); }
+/* links: ink with a soft lavender underline */
+body:has(.look-cute) main a { color: var(--k-ink); text-decoration-color: var(--k-lav); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+body:has(.look-cute) main a:hover { text-decoration-color: var(--k-ink); }
+/* the header and the notice, in the same warm paper */
+body:has(.look-cute) header.site { background: var(--k-bg); color: var(--k-ink); box-shadow: inset 0 -1px var(--k-line); }
+body:has(.look-cute) header.site.reading { box-shadow: inset 0 -1px var(--k-line); }
+body:has(.look-cute) .read-bar { background: transparent; height: 3px; }
+body:has(.look-cute) .read-bar i { background: var(--k-ink); border-radius: 0 3px 3px 0; }
+body:has(.look-cute) .brand { color: var(--k-ink); }
+body:has(.look-cute) .main-nav > a, body:has(.look-cute) .main-nav .more summary { color: var(--k-soft); border-bottom: 0; padding: 7px 12px; margin: 0 -12px; border-radius: 980px; }
+body:has(.look-cute) .main-nav { gap: var(--sp-4); }
+body:has(.look-cute) .main-nav > a:hover { color: var(--k-ink); background: var(--k-line); }
+body:has(.look-cute) .main-nav > a[aria-current] { color: var(--k-ink); background: var(--k-butter); }
+body:has(.look-cute) .hsearch { background: var(--k-card); border: 1px solid var(--k-line); color: var(--k-soft); border-radius: 980px; }
+body:has(.look-cute) .hs-k { border-color: var(--k-line); color: var(--k-faint); border-radius: 980px; }
+body:has(.look-cute) .icon-btn { color: var(--k-ink); border-radius: 980px; }
+body:has(.look-cute) .icon-btn:hover { background: var(--k-line); }
+body:has(.look-cute) .bar .btn, body:has(.look-cute) .auth .btn { background: var(--k-pill); color: var(--k-pill-ink); border-radius: 980px; box-shadow: none; }
+body:has(.look-cute) .ann { background: var(--k-butter); border: 0; }
+body:has(.look-cute) .ann-kind { padding: 2px 10px; border: 0; border-radius: 980px; background: var(--k-pill); color: var(--k-pill-ink); }
+body:has(.look-cute) .ann-msg, body:has(.look-cute) .ann-msg a, body:has(.look-cute) .ann-x { color: var(--k-ink); }
+body:has(.look-cute) .ann-msg a { text-decoration-color: var(--k-ink); }
+/* the heading: the same layout on a soft peach stage, with a sticker and a line drawing */
+body:has(.look-cute) .c-hero { position: relative; isolation: isolate; overflow: hidden; margin-top: var(--sp-2); padding: var(--sp-7) var(--sp-7) 150px; border-radius: 36px; background: var(--k-stage); }
+.cu-sticker, .cu-art { display: none; }
+body:has(.look-cute) .cu-sticker { display: grid; place-items: center; position: absolute; top: 26px; right: 30px; width: 104px; height: 104px; font-size: 46px; line-height: 1;
+  background: var(--k-badge) center / contain no-repeat; transform: rotate(8deg); transition: transform .4s cubic-bezier(.3, 1.6, .5, 1);
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
-body:has(.look-notion) .crumbs { margin: var(--sp-4) 0 var(--sp-2); font: 400 14px var(--n-font); color: var(--n-faint); }
-body:has(.look-notion) .crumbs a { color: var(--n-soft); text-decoration: none; }
-body:has(.look-notion) .c-hero { padding: 0 0 var(--sp-6); }
-body:has(.look-notion) .c-kicker { font: 500 14px var(--n-font); color: var(--n-soft); margin: 0 0 var(--sp-1); }
-body:has(.look-notion) .c-hero h1 { font: 700 40px/1.2 var(--n-font); letter-spacing: -.01em; margin: 0 0 var(--sp-1); max-width: none; }
-body:has(.look-notion) .c-hero .aka { font-size: 16px; color: var(--n-soft); }
-body:has(.look-notion) .c-hero-grid { grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); margin-top: var(--sp-5); }
-/* properties, Notion style: a type icon, a grey name, the value; UC/CSU as a coloured tag */
-body:has(.look-notion) .c-facts { order: -1; display: grid; grid-template-columns: minmax(0, 1fr); padding: 0; gap: 0; background: none; box-shadow: none; border-radius: 0; }
-body:has(.look-notion) .c-facts > div { display: grid !important; grid-template-columns: 180px minmax(0, 1fr); align-items: center; flex-direction: row; padding: 5px 0 !important; border: 0 !important; }
-body:has(.look-notion) .c-facts dt { order: 0; display: flex; align-items: center; gap: 8px; font: 400 14px var(--n-font); letter-spacing: 0; text-transform: none; color: var(--n-soft); }
-body:has(.look-notion) .c-facts dt::before { content: "≡"; width: 16px; text-align: center; font: 500 14px var(--n-font); color: var(--n-faint); }
-body:has(.look-notion) .c-facts [data-k="Grades"] dt::before, body:has(.look-notion) .c-facts [data-k="Course #"] dt::before { content: "#"; }
-body:has(.look-notion) .c-facts [data-k="UC/CSU a–g"] dt::before { content: "◉"; font-size: 11px; }
-body:has(.look-notion) .c-facts dd { order: 1; font: 400 14px var(--n-font); letter-spacing: 0; color: var(--n-ink); }
-body:has(.look-notion) .c-facts [data-k="UC/CSU a–g"] dd { justify-self: start; padding: 0 6px; border-radius: 3px; background: var(--n-c1); line-height: 20px; }
-body:has(.look-notion) .c-about { padding-top: var(--sp-3); border-top: 1px solid var(--n-line); }
-body:has(.look-notion) .c-lead { font: 400 16px/1.6 var(--n-font); }
-body:has(.look-notion) .c-src { font-size: 14px; color: var(--n-faint); }
-/* callouts: the prerequisite and empty sections */
-body:has(.look-notion) .c-prereq { position: relative; display: block; margin: var(--sp-4) 0 0; padding: 16px 16px 16px 48px; border: 0; border-radius: 4px; background: var(--n-callout); font: 400 15px/1.5 var(--n-font); color: var(--n-ink); }
-body:has(.look-notion) .c-prereq::before { content: "📌"; position: absolute; left: 16px; top: 15px; font-size: 18px; }
-body:has(.look-notion) .c-prereq span { display: block; font: 600 15px var(--n-font); letter-spacing: 0; text-transform: none; color: var(--n-ink); margin-bottom: 2px; }
-body:has(.look-notion) :is(.rq-empty, .c-sec .empty) { position: relative; padding: 16px 16px 16px 48px; border-radius: 4px; background: var(--n-callout); font: 400 15px/1.5 var(--n-font); color: var(--n-ink); }
-body:has(.look-notion) :is(.rq-empty, .c-sec .empty)::before { content: "💬"; position: absolute; left: 16px; top: 15px; font-size: 18px; }
-/* where it fits: linked pages */
-body:has(.look-notion) .c-path { margin-top: var(--sp-5); }
-body:has(.look-notion) .c-path-row { grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
-body:has(.look-notion) .cp-side, body:has(.look-notion) .cp-side:first-child, body:has(.look-notion) .cp-side:last-child { justify-content: flex-start; padding: 2px 0; min-height: 0; border: 0; gap: 4px 14px; }
-body:has(.look-notion) .cp-side small { order: 0; flex-basis: 180px; font: 400 14px var(--n-font); letter-spacing: 0; text-transform: none; color: var(--n-soft); text-align: left !important; }
-body:has(.look-notion) .cp-side span a { padding: 0; background: none; box-shadow: none; border-radius: 0; font: 500 14px var(--n-font); }
-body:has(.look-notion) .cp-side span a::before { content: "📄 "; text-decoration: none; }
-body:has(.look-notion) .cp-now { order: -1; justify-self: start; padding: 0; background: none; color: var(--n-ink); box-shadow: none; font: 600 14px var(--n-font); }
-body:has(.look-notion) .cp-now::before, body:has(.look-notion) .cp-now::after { display: none; }
-body:has(.look-notion) .cp-none { font: 400 14px var(--n-font); color: var(--n-faint); }
-body:has(.look-notion) .c-path-h { font: 600 14px var(--n-font); letter-spacing: 0; text-transform: none; color: var(--n-ink); }
-/* the table of contents block, and the body as one column */
-body:has(.look-notion) .c-layout { display: block; padding: 0; border: 0; }
-body:has(.look-notion) .c-rail { position: static; padding: var(--sp-3) 0 0; margin: 0; background: none; border: 0; }
-body:has(.look-notion) .nt-toc-h { display: block; margin: 0 0 4px; font: 600 14px var(--n-font); color: var(--n-ink); }
-body:has(.look-notion) .c-toc { display: grid; gap: 0; }
-body:has(.look-notion) .c-toc::before, body:has(.look-notion) .toc-fill, body:has(.look-notion) .toc-mark { display: none; }
-body:has(.look-notion) .c-toc a { padding: 3px 6px; margin-left: -6px; border: 0 !important; border-radius: 4px; color: var(--n-soft); font: 400 14px var(--n-font); text-decoration: underline; text-decoration-color: var(--n-line); box-shadow: none !important; justify-content: flex-start; gap: 8px; }
-body:has(.look-notion) .c-toc a:hover { background: var(--n-hover); color: var(--n-ink); }
-body:has(.look-notion) .c-toc a[aria-current] { color: var(--n-ink); font-weight: 400; }
-body:has(.look-notion) .c-toc .n { color: var(--n-faint); font: 400 12px var(--n-font); }
-body:has(.look-notion) .c-progress { display: none; }
-body:has(.look-notion) .c-sec { padding: var(--sp-7) 0 var(--sp-2); }
-body:has(.look-notion) .c-sec > h2 { font: 600 24px/1.3 var(--n-font); letter-spacing: 0; margin: 0 0 4px; }
-body:has(.look-notion) .c-sec > .sec-sub { font: 400 14px/1.5 var(--n-font); color: var(--n-soft); margin-bottom: var(--sp-4); }
-/* the study guides: a gallery, each card a pastel cover with a line drawing, and black pills */
-body:has(.look-notion) .res-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; padding: 0; background: none; box-shadow: none; border: 0; }
-body:has(.look-notion) .res-rows .gl-row { display: flex; flex-direction: column; gap: 0; padding: 0; border: 0; border-radius: 22px; overflow: hidden; background: var(--n-bg);
-  box-shadow: 0 0 0 1px var(--n-line), 0 2px 4px rgba(15, 15, 15, .05); transition: transform .2s ease, box-shadow .2s ease; }
-body:has(.look-notion) .res-rows .gl-row:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px var(--n-line), 0 10px 24px rgba(15, 15, 15, .1); }
-body:has(.look-notion) .res-rows .gl-row::before { content: ""; height: 112px; background: var(--n-doodle) center / 200px 90px no-repeat, var(--n-c1); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+2)::before { background-color: var(--n-c2); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+3)::before { background-color: var(--n-c3); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+4)::before { background-color: var(--n-c4); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+5)::before { background-color: var(--n-c5); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n)::before { background-color: var(--n-c6); }
-body:has(.look-notion) .gl-text { padding: 14px 18px 0; }
-body:has(.look-notion) .gl-title { font: 700 17px/1.3 var(--n-font); text-decoration: none; }
-body:has(.look-notion) .gl-title:hover { text-decoration: underline; }
-body:has(.look-notion) .gl-note { font: 400 13px/1.5 var(--n-font); color: var(--n-soft); margin-top: 4px; }
-body:has(.look-notion) .gl-who { font: 400 12px/1.4 var(--n-font); color: var(--n-faint); margin-top: 8px; }
-body:has(.look-notion) .gl-files { gap: 8px; padding: 14px 18px 18px; margin-top: auto; }
-body:has(.look-notion) .gl-files a { padding: 7px 14px; border-radius: 980px; background: var(--n-pill); color: var(--n-pill-ink); font: 600 13px var(--n-font); text-decoration: none; }
-body:has(.look-notion) .gl-files a::after { content: " →"; }
-body:has(.look-notion) .gl-files a:hover { background: var(--n-pill); color: var(--n-pill-ink); opacity: .86; }
-/* buttons and "add" links */
-body:has(.look-notion) .c-main .btn { background: var(--n-pill); color: var(--n-pill-ink); border-radius: 980px; box-shadow: none; padding: 9px 20px; }
-body:has(.look-notion) :is(.edit, .add-link) { color: var(--n-soft); font: 500 14px var(--n-font); text-decoration: none; }
-body:has(.look-notion) .edit::after { content: ""; }
-body:has(.look-notion) .edit::before { content: "+ "; }
-body:has(.look-notion) :is(.edit, .add-link):hover { color: var(--n-ink); background: var(--n-hover); border-radius: 4px; }
-/* tips as quote blocks; the to-dos as a checklist; the comment box plain */
-body:has(.look-notion) .tip-card { margin-top: var(--sp-3); padding: 2px 0 2px 16px; border: 0; border-left: 3px solid var(--n-ink); border-radius: 0; background: none; box-shadow: none; }
-body:has(.look-notion) .tip-card::before { display: none; }
-body:has(.look-notion) .tip-card p { font: 400 17px/1.55 var(--n-font); }
-body:has(.look-notion) .c-todo-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
-body:has(.look-notion) .c-todo-item { display: grid; grid-template-columns: 26px minmax(0, 1fr); padding: 4px 6px; margin-left: -6px; border-radius: 4px; background: none; box-shadow: none; transform: none !important; }
-body:has(.look-notion) .c-todo-item::before { content: ""; grid-row: 1 / span 2; width: 14px; height: 14px; margin-top: 4px; border: 1.5px solid var(--n-soft); border-radius: 2px; }
-body:has(.look-notion) .c-todo-item:hover { background: var(--n-hover); box-shadow: none; }
-body:has(.look-notion) .c-todo-item b { font: 500 16px var(--n-font); }
-body:has(.look-notion) .c-todo-item span { font: 400 14px var(--n-font); color: var(--n-soft); }
-body:has(.look-notion) .c-todo-item i { display: none; }
-body:has(.look-notion) .comment-form { padding: 0; background: none; box-shadow: none; }
-body:has(.look-notion) .comment-form :is(textarea, input, select, .combo-in) { border-radius: 6px; border-color: var(--n-line); background: var(--n-bg); box-shadow: rgba(15, 15, 15, .1) 0 0 0 1px inset; font-family: var(--n-font); }
-body:has(.look-notion) .t-missing li { border-color: var(--n-line) !important; }
-body:has(.look-notion) .vtab[aria-pressed="true"]::after { background: var(--n-ink); height: 2px; }
-body:has(.look-notion) footer.site { background: var(--n-bg); box-shadow: inset 0 1px var(--n-line); font-family: var(--n-font); }
-@media (max-width: 760px) {
-  body:has(.look-notion) #main { padding: 0 16px; }
-  body:has(.look-notion) .nt-icon { font-size: 60px; margin-top: -38px; }
-  body:has(.look-notion) .c-hero h1 { font-size: 32px; }
-  body:has(.look-notion) .c-facts > div { grid-template-columns: 140px minmax(0, 1fr); }
-}
-
-/* ── the Notion trial, made "cute" (Ethan, same day: "very 简约 but clean and cute", with a screenshot of
-   a peach page, a lavender card, a wavy badge and hand-drawn marks): a warm cream page, a peach cover,
-   the icon in a wavy lavender badge, rounded type where the device has it (SF Rounded on Apple; the
-   normal sans elsewhere: no web font is loaded, so nothing goes to a font service), whole-pastel cards
-   with soft 28px corners, a hand-drawn outline round tips, little "shine" marks by section headings. ── */
-body:has(.look-notion) { --n-round: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", var(--n-font); --n-bg: #fbf6f0; --n-cover: #f2dccb;
-  --n-lav: #dccbea; --n-peach: #f6dfd0; --n-butter: #f7eab6; --n-sky: #d6e5f1; --n-mint: #d7ecdd; --n-rose: #f3d7e1;
-  --n-c1: var(--n-butter); --n-c2: var(--n-sky); --n-c3: var(--n-lav); --n-c4: var(--n-mint); --n-c5: var(--n-peach); --n-c6: var(--n-rose);
-  --n-callout: #f3ebe2; --n-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%23191919%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E"); --n-wob: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M14%209%20C120%204%20290%206%20386%2010%20C393%2011%20396%2016%20395%2024%20C397%2080%20394%20140%20393%20182%20C392%20190%20387%20193%20378%20193%20C270%20197%20120%20194%2020%20191%20C11%20190%206%20186%206%20177%20C4%20120%207%2060%207%2020%20C7%2012%209%209%2014%209%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222.2%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E"); --n-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%23dccbea%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); }
-:root[data-theme="dark"] body:has(.look-notion) { --n-bg: #191919; --n-cover: #3d2f27; --n-lav: #3a3350; --n-peach: #4a3328; --n-butter: #4a4227; --n-sky: #263a4a;
-  --n-mint: #2c4033; --n-rose: #4a2e3a; --n-callout: #262423; --n-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E"); --n-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%233a3350%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body:has(.look-notion) { --n-bg: #191919; --n-cover: #3d2f27; --n-lav: #3a3350; --n-peach: #4a3328;
-  --n-butter: #4a4227; --n-sky: #263a4a; --n-mint: #2c4033; --n-rose: #4a2e3a; --n-callout: #262423; --n-shine: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2030%2030%22%20fill%3D%22none%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020%20L2%2024M12%209V3M21%2014l5-3%22/%3E%3C/svg%3E");
-  --n-badge: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M98.20%2C50.00%20L97.06%2C52.47%20L94.20%2C54.65%20L91.02%2C56.50%20L89.02%2C58.29%20L88.99%2C60.45%20L90.61%2C63.20%20L92.67%2C66.38%20L93.70%2C69.46%20L92.76%2C71.79%20L89.92%2C73.05%20L86.17%2C73.49%20L82.85%2C73.87%20L80.95%2C75.06%20L80.61%2C77.56%20L81.11%2C81.11%20L81.32%2C84.79%20L80.32%2C87.44%20L77.86%2C88.35%20L74.44%2C87.63%20L70.95%2C86.29%20L68.16%2C85.65%20L66.34%2C86.69%20L65.16%2C89.48%20L64.00%2C93.08%20L62.33%2C96.01%20L60.00%2C97.06%20L57.27%2C95.90%20L54.55%2C93.32%20L52.14%2C90.82%20L50.00%2C89.80%20L47.86%2C90.82%20L45.45%2C93.32%20L42.73%2C95.90%20L40.00%2C97.06%20L37.67%2C96.01%20L36.00%2C93.08%20L34.84%2C89.48%20L33.66%2C86.69%20L31.84%2C85.65%20L29.05%2C86.29%20L25.56%2C87.63%20L22.14%2C88.35%20L19.68%2C87.44%20L18.68%2C84.79%20L18.89%2C81.11%20L19.39%2C77.56%20L19.05%2C75.06%20L17.15%2C73.87%20L13.83%2C73.49%20L10.08%2C73.05%20L7.24%2C71.79%20L6.30%2C69.46%20L7.33%2C66.38%20L9.39%2C63.20%20L11.01%2C60.45%20L10.98%2C58.29%20L8.98%2C56.50%20L5.80%2C54.65%20L2.94%2C52.47%20L1.80%2C50.00%20L2.94%2C47.53%20L5.80%2C45.35%20L8.98%2C43.50%20L10.98%2C41.71%20L11.01%2C39.55%20L9.39%2C36.80%20L7.33%2C33.62%20L6.30%2C30.54%20L7.24%2C28.21%20L10.08%2C26.95%20L13.83%2C26.51%20L17.15%2C26.13%20L19.05%2C24.94%20L19.39%2C22.44%20L18.89%2C18.89%20L18.68%2C15.21%20L19.68%2C12.56%20L22.14%2C11.65%20L25.56%2C12.37%20L29.05%2C13.71%20L31.84%2C14.35%20L33.66%2C13.31%20L34.84%2C10.52%20L36.00%2C6.92%20L37.67%2C3.99%20L40.00%2C2.94%20L42.73%2C4.10%20L45.45%2C6.68%20L47.86%2C9.18%20L50.00%2C10.20%20L52.14%2C9.18%20L54.55%2C6.68%20L57.27%2C4.10%20L60.00%2C2.94%20L62.33%2C3.99%20L64.00%2C6.92%20L65.16%2C10.52%20L66.34%2C13.31%20L68.16%2C14.35%20L70.95%2C13.71%20L74.44%2C12.37%20L77.86%2C11.65%20L80.32%2C12.56%20L81.32%2C15.21%20L81.11%2C18.89%20L80.61%2C22.44%20L80.95%2C24.94%20L82.85%2C26.13%20L86.17%2C26.51%20L89.92%2C26.95%20L92.76%2C28.21%20L93.70%2C30.54%20L92.67%2C33.62%20L90.61%2C36.80%20L88.99%2C39.55%20L89.02%2C41.71%20L91.02%2C43.50%20L94.20%2C45.35%20L97.06%2C47.53%20L98.20%2C50.00Z%22%20fill%3D%22%233a3350%22%20stroke%3D%22%23e9e6df%22%20stroke-width%3D%223%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"); } }
-body:has(.look-notion) :is(h1, h2, h3, .gl-title, .c-kicker, .nt-toc-h, .c-path-h, .c-todo-item b, .ln-title) { font-family: var(--n-round); }
-body:has(.look-notion) :is(.main-nav, .crumbs, .bar, footer.site) a { text-decoration: none; }
-body:has(.look-notion) header.site { background: var(--n-bg); }
-body:has(.look-notion) .ann { background: var(--n-callout); }
-/* the icon in a wavy badge */
-body:has(.look-notion) .nt-icon { display: grid; place-items: center; width: 112px; height: 112px; margin-top: -62px; font-size: 52px; background: var(--n-badge) center / contain no-repeat; }
-body:has(.look-notion) .c-hero h1 { font-weight: 800; letter-spacing: -.015em; }
-body:has(.look-notion) .c-kicker { display: inline-block; padding: 2px 10px; border-radius: 980px; background: var(--n-lav); color: var(--n-ink); font-size: 13px; font-weight: 600; margin-bottom: var(--sp-2); }
-body:has(.look-notion) .c-facts [data-k="UC/CSU a–g"] dd { border-radius: 980px; padding: 0 10px; background: var(--n-butter); }
-body:has(.look-notion) .c-about { border-top: 0; padding-top: 0; }
-body:has(.look-notion) .c-prereq { border-radius: 20px; background: var(--n-butter); }
-body:has(.look-notion) :is(.rq-empty, .c-sec .empty) { border-radius: 20px; background: var(--n-peach); }
-/* headings with a little shine */
-body:has(.look-notion) .c-sec > h2 { display: inline-block; padding-right: 30px; background: var(--n-shine) right 2px top -6px / 24px 24px no-repeat; font-weight: 800; }
-body:has(.look-notion) .c-sec > .sec-sub { display: block; }
-/* study guide cards: all pastel, soft corners, the drawing on top */
-body:has(.look-notion) .res-rows { gap: 18px; }
-body:has(.look-notion) .res-rows .gl-row { border-radius: 28px; background: var(--n-c1); box-shadow: none; }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+2) { background: var(--n-c2); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+3) { background: var(--n-c3); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+4) { background: var(--n-c4); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n+5) { background: var(--n-c5); }
-body:has(.look-notion) .res-rows .gl-row:nth-child(6n) { background: var(--n-c6); }
-body:has(.look-notion) .res-rows .gl-row::before { height: 96px; background-color: transparent !important; }
-body:has(.look-notion) .res-rows .gl-row:hover { transform: translateY(-4px) rotate(-.4deg); box-shadow: 0 14px 28px -16px rgba(60, 40, 20, .35); }
-body:has(.look-notion) .gl-text { padding: 0 22px; }
-body:has(.look-notion) .gl-note, body:has(.look-notion) .gl-who { color: color-mix(in srgb, var(--n-ink) 70%, transparent); }
-body:has(.look-notion) .gl-files { padding: 16px 22px 22px; }
+body:has(.look-cute) .c-hero:hover .cu-sticker { transform: rotate(-6deg) scale(1.05); }
+body:has(.look-cute) .cu-art { display: block; position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; height: 140px; color: var(--k-ink); opacity: .85; pointer-events: none; }
+body:has(.look-cute) .cu-art svg { width: 100%; height: 100%; display: block; }
+body:has(.look-cute) .c-kicker { display: inline-block; padding: 3px 12px; border-radius: 980px; background: var(--k-lav); color: var(--k-ink); font: 700 var(--fs-sm) var(--k-round); }
+body:has(.look-cute) .c-hero h1 { font-weight: 800; letter-spacing: -.02em; padding-right: 110px; }
+body:has(.look-cute) .c-lead { color: var(--k-ink); }
+body:has(.look-cute) .c-hero .c-src { color: var(--k-soft); }
+/* the prerequisite inside a hand-drawn outline */
+body:has(.look-cute) .c-prereq { border: 0; padding: var(--sp-4) var(--sp-5); background: var(--k-wob) center / 100% 100% no-repeat; }
+body:has(.look-cute) .c-prereq span { color: var(--k-ink); }
+/* the facts: four pastel tiles on a white card */
+body:has(.look-cute) .c-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border-radius: 26px; background: var(--k-card); box-shadow: none; }
+body:has(.look-cute) .c-facts > div { padding: var(--sp-4) !important; border: 0 !important; border-radius: 18px; background: var(--k-butter); }
+body:has(.look-cute) .c-facts > div:nth-child(2) { background: var(--k-sky); }
+body:has(.look-cute) .c-facts > div:nth-child(3) { background: var(--k-mint); }
+body:has(.look-cute) .c-facts > div:nth-child(4) { background: var(--k-rose); }
+body:has(.look-cute) .c-facts dd { font-weight: 800; }
+body:has(.look-cute) .c-facts dt { color: var(--k-soft); }
+/* where it fits: white pills with an ink edge, this class as the black one */
+body:has(.look-cute) .cp-side span a { border-radius: 980px; background: var(--k-card); box-shadow: 0 0 0 1.5px var(--k-ink); text-decoration: none; }
+body:has(.look-cute) .cp-side span a:hover { background: var(--k-butter); }
+body:has(.look-cute) .cp-now { border-radius: 980px; background: var(--k-pill); color: var(--k-pill-ink); box-shadow: none; }
+body:has(.look-cute) .cp-now::before, body:has(.look-cute) .cp-now::after { background: var(--k-ink); }
+body:has(.look-cute) .cp-side small, body:has(.look-cute) .c-path-h { color: var(--k-soft); }
+/* the side index: soft round hovers, where you are as a black pill */
+body:has(.look-cute) .c-layout { border-top: 0; }
+body:has(.look-cute) .c-toc::before, body:has(.look-cute) .toc-fill, body:has(.look-cute) .toc-mark { display: none; }
+body:has(.look-cute) .c-toc a { border: 0 !important; padding: 7px 14px; margin: 1px 0; border-radius: 980px; color: var(--k-soft); text-decoration: none; }
+body:has(.look-cute) .c-toc a:hover { background: var(--k-line); color: var(--k-ink); }
+body:has(.look-cute) .c-toc a[aria-current] { background: var(--k-pill); color: var(--k-pill-ink); box-shadow: none !important; }
+body:has(.look-cute) .c-toc a[aria-current] .n { color: var(--k-pill-ink); opacity: .7; }
+body:has(.look-cute) .c-progress .c-bar { height: 8px; border-radius: 980px; background: var(--k-lav); overflow: hidden; }
+body:has(.look-cute) .c-progress .c-bar i { background: var(--k-ink); border-radius: 980px; }
+/* section headings with a little shine */
+body:has(.look-cute) .c-sec > h2 { display: inline-block; padding-right: 30px; background: var(--k-shine) right 2px top -6px / 24px 24px no-repeat; font-weight: 800; }
+body:has(.look-cute) .c-sec > .sec-sub { display: block; }
+/* study guides: the same list, as pastel rows with soft corners and a small drawing */
+body:has(.look-cute) .res-rows { display: grid; gap: 12px; padding: 0; background: none; box-shadow: none; border: 0; }
+body:has(.look-cute) .res-rows .gl-row { padding: var(--sp-5) var(--sp-5) var(--sp-5) 132px; border: 0; border-radius: 26px; background: var(--k-butter) left 14px center / 110px 50px no-repeat;
+  background-image: var(--k-d1); transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
+body:has(.look-cute) .res-rows .gl-row:nth-child(6n+2) { background-color: var(--k-sky); background-image: var(--k-d2); }
+body:has(.look-cute) .res-rows .gl-row:nth-child(6n+3) { background-color: var(--k-lav); background-image: var(--k-d3); }
+body:has(.look-cute) .res-rows .gl-row:nth-child(6n+4) { background-color: var(--k-mint); }
+body:has(.look-cute) .res-rows .gl-row:nth-child(6n+5) { background-color: var(--k-peach); background-image: var(--k-d2); }
+body:has(.look-cute) .res-rows .gl-row:nth-child(6n) { background-color: var(--k-rose); background-image: var(--k-d3); }
+body:has(.look-cute) .res-rows .gl-row:hover { transform: translateY(-2px) rotate(-.3deg); }
+body:has(.look-cute) .gl-title { font-weight: 800; text-decoration: none; }
+body:has(.look-cute) .gl-note, body:has(.look-cute) .gl-who { color: color-mix(in srgb, var(--k-ink) 72%, transparent); }
+body:has(.look-cute) .gl-files a { padding: 7px 14px; border-radius: 980px; background: var(--k-pill); color: var(--k-pill-ink); text-decoration: none; }
+body:has(.look-cute) .gl-files a::after { content: " →"; }
+body:has(.look-cute) .gl-files a:hover { background: var(--k-pill); color: var(--k-pill-ink); opacity: .85; }
+/* buttons: black pills; quiet ones white pills with an ink edge */
+body:has(.look-cute) .btn { border-radius: 980px; background: var(--k-pill); color: var(--k-pill-ink); box-shadow: none; }
+body:has(.look-cute) .btn:hover { background: var(--k-pill); opacity: .88; box-shadow: none; }
+body:has(.look-cute) .btn.ghost { background: var(--k-card); color: var(--k-ink); box-shadow: 0 0 0 1.5px var(--k-ink); }
+body:has(.look-cute) :is(.edit, .add-link) { color: var(--k-ink); text-decoration: underline 3px var(--k-lav); text-underline-offset: 4px; }
+/* empty states: a peach card with a small drawing */
+body:has(.look-cute) :is(.rq-empty, .c-sec .empty) { padding: var(--sp-5) var(--sp-5) var(--sp-5) 118px; border-radius: 26px; background: var(--k-peach) left 10px center / 100px 46px no-repeat; background-image: var(--k-d2); color: var(--k-ink); }
 /* tips: a lavender card, the words inside a hand-drawn outline */
-body:has(.look-notion) .tip-card { padding: 34px 38px 26px; border: 0; border-radius: 28px; background: var(--n-wob) center / calc(100% - 28px) calc(100% - 28px) no-repeat, var(--n-lav); }
-body:has(.look-notion) .tip-card p { font-family: var(--n-round); font-size: 18px; }
-body:has(.look-notion) .tip-card figcaption { margin-top: 6px; }
-/* to-dos, the comment box and pills, softer */
-body:has(.look-notion) .c-todo-item::before { border-radius: 5px; }
-body:has(.look-notion) .c-todo-item:hover { background: var(--n-callout); border-radius: 12px; }
-body:has(.look-notion) .comment-form :is(textarea, input, select, .combo-in) { border-radius: 16px; background: #fff; }
-:root[data-theme="dark"] body:has(.look-notion) .comment-form :is(textarea, input, select, .combo-in) { background: #222; }
-body:has(.look-notion) footer.site { background: var(--n-callout); box-shadow: none; }
-@media (max-width: 760px) { body:has(.look-notion) .nt-icon { width: 88px; height: 88px; font-size: 40px; margin-top: -48px; } body:has(.look-notion) .tip-card { padding: 28px 28px 22px; } }
+body:has(.look-cute) .tip-card { padding: 34px 38px 26px 64px; border: 0; border-radius: 28px; box-shadow: none; background: var(--k-wob-w) center / calc(100% - 28px) calc(100% - 28px) no-repeat, var(--k-lav); }
+body:has(.look-cute) .tip-card::before { left: 30px; top: 26px; color: var(--k-ink); }
+body:has(.look-cute) .tip-card p { color: var(--k-ink); }
+/* help finish this page: pastel tiles */
+body:has(.look-cute) .c-todo-item { border-radius: 26px; background: var(--k-mint); box-shadow: none; }
+body:has(.look-cute) .c-todo-item:nth-child(2) { background: var(--k-sky); }
+body:has(.look-cute) .c-todo-item:nth-child(3) { background: var(--k-butter); }
+body:has(.look-cute) .c-todo-item:nth-child(4) { background: var(--k-rose); }
+body:has(.look-cute) .c-todo-item:hover { box-shadow: none; transform: translateY(-2px) rotate(-.4deg); }
+body:has(.look-cute) .c-todo-item i { display: grid; place-items: center; width: 30px; height: 30px; top: var(--sp-4); border-radius: 50%; background: var(--k-pill); color: var(--k-pill-ink); }
+body:has(.look-cute) .c-todo-item b { font-weight: 800; }
+/* teachers, requests, comments: white cards with soft corners */
+body:has(.look-cute) .t-missing ul, body:has(.look-cute) .rq-class .rq-list { padding: 0 var(--sp-5); border: 0; border-radius: 26px; background: var(--k-card); }
+body:has(.look-cute) .t-missing li { border-color: var(--k-line) !important; }
+body:has(.look-cute) .t-missing li:first-child { border-top: 0; }
+body:has(.look-cute) .t-missing li:last-child { border-bottom: 0; }
+body:has(.look-cute) .rq-vote { border-radius: 980px; border-color: var(--k-ink); }
+body:has(.look-cute) .rq-vote[aria-pressed="true"] { background: var(--k-pill); color: var(--k-pill-ink); }
+body:has(.look-cute) .comment-form { border-radius: 26px; background: var(--k-card); box-shadow: none; }
+body:has(.look-cute) .comment-form :is(textarea, input, select, .combo-in) { border-radius: 16px; border-color: var(--k-line); background: var(--k-bg); box-shadow: none; }
+body:has(.look-cute) .vtab[aria-pressed="true"]::after { background: var(--k-ink); height: 3px; border-radius: 3px; }
+body:has(.look-cute) footer.site { background: var(--k-stage); }
+@media (max-width: 760px) {
+  body:has(.look-cute) .c-hero { padding: var(--sp-6) var(--sp-5) 110px; border-radius: 28px; }
+  body:has(.look-cute) .cu-sticker { width: 76px; height: 76px; font-size: 34px; top: 16px; right: 16px; }
+  body:has(.look-cute) .c-hero h1 { padding-right: 70px; }
+  body:has(.look-cute) .cu-art { height: 100px; }
+  body:has(.look-cute) .res-rows .gl-row { padding: 74px var(--sp-5) var(--sp-5); background-position: left 14px top 14px; }
+  body:has(.look-cute) :is(.rq-empty, .c-sec .empty) { padding: 70px var(--sp-5) var(--sp-5); background-position: left 10px top 12px; }
+  body:has(.look-cute) .tip-card { padding: 30px 26px 22px 50px; }
+  body:has(.look-cute) .tip-card::before { left: 20px; }
+}
+:root[data-theme="dark"] body:has(.look-cute) .ann-kind, :root[data-theme="dark"] body:has(.look-cute) .ann-msg,
+:root[data-theme="dark"] body:has(.look-cute) .ann-msg a, :root[data-theme="dark"] body:has(.look-cute) .ann-x { color: var(--k-ink); }
+:root[data-theme="dark"] body:has(.look-cute) .ann-kind { color: var(--k-pill-ink); }
+:root[data-theme="dark"] body:has(.look-cute) .ann { background: var(--k-butter); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body:has(.look-cute) .ann-msg, :root:not([data-theme="light"]) body:has(.look-cute) .ann-msg a, :root:not([data-theme="light"]) body:has(.look-cute) .ann-x { color: var(--k-ink); }
+  :root:not([data-theme="light"]) body:has(.look-cute) .ann-kind { color: var(--k-pill-ink); }
+  :root:not([data-theme="light"]) body:has(.look-cute) .ann { background: var(--k-butter); }
+}
