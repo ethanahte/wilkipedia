@@ -394,7 +394,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
 <a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
-<main id="main" class="wrap">{"" if path.startswith("bell/countdown") else '<i class="look-fresh" hidden></i>'}
+<main id="main" class="wrap">{"" if path.startswith("bell/countdown") else f'<i class="look-fresh" data-p="{(path.split("/")[0].replace(".html", "") or "home")}" hidden></i>'}
 {body}
 </main>
 <footer class="site">
@@ -623,7 +623,7 @@ def build_courses(depts, courses):
         page(f"courses/{c['slug']}/", c["name"], f"""
 {top}
 {crumbs([("All classes", "../../subjects/"), (dept_name[c['department']], f"../../subjects/{c['department']}/")], c["name"], f"courses/{c['slug']}/")}
-<header class="c-hero">
+<header class="c-hero" data-d="{e(c['department'])}">
   <p class="c-kicker"><span class="kk-e" aria-hidden="true">{DEPT_EMOJI.get(c["department"], "📘")}</span>{kicker}</p>
   <h1>{e(c['name'])}</h1>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}

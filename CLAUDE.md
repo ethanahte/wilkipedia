@@ -1462,6 +1462,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     with a gold dot. Links inherit their colour with a faint underline that turns gold.
   - Every page but `bell/countdown/` carries `<i class="look-fresh">` (added in `page()`); all rules are
     scoped `body:has(.look-fresh)`. The study-guides graph keeps its own Swiss field (only its corners soften).
+  - **Part two, a study desk** (same day, Ethan: "don't overuse the little airplane… be more creative… with
+    everything"). The plane/star/A+ were dropped as repeated decoration. Instead:
+    - every page head gets its OWN original ink drawing with one gold highlighter spot (`--dd-*`, ~30 of them,
+      generated as inline SVG in the "study desk" block). `page()` tags the marker with the first path segment
+      (`<i class="look-fresh" data-p="bell">`) and `PAGE`→drawing is a map in that CSS (bell → alarm clock,
+      calendar → circled day, menu → lunch tray, leaderboard → trophy, sat → bubble sheet, guides → notes and a
+      highlighter, teachers → apple, requests → "?" bubble, submit → pencil, school → building, 404 → crumpled
+      paper…). Class pages use their subject (`.c-hero[data-d=…]`: plotted curve, flask, bookmarked book, globe,
+      speech bubbles, sneaker, palette, gear and wrench, puzzle piece, toolbox). Heads that are a plain h1
+      (menu, study guides, contribute, teacher pages) get it via `#main::before`; home and map have none.
+      Drawings pop in once (`dd-in`) and tilt on hover; night mode inverts the ink and keeps the gold.
+    - the title highlighter draws itself in (`hl-draw`); text selection, plain-link hovers (a sweep) and tabs
+      use the same gold.
+    - kickers are tilted sticky notes with a folded corner; tips are on ruled notebook paper with a red
+      margin; class sections are numbered like notes (`counter(note)`, gold tab); empty sections show a
+      drawing for what's missing; the footer signs off with the pencil; buttons squish when pressed.
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
