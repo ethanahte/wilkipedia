@@ -1444,6 +1444,22 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   `~/Wilkipedia-backups/backup.log`, and `--unschedule` turns it off. If the repo
   moves, run `--schedule` again, because the plist stores the script's path.
 
+- **Style trials, one class page each (2026-10-23).** `TRIAL_LOOKS` in build.py: `ap-biology` → "apple",
+  `ap-calculus-bc` → "notion"; every other class page keeps the house design. Each trial page carries a
+  marker (`<i class="look-apple">` / `<i class="look-notion">`) and all its CSS is scoped to
+  `body:has(.look-…)` (two blocks at the end of style.css), so removing a slug from `TRIAL_LOOKS` reverts it.
+  - **Apple:** system font (SF Pro on Apple devices), a light glass global bar that doesn't stick, a sticky
+    local nav (class name · sections · blue "Share" pill; it replaces the side rail and owns `#c-toc`),
+    a centred hero with a very large title, the facts as a grey spec tile, full-width sections alternating
+    white / #f5f5f7 with big centred headlines, study guides as 18px-rounded cards, blue links with ›.
+  - **Notion, made "cute"** (Ethan's screenshots: pastel cards, black line drawings, black pills, a peach
+    page with a wavy badge): a cream page, a peach cover with an original line drawing (`NOTION_COVER`),
+    the subject emoji (`DEPT_EMOJI`) in a wavy lavender badge over the cover's edge, a 900px column,
+    properties as Notion rows with type icons, callouts (prerequisite, empty sections), a table of contents
+    block, study guides as whole-pastel 28px cards with a small drawing and black pills, tips in a lavender
+    card with a hand-drawn outline, the to-dos as a checklist, little "shine" marks by headings. Rounded
+    type via `ui-rounded` (Safari/Apple) only; no web font is loaded (privacy: nothing goes to a font CDN).
+  - Ethan hasn't picked yet; when he does, the winner's rules become the house style and the trials go.
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
