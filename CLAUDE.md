@@ -1507,6 +1507,15 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     light text; one button and chosen-chip colour at night: cream on charcoal (`--on-bg`/`--on-fg` remapped, so
     no stray gold); the bell page's Now panel (drawn in `--ink`, which is light at night) is a lit dark card.
     Gotcha fixed in doodles.py: the per-tone highlighter vars (`--mk-*`) must go in the first (day) block.
+  - **Home page, simplified (2026-10-24, Ethan: "more simple, but don't remove any of the current function…
+    get inspiration from the webs and images I listed before").** Two places instead of five floating cards:
+    `.hx`, a cover over the campus background (kicker, headline with the Morandi highlighter on "in one place.",
+    one white search bar with the live results popup and rotating examples, the not-official note, a soft scrim);
+    and `.hx-sheet`, one ivory sheet with rounded top corners rising over it, holding `.today` (the bell strip
+    `#bell` and the cafeteria `#next-meal` in one row split by a hairline; chips horizontal, the current period in
+    the page tone) and `.home-pair` (newest study guides with count, class finder and links, beside Recently
+    added). homemotion.js reveal now fades `.hx, .today, .home-sec`, then `.hx-sheet`, then the footer. With the
+    plain background the cover is ink on paper and the sheet has no lift. Styles: "The home page, simplified".
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:

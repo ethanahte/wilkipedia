@@ -446,41 +446,47 @@ def course_row(c, r):
 # ─────────────────────────── pages ───────────────────────────
 
 def build_home(depts, courses, teachers):
+    # The home page, simplified (Ethan 2026-10-24: "more simple, but don't remove any of the current function").
+    # Two places instead of five floating cards: a cover (the campus behind just the headline, the search and
+    # the note) and one ivory sheet that rises over it, holding Today (the bell and the cafeteria in one row)
+    # and What's new (the newest study guides beside everything recently added). Every feature is still here.
     page("", "Wilkipedia", f"""
-<section class="hero hero-split" aria-labelledby="hero-h">
-  <div class="hero-main">
-    <p class="hero-kicker">Wilcox High School · Santa Clara</p>
-    <h1 id="hero-h">Everything Wilcox, in one place.</h1>
-    <form class="big-search" action="search/" role="search">
-      <div class="big-search-field">{ICONS["search"]}<input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
-      <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
-      <button class="btn">Search</button>
-    </form>
-    <p class="hero-trust">Written by Wilcox students and checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
-  </div>
-  <aside class="hero-side" aria-label="Right now at Wilcox">
-    <p class="hero-side-h">Right now</p>
-    <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section>
-  </aside>
-</section>
-<section id="next-meal" class="bell next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
-
-<section class="home-sec guides-sec" aria-labelledby="hg-h">
-  <div class="hg-intro">
-    <h2 id="hg-h">Study guides</h2>
-    <p class="hg-sub">Made by Wilcox students for classes they took, and checked by reviewers before they go up.</p>
-    <p class="hg-count" id="hg-count"></p>
-    <form class="hg-find" id="hg-find" role="search"><label class="sr" for="hg-class">Find study guides for a class</label>
-      <input id="hg-class" list="hg-classes" placeholder="Your class, e.g. AP Biology" autocomplete="off"><datalist id="hg-classes"></datalist>
-      <button class="btn">Find</button></form>
-    <p class="hg-links"><a href="guides/">All study guides</a><a href="submit/?kind=resource">Share one you made</a></p>
-  </div>
-  <ol class="hg-list" id="home-guides" aria-label="Newest study guides"><li class="meta">Loading…</li></ol>
+<section class="hx" aria-labelledby="hero-h">
+  <p class="hx-kicker">Wilcox High School · Santa Clara</p>
+  <h1 id="hero-h">Everything Wilcox, <span class="hx-hl">in one place.</span></h1>
+  <form class="big-search hx-search" action="search/" role="search">
+    <div class="big-search-field">{ICONS["search"]}<input name="q" id="home-q" type="search" placeholder="Search anything…" aria-label="Search classes, teachers, clubs and teams" autocomplete="off">
+    <div id="home-results" class="results-pop" role="listbox" hidden></div></div>
+    <button class="btn">Search</button>
+  </form>
+  <p class="hero-trust">Written by Wilcox students and checked by student reviewers. Not an official Wilcox or SCUSD site.</p>
 </section>
 
-<section class="home-sec">
-  <h2>Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
-</section>
+<div class="hx-sheet">
+  <section class="today" aria-label="Today at Wilcox">
+    <div class="today-bell"><p class="today-h">Right now</p>
+      <section id="bell" class="bell" aria-label="Bell schedule"><div class="meta">Loading today’s bell schedule…</div></section></div>
+    <section id="next-meal" class="next-meal" aria-label="Cafeteria menu"><div class="meta">Loading the cafeteria menu…</div></section>
+  </section>
+
+  <div class="home-pair">
+    <section class="home-sec guides-sec" aria-labelledby="hg-h">
+      <div class="hg-intro">
+        <div class="hg-head"><h2 id="hg-h">Study guides</h2><p class="hg-count" id="hg-count"></p></div>
+        <p class="hg-sub">Made by Wilcox students for classes they took, and checked by reviewers before they go up.</p>
+        <form class="hg-find" id="hg-find" role="search"><label class="sr" for="hg-class">Find study guides for a class</label>
+          <input id="hg-class" list="hg-classes" placeholder="Your class, e.g. AP Biology" autocomplete="off"><datalist id="hg-classes"></datalist>
+          <button class="btn">Find</button></form>
+      </div>
+      <ol class="hg-list" id="home-guides" aria-label="Newest study guides"><li class="meta">Loading…</li></ol>
+      <p class="hg-links"><a href="guides/">All study guides</a><a href="submit/?kind=resource">Share one you made</a></p>
+    </section>
+
+    <section class="home-sec recent-sec" aria-labelledby="rc-h">
+      <h2 id="rc-h">Recently added</h2><div id="home-recent" class="mini-list"><div class="meta">Loading…</div></div>
+    </section>
+  </div>
+</div>
 """, desc="Everything about Wilcox High School in Santa Clara in one place: classes and teachers, the campus map, bell schedule, clubs and sports, written by Wilcox students.",
          data={"page": "home"})
 
