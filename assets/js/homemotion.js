@@ -47,7 +47,7 @@ export function mountHomeMotion() {
     stick();
     if (!reveal) return;
     // the sheet's contents fade first, then the sheet itself, so the campus shows through at the end
-    cards = [...$$('.hx, .today, .home-sec', layer), $('.hx-sheet', layer), foot].filter((c) => c && c.offsetParent);
+    cards = [...$$('.hx, .hs-row', layer), $('.hx-sheet', layer), foot].filter((c) => c && c.offsetParent);
     shown = -1;
     paint();
   };

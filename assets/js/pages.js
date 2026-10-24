@@ -277,6 +277,26 @@ async function homeGuides(data, name) {
   }).join('');
 }
 
+// The cover's date and its "at a glance" line (2026-10-24): what's on now, the next meal and the newest guide,
+// read from the bell strip, the cafeteria and the guide list as they draw (nothing fetched twice).
+function glance() {
+  const date = $('#hx-date'), box = $('#hx-now');
+  if (date) date.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  if (!box) return;
+  const paint = () => {
+    const now = $('#bell .bell-status')?.textContent.replace(/\s+/g, ' ').replace(/^Now:\s*/, '').trim();
+    const dish = $('#next-meal .nm-tiles .nm-name, #next-meal .nm-dish');
+    const meal = dish && $('#next-meal .nm-days [aria-selected="true"]')?.textContent.trim();
+    const guide = $('#home-guides .hg-row');
+    const item = (k, v, href) => `<li><a href="${href}"><span class="hx-k">${k}</span><span class="hx-v">${esc(v)}</span></a></li>`;
+    box.innerHTML = [now && item('Now', now, '#today'), dish && item(meal ? `Lunch · ${meal}` : 'Lunch', [...dish.childNodes].filter((n) => n.nodeType === 3 || !n.matches?.('.diet, abbr, .nm-i, [class*="tag"], [title]')).map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim(), '#today'),
+      guide && item('New guide', $('.hg-title', guide).textContent.trim(), guide.getAttribute('href'))].filter(Boolean).join('');
+  };
+  const mo = new MutationObserver(() => { clearTimeout(mo.t); mo.t = setTimeout(paint, 60); });
+  for (const id of ['#bell', '#next-meal', '#home-guides']) { const el = $(id); if (el) mo.observe(el, { childList: true, subtree: true }); }
+  paint();
+}
+
 const pages = {
   async home() {
     heroExamples($('#home-q'));
@@ -284,6 +304,7 @@ const pages = {
     import('./homemotion.js').then((m) => m.mountHomeMotion());           // scroll on to see only the background; edges bounce
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
+    glance();
     attach($('#home-q'), $('#home-results'));
     addLive(s);
     const [recent, data] = await Promise.all([s.recent(4), courses()]);
