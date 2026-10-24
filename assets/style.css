@@ -4859,3 +4859,5 @@ body.home footer.site { margin-top: 0 !important; background: var(--f-bg) !impor
   :root:not([data-theme="light"]) body.home .today .nm-ic { background: color-mix(in srgb, var(--c) 18%, #1e1c19); }
 }
 @media (prefers-reduced-motion: reduce) { .hx-hl { animation: none; } }
+/* the home title has no highlighter (Ethan 2026-10-24) */
+body.home .hx-hl { background: none !important; animation: none !important; padding: 0; }
