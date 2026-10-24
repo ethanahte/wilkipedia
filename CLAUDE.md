@@ -1520,7 +1520,16 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     numbered index of the 5 newest, links), 03 Recently added (four ruled columns). homemotion.js's reveal (fade to the
     background at the very bottom) is switched off (`reveal = false`, Ethan 2026-10-24: "a bit unnecessary"); the pull stays. `--hx-pad` lines the cover up with the header. Plain
     background: the cover is ink on paper. Styles: "The home page as an editorial front page".
-- **Type (2026-10-24, Ethan: "re do the font… not too thick, not too boring", for titles and the whole site).**
+- **Type, final (2026-10-24, Ethan: Instrument Serif "looks bad"; wants "a simpler font like the one on iPhone…
+  no hooks, no small feet").** One sans everywhere: `--sans` = the system font first (SF Pro on Apple devices),
+  then self-hosted Inter (assets/fonts/Inter.woff2, SIL OFL, OFL-Inter.txt) for Windows/Android/ChromeOS. No
+  serif on site pages (`--serif`/`--display` point at the sans; Newsreader only on the 3D campus). Titles 650
+  weight with tight tracking; the home headline's second line is weight 300; clock-like figures light and
+  tabular. The Instrument fonts were removed. The bullet below is history.
+- **Edges (same day: "the bouncy effect is so bad… make it like all the other websites").** homemotion.js is
+  no longer mounted (no custom pull, no reveal) and `overscroll-behavior-y` is back to `auto`, so each
+  browser's own overscroll resistance handles the edges.
+- *(History)* **Type (2026-10-24, Ethan: "re do the font… not too thick, not too boring", for titles and the whole site).**
   Instrument Serif (titles: h1, section h2s, the home headline in upright + italic, big figures like `.bp-big`,
   the italic section numerals) and Instrument Sans (everything else, variable 400–700), a pair designed
   together. Self-hosted in assets/fonts (SIL OFL, licence `OFL-Instrument.txt`; downloaded from Google Fonts'

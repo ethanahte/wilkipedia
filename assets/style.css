@@ -81,10 +81,10 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%;
-  /* No rubber-band bounce or pull-to-refresh at the page edges: pulling down
-     dragged the header along and looked like a refresh that never happened. */
-  overscroll-behavior-y: none; }
-body { overscroll-behavior-y: none; }
+  /* The browser's own overscroll at the page edges (a soft resistance, like any site). The custom
+     rubber band on the home page was removed on 2026-10-24. */
+  overscroll-behavior-y: auto; }
+body { overscroll-behavior-y: auto; }   /* the browser's own edge resistance (Ethan 2026-10-24) */
 body { margin: 0; background: var(--paper); color: var(--ink); font: 1rem/1.55 var(--sans); transition: background .2s, color .2s; }
 a { color: var(--ink); text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
@@ -4723,7 +4723,7 @@ body.home { --hx-pad: max(16px, calc(50vw - 504px)); }   /* lines up with the he
 .hx-body { align-self: end; padding: var(--sp-8) 0 var(--sp-7); max-width: 760px; }
 .hx h1 { margin: 0; color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, .3); }
 .hx-a { display: block; font: 800 clamp(2.8rem, 7.4vw, 6rem)/.98 var(--f-font, var(--sans)); letter-spacing: -.045em; }
-.hx-b { display: block; margin-top: .16em; font: italic 400 clamp(2.8rem, 7.4vw, 6rem)/1 'Instrument Serif', Georgia, serif; letter-spacing: -.025em; }
+.hx-b { display: block; margin-top: .16em; font: italic 400 clamp(2.8rem, 7.4vw, 6rem)/1 var(--sans); letter-spacing: -.025em; }
 .hx-hl { padding: 0 .04em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
   background: var(--m-marker) 0 92% / 100% .34em no-repeat; animation: hl-draw .9s .25s cubic-bezier(.65, .05, .3, 1) both; }
 .hx-search { display: flex; gap: 6px; width: min(560px, 100%); margin: var(--sp-6) 0 0; padding: 6px; border-radius: 14px; background: rgba(255, 255, 255, .96);
@@ -4759,7 +4759,7 @@ body.home .hx-search .btn { height: 46px; padding: 0 20px; border-radius: 10px !
 .hs-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--sp-6) var(--sp-7); padding: var(--sp-7) 0; border-top: 1px solid var(--f-line); }
 .hs-row:first-child { border-top: 0; }
 .hs-label { align-self: start; position: sticky; top: 84px; }
-.hs-n { display: block; font: italic 400 2.6rem/1 'Instrument Serif', Georgia, serif; color: var(--m-deep); }
+.hs-n { display: block; font: italic 400 2.6rem/1 var(--sans); color: var(--m-deep); }
 body.home .hs-label h2 { margin: var(--sp-2) 0 0; font: 600 .8rem/1.4 var(--sans) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--f-ink); }
 body.home .hs-label .hg-count { margin: var(--sp-2) 0 0; font-size: var(--fs-xs); line-height: 1.5; color: var(--f-faint); }
 /* 01 Today: the bell as a ruler, the cafeteria on circles */
@@ -4802,7 +4802,7 @@ body.home .hg-find input { flex: 1; min-width: 0; }
 body.home .hg-list { counter-reset: hg; margin: 0; border-top: 1px solid var(--f-ink) !important; }
 body.home .hg-list > li { counter-increment: hg; border-bottom: 1px solid var(--f-line) !important; }
 body.home .hg-row { grid-template-columns: 56px minmax(0, 1fr) auto !important; align-items: baseline; padding: 16px 0 !important; }
-body.home .hg-row::before { content: counter(hg, decimal-leading-zero); grid-row: 1 / span 2; font: italic 400 1.35rem/1 'Instrument Serif', Georgia, serif; color: var(--f-faint); }
+body.home .hg-row::before { content: counter(hg, decimal-leading-zero); grid-row: 1 / span 2; font: italic 400 1.35rem/1 var(--sans); color: var(--f-faint); }
 body.home .hg-title { grid-column: 2; font: 600 1.05rem/1.35 var(--f-font, var(--sans)) !important; }
 body.home .hg-meta { grid-column: 2 !important; }
 body.home .hg-go { grid-column: 3 !important; grid-row: 1 / span 2 !important; }
@@ -4862,55 +4862,36 @@ body.home footer.site { margin-top: 0 !important; background: var(--f-bg) !impor
 /* the home title has no highlighter (Ethan 2026-10-24) */
 body.home .hx-hl { background: none !important; animation: none !important; padding: 0; }
 
-/* ══ Type, redone (2026-10-24, Ethan: "choose a better one… not too thick, not too boring", for the titles and
-   the whole site). Instrument Serif for titles (a light, elegant display serif with a lovely italic) and
-   Instrument Sans for everything else (crisp, slightly narrow, calm), a pair designed together. Both are SIL
-   OFL fonts hosted here (assets/fonts, licence in OFL-Instrument.txt), so no page asks Google for anything.
-   Titles are weight 400 (the serif has no bold; never fake one). The countdown and the study-guides graph
-   keep their Swiss Helvetica; the 3D campus keeps Newsreader. ══ */
-@font-face { font-family: 'Instrument Sans'; src: url('fonts/InstrumentSans.woff2') format('woff2'); font-weight: 400 700; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Instrument Sans'; src: url('fonts/InstrumentSans-Italic.woff2') format('woff2'); font-weight: 400 700; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Instrument Serif'; src: url('fonts/InstrumentSerif.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Instrument Serif'; src: url('fonts/InstrumentSerif-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
-:root { --sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; --display: 'Instrument Serif', Georgia, 'Times New Roman', serif; --label: var(--sans); }
-body, body:has(.look-fresh) { --f-font: var(--sans); font-family: var(--sans); font-synthesis-weight: none; }
-body { font-size: 1.0625rem; letter-spacing: -.003em; }
-/* titles: the serif, light, a touch larger (a display serif reads smaller than a heavy sans) */
-:is(h1, h2), body:has(.look-fresh) :is(h1, h2), body:has(.look-fresh) :is(.c-hero h1, .cl-head h1, #main > h1:first-of-type, .t-id h1, .set-head h1, .gl-subject-h h2, .c-sec > h2) {
-  font-family: var(--display) !important; font-weight: 400 !important; letter-spacing: -.01em !important; }
-:is(.c-hero h1, .cl-head h1, .set-head h1, .t-id h1), body:has(.look-fresh) #main > h1:first-of-type { font-size: clamp(2.8rem, 6.6vw, 4.6rem) !important; line-height: 1.02 !important; }
-body:has(.look-fresh) .c-sec > h2 { font-size: 2.1rem !important; line-height: 1.1; }
-h2 { line-height: 1.12; }
-body:has(.look-fresh) .gl-subject-h h2 { font-size: 2.4rem !important; }
-/* the home headline: one serif in two voices, upright then italic */
-.hx-a, .hx-b { font-family: var(--display) !important; font-weight: 400 !important; }
-.hx-a { font-size: clamp(3.2rem, 8.4vw, 7rem) !important; letter-spacing: -.02em !important; line-height: .96 !important; }
-.hx-b { font-size: clamp(3.2rem, 8.4vw, 7rem) !important; letter-spacing: -.015em !important; margin-top: 0 !important; line-height: 1 !important; }
-body.home .home-pair h2, body.home .hs-label h2 { font-family: var(--sans) !important; }
-/* big figures and display lines elsewhere */
-:is(.bp-big, .cd-name, .sat-next h2, .cy-day b) { font-family: var(--display) !important; font-weight: 400 !important; letter-spacing: -.01em !important; }
-.bp-big { font-size: clamp(3rem, 7vw, 5rem) !important; }
-/* the section numerals were already the serif italic; they keep it in the new face */
-.hs-n, body.home .hg-row::before { font-family: var(--display) !important; }
-/* text weights: the sans is lighter than the system one, so body stays 400 and UI labels go to 600 */
-:is(.btn, .vtab[aria-pressed="true"], .gl-title, .hg-title, .tt-what, .mini-list a b) { font-weight: 600; }
-/* the serif is for real titles; small headings inside cards, folds and dialogs stay in the sans */
-body :is(summary h2, .nb-card h2, .nb-fold h2, .panel h2, dialog h2, .popc h2, .members-gate h2, .gv-info h3, .cy h2, .ib-card h2, .fb-form2 h2, .rq-ask h2, .sec h2) {
-  font-family: var(--sans) !important; font-weight: 600 !important; letter-spacing: -.01em !important; }
-/* spacing for the new type: the serif's line box is taller, so headings get a little more room below */
-body :is(h1, h2) + :is(p, .sec-sub, .lede, .meta, .bp-sub, .t-where, .nb-sub, .mp-top-r) { margin-top: var(--sp-3) !important; }
-body:has(.look-fresh) .c-sec > h2 { margin-bottom: var(--sp-3) !important; }
-.settings h2 + p { margin-top: var(--sp-2) !important; }
-.bp-big + .bp-sub { margin-top: var(--sp-3) !important; }
-.cy-day + .cy-sub { margin-top: var(--sp-3) !important; }
-:is(.bc-l, .sn-k) { margin-bottom: 6px !important; }
-.st-step + .st-time { margin-top: var(--sp-4) !important; }
-.cal-date { gap: 3px; }
-.cal-date b { font-family: var(--display); font-weight: 400; line-height: 1; }
-.hx-a { line-height: 1.04 !important; } .hx-b { line-height: 1.08 !important; }
-body :is(.c-hero, .cl-head, .set-head, .t-id) h1 + *, body #main > h1:first-of-type + * { margin-top: var(--sp-5) !important; }
-.t-where, .teachers .t-id p { margin-top: var(--sp-4) !important; }
-.t-sec h2 + .meta, #t-sched + .meta, h2 + p.meta { margin-top: var(--sp-3) !important; }
-.bc-n, .sn-v { margin-top: 8px !important; display: block; }
-.bp-big { margin-bottom: var(--sp-2) !important; }
-.hx-b { margin-top: .12em !important; }
+/* ══ Type (2026-10-24, Ethan: "a simpler font like the one on iPhone… no hooks, no small feet"). One sans
+   everywhere: on Apple devices the system's own SF Pro (the iPhone clock face), elsewhere Inter (self-hosted,
+   SIL OFL, licence in assets/fonts/OFL-Inter.txt), which is drawn to sit beside it. No serif anywhere on the
+   site's pages (the 3D campus keeps its own). Titles are iOS-style: semibold, tight tracking, not heavy. Big
+   figures (the bell, the calendar, countdowns) are light and tabular, like the lock-screen clock. ══ */
+@font-face { font-family: 'Inter'; src: url('fonts/Inter.woff2') format('woff2'); font-weight: 400 700; font-style: normal; font-display: swap; }
+:root { --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --serif: var(--sans); --display: var(--sans); --label: var(--sans); }
+body, body:has(.look-fresh) { --f-font: var(--sans); --serif: var(--sans); font-family: var(--sans); letter-spacing: -.011em; }
+body { font-size: 1.0625rem; }
+/* titles: semibold, tight, never heavy */
+:is(h1, h2, h3), body:has(.look-fresh) :is(h1, h2, h3) { font-family: var(--sans) !important; }
+:is(h1, h2), body:has(.look-fresh) :is(.c-hero h1, .cl-head h1, #main > h1:first-of-type, .t-id h1, .set-head h1, .gl-subject-h h2, .c-sec > h2) {
+  font-weight: 650 !important; letter-spacing: -.028em !important; }
+:is(.c-hero h1, .cl-head h1, .set-head h1, .t-id h1), body:has(.look-fresh) #main > h1:first-of-type { font-size: clamp(2.4rem, 5.6vw, 3.6rem) !important; line-height: 1.06 !important; }
+body:has(.look-fresh) .c-sec > h2 { font-size: 1.6rem !important; line-height: 1.15; }
+body:has(.look-fresh) .gl-subject-h h2 { font-size: 1.9rem !important; }
+h3 { font-weight: 600; letter-spacing: -.018em; }
+/* the home headline: one weight lighter on the second line, like the iPhone's date above its clock */
+.hx-a, .hx-b { font-family: var(--sans) !important; font-style: normal !important; letter-spacing: -.04em !important; }
+.hx-a { font-weight: 650 !important; font-size: clamp(2.8rem, 7.2vw, 5.8rem) !important; line-height: 1.02 !important; }
+.hx-b { font-weight: 300 !important; font-size: clamp(2.8rem, 7.2vw, 5.8rem) !important; line-height: 1.06 !important; margin-top: 0 !important; }
+/* the clock-like figures: light, tabular */
+:is(.bp-big, .cd-name) { font-weight: 600 !important; letter-spacing: -.03em !important; }
+:is(.cy-day b, .bc-n b, .bp-count, .bp-digits, .st-time, .sn-big, .c-facts dd, .t-stats dd, .rq-want b, .c-progress p b) { font-family: var(--sans) !important; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+:is(.cy-day b, .bc-n b, .bp-count, .st-time) { font-weight: 300 !important; }
+.hs-n, body.home .hg-row::before { font-style: normal !important; font-weight: 300 !important; letter-spacing: -.03em; }
+/* small capital labels: the sans, a little tracking */
+body:has(.look-fresh) :is(.label, .label-h, .c-path-h, .c-prereq span, .c-facts dt, .t-stats dt, .nm-label, .c-kicker, .set-kicker, .hx-kicker, .hx-date, .hx-k, .hs-label h2, .today-h, .bell-day, .nm-title) {
+  font-family: var(--sans) !important; font-weight: 600 !important; letter-spacing: .06em !important; }
+/* spacing under titles */
+body :is(.c-hero, .cl-head, .set-head, .t-id) h1 + *, body #main > h1:first-of-type + * { margin-top: var(--sp-4) !important; }
+body :is(h1, h2) + :is(p, .sec-sub, .lede, .meta) { margin-top: var(--sp-2); }

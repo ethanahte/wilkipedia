@@ -301,7 +301,8 @@ const pages = {
   async home() {
     heroExamples($('#home-q'));
     if (getPref('homebg') === 'pano') import('./pano.js').then((m) => m.mountPano(root));   // the turning quad behind the page
-    import('./homemotion.js').then((m) => m.mountHomeMotion());           // scroll on to see only the background; edges bounce
+    // homemotion.js (the custom rubber-band pull and the bottom reveal) is no longer mounted (Ethan 2026-10-24:
+    // "not bouncy… like all the other websites"): the browser's own overscroll resistance handles the edges.
     mountBellStrip($('#bell'));
     import('./menu.js').then((m) => m.mountNextMeal($('#next-meal')));
     glance();
