@@ -359,7 +359,8 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
 <meta property="og:site_name" content="Wilkipedia">
 {canon}
 <link rel="icon" href="{r}assets/icon.svg" type="image/svg+xml">
-<link rel="preload" href="{r}assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{r}assets/fonts/InstrumentSans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{r}assets/fonts/InstrumentSerif.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{r}assets/style.css?v={v["style.css"]}">
 <meta name="data-version" content="{v["data"]}">
 {STORAGE_GATE}
@@ -1225,7 +1226,7 @@ def build_static():
   <li><b>Campus map</b><span>Redrawn from the Wilcox High School campus map</span></li>
   <li><b>Cafeteria menu</b><span>Santa Clara Unified Nutrition Services (live)</span></li>
   <li><b>Class colours</b><span>Wikipedia, “Adrian C. Wilcox High School”</span></li>
-  <li><b>Typeface</b><span>Newsreader (SIL Open Font License)</span></li>
+  <li><b>Typefaces</b><span>Instrument Sans and Instrument Serif (SIL Open Font License), hosted on this site; Newsreader on the 3D campus</span></li>
   <li><b>Orrery sky</b><span>Milky Way panorama, <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier ↗</a></span></li>
 </ul></section>""", data={"page": "credits"}, private=True,
          desc="Everyone who helped build Wilkipedia: founders, reviewers, contributors and people who sent ideas.")

@@ -1520,6 +1520,17 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     numbered index of the 5 newest, links), 03 Recently added (four ruled columns). homemotion.js's reveal (fade to the
     background at the very bottom) is switched off (`reveal = false`, Ethan 2026-10-24: "a bit unnecessary"); the pull stays. `--hx-pad` lines the cover up with the header. Plain
     background: the cover is ink on paper. Styles: "The home page as an editorial front page".
+- **Type (2026-10-24, Ethan: "re do the font… not too thick, not too boring", for titles and the whole site).**
+  Instrument Serif (titles: h1, section h2s, the home headline in upright + italic, big figures like `.bp-big`,
+  the italic section numerals) and Instrument Sans (everything else, variable 400–700), a pair designed
+  together. Self-hosted in assets/fonts (SIL OFL, licence `OFL-Instrument.txt`; downloaded from Google Fonts'
+  static files, never linked from Google, so the privacy promise holds); preloaded in `page()`. The serif has
+  one weight: titles are 400, never faux bold (`font-synthesis-weight: none`). Small headings inside cards,
+  folds and dialogs stay in the sans. Tokens: `--sans`, `--display`; `--label` = sans; the old literal
+  'Newsreader' small-cap labels now use the sans, italic ones the display serif. Newsreader.woff2 stays only
+  for the 3D campus (campus.css). The countdown and the study-guides graph keep their Swiss Helvetica.
+  Note for the layout audit: the serif's content area is taller than its line box, so title→text gaps under
+  ~6px measured are usually fine by eye; check a screenshot before "fixing" them.
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
