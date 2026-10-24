@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CSS = ROOT / "assets" / "style.css"
 START, END = "/* doodles:start (tools/doodles.py writes this block; edit there) */", "/* doodles:end */"
 INK = "#2f2c28"
+INK_NIGHT, PAPER_NIGHT = "#e9e3d8", "#1d1b18"   # night: the same drawings in chalk-cream ink, spots unchanged
 
 # Morandi tones: soft colours greyed toward each other, so none shouts. Each: (tone, tint, deep).
 # tone = the highlighter and drawing spot, tint = a faint panel wash, deep = marks and small text.
@@ -139,15 +140,24 @@ def block():
     for d, tone in EXTRA.items():
         want.setdefault(d, tone)
     out = [START, "body:has(.look-fresh) {"]
+    night = []
     for name, tone in want.items():
-        out.append(f"  --dd-{name}: {uri(svg(drawings(M[tone][0])[name]))};")
+        day = svg(drawings(M[tone][0])[name])
+        out.append(f"  --dd-{name}: {uri(day)};")
+        # night mode gets its own copy (cream ink, the spot in its Morandi tone) instead of a CSS invert,
+        # so the colours stay true and nothing turns muddy
+        dark = day.replace(INK, INK_NIGHT).replace('fill="#fff"', 'fill="' + PAPER_NIGHT + '"')
+        night.append("  --dd-" + name + ": " + uri(dark) + ";")
     out.append("}")
+    nb = "\n".join(night)
+    out.append(f':root[data-theme="dark"] body:has(.look-fresh) {{\n{nb}\n}}')
+    out.append(f'@media (prefers-color-scheme: dark) {{ :root:not([data-theme="light"]) body:has(.look-fresh) {{\n{nb}\n}} }}')
 
     # a highlighter swipe in every tone (a band with slightly ragged, rounded ends)
     for tone, (t, _, _) in M.items():
         mk = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" preserveAspectRatio="none"><path d="M5 12 C40 6 120 8 196 5 '
               f'C199 14 198 26 195 33 C130 37 60 35 4 37 C1 28 2 19 5 12 Z" fill="{rgba(t, .7)}"/></svg>')
-        out.insert(-1, f"  --mk-{tone}: {uri(mk)};")
+        out.insert(out.index("}"), f"  --mk-{tone}: {uri(mk)};")      # into the first (day) block, which every mode reads
 
     def tone_vars(tone):
         t, tint, deep = M[tone]
