@@ -1517,8 +1517,8 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     ivory sheet on a Swiss grid of `.hs-row`s, a sticky label column (italic serif numeral + small-cap title) and
     content: 01 Today (the bell strip as a ruler of periods: a 3px line per period, the current one in the page
     tone; the cafeteria with each dish on a Morandi circle), 02 Study guides (count in the label, finder, a
-    numbered index of the 5 newest, links), 03 Recently added (four ruled columns). homemotion.js reveal fades
-    `.hx, .hs-row`, then the sheet, then the footer. `--hx-pad` lines the cover up with the header. Plain
+    numbered index of the 5 newest, links), 03 Recently added (four ruled columns). homemotion.js's reveal (fade to the
+    background at the very bottom) is switched off (`reveal = false`, Ethan 2026-10-24: "a bit unnecessary"); the pull stays. `--hx-pad` lines the cover up with the header. Plain
     background: the cover is ink on paper. Styles: "The home page as an editorial front page".
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the

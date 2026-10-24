@@ -1,6 +1,6 @@
 // The home page's motion (Ethan, 2026-09-30).
 //
-//   Reveal   past the last card there is room to keep scrolling. The page stops moving and the
+//   Reveal   (OFF since 2026-10-24, see `reveal` below) past the last card there is room to keep scrolling. The page stops moving and the
 //            cards fade away, one after another from the top, until only the background is left
 //            (the turning quad or the painting) with a way back to the top. Not with the plain
 //            background: there'd be nothing to show.
@@ -12,7 +12,7 @@
 //            browser's own bounce is off site-wide (it dragged the header and looked like a refresh).
 //
 // (They used to fly out to the sides; Ethan preferred a fade.) Reduce motion: no pull.
-import { $, $$, lessMotion, getPref } from './ui.js';
+import { $, $$, lessMotion } from './ui.js';
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
 
@@ -25,7 +25,9 @@ export function mountHomeMotion() {
   main.before(layer);
   layer.append(main, foot);
 
-  const reveal = getPref('homebg') !== 'plain';
+  // The reveal (the page fading away at the very bottom to show the background) was removed on
+  // 2026-10-24 (Ethan: "a bit unnecessary"). The code stays behind this switch; the pull still works.
+  const reveal = false;
   let end = null, cards = [];
   if (reveal) {
     end = document.createElement('div');
