@@ -317,6 +317,11 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
     elif SITE_URL:
         rel = "" if path in ("", "index.html") else path.rstrip("/") + ("/" if not path.endswith(".html") else "")
         canon = f'<link rel="canonical" href="{e(SITE_URL.rstrip("/") + "/" + rel)}">'
+    # the site look's marker (style.css "Fresh"): which page this is, and on a subject page which subject,
+    # so the page gets its drawing and its Morandi colour; the full-screen countdown has none
+    parts = path.split("/")
+    look_d = f' data-d="{parts[1]}"' if parts[0] == "subjects" and len(parts) > 2 and parts[1] else ""
+    look_mark = "" if path.startswith("bell/countdown") else f'<i class="look-fresh" data-p="{parts[0].replace(".html", "") or "home"}"{look_d} hidden></i>'
     cur = lambda href: " aria-current=page" if active == href else ""
     nav = "".join(f'<a href="{r}{href}"{cur(href)}>{label}</a>' for href, label in NAV)
     more_active = any(active == href for href, _, _ in MORE)
@@ -394,7 +399,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
 <a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
-<main id="main" class="wrap">{"" if path.startswith("bell/countdown") else f'<i class="look-fresh" data-p="{(path.split("/")[0].replace(".html", "") or "home")}" hidden></i>'}
+<main id="main" class="wrap">{look_mark}
 {body}
 </main>
 <footer class="site">

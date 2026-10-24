@@ -1478,6 +1478,18 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
     - kickers are tilted sticky notes with a folded corner; tips are on ruled notebook paper with a red
       margin; class sections are numbered like notes (`counter(note)`, gold tab); empty sections show a
       drawing for what's missing; the footer signs off with the pencil; buttons squish when pressed.
+  - **Part three, Morandi on ivory** (same day: "use more 莫兰迪色", plus a reference of an ivory app with sage
+    circles behind objects, coral and mustard accents, spaced serif capitals, black buttons; adapted).
+    `tools/doodles.py` now owns the drawings and the palette: ten Morandi tones `M` (sage, rose, blue, oat,
+    clay, lilac, mustard, teal, mauve, stone; each tone/tint/deep), `SUBJECT` and `PAGE` maps, and it writes the
+    `/* doodles:start … doodles:end */` block of style.css (drawings with their spot in the page's tone, a
+    highlighter swipe per tone `--mk-*`, and per page / per subject `--m-tone/-hl/-tint/-deep/-marker`). Edit the
+    drawings or colours there and run `python3 tools/doodles.py`, then build. `page()` also tags subject pages
+    `data-d`; class pages take their colours from `.c-hero[data-d]`. The paper is ivory (#f7f4ee) with white
+    cards and a soft shadow; the title highlighter, selection, link sweeps, note numbers, reading bar and side
+    marker use the page's tone; the head drawing (::after) sits on a disc of that tone (::before, its own layer so
+    night mode can invert the ink alone); kickers and small labels are Newsreader in spaced capitals; buttons are
+    black with 8px corners; All classes' subject tiles wear their subject's tint; the notice takes the page's tint.
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
