@@ -394,7 +394,7 @@ def page(path, title, body, *, desc="", script=None, active=None, data=None, pri
 <div id="announce" class="announce" aria-label="Announcements" role="region" hidden></div>
 <a id="contribute-fab" class="fab contribute-fab" href="{r}submit/" aria-label="Contribute: add info, a tip or a study guide">{ICONS["plus"]}<span class="t">Contribute</span></a>
 <a id="bounty-tab" class="bounty-fab" href="{r}bounties/" aria-label="Bounty board" hidden>{ICONS["bounty"]}<span class="t">Bounties</span><span class="n" aria-label="unclaimed bounties"></span></a>
-<main id="main" class="wrap">
+<main id="main" class="wrap">{"" if path.startswith("bell/countdown") else '<i class="look-fresh" hidden></i>'}
 {body}
 </main>
 <footer class="site">
@@ -559,17 +559,6 @@ SEC_ICONS = {
 
 DEPT_EMOJI = {"english": "📖", "math": "📐", "social-science": "🌍", "science": "🧪", "world-language": "💬",
               "physical-education": "🏃", "visual-performing-arts": "🎨", "practical-arts": "🛠️", "electives": "✨", "svcte": "🧰"}
-# The class page hero's line drawing: an open book, a pencil, a mug, a lamp and some sparkles, in ink.
-# Drawn for Wilkipedia (original line art).
-HERO_ART = """<svg viewBox="0 0 1200 240" preserveAspectRatio="xMaxYMax meet" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-<g class="nt-spark"><path d="M160 60v28M146 74h28"/><path d="M1040 150v22M1029 161h22"/><path d="M700 40l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/><path d="M330 170l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/><path d="M905 55l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/></g>
-<path d="M470 190c40-22 82-26 130-8 48-18 90-14 130 8V92c-40-22-82-26-130-8-48-18-90-14-130 8z"/><path d="M600 84v106"/>
-<path d="M496 112c24-8 50-9 78-2M496 132c24-8 50-9 78-2M496 152c24-8 50-9 78-2M626 110c28-7 54-6 78 2M626 130c28-7 54-6 78 2"/>
-<path d="M780 196l70-120 18 10-70 120-24 12z"/><path d="M850 76l18 10M783 194l13 7"/>
-<path d="M330 120h70v54c0 14-12 24-26 24h-18c-14 0-26-10-26-24z"/><path d="M400 134h10c12 0 12 26 0 26h-10"/><path d="M350 104c-6-10 6-14 0-24M372 104c-6-10 6-14 0-24"/>
-<path d="M960 200h60M990 200v-62M950 138h80l-14-40h-52z"/><path d="M990 98V84"/>
-<path d="M110 200h980" stroke-width="1.6" opacity=".35"/>
-</svg>"""
 
 
 def sec_head(key, title, sub=""):
@@ -617,10 +606,7 @@ def build_courses(depts, courses):
     </ol>
     <p class="c-src">From the catalog’s prerequisites. <a href="../../subjects/#pw-fold">See every class’s path</a></p>
   </div>''' if bef or aft else "")
-        # The look (Ethan 2026-10-23, after trying Apple and Notion styles on one page each: "I like the
-        # Notion style more, but don't copy Notion's arrangement, just the 美工… don't change too much"):
-        # the house layout unchanged, drawn in the illustrated style (style.css "Illustrated" block).
-        # The hero carries two decorations: the subject's sticker (an emoji in a wavy badge) and a line drawing.
+        # The look is the site-wide "Fresh" style (style.css); the layout here is the house one.
         rail = """<aside class="c-rail" aria-label="On this page">
   <nav class="c-toc" id="c-toc">
     <a href="#s-overview" data-sec="overview">What students say<span class="n"></span></a>
@@ -633,14 +619,12 @@ def build_courses(depts, courses):
   </nav>
   <div class="c-progress" id="c-progress" hidden></div>
 </aside>"""
-        top = '<i class="look-cute" hidden></i>'
+        top = ''                         # the look marker comes from page() on every page
         page(f"courses/{c['slug']}/", c["name"], f"""
 {top}
 {crumbs([("All classes", "../../subjects/"), (dept_name[c['department']], f"../../subjects/{c['department']}/")], c["name"], f"courses/{c['slug']}/")}
 <header class="c-hero">
-  <span class="cu-sticker" aria-hidden="true">{DEPT_EMOJI.get(c["department"], "📘")}</span>
-  <div class="cu-art" aria-hidden="true">{HERO_ART}</div>
-  <p class="c-kicker">{kicker}</p>
+  <p class="c-kicker"><span class="kk-e" aria-hidden="true">{DEPT_EMOJI.get(c["department"], "📘")}</span>{kicker}</p>
   <h1>{e(c['name'])}</h1>
   {f'<p class="aka">Students call it <b>{e(c["call"])}</b></p>' if c.get("call") else ''}
   {f'<p class="aka">Wilcox also runs {" and ".join(f"<b>{e(n)}</b>" for n in c["sections"])} as a separate class under this course</p>' if c.get("sections") else ''}

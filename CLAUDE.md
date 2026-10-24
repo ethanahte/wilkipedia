@@ -1444,19 +1444,24 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
   `~/Wilkipedia-backups/backup.log`, and `--unschedule` turns it off. If the repo
   moves, run `--schedule` again, because the plist stores the script's path.
 
-- **Illustrated look on the class pages (2026-10-23).** Ethan tried an Apple style (AP Biology) and a
-  Notion style (AP Calculus BC) on one page each, chose Notion's *art* only: "don't copy Notion's
-  arrangement, just the 美工… don't change too much". Both trials were removed. Every class page now carries
-  `<i class="look-cute">` and the "Illustrated" block at the end of style.css (scoped `body:has(.look-cute)`)
-  restyles the unchanged house layout: a cream page (#fbf6f0) and header, pastels (`--k-butter/peach/lav/sky/
-  mint/rose`), the hero on a peach rounded stage with the subject sticker (`DEPT_EMOJI` in a wavy lavender
-  badge, `.cu-sticker`) and an original ink line drawing along its foot (`HERO_ART`, `.cu-art`), the
-  prerequisite in a hand-drawn outline, the facts as four pastel tiles, white pills with an ink edge for
-  "where it fits", the side index with a black pill for where you are, study guides as pastel rows with a
-  small drawing each (three doodles, `--k-d1..3`), empty states as peach cards with a drawing, tips in a
-  lavender card with a hand-drawn white outline, black pill buttons, "shine" marks by headings, lavender
-  link underlines. Rounded type only via `ui-rounded` (Apple devices); no web font is fetched. Other pages
-  are not restyled yet: that's the next step once Ethan is happy with the class pages.
+- **Fresh, site-wide (2026-10-23).** History: Ethan tried an Apple and a Notion style on one class page
+  each and chose Notion's direction; a first version copied the pastel colours, squiggly frames and wavy
+  badge from his reference screenshots, and he said not to copy ("go look at Notion and those 清新 sites,
+  analyse and adapt"). That version was removed. After looking at notion.com, tally.so, bear.app and
+  craft.do, the "Fresh" block at the end of style.css is our own synthesis:
+  - white paper and air; colour rare. Heavy tight sans headlines (800, -0.035em), grey text under them;
+    one sans everywhere (`--serif` is pointed at the sans inside this look).
+  - ONE delight per place: a **gold highlighter swipe** (`--f-marker`, an original ragged-ended band) behind
+    page titles (`.c-hero h1`, `.cl-head h1`, made inline with box-decoration-break), the current header
+    link and the chosen tab. The side index keeps its gold marker; the reading bar is gold.
+  - a few original margin doodles in page heads (`--f-plane`, `--f-pencil`, `--f-star`, `--f-aplus`), never
+    frames; empty states carry the paper plane.
+  - grey panels (`--f-panel`) without borders or shadows for every card and list panel, 16px corners;
+    black rounded buttons; inputs white with a hairline and a soft gold focus ring; kickers as small grey
+    tags (class pages put the subject emoji `DEPT_EMOJI` in theirs, `.kk-e`); the notice is a grey band
+    with a gold dot. Links inherit their colour with a faint underline that turns gold.
+  - Every page but `bell/countdown/` carries `<i class="look-fresh">` (added in `page()`); all rules are
+    scoped `body:has(.look-fresh)`. The study-guides graph keeps its own Swiss field (only its corners soften).
 - **The design system (2026-10-23, Ethan: "adopt Refactoring UI and redo the web UI design"; the book is
   his PDF, not in the repo).** The block of style.css headed "THE SYSTEM" (near the end, after the
   readability pass) is the source of truth. New UI picks values from its scales, never fresh numbers:
