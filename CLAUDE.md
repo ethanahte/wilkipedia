@@ -1523,9 +1523,9 @@ Founders: Ethan Liu and Jonathan Lee. README.md has setup and architecture;
 - **Type, final (2026-10-24, Ethan: Instrument Serif "looks bad"; wants "a simpler font like the one on iPhone…
   no hooks, no small feet").** One sans everywhere: `--sans` = the system font first (SF Pro on Apple devices),
   then self-hosted Inter (assets/fonts/Inter.woff2, SIL OFL, OFL-Inter.txt) for Windows/Android/ChromeOS. No
-  serif on site pages (`--serif`/`--display` point at the sans; Newsreader only on the 3D campus). Titles 650
-  weight with tight tracking; the home headline's second line is weight 300; clock-like figures light and
-  tabular. The Instrument fonts were removed. The bullet below is history.
+  serif on site pages (`--serif`/`--display` point at the sans; Newsreader only on the 3D campus). Ethan then
+  asked for it thinner ("Lighter SF Pro" block): h1 400, h2 500, h3 500, UI labels and buttons 500, b 600, big
+  numbers 300, the home headline 500 over 200. Inter's @font-face covers 100–900 (the file is the variable font). The Instrument fonts were removed. The bullet below is history.
 - **Edges (same day: "the bouncy effect is so bad… make it like all the other websites").** homemotion.js is
   no longer mounted (no custom pull, no reveal) and `overscroll-behavior-y` is back to `auto`, so each
   browser's own overscroll resistance handles the edges.

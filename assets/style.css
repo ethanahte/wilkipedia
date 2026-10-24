@@ -4867,7 +4867,7 @@ body.home .hx-hl { background: none !important; animation: none !important; padd
    SIL OFL, licence in assets/fonts/OFL-Inter.txt), which is drawn to sit beside it. No serif anywhere on the
    site's pages (the 3D campus keeps its own). Titles are iOS-style: semibold, tight tracking, not heavy. Big
    figures (the bell, the calendar, countdowns) are light and tabular, like the lock-screen clock. ══ */
-@font-face { font-family: 'Inter'; src: url('fonts/Inter.woff2') format('woff2'); font-weight: 400 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('fonts/Inter.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 :root { --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --serif: var(--sans); --display: var(--sans); --label: var(--sans); }
 body, body:has(.look-fresh) { --f-font: var(--sans); --serif: var(--sans); font-family: var(--sans); letter-spacing: -.011em; }
@@ -4939,3 +4939,20 @@ body.home .today .nm-more-l { display: none !important; }
   body.home .today .nm-top { flex-wrap: nowrap !important; }
 }
 .hx .hx-b { margin-top: .1em !important; }
+
+/* ══ Lighter SF Pro (2026-10-24, Ethan picked SF Pro, "but make it thinner"). Every weight steps down one or
+   two notches, like iOS: titles regular-to-medium instead of semibold, big numbers thin, body text regular,
+   emphasis medium instead of bold. ══ */
+body { font-weight: 400; }
+:is(h1, h2), body:has(.look-fresh) :is(.c-hero h1, .cl-head h1, #main > h1:first-of-type, .t-id h1, .set-head h1, .gl-subject-h h2, .c-sec > h2) { font-weight: 500 !important; letter-spacing: -.03em !important; }
+:is(.c-hero h1, .cl-head h1, .set-head h1, .t-id h1), body:has(.look-fresh) #main > h1:first-of-type { font-weight: 400 !important; letter-spacing: -.035em !important; }
+h3, h4 { font-weight: 500 !important; }
+b, strong { font-weight: 600; }
+.hx-a { font-weight: 500 !important; }
+.hx-b { font-weight: 200 !important; }
+:is(.bp-big, .cd-name, .cy-day b, .bc-n b, .bp-count, .st-time, .hs-n, .c-facts dd, .t-stats dd, .rq-want b, .c-progress p b, .sn-big), body.home .hg-row::before { font-weight: 300 !important; }
+.bp-big { font-weight: 400 !important; }
+:is(.btn, .vtab, .gl-title, .hg-title, .tt-what, .mini-list a b, .c-toc a[aria-current], .main-nav > a[aria-current], .nm-days button, .chip, .gl-files a) { font-weight: 500 !important; }
+body.home .today .bell-status { font-weight: 500 !important; } body.home .today .bell-status b { font-weight: 500 !important; }
+:is(.c-kicker, .set-kicker, .hx-kicker, .hx-date, .hx-k, .label, .label-h, .c-facts dt, .t-stats dt, .nm-label, .nm-title, .bell-day, .hs-label h2, .c-path-h) { font-weight: 500 !important; }
+.hx-v, .cl-subj b, .kind-card b, .c-todo-item b, .t-missing li a { font-weight: 500 !important; }
