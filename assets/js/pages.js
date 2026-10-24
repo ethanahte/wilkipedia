@@ -285,7 +285,7 @@ function glance() {
   if (!box) return;
   const paint = () => {
     const now = $('#bell .bell-status')?.textContent.replace(/\s+/g, ' ').replace(/^Now:\s*/, '').trim();
-    const dish = $('#next-meal .nm-tiles .nm-name, #next-meal .nm-dish');
+    const dish = $('#next-meal .nm-tiles .nm-name') || $('#next-meal .nm-lhead ~ .nm-row .nm-dish');   // lunch, never breakfast
     const meal = dish && $('#next-meal .nm-days [aria-selected="true"]')?.textContent.trim();
     const guide = $('#home-guides .hg-row');
     const item = (k, v, href) => `<li><a href="${href}"><span class="hx-k">${k}</span><span class="hx-v">${esc(v)}</span></a></li>`;

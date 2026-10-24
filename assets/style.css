@@ -4895,3 +4895,47 @@ body:has(.look-fresh) :is(.label, .label-h, .c-path-h, .c-prereq span, .c-facts 
 /* spacing under titles */
 body :is(.c-hero, .cl-head, .set-head, .t-id) h1 + *, body #main > h1:first-of-type + * { margin-top: var(--sp-4) !important; }
 body :is(h1, h2) + :is(p, .sec-sub, .lede, .meta) { margin-top: var(--sp-2); }
+
+/* ══ Home "Today", tidied (2026-10-24, Ethan: "this part is still messy, especially the menu"). One column:
+   the bell on top as one calm line and its ruler, then the cafeteria as three tidy lines: a header (label,
+   day tabs that scroll, Full menu), breakfast and regulars as single quiet lines that end in "…", and lunch
+   as ONE row of dishes on small circles (it scrolls sideways if there are more than fit). ══ */
+.today { grid-template-columns: minmax(0, 1fr) !important; gap: 0 !important; }
+.today-bell { padding: 0 0 var(--sp-5) !important; border: 0 !important; border-bottom: 1px solid var(--f-line) !important; }
+body.home .today .bell-top { align-items: baseline; }
+body.home .today .bell-status { margin-top: 6px; font: 600 1.3rem/1.3 var(--sans) !important; letter-spacing: -.02em; }
+body.home .today .bell-status b { font-weight: 650; }
+body.home .today .bell-chips { margin-top: var(--sp-4); }
+body.home .today .next-meal { padding-top: var(--sp-5) !important; }
+/* header: label, tabs, Full menu on one line */
+body.home .today .nm-top { flex-wrap: nowrap; align-items: center; gap: var(--sp-4); }
+body.home .today .nm-days { flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; gap: 2px; }
+body.home .today .nm-full { flex: none; margin-left: 0; font-size: var(--fs-sm); }
+/* breakfast and regulars: one quiet line each */
+body.home .today :is(.nm-bfast, .nm-regulars) { margin-top: var(--sp-3); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--fs-sm); color: var(--f-soft); }
+body.home .today :is(.nm-bfast, .nm-regulars) .nm-label { margin-right: var(--sp-3); }
+body.home .today .nm-regulars.open { white-space: normal; }
+body.home .today .nm-bfast .nm-more, body.home .today .nm-regulars .nm-more { display: none; }
+body.home .today .nm-lhead { margin-top: var(--sp-4); font-size: var(--fs-sm); }
+/* lunch: one row of dishes */
+body.home .today .nm-tiles { display: grid; grid-auto-flow: column; grid-auto-columns: 104px; grid-template-columns: none; gap: var(--sp-3);
+  margin: var(--sp-3) 0 0; padding-bottom: 4px; overflow-x: auto; scrollbar-width: thin; scroll-snap-type: x proximity; }
+body.home .today .nm-tiles > li { scroll-snap-align: start; }
+body.home .today .nm-tile { gap: 8px; }
+body.home .today .nm-ic { width: 52px; height: 52px; font-size: 1.45rem; }
+body.home .today .nm-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .76rem; line-height: 1.3; }
+body.home .today .nm-name .diet { font-size: .6rem; }
+/* the section numeral: upright, light */
+.hs-n { font: 300 2.4rem/1 var(--sans) !important; font-style: normal !important; letter-spacing: -.04em; }
+/* the glance bar: less empty space under it */
+.hx-now a { padding-bottom: calc(var(--sp-4) + 26px) !important; }
+.hx-sheet { margin-top: -26px !important; }
+@media (max-width: 560px) { body.home .today .nm-full span { display: none; } }
+body.home .today .nm-top > * { order: 0 !important; }
+body.home .today .nm-full { order: 3 !important; }
+body.home .today .nm-more-l { display: none !important; }
+@media (max-width: 760px) {
+  body.home .today .nm-tiles { grid-auto-flow: column !important; grid-auto-columns: 96px !important; grid-template-columns: none !important; grid-template-rows: none !important; }
+  body.home .today .nm-top { flex-wrap: nowrap !important; }
+}
+.hx .hx-b { margin-top: .1em !important; }
