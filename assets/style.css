@@ -2610,9 +2610,12 @@ a.ib-tile:hover { border-color: var(--gold); }
 .t-page { color: var(--ink); }
 .c-main .t-missing { margin-top: 18px; }
 .t-missing-h { margin: 0 0 8px; }
-.c-main .t-missing ul { max-width: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); column-gap: 28px; }
-.c-main .t-missing li:first-child { border-top: 0; }
-.c-main .t-missing li { border-top: 1px solid var(--rule); border-bottom: 0; }
+/* one teacher per row inside the panel, divided like the study guide rows (a multi-column grid
+   put a divider over the second column only and left the names touching the panel edge) */
+.c-main .t-missing ul { max-width: none; padding: 0 var(--sp-5); }
+.c-main .t-missing li { border-top: 0; border-bottom: 0; align-items: center; }
+.c-main .t-missing li + li { border-top: 1px solid var(--rule); }
+@media (max-width: 760px) { .c-main .t-missing ul { padding: 0 var(--sp-4); } }
 .c-main .compare { margin-top: 14px; }
 .c-main .compare td p { margin: 0 0 .4em; }
 .res-filter { margin: 4px 0 8px; border-bottom: 1px solid var(--rule); }
